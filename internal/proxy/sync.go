@@ -56,7 +56,7 @@ func SyncFromDB(ctx context.Context, q *sqlc.Queries, cfg config.Config) error {
 	panelHost := instance.PanelHostname(panel.PublicURL)
 	panelUpstream := ""
 	if panelHost != "" {
-		panelUpstream = "host.docker.internal:" + cfg.ListenPort()
+		panelUpstream = "127.0.0.1:" + cfg.ListenPort()
 	}
 
 	body, err := Render(RenderInput{

@@ -4,25 +4,27 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/Joeydekruis/dockyrd/internal/config"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
-	"github.com/docker/docker/api/types/network"
-	"github.com/docker/go-connections/nat"
-
-	"github.com/Joeydekruis/dockyrd/internal/config"
+	"github.com/docker/docker/errdefs"
 )
 
 const (
-	ProxyContainerName = "dy-proxy"
-	ProxyImage         = "caddy:2-alpine"
+	ProxyContainerName  = "dy-proxy"
+	ProxyImage          = "caddy:2-alpine"
+	proxySpecLabel      = "dev.dockyard.proxy_spec"
+	proxySpecHostV1     = "host-v1"
+	caddyDirInContainer = "/var/lib/dockyard/caddy"
 )
 
-// EnsureProxy runs the system Caddy container (dy-proxy) with admin socket on the data volume.
+// EnsureProxy runs the system Caddy container (dy-proxy) with host networking on 80/443.
 func (c *Client) EnsureProxy(ctx context.Context, cfg config.Config) error {
 	if c == nil || c.moby == nil {
 		return errors.New("docker client required")
@@ -34,11 +36,14 @@ func (c *Client) EnsureProxy(ctx context.Context, cfg config.Config) error {
 	if err := os.MkdirAll(caddyDir, 0o750); err != nil {
 		return err
 	}
+	if err := os.MkdirAll(filepath.Join(caddyDir, "certificates"), 0o750); err != nil {
+		return err
+	}
 	if err := os.MkdirAll(cfg.SitesDir(), 0o750); err != nil {
 		return err
 	}
 	bootstrapPath := filepath.Join(caddyDir, "bootstrap.json")
-	raw, err := proxyBootstrapJSON(cfg.CaddyAdminSocket())
+	raw, err := proxyBootstrapJSON()
 	if err != nil {
 		return err
 	}
@@ -46,52 +51,80 @@ func (c *Client) EnsureProxy(ctx context.Context, cfg config.Config) error {
 		return err
 	}
 
+	if err := c.PullImage(ctx, ProxyImage); err != nil {
+		return fmt.Errorf("pull %s: %w", ProxyImage, err)
+	}
+
 	inspect, err := c.moby.ContainerInspect(ctx, ProxyContainerName)
-	if err != nil {
+	if err == nil {
+		spec := inspect.Config.Labels[proxySpecLabel]
+		if spec != proxySpecHostV1 {
+			if err := c.removeProxyContainer(ctx); err != nil {
+				return err
+			}
+			err = errdefs.NotFound(errors.New("recreate dy-proxy"))
+		} else if !inspect.State.Running {
+			if err := c.moby.ContainerStart(ctx, ProxyContainerName, container.StartOptions{}); err != nil {
+				return fmt.Errorf("start dy-proxy: %w", err)
+			}
+		}
+	}
+	if err != nil && !errdefs.IsNotFound(err) {
+		return err
+	}
+
+	if errdefs.IsNotFound(err) {
 		_, err = c.moby.ContainerCreate(ctx, &container.Config{
 			Image: ProxyImage,
 			Cmd: []string{
 				"caddy", "run",
-				"--config", "/var/lib/dockyard/caddy/bootstrap.json",
+				"--config", caddyDirInContainer + "/bootstrap.json",
 			},
 			Labels: map[string]string{
-				LabelManaged: managedTrue,
-				LabelKind:    KindSystem,
+				LabelManaged:   managedTrue,
+				LabelKind:      KindSystem,
+				proxySpecLabel: proxySpecHostV1,
 			},
 		}, &container.HostConfig{
-			PortBindings: nat.PortMap{
-				nat.Port("80/tcp"):  {{HostIP: "0.0.0.0", HostPort: "80"}},
-				nat.Port("443/tcp"): {{HostIP: "0.0.0.0", HostPort: "443"}},
-			},
+			NetworkMode:   "host",
 			RestartPolicy: container.RestartPolicy{Name: "always"},
-			ExtraHosts:    []string{"host.docker.internal:host-gateway"},
 			Mounts: []mount.Mount{
-				{Type: mount.TypeBind, Source: caddyDir, Target: "/var/lib/dockyard/caddy"},
+				{Type: mount.TypeBind, Source: caddyDir, Target: caddyDirInContainer},
 				{Type: mount.TypeBind, Source: cfg.SitesDir(), Target: "/srv/sites", ReadOnly: true},
 			},
-		}, &network.NetworkingConfig{
-			EndpointsConfig: map[string]*network.EndpointSettings{
-				EdgeNetworkName: {},
-			},
-		}, nil, ProxyContainerName)
+		}, nil, nil, ProxyContainerName)
 		if err != nil {
-			return err
+			return fmt.Errorf("create dy-proxy: %w", err)
 		}
 		if err := c.moby.ContainerStart(ctx, ProxyContainerName, container.StartOptions{}); err != nil {
-			return err
-		}
-	} else if !inspect.State.Running {
-		if err := c.moby.ContainerStart(ctx, ProxyContainerName, container.StartOptions{}); err != nil {
-			return err
+			return fmt.Errorf("start dy-proxy: %w", err)
 		}
 	}
-	return waitForFile(ctx, cfg.CaddyAdminSocket(), 30*time.Second)
+
+	if err := waitForFile(ctx, cfg.CaddyAdminSocket(), 45*time.Second); err != nil {
+		logs, _ := c.moby.ContainerLogs(ctx, ProxyContainerName, container.LogsOptions{Tail: "40"})
+		if logs != nil {
+			defer logs.Close()
+			buf := make([]byte, 4096)
+			n, _ := logs.Read(buf)
+			if n > 0 {
+				return fmt.Errorf("%w (dy-proxy logs: %s)", err, strings.TrimSpace(string(buf[:n])))
+			}
+		}
+		return err
+	}
+	return nil
 }
 
-func proxyBootstrapJSON(adminSocket string) ([]byte, error) {
-	adminSocket = strings.TrimPrefix(strings.TrimSpace(adminSocket), "/")
+func (c *Client) removeProxyContainer(ctx context.Context) error {
+	timeout := 10
+	_ = c.moby.ContainerStop(ctx, ProxyContainerName, container.StopOptions{Timeout: &timeout})
+	return c.moby.ContainerRemove(ctx, ProxyContainerName, container.RemoveOptions{Force: true})
+}
+
+func proxyBootstrapJSON() ([]byte, error) {
 	doc := map[string]any{
-		"admin": map[string]any{"listen": "unix//" + adminSocket},
+		"admin": map[string]any{"listen": "unix//" + strings.TrimPrefix(caddyDirInContainer+"/admin.sock", "/")},
 		"apps": map[string]any{
 			"http": map[string]any{
 				"servers": map[string]any{
@@ -119,4 +152,22 @@ func waitForFile(ctx context.Context, path string, timeout time.Duration) error 
 		}
 	}
 	return errors.New("timed out waiting for caddy admin socket")
+}
+
+// ProxyRunning reports whether dy-proxy exists and is running with the current spec.
+func (c *Client) ProxyRunning(ctx context.Context) (bool, string) {
+	if c == nil || c.moby == nil {
+		return false, "docker unavailable"
+	}
+	inspect, err := c.moby.ContainerInspect(ctx, ProxyContainerName)
+	if err != nil {
+		return false, "not created"
+	}
+	if inspect.Config.Labels[proxySpecLabel] != proxySpecHostV1 {
+		return false, "outdated spec (restart dockyard to recreate)"
+	}
+	if !inspect.State.Running {
+		return false, inspect.State.Status
+	}
+	return true, "running"
 }

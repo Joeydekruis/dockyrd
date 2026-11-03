@@ -111,6 +111,10 @@ func Render(in RenderInput) ([]byte, error) {
 				},
 			},
 			"tls": map[string]any{
+				"storage": map[string]any{
+					"module": "file_system",
+					"root":   "/var/lib/dockyard/caddy/certificates",
+				},
 				"automation": map[string]any{
 					"policies": []any{
 						map[string]any{

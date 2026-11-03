@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.26] - 2026-11-04
+
+_Finished: 2026-11-04_
+
+### Fixed
+
+- **`dy-proxy`** — host networking so 80/443 bind on the VPS; recreate outdated bridge containers; pull image before start; panel upstream `127.0.0.1:8000`
+- **`dockyard doctor`** — checks `dy-proxy` container and localhost 80/443 listeners
+
 ## [0.0.25] - 2026-11-04
 
 _Finished: 2026-11-04_

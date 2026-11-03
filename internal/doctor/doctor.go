@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"net"
 	"os"
 	"strings"
 	"time"
@@ -54,7 +55,9 @@ func Run(ctx context.Context, cfg config.Config, version string) Report {
 	rep.Checks = append(rep.Checks, checkDatabase(cfg)...)
 	rep.Checks = append(rep.Checks, checkDisk(cfg)...)
 	rep.Checks = append(rep.Checks, checkDocker(ctx)...)
+	rep.Checks = append(rep.Checks, checkProxyContainer(ctx)...)
 	rep.Checks = append(rep.Checks, checkProxySocket(cfg)...)
+	rep.Checks = append(rep.Checks, checkHTTPSPorts(ctx)...)
 	rep.Checks = append(rep.Checks, checkListen(cfg)...)
 	rep.Checks = append(rep.Checks, checkClock()...)
 	return rep
@@ -185,6 +188,41 @@ func checkDocker(ctx context.Context) []Check {
 		}}
 	}
 	return []Check{{Name: "Docker Engine", Status: StatusOK, Detail: "reachable"}}
+}
+
+func checkProxyContainer(ctx context.Context) []Check {
+	cli, err := docker.NewClient()
+	if err != nil {
+		return nil
+	}
+	defer cli.Close()
+	ok, detail := cli.ProxyRunning(ctx)
+	if !ok {
+		return []Check{{
+			Name:    "dy-proxy container",
+			Status:  StatusWarn,
+			Detail:  detail,
+			FixHint: "Restart `dockyard.service`; check `journalctl -u dockyard` for ensure dy-proxy errors",
+		}}
+	}
+	return []Check{{Name: "dy-proxy container", Status: StatusOK, Detail: detail}}
+}
+
+func checkHTTPSPorts(ctx context.Context) []Check {
+	d := net.Dialer{Timeout: 2 * time.Second}
+	for _, addr := range []string{"127.0.0.1:443", "127.0.0.1:80"} {
+		conn, err := d.DialContext(ctx, "tcp", addr)
+		if err != nil {
+			return []Check{{
+				Name:    "HTTPS edge (443/80)",
+				Status:  StatusWarn,
+				Detail:  fmt.Sprintf("nothing listening on %s", addr),
+				FixHint: "Set Public URL + ACME email in Instance settings and save; open firewall 80/443; restart dockyard",
+			}}
+		}
+		_ = conn.Close()
+	}
+	return []Check{{Name: "HTTPS edge (443/80)", Status: StatusOK, Detail: "listening on localhost"}}
 }
 
 func checkProxySocket(cfg config.Config) []Check {
