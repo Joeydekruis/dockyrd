@@ -4,13 +4,13 @@ _Last updated: 2026-11-03_
 
 ## Current focus
 
-**M3:** **#23–#25** implemented locally (#23 Postgres/Valkey, #24 `${{refs}}`, #25 Garage API + `dy-garage`). **#26** buckets + UI next.
+**M3 complete locally** (#23–#26 on `development`). Next roadmap slice: **M4** (observability + team).
 
 ## Blockers
 
-Docker host needed to verify Garage layout/admin API and bucket flows (#26).
+None for planning M4; M3 product exit still needs Docker-host manual smoke.
 
 ## Next
 
-- **#26** bucket services, keys API, `/databases` + `/storage` UI, `verify-m3-smoke.sh`
-- Handoff/commits when Joey asks
+- Maintainer verify M3 on host; close GitHub #23–#26 when accepted.
+- Plan M4 GitHub issues (metrics, events, Analytics, team/2FA).

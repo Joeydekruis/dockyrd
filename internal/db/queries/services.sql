@@ -74,3 +74,42 @@ FROM services s
 JOIN environments e ON e.id = s.environment_id
 JOIN projects p ON p.id = e.project_id
 WHERE s.kind IN ('postgres', 'redis');
+
+-- name: ListDatabaseServices :many
+SELECT
+  s.id,
+  s.kind,
+  s.name,
+  s.slug,
+  s.desired_state,
+  s.config,
+  e.project_id,
+  p.name AS project_name,
+  p.slug AS project_slug
+FROM services s
+JOIN environments e ON e.id = s.environment_id
+JOIN projects p ON p.id = e.project_id
+WHERE s.kind IN ('postgres', 'redis')
+ORDER BY s.created_at DESC;
+
+-- name: ListServicesByKind :many
+SELECT
+  s.id,
+  s.kind,
+  s.name,
+  s.slug,
+  s.desired_state,
+  s.config,
+  e.project_id,
+  p.name AS project_name,
+  p.slug AS project_slug
+FROM services s
+JOIN environments e ON e.id = s.environment_id
+JOIN projects p ON p.id = e.project_id
+WHERE s.kind = ?
+ORDER BY s.created_at DESC;
+
+-- name: UpdateServiceConfig :exec
+UPDATE services
+SET config = ?, updated_at = ?
+WHERE id = ?;

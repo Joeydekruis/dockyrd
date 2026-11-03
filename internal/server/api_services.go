@@ -85,7 +85,7 @@ func (d apiDeps) handleCreateService(w http.ResponseWriter, r *http.Request) {
 		writeJSONError(w, http.StatusBadRequest, "project_id, kind, and name required")
 		return
 	}
-	if body.Kind != "app" && body.Kind != "static_site" && body.Kind != "postgres" && body.Kind != "redis" {
+	if body.Kind != "app" && body.Kind != "static_site" && body.Kind != "postgres" && body.Kind != "redis" && body.Kind != "bucket" {
 		writeJSONError(w, http.StatusBadRequest, "unsupported service kind")
 		return
 	}
@@ -115,6 +115,30 @@ func (d apiDeps) handleCreateService(w http.ResponseWriter, r *http.Request) {
 		}
 		if genErr != nil {
 			writeJSONError(w, http.StatusInternalServerError, "config error")
+			return
+		}
+	case "bucket":
+		masterKey, err := crypto.LoadMasterKey(d.cfg.SecretKeyPath())
+		if err != nil {
+			writeJSONError(w, http.StatusInternalServerError, "secrets not configured")
+			return
+		}
+		bucketName := slug.FromName(body.Name)
+		publicRead := false
+		if len(cfg) > 0 {
+			var partial struct {
+				BucketName string `json:"bucket_name"`
+				PublicRead bool   `json:"public_read"`
+			}
+			_ = json.Unmarshal(cfg, &partial)
+			if strings.TrimSpace(partial.BucketName) != "" {
+				bucketName = partial.BucketName
+			}
+			publicRead = partial.PublicRead
+		}
+		cfg, err = dbkind.NewBucketConfigJSON(masterKey, bucketName, publicRead)
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, err.Error())
 			return
 		}
 	}

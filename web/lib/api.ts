@@ -109,7 +109,7 @@ export function listServices(projectId: string, kind?: string) {
 
 export function createService(input: {
   project_id: string;
-  kind: "app" | "static_site";
+  kind: "app" | "static_site" | "postgres" | "redis" | "bucket";
   name: string;
   config?: Record<string, unknown>;
 }) {
@@ -117,6 +117,69 @@ export function createService(input: {
     method: "POST",
     json: { environment: "production", ...input },
   });
+}
+
+export type DatabaseRow = {
+  id: string;
+  kind: string;
+  name: string;
+  slug: string;
+  desired_state: string;
+  config: Record<string, unknown>;
+  project_id: string;
+  project_name: string;
+  project_slug: string;
+};
+
+export function listDatabases() {
+  return apiFetch<{ databases: DatabaseRow[] }>("/api/v1/databases");
+}
+
+export function getServiceConnection(serviceId: string, reveal = false) {
+  const q = reveal ? "?reveal=1" : "";
+  return apiFetch<{ variables: Record<string, string> }>(
+    `/api/v1/services/${serviceId}/connection${q}`,
+  );
+}
+
+export type StorageStatus = {
+  installed: boolean;
+  provider?: string;
+  version?: string;
+  internal_endpoint: string;
+  buckets?: {
+    id: string;
+    name: string;
+    slug: string;
+    project_id: string;
+    project_name: string;
+    config: Record<string, unknown>;
+  }[];
+};
+
+export function getStorageStatus() {
+  return apiFetch<StorageStatus>("/api/v1/storage");
+}
+
+export function installGarage() {
+  return apiFetch<StorageStatus>("/api/v1/storage/install", {
+    method: "POST",
+    json: { provider: "garage" },
+  });
+}
+
+export type BucketKey = {
+  id: string;
+  name?: string;
+  access_key_id: string;
+  secret?: string;
+};
+
+export function listBucketKeys(serviceId: string, reveal = false) {
+  const q = reveal ? "?reveal=1" : "";
+  return apiFetch<{ keys: BucketKey[] }>(
+    `/api/v1/services/${serviceId}/keys${q}`,
+  );
 }
 
 export type Deployment = {

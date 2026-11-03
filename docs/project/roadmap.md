@@ -11,7 +11,7 @@ From briefing §15. Update when a milestone closes.
 | **M4 · Observability + team** | Metrics, events, Analytics, team/2FA/audit/search | All 19 design screens functional |
 | **M5 · v0.1.0 release** | Self-update, doctor, docs, e2e green | Public release |
 
-**Progress (2026-11-03):** GitHub issues **#1–#12 (M0)**, **#13–#18 (M1)**, **#19–#22 (M2)** closed as tested/done. **M3 started:** milestones + **#23–#26** planned; **#23** (Postgres/Valkey services + reconcile) in progress on `development`. M3 exit: Next.js + Postgres + S3 uploads end-to-end (#24–#26).
+**Progress (2026-11-03):** M0–M2 closed. **M3 (#23–#26)** implemented on `development` (Postgres/Valkey, refs, Garage, buckets UI). M3 briefing exit (live Next + Postgres + S3 on Docker host) still manual via `verify-m3-smoke.sh`.
 
 ## Post-MVP (briefing)
 

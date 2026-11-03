@@ -2,10 +2,8 @@ package deploy
 
 import (
 	"context"
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/Joeydekruis/dockyrd/internal/appconfig"
 	"github.com/Joeydekruis/dockyrd/internal/crypto"
@@ -85,41 +83,27 @@ func publishedForService(ctx context.Context, q *sqlc.Queries, masterKey []byte,
 	}
 }
 
-type bucketConfig struct {
-	BucketName  string `json:"bucket_name"`
-	AccessKeyID string `json:"access_key_id"`
-	SecretEnc   string `json:"secret_key_enc"`
-	PublicRead  bool   `json:"public_read"`
-}
-
 func publishedBucket(raw json.RawMessage, masterKey []byte, slug string) (map[string]string, error) {
-	var cfg bucketConfig
-	if len(raw) > 0 {
-		if err := json.Unmarshal(raw, &cfg); err != nil {
-			return nil, err
-		}
+	cfg, err := dbkind.ParseBucket(raw)
+	if err != nil {
+		return nil, err
 	}
-	if cfg.BucketName == "" {
-		cfg.BucketName = slug
-	}
+	accessKeyID := ""
 	secret := ""
-	if strings.TrimSpace(cfg.SecretEnc) != "" {
-		enc, err := base64.StdEncoding.DecodeString(cfg.SecretEnc)
+	if len(cfg.Keys) > 0 {
+		accessKeyID = cfg.Keys[0].AccessKeyID
+		sec, err := dbkind.DecryptKeySecret(masterKey, cfg.Keys[0])
 		if err != nil {
 			return nil, err
 		}
-		plain, err := crypto.Decrypt(masterKey, enc)
-		if err != nil {
-			return nil, err
-		}
-		secret = string(plain)
+		secret = sec
 	}
 	endpoint := "http://dy-garage:3900"
 	vars := map[string]string{
 		"S3_ENDPOINT":          endpoint,
 		"S3_REGION":            "garage",
 		"S3_BUCKET":            cfg.BucketName,
-		"S3_ACCESS_KEY_ID":     cfg.AccessKeyID,
+		"S3_ACCESS_KEY_ID":     accessKeyID,
 		"S3_SECRET_ACCESS_KEY": secret,
 	}
 	if cfg.PublicRead {

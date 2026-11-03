@@ -153,6 +153,16 @@ func RedactConfig(kind string, raw json.RawMessage) json.RawMessage {
 		cfg.PasswordEnc = ""
 		out, _ := json.Marshal(cfg)
 		return out
+	case "bucket":
+		var cfg BucketConfig
+		if json.Unmarshal(raw, &cfg) != nil {
+			return raw
+		}
+		for i := range cfg.Keys {
+			cfg.Keys[i].SecretEnc = ""
+		}
+		out, _ := json.Marshal(cfg)
+		return out
 	default:
 		return raw
 	}

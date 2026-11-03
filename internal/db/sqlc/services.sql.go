@@ -105,6 +105,69 @@ func (q *Queries) GetServiceByID(ctx context.Context, id string) (Service, error
 	return i, err
 }
 
+const listDatabaseServices = `-- name: ListDatabaseServices :many
+SELECT
+  s.id,
+  s.kind,
+  s.name,
+  s.slug,
+  s.desired_state,
+  s.config,
+  e.project_id,
+  p.name AS project_name,
+  p.slug AS project_slug
+FROM services s
+JOIN environments e ON e.id = s.environment_id
+JOIN projects p ON p.id = e.project_id
+WHERE s.kind IN ('postgres', 'redis')
+ORDER BY s.created_at DESC
+`
+
+type ListDatabaseServicesRow struct {
+	ID           string
+	Kind         string
+	Name         string
+	Slug         string
+	DesiredState string
+	Config       interface{}
+	ProjectID    string
+	ProjectName  string
+	ProjectSlug  string
+}
+
+func (q *Queries) ListDatabaseServices(ctx context.Context) ([]ListDatabaseServicesRow, error) {
+	rows, err := q.db.QueryContext(ctx, listDatabaseServices)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListDatabaseServicesRow
+	for rows.Next() {
+		var i ListDatabaseServicesRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Kind,
+			&i.Name,
+			&i.Slug,
+			&i.DesiredState,
+			&i.Config,
+			&i.ProjectID,
+			&i.ProjectName,
+			&i.ProjectSlug,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listDeployableServices = `-- name: ListDeployableServices :many
 SELECT id, kind, config, slug
 FROM services
@@ -205,6 +268,69 @@ func (q *Queries) ListReconcileDatabaseServices(ctx context.Context) ([]ListReco
 	return items, nil
 }
 
+const listServicesByKind = `-- name: ListServicesByKind :many
+SELECT
+  s.id,
+  s.kind,
+  s.name,
+  s.slug,
+  s.desired_state,
+  s.config,
+  e.project_id,
+  p.name AS project_name,
+  p.slug AS project_slug
+FROM services s
+JOIN environments e ON e.id = s.environment_id
+JOIN projects p ON p.id = e.project_id
+WHERE s.kind = ?
+ORDER BY s.created_at DESC
+`
+
+type ListServicesByKindRow struct {
+	ID           string
+	Kind         string
+	Name         string
+	Slug         string
+	DesiredState string
+	Config       interface{}
+	ProjectID    string
+	ProjectName  string
+	ProjectSlug  string
+}
+
+func (q *Queries) ListServicesByKind(ctx context.Context, kind string) ([]ListServicesByKindRow, error) {
+	rows, err := q.db.QueryContext(ctx, listServicesByKind, kind)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListServicesByKindRow
+	for rows.Next() {
+		var i ListServicesByKindRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Kind,
+			&i.Name,
+			&i.Slug,
+			&i.DesiredState,
+			&i.Config,
+			&i.ProjectID,
+			&i.ProjectName,
+			&i.ProjectSlug,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listServicesByProject = `-- name: ListServicesByProject :many
 SELECT
   s.id,
@@ -271,5 +397,22 @@ type SetServiceLiveDeploymentParams struct {
 
 func (q *Queries) SetServiceLiveDeployment(ctx context.Context, arg SetServiceLiveDeploymentParams) error {
 	_, err := q.db.ExecContext(ctx, setServiceLiveDeployment, arg.LiveDeploymentID, arg.UpdatedAt, arg.ID)
+	return err
+}
+
+const updateServiceConfig = `-- name: UpdateServiceConfig :exec
+UPDATE services
+SET config = ?, updated_at = ?
+WHERE id = ?
+`
+
+type UpdateServiceConfigParams struct {
+	Config    interface{}
+	UpdatedAt sql.NullInt64
+	ID        string
+}
+
+func (q *Queries) UpdateServiceConfig(ctx context.Context, arg UpdateServiceConfigParams) error {
+	_, err := q.db.ExecContext(ctx, updateServiceConfig, arg.Config, arg.UpdatedAt, arg.ID)
 	return err
 }

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/Joeydekruis/dockyrd/internal/docker"
+	"github.com/Joeydekruis/dockyrd/internal/dbkind"
 	"github.com/Joeydekruis/dockyrd/internal/storage"
 )
 
@@ -20,11 +21,29 @@ func (d apiDeps) handleGetStorage(w http.ResponseWriter, r *http.Request) {
 	}
 	installed, _ := storage.IsGarageInstalled(r.Context(), d.q)
 	st, _ := storage.LoadGarage(r.Context(), d.q)
+	buckets, err := d.q.ListServicesByKind(r.Context(), "bucket")
+	if err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "database error")
+		return
+	}
+	bucketOut := make([]map[string]any, 0, len(buckets))
+	for _, b := range buckets {
+		cfg := serviceConfigJSON(b.Config)
+		bucketOut = append(bucketOut, map[string]any{
+			"id":           b.ID,
+			"name":         b.Name,
+			"slug":         b.Slug,
+			"project_id":   b.ProjectID,
+			"project_name": b.ProjectName,
+			"config":       dbkind.RedactConfig("bucket", cfg),
+		})
+	}
 	writeJSON(w, http.StatusOK, map[string]any{
 		"installed":         installed,
 		"provider":          st.Provider,
 		"version":           st.Version,
 		"internal_endpoint": storage.InternalEndpoint,
+		"buckets":           bucketOut,
 	})
 }
 

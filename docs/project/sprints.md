@@ -61,7 +61,7 @@ Milestone: **M3 · Sprint 3 — Garage install** — #25
 
 Milestone: **M3 · Sprint 4 — Buckets & UI** — #26
 
-**Status (2026-11-03):** M3 issues **#23–#26** open on GitHub; implementation started with #23 (API + reconcile + connection vars).
+**Status (2026-11-03):** M3 issues **#23–#26** implemented on `development` @ pending push after #26. Gate: `./scripts/verify-m3-smoke.sh`.
 
 ## Sprint 1 issues (GitHub)
 

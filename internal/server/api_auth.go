@@ -61,6 +61,8 @@ func registerAPIRoutes(mux *http.ServeMux, deps apiDeps) {
 	registerStreamRoutes(mux, deps)
 	registerGitHubRoutes(mux, deps)
 	registerStorageRoutes(mux, deps)
+	registerDatabaseRoutes(mux, deps)
+	registerBucketKeyRoutes(mux, deps)
 }
 
 func (d apiDeps) handleLogin(w http.ResponseWriter, r *http.Request) {
