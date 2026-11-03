@@ -1,0 +1,29 @@
+name: Install matrix
+
+on:
+  push:
+    branches: [development, main]
+    paths:
+      - "scripts/install.sh"
+      - "scripts/verify-install.sh"
+      - ".github/workflows/install-matrix.yml"
+  workflow_dispatch:
+
+jobs:
+  verify-install:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: UI embed stub
+        run: chmod +x scripts/ensure-ui-stub.sh && ./scripts/ensure-ui-stub.sh
+      - name: Build local binary
+        run: make build
+      - name: Install preflight
+        run: chmod +x scripts/verify-install.sh && ./scripts/verify-install.sh

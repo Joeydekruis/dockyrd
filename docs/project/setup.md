@@ -71,6 +71,14 @@ Optional env for builds: `DOCKYARD_BUILD_TIMEOUT` (default `20m`), `DOCKYARD_MIN
 go run ./cmd/dockyard doctor
 ```
 
+## Production validation (§19)
+
+```bash
+./scripts/verify-production-local.sh
+```
+
+Checklist: [`docs/user/production-validation.md`](../user/production-validation.md).
+
 ## Full pre-release check
 
 Use the matrix in **`.cursor/skills/push-to-main/SKILL.md`** before merging to `main`.

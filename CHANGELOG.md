@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.23] - 2026-11-03
+
+_Finished: 2026-11-03_
+
+### Added
+
+- **Production validation** — `docs/user/production-validation.md`, `scripts/verify-production-local.sh`, `scripts/measure-rss.sh`, `e2e/scripts/load-health.sh`, `e2e/fixtures/hello-static`
+- **Install matrix CI** — `.github/workflows/install-matrix.yml` (ubuntu amd64 + arm64)
+- **Update modal** — dashboard banner + release notes from `GET /api/v1/server`
+- **`packaging/dockyard.env.example`** — `DOCKYARD_REQUIRE_OWNER_2FA=1`
+
+### Changed
+
+- **Owner 2FA mandate** — when `DOCKYARD_REQUIRE_OWNER_2FA=1` (recommended production); instance `require_2fa_all` for all users
+- **Databases UI** — service detail panel + reference var hints
+- **Post-M5 backlog** — `docs/project/post-m5-backlog.md`
+
 ## [0.0.22] - 2026-11-03
 
 _Finished: 2026-11-03_

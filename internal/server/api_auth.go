@@ -44,10 +44,11 @@ type setupRequest struct {
 }
 
 type userResponse struct {
-	ID    string `json:"id"`
-	Email string `json:"email"`
-	Name  string `json:"name"`
-	Role  string `json:"role"`
+	ID           string `json:"id"`
+	Email        string `json:"email"`
+	Name         string `json:"name"`
+	Role         string `json:"role"`
+	TOTPEnabled  bool   `json:"totp_enabled"`
 }
 
 func registerAPIRoutes(mux *http.ServeMux, deps apiDeps) {
@@ -141,10 +142,11 @@ func (d apiDeps) handleMe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, userResponse{
-		ID:    user.ID,
-		Email: user.Email,
-		Name:  user.Name,
-		Role:  user.Role,
+		ID:          user.ID,
+		Email:       user.Email,
+		Name:        user.Name,
+		Role:        user.Role,
+		TOTPEnabled: totpEnabled(user.TotpEnabledAt),
 	})
 }
 

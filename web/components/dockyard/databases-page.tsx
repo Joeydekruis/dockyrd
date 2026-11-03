@@ -20,6 +20,7 @@ export function DatabasesPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [connection, setConnection] = useState<string | null>(null);
+  const [selected, setSelected] = useState<DatabaseRow | null>(null);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -148,12 +149,19 @@ export function DatabasesPage() {
                 key={row.id}
                 className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm"
               >
-                <div>
+                <button
+                  type="button"
+                  className="min-w-0 flex-1 text-left"
+                  onClick={() => {
+                    setSelected(row);
+                    setConnection(null);
+                  }}
+                >
                   <p className="font-medium">{row.name}</p>
                   <p className="text-[var(--muted-foreground)]">
                     {row.project_name} · {row.kind} · {row.slug}
                   </p>
-                </div>
+                </button>
                 <button
                   type="button"
                   className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs"
@@ -165,6 +173,35 @@ export function DatabasesPage() {
             ))}
           </ul>
         )}
+        {selected ? (
+          <section className="mt-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 text-sm">
+            <h3 className="mb-2 font-medium">Service detail</h3>
+            <dl className="grid gap-2 sm:grid-cols-2">
+              <div>
+                <dt className="text-[var(--muted-foreground)]">Slug</dt>
+                <dd className="font-mono">{selected.slug}</dd>
+              </div>
+              <div>
+                <dt className="text-[var(--muted-foreground)]">Engine</dt>
+                <dd>{selected.kind}</dd>
+              </div>
+              <div>
+                <dt className="text-[var(--muted-foreground)]">Project</dt>
+                <dd>{selected.project_name}</dd>
+              </div>
+              <div>
+                <dt className="text-[var(--muted-foreground)]">State</dt>
+                <dd>{selected.desired_state ?? "—"}</dd>
+              </div>
+            </dl>
+            <p className="mt-3 text-[var(--muted-foreground)]">
+              Reference in app env:{" "}
+              <code className="rounded bg-[var(--muted)]/30 px-1">{`\${{${selected.slug}.DATABASE_URL}}`}</code>{" "}
+              or{" "}
+              <code className="rounded bg-[var(--muted)]/30 px-1">{`\${{${selected.slug}.REDIS_URL}}`}</code>
+            </p>
+          </section>
+        ) : null}
       </section>
     </DashboardShell>
   );

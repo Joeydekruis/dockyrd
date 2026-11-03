@@ -8,6 +8,7 @@ import {
   useCommandPalette,
 } from "@/components/dockyard/command-palette";
 import { Sidebar } from "@/components/dockyard/sidebar";
+import { UpdateAvailableNotifier } from "@/components/dockyard/update-available-modal";
 import { getMe } from "@/lib/api";
 
 type DashboardShellProps = {
@@ -28,8 +29,17 @@ export function DashboardShell({
   useEffect(() => {
     let cancelled = false;
     getMe()
-      .then(() => {
-        if (!cancelled) setReady(true);
+      .then((me) => {
+        if (cancelled) return;
+        if (
+          me.role === "owner" &&
+          !me.totp_enabled &&
+          !window.location.pathname.startsWith("/settings/profile")
+        ) {
+          router.replace("/settings/profile");
+          return;
+        }
+        setReady(true);
       })
       .catch(() => {
         if (!cancelled) router.replace("/sign-in");
@@ -59,7 +69,10 @@ export function DashboardShell({
           breadcrumb={breadcrumb}
           onOpenSearch={() => palette.setOpen(true)}
         />
-        <div className="flex-1 px-8 py-6">{children}</div>
+        <div className="flex-1 px-8 py-6">
+          <UpdateAvailableNotifier />
+          {children}
+        </div>
       </div>
       <CommandPalette open={palette.open} onClose={palette.close} />
     </div>

@@ -32,6 +32,7 @@ export function InstanceSettingsPage() {
     public_url: string;
     acme_email: string;
     wildcard_domain: string;
+    require_2fa_all: boolean;
     smtp: {
       host: string;
       port: number;
@@ -86,6 +87,7 @@ export function InstanceSettingsPage() {
         public_url: instance.public_url,
         acme_email: instance.acme_email,
         wildcard_domain: instance.wildcard_domain,
+        require_2fa_all: instance.require_2fa_all,
         smtp: {
           host: instance.smtp.host,
           port: instance.smtp.port || 587,
@@ -219,6 +221,19 @@ export function InstanceSettingsPage() {
                 }
                 placeholder="*.apps.example.com"
               />
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={instance.require_2fa_all}
+                onChange={(e) =>
+                  setInstance({
+                    ...instance,
+                    require_2fa_all: e.target.checked,
+                  })
+                }
+              />
+              Require 2FA for all users (owners always require 2FA)
             </label>
             <hr className="border-[var(--border)]" />
             <label className="block text-sm">

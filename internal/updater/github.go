@@ -19,10 +19,12 @@ type Release struct {
 	AssetURL    string
 	AssetName   string
 	ChecksumURL string
+	Notes       string
 }
 
 type ghRelease struct {
 	TagName string `json:"tag_name"`
+	Body    string `json:"body"`
 	Assets  []struct {
 		Name               string `json:"name"`
 		BrowserDownloadURL string `json:"browser_download_url"`
@@ -60,6 +62,7 @@ func FetchLatest(ctx context.Context, repo, currentVersion string) (Release, boo
 	wantPrefix := fmt.Sprintf("dockyard_%s_%s_%s", strings.TrimPrefix(tag, "v"), runtime.GOOS, runtime.GOARCH)
 	var rel Release
 	rel.Tag = tag
+	rel.Notes = strings.TrimSpace(payload.Body)
 	for _, a := range payload.Assets {
 		if strings.HasPrefix(a.Name, wantPrefix) && strings.HasSuffix(a.Name, ".tar.gz") {
 			rel.AssetName = a.Name

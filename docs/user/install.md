@@ -41,6 +41,7 @@ Fix any `✗` lines before going to production. See [troubleshooting](./troubles
 - [First app](./first-app.md)
 - [Next.js guide](./nextjs.md)
 - [Email / SMTP](./email-smtp.md)
+- [Production validation](./production-validation.md)
 
 ```bash
 dockyard update --check

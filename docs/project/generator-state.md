@@ -4,12 +4,12 @@ _Last updated: 2026-11-03_
 
 ## Current focus
 
-**M0–M5 closed** on GitHub @ `development` **v0.0.21**. Optional: **push-to-main** + tag for public release.
+**Post-M5 §19 slice** on `development` — production checklist, install matrix CI, owner 2FA policy, update modal, DB detail panel, e2e fixtures skeleton.
 
 ## Next
 
-- Briefing §19 polish (Ubuntu install matrix CI, fixtures, update modal, RSS measurement)
-- Tag `v0.0.21` on `main` when ready to ship binaries
+- Merge to `main` + tag **v0.0.23** when verified
+- Remaining §19: automated fixture deploy, Ubuntu curl CI, chaos/load in CI
 
 ## Blockers
 

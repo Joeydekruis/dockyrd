@@ -13,6 +13,7 @@ type serverInfoResponse struct {
 	UptimeSec       int64  `json:"uptime_sec"`
 	UpdateAvailable bool   `json:"update_available"`
 	LatestTag       string `json:"latest_tag,omitempty"`
+	ReleaseNotes    string `json:"release_notes,omitempty"`
 }
 
 func (d apiDeps) handleServerInfo(w http.ResponseWriter, r *http.Request) {
@@ -32,6 +33,7 @@ func (d apiDeps) handleServerInfo(w http.ResponseWriter, r *http.Request) {
 			resp.UpdateAvailable = check.Newer
 			if check.Newer {
 				resp.LatestTag = check.Latest.Tag
+				resp.ReleaseNotes = check.Latest.Notes
 			}
 		}
 	}

@@ -101,6 +101,16 @@ export function ProfileSettingsPage() {
         </Link>
       </nav>
 
+      {!loading && !totpEnabled ? (
+        <p
+          className="mb-4 rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm"
+          role="status"
+        >
+          Owners must enable two-factor authentication before using the rest of
+          the dashboard.
+        </p>
+      ) : null}
+
       {error ? (
         <p className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-700">
           {error}

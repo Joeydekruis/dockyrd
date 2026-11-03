@@ -224,6 +224,9 @@ func (d apiDeps) requireUser(w http.ResponseWriter, r *http.Request) (sqlc.GetUs
 		writeJSONError(w, http.StatusUnauthorized, "authentication required")
 		return sqlc.GetUserByIDRow{}, false
 	}
+	if !d.enforce2FASetupPolicy(w, r, user) {
+		return sqlc.GetUserByIDRow{}, false
+	}
 	return user, true
 }
 

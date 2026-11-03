@@ -48,10 +48,11 @@ func (d apiDeps) handleGetInstanceSettings(w http.ResponseWriter, r *http.Reques
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]any{
-		"public_url":      panel.PublicURL,
-		"acme_email":      panel.AcmeEmail,
-		"wildcard_domain": panel.Wildcard,
-		"smtp":            smtp,
+		"public_url":       panel.PublicURL,
+		"acme_email":       panel.AcmeEmail,
+		"wildcard_domain":  panel.Wildcard,
+		"require_2fa_all":  panel.Require2FAAll,
+		"smtp":             smtp,
 	})
 }
 
@@ -60,10 +61,11 @@ func (d apiDeps) handlePatchInstanceSettings(w http.ResponseWriter, r *http.Requ
 		return
 	}
 	var body struct {
-		PublicURL      *string `json:"public_url"`
-		AcmeEmail      *string `json:"acme_email"`
-		WildcardDomain *string `json:"wildcard_domain"`
-		SMTP           *struct {
+		PublicURL       *string `json:"public_url"`
+		AcmeEmail       *string `json:"acme_email"`
+		WildcardDomain  *string `json:"wildcard_domain"`
+		Require2FAAll   *bool   `json:"require_2fa_all"`
+		SMTP            *struct {
 			Host     string `json:"host"`
 			Port     int    `json:"port"`
 			Username string `json:"username"`
@@ -90,6 +92,9 @@ func (d apiDeps) handlePatchInstanceSettings(w http.ResponseWriter, r *http.Requ
 	}
 	if body.WildcardDomain != nil {
 		panel.Wildcard = strings.TrimSpace(*body.WildcardDomain)
+	}
+	if body.Require2FAAll != nil {
+		panel.Require2FAAll = *body.Require2FAAll
 	}
 	if err := instance.SavePanel(ctx, d.q, panel); err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "database error")

@@ -31,6 +31,7 @@ export type MeResponse = {
   email: string;
   name: string;
   role: string;
+  totp_enabled?: boolean;
 };
 
 export type SetupStatusResponse = {
@@ -460,6 +461,7 @@ export type ServerInfo = {
   uptime_sec: number;
   update_available: boolean;
   latest_tag?: string;
+  release_notes?: string;
 };
 
 export function getServerInfo() {
@@ -478,6 +480,7 @@ export type InstanceSettings = {
   public_url: string;
   acme_email: string;
   wildcard_domain: string;
+  require_2fa_all: boolean;
   smtp: {
     host: string;
     port: number;
@@ -496,6 +499,7 @@ export function patchInstanceSettings(body: {
   public_url?: string;
   acme_email?: string;
   wildcard_domain?: string;
+  require_2fa_all?: boolean;
   smtp?: {
     host: string;
     port: number;
