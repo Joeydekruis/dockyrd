@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.21] - 2026-11-03
+
+_Finished: 2026-11-03_
+
+### Fixed
+
+- **SMTP dial address** — `net.JoinHostPort` for `go vet` / CI IPv6 lint
+
+### Changed
+
+- **M5 milestone closed** — doctor, admin CLI, CI, self-update, e2e, GoReleaser, Playwright, server API, install verify, user docs (#35–#44); gates `verify-m5-smoke.sh`, `verify-install.sh`, `make e2e`
+- **Issue specs** — AC marked complete for #35–#44; `roadmap.md` / `sprints.md`
+
 ## [0.0.20] - 2026-11-03
 
 _Finished: 2026-11-03_

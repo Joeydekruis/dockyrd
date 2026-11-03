@@ -6,6 +6,6 @@ github: https://github.com/Joeydekruis/dockyrd/issues/42
 
 ## AC
 
-- [ ] `GET /api/v1/server` — authenticated; `version`; admins get `update_available` + `latest_tag`
-- [ ] `BuildVersion` set from binary ldflags on `serve`
-- [ ] Instance settings UI shows version / update hint
+- [x] `GET /api/v1/server` — authenticated; `version`; admins get `update_available` + `latest_tag`
+- [x] `BuildVersion` set from binary ldflags on `serve`
+- [x] Instance settings UI shows version / update hint

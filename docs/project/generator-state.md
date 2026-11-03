@@ -4,12 +4,12 @@ _Last updated: 2026-11-03_
 
 ## Current focus
 
-**M5 / v0.1.0:** issues **#35–#44** on `development` @ **0.0.20**. **M3** and **M4** closed on GitHub.
+**M0–M5 closed** on GitHub @ `development` **v0.0.21**. Optional: **push-to-main** + tag for public release.
 
 ## Next
 
-- Maintainer: close M5 issues after verify; optional push-to-main
-- §19: Ubuntu install CI, `e2e/fixtures/`, UI update modal
+- Briefing §19 polish (Ubuntu install matrix CI, fixtures, update modal, RSS measurement)
+- Tag `v0.0.21` on `main` when ready to ship binaries
 
 ## Blockers
 

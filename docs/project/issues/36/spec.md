@@ -6,6 +6,6 @@ github: https://github.com/Joeydekruis/dockyrd/issues/36
 
 ## AC
 
-- [ ] `dockyard admin reset-password <email> [password]` updates argon2id hash (min 12 chars)
-- [ ] `dockyard admin disable-2fa <email>` clears TOTP fields
-- [ ] Uses control-plane DB via `config.Load()` paths
+- [x] `dockyard admin reset-password <email> [password]` updates argon2id hash (min 12 chars)
+- [x] `dockyard admin disable-2fa <email>` clears TOTP fields
+- [x] Uses control-plane DB via `config.Load()` paths

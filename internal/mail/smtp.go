@@ -28,7 +28,7 @@ func SendPlain(cfg instance.SMTPConfig, to, subject, body string) error {
 	msg.WriteString("Content-Type: text/plain; charset=UTF-8\r\n")
 	msg.WriteString("\r\n")
 	msg.WriteString(body)
-	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
+	addr := smtpAddr(cfg)
 	auth := smtp.PlainAuth("", cfg.Username, cfg.Password, cfg.Host)
 	if cfg.UseTLS && cfg.Port == 465 {
 		return sendTLS(addr, cfg.Host, auth, from, []string{to}, []byte(msg.String()))
@@ -83,10 +83,13 @@ func extractEmail(from string) string {
 
 // VerifyConnection checks TCP reachability to the SMTP host.
 func VerifyConnection(cfg instance.SMTPConfig) error {
-	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
-	conn, err := net.Dial("tcp", addr)
+	conn, err := net.Dial("tcp", smtpAddr(cfg))
 	if err != nil {
 		return err
 	}
 	return conn.Close()
+}
+
+func smtpAddr(cfg instance.SMTPConfig) string {
+	return net.JoinHostPort(cfg.Host, fmt.Sprintf("%d", cfg.Port))
 }

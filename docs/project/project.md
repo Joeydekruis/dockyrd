@@ -14,7 +14,7 @@ Self-hosted, open-source deploy platform: one Go binary, Docker workloads, Caddy
 
 ## Lifecycle stage
 
-**MVP (pre-code → M0)** — first public repo; optimize for install simplicity, stability, and small footprint (briefing §1.3).
+**MVP (M0–M5 complete on `development`)** — v0.1.0 scope shipped in code; briefing §19 hardening remains before marketing release.
 
 ## Delivery
 

@@ -77,7 +77,7 @@ Milestone: **M4 · Sprint 2 — Team & audit** — #29, #30
 
 **M4 milestone:** **done** — maintainer closed 2026-11-03. Gate: `./scripts/verify-m4-smoke.sh`.
 
-## M5 · Sprint 1 — Doctor & admin CLI — complete (ready for review)
+## M5 · Sprint 1 — Doctor & admin CLI — closed
 
 Milestone: **M5 · Sprint 1 — Doctor & admin CLI** — #35–#38
 
@@ -88,20 +88,22 @@ Milestone: **M5 · Sprint 1 — Doctor & admin CLI** — #35–#38
 | #37 | CI workflow (`ci.yml`) |
 | #38 | Self-update + rollback CLI |
 
-**Status (2026-11-03):** `development` @ **v0.0.15** — gate `./scripts/verify-m5-smoke.sh`. User docs under `docs/user/`.
+**Status (2026-11-03):** **Closed on GitHub** — gate `./scripts/verify-m5-smoke.sh`.
 
-## M5 · Sprint 2 — E2E & release — complete (ready for review)
+## M5 · Sprint 2 — E2E & release — closed
 
-Milestone: **M5 · Sprint 2 — E2E & release** — #39, #40
+Milestone: **M5 · Sprint 2 — E2E & release** — #39–#44
 
 | Issue | Title |
 |--|--|
 | #39 | E2E smoke + `e2e.yml` |
-| #40 | GoReleaser + `release.yml` + install download |
+| #40 | GoReleaser + `release.yml` |
+| #41 | Playwright UI smoke |
+| #42 | Server info / update check API |
+| #43 | Install preflight + `verify-install.sh` |
+| #44 | User docs (Next.js, DNS) |
 
-**Status (2026-11-03):** `development` @ **v0.0.16–0.0.17**. #41 Playwright + #42 server info API ready for review.
-
-**Superseded** — see “M5 · Sprint 2 — complete” above.
+**Status (2026-11-03):** **Closed on GitHub** — `make e2e`, `./scripts/verify-install.sh`, Playwright in CI. **M5 milestone done** @ v0.0.21.
 
 ## Sprint 1 issues (GitHub)
 
