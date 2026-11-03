@@ -7,10 +7,14 @@ Dockyard ships as a single Go binary plus embedded dashboard UI.
 On Ubuntu 24.04 or Debian 12 (amd64 or arm64):
 
 ```bash
-curl -fsSL https://get.dockyard.dev | sudo sh
+curl -fsSL https://raw.githubusercontent.com/Joeydekruis/dockyrd/development/scripts/install.sh | sudo sh
 ```
 
-The installer checks Docker, installs `/usr/local/bin/dockyard`, registers `dockyard.service`, and prints a **one-time setup token**.
+When `https://get.dockyard.dev` is live, that URL will serve the same script.
+
+The installer checks the OS, installs **Docker Engine** on Debian/Ubuntu when missing, installs `/usr/local/bin/dockyard`, registers `dockyard.service`, and prints a **one-time setup token**.
+
+Skip automatic Docker install: `DOCKYARD_SKIP_DOCKER_INSTALL=1` or pass `--no-docker-install` when piping the script.
 
 Open `http://YOUR_HOST:8000/setup`, complete the wizard, then sign in.
 

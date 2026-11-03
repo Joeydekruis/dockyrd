@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.24] - 2026-11-03
+
+_Finished: 2026-11-03_
+
+### Changed
+
+- **`scripts/install.sh`** — auto-install Docker Engine on Debian/Ubuntu; fetch `dockyard.service` when run via `curl | sh`; `DOCKYARD_SKIP_DOCKER_INSTALL` / `--no-docker-install`
+- **README** and **`docs/user/install.md`** — interim install URL (raw GitHub) until `get.dockyard.dev` is live
+
 ## [0.0.23] - 2026-11-03
 
 _Finished: 2026-11-03_

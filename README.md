@@ -2,17 +2,28 @@
 
 Self-hosted, open-source deploy platform: one Go binary, Docker workloads, Caddy edge, SQLite control plane, embedded **Dockyrd** dashboard.
 
-**Status:** M0–M5 shipped; latest release **v0.0.22** on `main` (see [releases](https://github.com/Joeydekruis/dockyrd/releases)).
+**Status:** M0–M5 shipped; see [releases](https://github.com/Joeydekruis/dockyrd/releases) for the current version.
 
 ## Install
 
-See [`docs/user/install.md`](docs/user/install.md). Production:
+Full guide: [`docs/user/install.md`](docs/user/install.md).
+
+On a Linux VPS (**Ubuntu 24.04** or **Debian 12**, amd64 or arm64):
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Joeydekruis/dockyrd/development/scripts/install.sh | sudo sh
+```
+
+The script installs **Docker Engine** when it is missing (official apt repo), downloads the latest [release](https://github.com/Joeydekruis/dockyrd/releases) binary, runs `dockyard init`, and enables `dockyard.service`. Use the **setup URL** from the output with your server’s **public IP** on port **8000** — DNS is not required for first setup.
+
+- Other distros: install Docker yourself, then re-run the script (or set `DOCKYARD_SKIP_DOCKER_INSTALL=1` if Docker is already managed).
+- Production hardening: set `DOCKYARD_REQUIRE_OWNER_2FA=1` in `/etc/dockyard/dockyard.env` (see [`packaging/dockyard.env.example`](packaging/dockyard.env.example)).
+
+When `https://get.dockyard.dev` is live, the install one-liner will be:
 
 ```bash
 curl -fsSL https://get.dockyard.dev | sudo sh
 ```
-
-Set `DOCKYARD_REQUIRE_OWNER_2FA=1` in `/etc/dockyard/dockyard.env` (see [`packaging/dockyard.env.example`](packaging/dockyard.env.example)).
 
 ## Local build
 

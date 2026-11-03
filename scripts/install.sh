@@ -1,8 +1,9 @@
 #!/bin/sh
-# Dockyard installer (M0 skeleton). Full Docker/release flow lands in later milestones.
+# Dockyard installer: paths, Docker (Debian/Ubuntu), release binary, init, systemd.
 set -e
 
 DOCKYARD_VERSION="${DOCKYARD_VERSION:-dev}"
+DOCKYARD_INSTALL_REF="${DOCKYARD_INSTALL_REF:-development}"
 INSTALL_BIN="${DOCKYARD_INSTALL_BIN:-}"
 CONFIG_DIR="${DOCKYARD_CONFIG_DIR:-/etc/dockyard}"
 DATA_DIR="${DOCKYARD_DATA_DIR:-/var/lib/dockyard}"
@@ -10,6 +11,7 @@ BIN_DEST="${DOCKYARD_BIN_DEST:-/usr/local/bin/dockyard}"
 UNIT_SRC="${DOCKYARD_UNIT_SRC:-}"
 SKIP_SYSTEMD="${DOCKYARD_SKIP_SYSTEMD:-0}"
 SKIP_ROOT="${DOCKYARD_SKIP_ROOT:-0}"
+DOCKYARD_SKIP_DOCKER_INSTALL="${DOCKYARD_SKIP_DOCKER_INSTALL:-0}"
 
 log() {
 	printf '%s\n' "$*"
@@ -42,9 +44,96 @@ preflight() {
 		log "systemd is required for service install." >&2
 		exit 1
 	fi
-	if ! command -v docker >/dev/null 2>&1; then
-		log "Warning: Docker not found — install Docker before deploying apps." >&2
+}
+
+parse_args() {
+	for arg in "$@"; do
+		case "$arg" in
+		--no-docker-install) DOCKYARD_SKIP_DOCKER_INSTALL=1 ;;
+		esac
+	done
+}
+
+docker_daemon_ready() {
+	docker info >/dev/null 2>&1
+}
+
+ensure_docker_running() {
+	if ! command -v systemctl >/dev/null 2>&1; then
+		return 0
 	fi
+	if systemctl is-active --quiet docker 2>/dev/null; then
+		return 0
+	fi
+	systemctl enable docker.service 2>/dev/null || true
+	systemctl start docker.service 2>/dev/null || true
+}
+
+wait_for_docker() {
+	i=0
+	while ! docker_daemon_ready; do
+		i=$((i + 1))
+		if [ "$i" -gt 60 ]; then
+			log "Docker daemon did not become ready." >&2
+			exit 1
+		fi
+		sleep 1
+	done
+}
+
+install_docker_via_apt() {
+	if ! command -v apt-get >/dev/null 2>&1; then
+		log "Docker is not installed and automatic install needs apt (Debian/Ubuntu)." >&2
+		exit 1
+	fi
+	if [ ! -f /etc/os-release ]; then
+		log "Cannot detect OS for Docker install (/etc/os-release missing)." >&2
+		exit 1
+	fi
+	# shellcheck disable=SC1091
+	. /etc/os-release
+	case "${ID:-}" in
+	ubuntu) distro=ubuntu ;;
+	debian) distro=debian ;;
+	*)
+		log "Automatic Docker install supports Debian and Ubuntu only (detected: ${ID:-unknown})." >&2
+		log "Install Docker manually, then re-run this script." >&2
+		exit 1
+		;;
+	esac
+	if [ -z "${VERSION_CODENAME:-}" ]; then
+		log "Could not detect OS version codename for Docker apt repo." >&2
+		exit 1
+	fi
+	log "Installing Docker Engine from download.docker.com (${ID} ${VERSION_CODENAME})…"
+	install -m 0755 -d /etc/apt/keyrings
+	curl -fsSL "https://download.docker.com/linux/${distro}/gpg" -o /etc/apt/keyrings/docker.asc
+	chmod a+r /etc/apt/keyrings/docker.asc
+	# shellcheck disable=SC2046
+	echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/${distro} ${VERSION_CODENAME} stable" \
+		>/etc/apt/sources.list.d/docker.list
+	apt-get update -qq
+	DEBIAN_FRONTEND=noninteractive apt-get install -y -qq \
+		docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+}
+
+ensure_docker() {
+	if [ "$DOCKYARD_SKIP_DOCKER_INSTALL" = "1" ] || [ "$SKIP_ROOT" = "1" ]; then
+		if ! command -v docker >/dev/null 2>&1; then
+			log "Warning: Docker not installed (install skipped)." >&2
+		fi
+		return 0
+	fi
+	if command -v docker >/dev/null 2>&1; then
+		ensure_docker_running
+		wait_for_docker
+		log "✓ Docker is installed and running."
+		return 0
+	fi
+	install_docker_via_apt
+	ensure_docker_running
+	wait_for_docker
+	log "✓ Docker installed and running."
 }
 
 ensure_paths() {
@@ -112,20 +201,39 @@ download_release_binary() {
 	return 0
 }
 
+resolve_unit_src() {
+	if [ -n "$UNIT_SRC" ] && [ -f "$UNIT_SRC" ]; then
+		printf '%s' "$UNIT_SRC"
+		return 0
+	fi
+	script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+	local_path="$script_dir/../packaging/dockyard.service"
+	if [ -f "$local_path" ]; then
+		printf '%s' "$local_path"
+		return 0
+	fi
+	repo="${DOCKYARD_GITHUB_REPO:-Joeydekruis/dockyrd}"
+	ref="${DOCKYARD_INSTALL_REF:-development}"
+	tmp=$(mktemp) || return 1
+	if ! curl -sfL "https://raw.githubusercontent.com/${repo}/${ref}/packaging/dockyard.service" -o "$tmp"; then
+		rm -f "$tmp"
+		return 1
+	fi
+	printf '%s' "$tmp"
+}
+
 install_systemd() {
 	if [ "$SKIP_SYSTEMD" = "1" ]; then
 		return 0
 	fi
-	unit_src="$UNIT_SRC"
-	if [ -z "$unit_src" ]; then
-		script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-		unit_src="$script_dir/../packaging/dockyard.service"
-	fi
-	if [ ! -f "$unit_src" ]; then
-		log "Missing unit file: $unit_src" >&2
+	unit_src=$(resolve_unit_src) || {
+		log "Missing unit file (set DOCKYARD_UNIT_SRC or run from a git checkout)." >&2
 		exit 1
-	fi
+	}
 	install -m 644 "$unit_src" /etc/systemd/system/dockyard.service
+	case "$unit_src" in
+	/tmp/* | /var/tmp/*) rm -f "$unit_src" ;;
+	esac
 	systemctl daemon-reload
 	systemctl enable dockyard.service
 }
@@ -136,9 +244,11 @@ run_init() {
 }
 
 main() {
+	parse_args "$@"
 	log "Dockyard install, version ${DOCKYARD_VERSION}"
 	require_root
 	preflight
+	ensure_docker
 	ensure_paths
 	install_binary
 	run_init
