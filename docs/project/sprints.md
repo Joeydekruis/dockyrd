@@ -23,6 +23,14 @@ Create or track these as GitHub issues under milestone **M0 · Sprint 1 — Mono
 
 Issue numbers may differ after creation — update this table and rename `docs/project/issues/<n>/` to match.
 
+## Sprint 2 issues (GitHub)
+
+| Issue | Title | Local spec |
+|--|--|--|
+| #4 | [foundation] SQLite goose migrations and sqlc | `docs/project/issues/4/` |
+| #5 | [foundation] Config paths and environment | `docs/project/issues/5/` |
+| #6 | [foundation] Auth package stubs | `docs/project/issues/6/` |
+
 ## Pickup order
 
 1. Sprint 1 issues in table order

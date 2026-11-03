@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/Joeydekruis/dockyrd/internal/config"
 	"github.com/Joeydekruis/dockyrd/internal/server"
 )
 
@@ -17,7 +18,8 @@ func main() {
 
 	switch os.Args[1] {
 	case "serve":
-		if err := server.Serve(":8000"); err != nil {
+		cfg := config.Load()
+		if err := server.Serve(cfg.Listen); err != nil {
 			fmt.Fprintf(os.Stderr, "serve: %v\n", err)
 			os.Exit(1)
 		}

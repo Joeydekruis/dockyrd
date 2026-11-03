@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/Joeydekruis/dockyrd/internal/auth"
 	"github.com/Joeydekruis/dockyrd/web"
 )
 
@@ -16,6 +17,7 @@ type healthResponse struct {
 func Serve(addr string) error {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/v1/health", handleHealth)
+	mux.HandleFunc("GET /api/v1/setup/status", auth.HandleSetupStatus)
 
 	ui, err := web.Assets()
 	if err == nil {

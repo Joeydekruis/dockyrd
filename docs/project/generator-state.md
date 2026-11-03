@@ -4,7 +4,7 @@ _Last updated: (session)_
 
 ## Current focus
 
-**M0 · Sprint 1** — GitHub issues #1–#3 (monorepo, CI, embed). Backlog: GitHub only (see `github-workflow.md`).
+**M0 · Sprint 3** — install.sh, systemd, `dockyard init`, setup-token (issues TBD on GitHub).
 
 ## Blockers
 
@@ -12,4 +12,4 @@ None.
 
 ## Next
 
-Finish Sprint 1 handoff → Sprint 2 (SQLite + auth bootstrap). See `docs/project/sprints.md`.
+Create Sprint 3 GitHub issues + implement. Sprint 2 (#4–#6) handoff pushed 2026-11-03.
