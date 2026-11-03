@@ -70,6 +70,7 @@ func registerAPIRoutes(mux *http.ServeMux, deps apiDeps) {
 	registerTeamRoutes(mux, deps)
 	registerInvitePublicRoutes(mux, deps)
 	registerSearchRoutes(mux, deps)
+	registerAuthSecurityRoutes(mux, deps)
 }
 
 func (d apiDeps) handleLogin(w http.ResponseWriter, r *http.Request) {
@@ -108,8 +109,12 @@ func (d apiDeps) handleLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := d.startSession(w, r, user.ID); err != nil {
+	if err := d.startSession(w, r, user.ID, !totpEnabled(user.TotpEnabledAt)); err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "session error")
+		return
+	}
+	if totpEnabled(user.TotpEnabledAt) {
+		writeJSON(w, http.StatusAccepted, map[string]any{"mfa_required": true})
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"ok": true})
@@ -201,17 +206,21 @@ func (d apiDeps) handleSetup(w http.ResponseWriter, r *http.Request) {
 		writeJSONError(w, http.StatusInternalServerError, "server bootstrap error")
 		return
 	}
-	if err := d.startSession(w, r, userID); err != nil {
+	if err := d.startSession(w, r, userID, true); err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "session error")
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"ok": true})
 }
 
-func (d apiDeps) startSession(w http.ResponseWriter, r *http.Request, userID string) error {
+func (d apiDeps) startSession(w http.ResponseWriter, r *http.Request, userID string, mfaPassed bool) error {
 	plain, hash, err := auth.NewSessionToken()
 	if err != nil {
 		return err
+	}
+	mfa := int64(0)
+	if mfaPassed {
+		mfa = 1
 	}
 	now := time.Now()
 	expires := now.Add(30 * 24 * time.Hour)
@@ -220,6 +229,7 @@ func (d apiDeps) startSession(w http.ResponseWriter, r *http.Request, userID str
 		UserID:     userID,
 		UserAgent:  sql.NullString{String: r.UserAgent(), Valid: r.UserAgent() != ""},
 		Ip:         sql.NullString{String: clientIP(r), Valid: true},
+		MfaPassed:  mfa,
 		CreatedAt:  now.Unix(),
 		LastSeenAt: now.Unix(),
 		ExpiresAt:  expires.Unix(),
@@ -252,7 +262,14 @@ func (d apiDeps) userFromRequest(r *http.Request) (sqlc.GetUserByIDRow, error) {
 	if time.Now().Unix() > sess.ExpiresAt {
 		return sqlc.GetUserByIDRow{}, errors.New("expired")
 	}
-	return d.q.GetUserByID(r.Context(), sess.UserID)
+	user, err := d.q.GetUserByID(r.Context(), sess.UserID)
+	if err != nil {
+		return sqlc.GetUserByIDRow{}, err
+	}
+	if totpEnabled(user.TotpEnabledAt) && sess.MfaPassed == 0 {
+		return sqlc.GetUserByIDRow{}, errors.New("mfa required")
+	}
+	return user, nil
 }
 
 func clearSessionCookie(w http.ResponseWriter) {

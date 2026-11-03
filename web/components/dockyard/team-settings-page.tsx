@@ -5,8 +5,10 @@ import { useCallback, useEffect, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import {
   createInvite,
+  listAuditLog,
   listInvites,
   listTeamUsers,
+  type AuditEntry,
   type TeamInvite,
   type TeamUser,
 } from "@/lib/api";
@@ -17,6 +19,7 @@ export function TeamSettingsPage() {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("member");
   const [lastToken, setLastToken] = useState<string | null>(null);
+  const [audit, setAudit] = useState<AuditEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -30,6 +33,12 @@ export function TeamSettingsPage() {
       setUsers(us);
       setInvites(inv);
       setError(null);
+      try {
+        const { entries } = await listAuditLog();
+        setAudit(entries.slice(0, 20));
+      } catch {
+        setAudit([]);
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load team");
     } finally {
@@ -149,6 +158,26 @@ export function TeamSettingsPage() {
           )}
         </ul>
       </section>
+
+      {audit.length > 0 ? (
+        <section className="mt-8 space-y-3">
+          <h2 className="text-lg font-medium">Recent audit log</h2>
+          <ul className="divide-y divide-[var(--border)] rounded-xl border border-[var(--border)] bg-[var(--surface)]">
+            {audit.map((row) => (
+              <li key={row.id} className="px-4 py-3 text-sm">
+                <span className="font-medium">{row.action}</span>
+                {row.target_kind ? (
+                  <span className="text-[var(--muted-foreground)]">
+                    {" "}
+                    · {row.target_kind}
+                    {row.target_id ? ` ${row.target_id}` : ""}
+                  </span>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
     </DashboardShell>
   );
 }

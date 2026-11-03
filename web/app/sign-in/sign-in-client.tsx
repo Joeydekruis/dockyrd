@@ -4,12 +4,14 @@ import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AuthLayout } from "@/components/dockyard/auth-layout";
-import { getMe, getSetupStatus, login } from "@/lib/api";
+import { getMe, getSetupStatus, login, submitMfa } from "@/lib/api";
 
 export function SignInClient() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [mfaCode, setMfaCode] = useState("");
+  const [mfaStep, setMfaStep] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -30,51 +32,76 @@ export function SignInClient() {
     setError(null);
     setLoading(true);
     try {
-      await login(email, password);
+      if (mfaStep) {
+        await submitMfa(mfaCode.trim());
+        router.replace("/");
+        return;
+      }
+      const res = await login(email, password);
+      if (res.mfa_required) {
+        setMfaStep(true);
+        return;
+      }
       router.replace("/");
     } catch {
-      setError("Incorrect email or password");
+      setError(mfaStep ? "Invalid authentication code" : "Incorrect email or password");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <AuthLayout title="Sign in">
+    <AuthLayout title={mfaStep ? "Two-factor authentication" : "Sign in"}>
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
-        <Field label="Email">
-          <input
-            required
-            type="email"
-            autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="field-input"
-          />
-        </Field>
-        <Field label="Password">
-          <div className="relative">
+        {mfaStep ? (
+          <Field label="Authenticator code">
             <input
               required
-              type={showPassword ? "text" : "password"}
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="field-input pr-24"
+              autoFocus
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              value={mfaCode}
+              onChange={(e) => setMfaCode(e.target.value)}
+              className="field-input"
             />
-            <button
-              type="button"
-              onClick={() => setShowPassword((v) => !v)}
-              className="absolute top-1/2 right-2 -translate-y-1/2 rounded px-2 py-1 text-xs"
-              style={{ color: "var(--link-blue)" }}
-            >
-              {showPassword ? "Hide" : "Show"}
-            </button>
-          </div>
-        </Field>
-        <Link href="/forgot-password" className="text-sm" style={{ color: "var(--link-blue)" }}>
-          Forgot password?
-        </Link>
+          </Field>
+        ) : (
+          <>
+            <Field label="Email">
+              <input
+                required
+                type="email"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="field-input"
+              />
+            </Field>
+            <Field label="Password">
+              <div className="relative">
+                <input
+                  required
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="field-input pr-24"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute top-1/2 right-2 -translate-y-1/2 rounded px-2 py-1 text-xs"
+                  style={{ color: "var(--link-blue)" }}
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
+              </div>
+            </Field>
+            <Link href="/forgot-password" className="text-sm" style={{ color: "var(--link-blue)" }}>
+              Forgot password?
+            </Link>
+          </>
+        )}
         {error ? (
           <p className="text-sm" style={{ color: "var(--danger)" }} role="alert">
             {error}
@@ -86,7 +113,7 @@ export function SignInClient() {
           className="min-h-11 rounded-[10px] font-mono text-xs uppercase tracking-wide text-white"
           style={{ background: "var(--ink-navy)" }}
         >
-          {loading ? "Signing in…" : "Sign in"}
+          {loading ? "Please wait…" : mfaStep ? "Verify" : "Sign in"}
         </button>
       </form>
     </AuthLayout>

@@ -16,10 +16,39 @@ SELECT
   name,
   password_hash,
   role,
-  disabled_at
+  disabled_at,
+  totp_enabled_at
 FROM users
 WHERE email = ? COLLATE NOCASE
 LIMIT 1;
+
+-- name: GetUserSecurity :one
+SELECT
+  id,
+  email,
+  name,
+  role,
+  totp_secret_enc,
+  totp_enabled_at
+FROM users
+WHERE id = ?
+LIMIT 1;
+
+-- name: EnableUserTOTP :exec
+UPDATE users
+SET
+  totp_secret_enc = ?,
+  totp_enabled_at = ?,
+  updated_at = ?
+WHERE id = ?;
+
+-- name: DisableUserTOTP :exec
+UPDATE users
+SET
+  totp_secret_enc = NULL,
+  totp_enabled_at = NULL,
+  updated_at = ?
+WHERE id = ?;
 
 -- name: ListUsers :many
 SELECT

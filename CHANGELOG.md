@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.12] - 2026-11-03
+
+_Finished: 2026-11-03_
+
+### Added
+
+- **#32 / 2FA & profile security** — TOTP, MFA login step, sessions API, profile UI — https://github.com/Joeydekruis/dockyrd/issues/32
+- **`github.com/pquerna/otp`** — authenticator codes
+
 ## [0.0.11] - 2026-11-03
 
 _Finished: 2026-11-03_

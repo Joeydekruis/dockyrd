@@ -20,7 +20,7 @@ INSERT INTO sessions (
   created_at,
   last_seen_at,
   expires_at
-) VALUES (?, ?, ?, ?, 1, ?, ?, ?)
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
 `
 
 type CreateSessionParams struct {
@@ -28,6 +28,7 @@ type CreateSessionParams struct {
 	UserID     string
 	UserAgent  sql.NullString
 	Ip         sql.NullString
+	MfaPassed  int64
 	CreatedAt  int64
 	LastSeenAt int64
 	ExpiresAt  int64
@@ -39,6 +40,7 @@ func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) er
 		arg.UserID,
 		arg.UserAgent,
 		arg.Ip,
+		arg.MfaPassed,
 		arg.CreatedAt,
 		arg.LastSeenAt,
 		arg.ExpiresAt,
@@ -55,8 +57,24 @@ func (q *Queries) DeleteSession(ctx context.Context, idHash []byte) error {
 	return err
 }
 
+const deleteSessionForUser = `-- name: DeleteSessionForUser :exec
+DELETE FROM sessions
+WHERE id_hash = ?
+  AND user_id = ?
+`
+
+type DeleteSessionForUserParams struct {
+	IDHash []byte
+	UserID string
+}
+
+func (q *Queries) DeleteSessionForUser(ctx context.Context, arg DeleteSessionForUserParams) error {
+	_, err := q.db.ExecContext(ctx, deleteSessionForUser, arg.IDHash, arg.UserID)
+	return err
+}
+
 const getSession = `-- name: GetSession :one
-SELECT user_id, expires_at
+SELECT user_id, expires_at, mfa_passed
 FROM sessions
 WHERE id_hash = ?
 `
@@ -64,27 +82,29 @@ WHERE id_hash = ?
 type GetSessionRow struct {
 	UserID    string
 	ExpiresAt int64
+	MfaPassed int64
 }
 
 func (q *Queries) GetSession(ctx context.Context, idHash []byte) (GetSessionRow, error) {
 	row := q.db.QueryRowContext(ctx, getSession, idHash)
 	var i GetSessionRow
-	err := row.Scan(&i.UserID, &i.ExpiresAt)
+	err := row.Scan(&i.UserID, &i.ExpiresAt, &i.MfaPassed)
 	return i, err
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, email, name, role
+SELECT id, email, name, role, totp_enabled_at
 FROM users
 WHERE id = ?
 LIMIT 1
 `
 
 type GetUserByIDRow struct {
-	ID    string
-	Email string
-	Name  string
-	Role  string
+	ID            string
+	Email         string
+	Name          string
+	Role          string
+	TotpEnabledAt sql.NullInt64
 }
 
 func (q *Queries) GetUserByID(ctx context.Context, id string) (GetUserByIDRow, error) {
@@ -95,6 +115,73 @@ func (q *Queries) GetUserByID(ctx context.Context, id string) (GetUserByIDRow, e
 		&i.Email,
 		&i.Name,
 		&i.Role,
+		&i.TotpEnabledAt,
 	)
 	return i, err
+}
+
+const listSessionsForUser = `-- name: ListSessionsForUser :many
+SELECT
+  id_hash,
+  user_agent,
+  ip,
+  mfa_passed,
+  created_at,
+  last_seen_at,
+  expires_at
+FROM sessions
+WHERE user_id = ?
+ORDER BY last_seen_at DESC
+`
+
+type ListSessionsForUserRow struct {
+	IDHash     []byte
+	UserAgent  sql.NullString
+	Ip         sql.NullString
+	MfaPassed  int64
+	CreatedAt  int64
+	LastSeenAt int64
+	ExpiresAt  int64
+}
+
+func (q *Queries) ListSessionsForUser(ctx context.Context, userID string) ([]ListSessionsForUserRow, error) {
+	rows, err := q.db.QueryContext(ctx, listSessionsForUser, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListSessionsForUserRow
+	for rows.Next() {
+		var i ListSessionsForUserRow
+		if err := rows.Scan(
+			&i.IDHash,
+			&i.UserAgent,
+			&i.Ip,
+			&i.MfaPassed,
+			&i.CreatedAt,
+			&i.LastSeenAt,
+			&i.ExpiresAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const setSessionMFAPassed = `-- name: SetSessionMFAPassed :exec
+UPDATE sessions
+SET mfa_passed = 1
+WHERE id_hash = ?
+`
+
+func (q *Queries) SetSessionMFAPassed(ctx context.Context, idHash []byte) error {
+	_, err := q.db.ExecContext(ctx, setSessionMFAPassed, idHash)
+	return err
 }

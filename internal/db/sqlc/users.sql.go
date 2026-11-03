@@ -45,6 +45,51 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
 	return err
 }
 
+const disableUserTOTP = `-- name: DisableUserTOTP :exec
+UPDATE users
+SET
+  totp_secret_enc = NULL,
+  totp_enabled_at = NULL,
+  updated_at = ?
+WHERE id = ?
+`
+
+type DisableUserTOTPParams struct {
+	UpdatedAt int64
+	ID        string
+}
+
+func (q *Queries) DisableUserTOTP(ctx context.Context, arg DisableUserTOTPParams) error {
+	_, err := q.db.ExecContext(ctx, disableUserTOTP, arg.UpdatedAt, arg.ID)
+	return err
+}
+
+const enableUserTOTP = `-- name: EnableUserTOTP :exec
+UPDATE users
+SET
+  totp_secret_enc = ?,
+  totp_enabled_at = ?,
+  updated_at = ?
+WHERE id = ?
+`
+
+type EnableUserTOTPParams struct {
+	TotpSecretEnc []byte
+	TotpEnabledAt sql.NullInt64
+	UpdatedAt     int64
+	ID            string
+}
+
+func (q *Queries) EnableUserTOTP(ctx context.Context, arg EnableUserTOTPParams) error {
+	_, err := q.db.ExecContext(ctx, enableUserTOTP,
+		arg.TotpSecretEnc,
+		arg.TotpEnabledAt,
+		arg.UpdatedAt,
+		arg.ID,
+	)
+	return err
+}
+
 const getUserByEmail = `-- name: GetUserByEmail :one
 SELECT
   id,
@@ -52,19 +97,21 @@ SELECT
   name,
   password_hash,
   role,
-  disabled_at
+  disabled_at,
+  totp_enabled_at
 FROM users
 WHERE email = ? COLLATE NOCASE
 LIMIT 1
 `
 
 type GetUserByEmailRow struct {
-	ID           string
-	Email        string
-	Name         string
-	PasswordHash sql.NullString
-	Role         string
-	DisabledAt   sql.NullInt64
+	ID            string
+	Email         string
+	Name          string
+	PasswordHash  sql.NullString
+	Role          string
+	DisabledAt    sql.NullInt64
+	TotpEnabledAt sql.NullInt64
 }
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error) {
@@ -77,6 +124,43 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEm
 		&i.PasswordHash,
 		&i.Role,
 		&i.DisabledAt,
+		&i.TotpEnabledAt,
+	)
+	return i, err
+}
+
+const getUserSecurity = `-- name: GetUserSecurity :one
+SELECT
+  id,
+  email,
+  name,
+  role,
+  totp_secret_enc,
+  totp_enabled_at
+FROM users
+WHERE id = ?
+LIMIT 1
+`
+
+type GetUserSecurityRow struct {
+	ID            string
+	Email         string
+	Name          string
+	Role          string
+	TotpSecretEnc []byte
+	TotpEnabledAt sql.NullInt64
+}
+
+func (q *Queries) GetUserSecurity(ctx context.Context, id string) (GetUserSecurityRow, error) {
+	row := q.db.QueryRowContext(ctx, getUserSecurity, id)
+	var i GetUserSecurityRow
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.Name,
+		&i.Role,
+		&i.TotpSecretEnc,
+		&i.TotpEnabledAt,
 	)
 	return i, err
 }

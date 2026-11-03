@@ -122,7 +122,7 @@ func (d apiDeps) handleInviteAccept(w http.ResponseWriter, r *http.Request) {
 		Meta:       map[string]any{"email": email, "role": role},
 		IP:         clientIP(r),
 	})
-	if err := d.startSession(w, r, userID); err != nil {
+	if err := d.startSession(w, r, userID, true); err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "session error")
 		return
 	}

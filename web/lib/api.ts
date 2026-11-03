@@ -46,10 +46,72 @@ export function getSetupStatus() {
 }
 
 export function login(email: string, password: string) {
-  return apiFetch<{ ok: boolean }>("/api/v1/auth/login", {
+  return apiFetch<{ ok?: boolean; mfa_required?: boolean }>("/api/v1/auth/login", {
     method: "POST",
     json: { email, password, remember: true },
   });
+}
+
+export function submitMfa(code: string) {
+  return apiFetch<{ ok: boolean }>("/api/v1/auth/mfa", {
+    method: "POST",
+    json: { code },
+  });
+}
+
+export function getAuthSecurity() {
+  return apiFetch<{ totp_enabled: boolean; recovery_remaining: number }>(
+    "/api/v1/auth/security",
+  );
+}
+
+export function setupTotp() {
+  return apiFetch<{ secret: string; otpauth_url: string }>("/api/v1/auth/totp/setup", {
+    method: "POST",
+    json: {},
+  });
+}
+
+export function enableTotp(input: { secret: string; code: string }) {
+  return apiFetch<{ ok: boolean; recovery_codes?: string[] }>(
+    "/api/v1/auth/totp/enable",
+    {
+      method: "POST",
+      json: input,
+    },
+  );
+}
+
+export type AuthSession = {
+  id: string;
+  current: boolean;
+  user_agent?: string;
+  ip?: string;
+  mfa_passed: boolean;
+  created_at: number;
+  last_seen_at: number;
+  expires_at: number;
+};
+
+export function listAuthSessions() {
+  return apiFetch<{ sessions: AuthSession[] }>("/api/v1/auth/sessions");
+}
+
+export function revokeAuthSession(id: string) {
+  return apiFetch<void>(`/api/v1/auth/sessions/${id}`, { method: "DELETE" });
+}
+
+export type AuditEntry = {
+  id: string;
+  user_id?: string;
+  action: string;
+  target_kind?: string;
+  target_id?: string;
+  created_at: number;
+};
+
+export function listAuditLog() {
+  return apiFetch<{ entries: AuditEntry[] }>("/api/v1/audit");
 }
 
 export function logout() {
