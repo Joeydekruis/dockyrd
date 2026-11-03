@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.15] - 2026-11-03
+
+_Finished: 2026-11-03_
+
+### Added
+
+- **#35 / `dockyard doctor`** — host and control-plane diagnostics — https://github.com/Joeydekruis/dockyrd/issues/35
+- **#36 / Admin CLI** — `admin reset-password`, `admin disable-2fa` — https://github.com/Joeydekruis/dockyrd/issues/36
+- **#37 / CI** — GitHub Actions `ci.yml`, `./scripts/verify-m5-smoke.sh` — https://github.com/Joeydekruis/dockyrd/issues/37
+- **#38 / Self-update** — `update --check`, apply with checksum + DB backup, `--rollback` on Linux — https://github.com/Joeydekruis/dockyrd/issues/38
+- **User docs** — `docs/user/install.md`, `first-app.md`, `troubleshooting.md`
+
 ## [0.0.14] - 2026-11-03
 
 _Finished: 2026-11-03_

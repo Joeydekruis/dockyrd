@@ -87,7 +87,24 @@ Milestone: **M4 · Sprint 4 — Docker cleanup & password reset** — #33, #34
 
 **Status:** v0.0.13–0.0.14 — containers/cleanup API, Analytics UI, forgot/reset password; capstone: applications API, home dashboard, event `action_href`, old static release prune.
 
-**M4 milestone:** issues **#27–#34** ready for maintainer verification. Remaining briefing gaps tracked under M5 / post-M4 notes in `roadmap.md`.
+**M4 milestone:** issues **#27–#34** — `status/ready-for-review` (maintainer close).
+
+## M5 · Sprint 1 — Doctor & admin CLI — complete (ready for review)
+
+Milestone: **M5 · Sprint 1 — Doctor & admin CLI** — #35–#38
+
+| Issue | Title |
+|--|--|
+| #35 | `dockyard doctor` |
+| #36 | Admin reset-password / disable-2fa |
+| #37 | CI workflow (`ci.yml`) |
+| #38 | Self-update + rollback CLI |
+
+**Status (2026-11-03):** `development` @ **v0.0.15** — gate `./scripts/verify-m5-smoke.sh`. User docs under `docs/user/`.
+
+## M5 · Sprint 2 — E2E & release (planned)
+
+Release workflow, Playwright e2e, cosign — briefing §14.3 / §19.
 
 ## Sprint 1 issues (GitHub)
 

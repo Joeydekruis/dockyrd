@@ -50,6 +50,13 @@ After M2 backend/UI changes on `development`:
 
 Optional env for builds: `DOCKYARD_BUILD_TIMEOUT` (default `20m`), `DOCKYARD_MIN_FREE_DISK_PERCENT` (default `10`), `DOCKYARD_BUILDX_BUILDER` (default `dy-buildkit`), `DOCKYARD_PUBLIC_URL` for GitHub App callbacks/webhooks.
 
+## M5 slice (doctor, admin CLI, CI)
+
+```bash
+./scripts/verify-m5-smoke.sh
+go run ./cmd/dockyard doctor
+```
+
 ## Full pre-release check
 
 Use the matrix in **`.cursor/skills/push-to-main/SKILL.md`** before merging to `main`.
