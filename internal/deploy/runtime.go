@@ -16,6 +16,7 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/github"
 	"github.com/Joeydekruis/dockyrd/internal/docker"
 	"github.com/Joeydekruis/dockyrd/internal/proxy"
+	"github.com/Joeydekruis/dockyrd/internal/refs"
 )
 
 const healthTimeout = 60 * time.Second
@@ -224,6 +225,14 @@ func (rt *Runtime) runAppDeployment(ctx context.Context, deploymentID string, de
 }
 
 func (rt *Runtime) runtimeEnv(ctx context.Context, serviceID string) ([]string, error) {
+	ctxRow, err := rt.Q.GetServiceDeployContext(ctx, serviceID)
+	if err != nil {
+		return nil, err
+	}
+	catalog, err := rt.projectCatalog(ctx, ctxRow.ProjectID)
+	if err != nil {
+		return nil, err
+	}
 	key, err := crypto.LoadMasterKey(rt.Cfg.SecretKeyPath())
 	if err != nil {
 		return nil, err
@@ -241,12 +250,24 @@ func (rt *Runtime) runtimeEnv(ctx context.Context, serviceID string) ([]string, 
 		if err != nil {
 			return nil, err
 		}
-		out = append(out, fmt.Sprintf("%s=%s", row.Key, string(val)))
+		resolved, err := refs.Resolve(string(val), refs.Catalog(catalog))
+		if err != nil {
+			return nil, err
+		}
+		out = append(out, fmt.Sprintf("%s=%s", row.Key, resolved))
 	}
 	return out, nil
 }
 
 func (rt *Runtime) buildArgs(ctx context.Context, serviceID string) (map[string]string, []string, error) {
+	ctxRow, err := rt.Q.GetServiceDeployContext(ctx, serviceID)
+	if err != nil {
+		return nil, nil, err
+	}
+	catalog, err := rt.projectCatalog(ctx, ctxRow.ProjectID)
+	if err != nil {
+		return nil, nil, err
+	}
 	key, err := crypto.LoadMasterKey(rt.Cfg.SecretKeyPath())
 	if err != nil {
 		return nil, nil, err
@@ -265,7 +286,10 @@ func (rt *Runtime) buildArgs(ctx context.Context, serviceID string) (map[string]
 		if err != nil {
 			return nil, nil, err
 		}
-		s := string(val)
+		s, err := refs.Resolve(string(val), refs.Catalog(catalog))
+		if err != nil {
+			return nil, nil, err
+		}
 		args[row.Key] = s
 		if row.IsSecret != 0 {
 			secrets = append(secrets, s)

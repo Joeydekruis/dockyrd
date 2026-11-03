@@ -32,6 +32,8 @@ func (l *Loop) Tick(ctx context.Context) {
 		if err := l.Docker.Ping(ctx); err != nil {
 			return
 		}
+		SyncDatabaseServices(ctx, l.Cfg, l.Q, l.Docker, l.Log)
+		SyncGarage(ctx, l.Cfg, l.Q, l.Docker, l.Log)
 	}
 	if err := proxy.SyncFromDB(ctx, l.Q, l.Cfg); err != nil && l.Log != nil {
 		l.Log.Debug("proxy sync", "err", err)

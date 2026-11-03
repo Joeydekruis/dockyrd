@@ -146,6 +146,65 @@ func (q *Queries) ListDeployableServices(ctx context.Context) ([]ListDeployableS
 	return items, nil
 }
 
+const listReconcileDatabaseServices = `-- name: ListReconcileDatabaseServices :many
+SELECT
+  s.id,
+  s.kind,
+  s.slug,
+  s.desired_state,
+  s.config,
+  p.slug AS project_slug,
+  p.id AS project_id,
+  p.server_id
+FROM services s
+JOIN environments e ON e.id = s.environment_id
+JOIN projects p ON p.id = e.project_id
+WHERE s.kind IN ('postgres', 'redis')
+`
+
+type ListReconcileDatabaseServicesRow struct {
+	ID           string
+	Kind         string
+	Slug         string
+	DesiredState string
+	Config       interface{}
+	ProjectSlug  string
+	ProjectID    string
+	ServerID     string
+}
+
+func (q *Queries) ListReconcileDatabaseServices(ctx context.Context) ([]ListReconcileDatabaseServicesRow, error) {
+	rows, err := q.db.QueryContext(ctx, listReconcileDatabaseServices)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListReconcileDatabaseServicesRow
+	for rows.Next() {
+		var i ListReconcileDatabaseServicesRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Kind,
+			&i.Slug,
+			&i.DesiredState,
+			&i.Config,
+			&i.ProjectSlug,
+			&i.ProjectID,
+			&i.ServerID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listServicesByProject = `-- name: ListServicesByProject :many
 SELECT
   s.id,

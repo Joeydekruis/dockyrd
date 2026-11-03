@@ -59,3 +59,18 @@ ORDER BY s.created_at DESC;
 SELECT id, kind, config, slug
 FROM services
 WHERE kind IN ('app', 'static_site');
+
+-- name: ListReconcileDatabaseServices :many
+SELECT
+  s.id,
+  s.kind,
+  s.slug,
+  s.desired_state,
+  s.config,
+  p.slug AS project_slug,
+  p.id AS project_id,
+  p.server_id
+FROM services s
+JOIN environments e ON e.id = s.environment_id
+JOIN projects p ON p.id = e.project_id
+WHERE s.kind IN ('postgres', 'redis');

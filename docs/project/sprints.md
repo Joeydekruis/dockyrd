@@ -45,6 +45,24 @@ Milestone: **M2 · Sprint 4 — Static sites** (closed) — #22
 
 **Status (2026-11-03):** All M2 issues closed on GitHub (`status/done`). Gate: `./scripts/verify-m2-smoke.sh`.
 
+## M3 · Sprint 1 — Postgres & Valkey — complete (local)
+
+Milestone: **M3 · Sprint 1 — Postgres & Valkey** — #23
+
+## M3 · Sprint 2 — Reference variables — complete (local)
+
+Milestone: **M3 · Sprint 2 — Reference variables** — #24
+
+## M3 · Sprint 3 — Garage install — in progress (local)
+
+Milestone: **M3 · Sprint 3 — Garage install** — #25
+
+## M3 · Sprint 4 — Buckets & UI — planned
+
+Milestone: **M3 · Sprint 4 — Buckets & UI** — #26
+
+**Status (2026-11-03):** M3 issues **#23–#26** open on GitHub; implementation started with #23 (API + reconcile + connection vars).
+
 ## Sprint 1 issues (GitHub)
 
 Create or track these as GitHub issues under milestone **M0 · Sprint 1 — Monorepo & CI**:

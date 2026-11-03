@@ -4,13 +4,13 @@ _Last updated: 2026-11-03_
 
 ## Current focus
 
-**M3** planning (Postgres, Valkey, Garage) — M0–M2 issue backlog cleared on GitHub (2026-11-03).
+**M3:** **#23–#25** implemented locally (#23 Postgres/Valkey, #24 `${{refs}}`, #25 Garage API + `dy-garage`). **#26** buckets + UI next.
 
 ## Blockers
 
-None for starting M3 specs; Docker-host E2E still recommended before production use.
+Docker host needed to verify Garage layout/admin API and bucket flows (#26).
 
 ## Next
 
-- Plan/create M3 GitHub issues + specs.
-- Optional: `./scripts/verify-m2-smoke.sh` on a host with Docker + `DOCKYARD_PUBLIC_URL`.
+- **#26** bucket services, keys API, `/databases` + `/storage` UI, `verify-m3-smoke.sh`
+- Handoff/commits when Joey asks

@@ -10,7 +10,9 @@ import (
 
 	"github.com/oklog/ulid/v2"
 
+	"github.com/Joeydekruis/dockyrd/internal/crypto"
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
+	"github.com/Joeydekruis/dockyrd/internal/dbkind"
 	"github.com/Joeydekruis/dockyrd/internal/slug"
 )
 
@@ -83,17 +85,38 @@ func (d apiDeps) handleCreateService(w http.ResponseWriter, r *http.Request) {
 		writeJSONError(w, http.StatusBadRequest, "project_id, kind, and name required")
 		return
 	}
-	if body.Kind != "app" && body.Kind != "static_site" {
-		writeJSONError(w, http.StatusBadRequest, "only app and static_site services supported in this slice")
+	if body.Kind != "app" && body.Kind != "static_site" && body.Kind != "postgres" && body.Kind != "redis" {
+		writeJSONError(w, http.StatusBadRequest, "unsupported service kind")
 		return
 	}
 	cfg := body.Config
-	if len(cfg) == 0 {
-		if body.Kind == "static_site" {
+	switch body.Kind {
+	case "static_site":
+		if len(cfg) == 0 {
 			writeJSONError(w, http.StatusBadRequest, "config required for static_site")
 			return
 		}
-		cfg = json.RawMessage(`{"source":{"type":"image","ref":"nginx:alpine"},"port":80}`)
+	case "app":
+		if len(cfg) == 0 {
+			cfg = json.RawMessage(`{"source":{"type":"image","ref":"nginx:alpine"},"port":80}`)
+		}
+	case "postgres", "redis":
+		masterKey, err := crypto.LoadMasterKey(d.cfg.SecretKeyPath())
+		if err != nil {
+			writeJSONError(w, http.StatusInternalServerError, "secrets not configured")
+			return
+		}
+		version := parseConfigVersion(cfg)
+		var genErr error
+		if body.Kind == "postgres" {
+			cfg, genErr = dbkind.NewPostgresConfigJSON(masterKey, version)
+		} else {
+			cfg, genErr = dbkind.NewRedisConfigJSON(masterKey, version)
+		}
+		if genErr != nil {
+			writeJSONError(w, http.StatusInternalServerError, "config error")
+			return
+		}
 	}
 
 	ctx := r.Context()
@@ -153,7 +176,8 @@ func (d apiDeps) handleGetService(w http.ResponseWriter, r *http.Request) {
 }
 
 func serviceFromRow(row sqlc.Service) serviceResponse {
-	cfg, _ := json.Marshal(row.Config)
+	cfg := serviceConfigJSON(row.Config)
+	display := dbkind.RedactConfig(row.Kind, cfg)
 	created := int64(0)
 	if row.CreatedAt.Valid {
 		created = row.CreatedAt.Int64
@@ -169,8 +193,36 @@ func serviceFromRow(row sqlc.Service) serviceResponse {
 		Name:          row.Name,
 		Slug:          row.Slug,
 		DesiredState:  row.DesiredState,
-		Config:        cfg,
+		Config:        display,
 		CreatedAt:     created,
 		UpdatedAt:     updated,
 	}
+}
+
+func serviceConfigJSON(v interface{}) json.RawMessage {
+	switch x := v.(type) {
+	case json.RawMessage:
+		return x
+	case []byte:
+		return json.RawMessage(x)
+	case string:
+		return json.RawMessage(x)
+	default:
+		b, err := json.Marshal(x)
+		if err != nil {
+			return json.RawMessage(`{}`)
+		}
+		return b
+	}
+}
+
+func parseConfigVersion(raw json.RawMessage) int {
+	if len(raw) == 0 {
+		return 0
+	}
+	var partial struct {
+		Version int `json:"version"`
+	}
+	_ = json.Unmarshal(raw, &partial)
+	return partial.Version
 }

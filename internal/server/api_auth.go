@@ -53,12 +53,14 @@ func registerAPIRoutes(mux *http.ServeMux, deps apiDeps) {
 	mux.HandleFunc("POST /api/v1/setup", deps.handleSetup)
 	registerProjectRoutes(mux, deps)
 	registerServiceRoutes(mux, deps)
+	registerConnectionRoutes(mux, deps)
 	registerDomainRoutes(mux, deps)
 	registerDeploymentRoutes(mux, deps)
 	registerVariableRoutes(mux, deps)
 	registerLogRoutes(mux, deps)
 	registerStreamRoutes(mux, deps)
 	registerGitHubRoutes(mux, deps)
+	registerStorageRoutes(mux, deps)
 }
 
 func (d apiDeps) handleLogin(w http.ResponseWriter, r *http.Request) {
