@@ -13,13 +13,15 @@ const (
 	envDataDir       = "DOCKYARD_DATA_DIR"
 	envConfigDir     = "DOCKYARD_CONFIG_DIR"
 	envListen        = "DOCKYARD_LISTEN"
+	envPublicIPv4    = "DOCKYARD_PUBLIC_IPV4"
 )
 
 // Config holds process-level paths and network binding.
 type Config struct {
-	DataDir   string
-	ConfigDir string
-	Listen    string
+	DataDir     string
+	ConfigDir   string
+	Listen      string
+	PublicIPv4  string
 }
 
 // Load reads environment overrides with platform defaults.
@@ -37,6 +39,9 @@ func Load() Config {
 	}
 	if v := os.Getenv(envListen); v != "" {
 		cfg.Listen = v
+	}
+	if v := os.Getenv(envPublicIPv4); v != "" {
+		cfg.PublicIPv4 = v
 	}
 	if runtime.GOOS == "linux" {
 		return cfg
@@ -77,6 +82,11 @@ func (c Config) DatabasePath() string {
 // SecretKeyPath returns the AES master key path.
 func (c Config) SecretKeyPath() string {
 	return filepath.Join(c.ConfigDir, "secret.key")
+}
+
+// CaddyAdminSocket is the host path to dy-proxy admin unix socket.
+func (c Config) CaddyAdminSocket() string {
+	return filepath.Join(c.DataDir, "caddy", "admin.sock")
 }
 
 // EnvFilePath is the optional systemd EnvironmentFile.

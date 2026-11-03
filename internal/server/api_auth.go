@@ -49,6 +49,9 @@ func registerAPIRoutes(mux *http.ServeMux, deps apiDeps) {
 	mux.HandleFunc("POST /api/v1/auth/logout", deps.handleLogout)
 	mux.HandleFunc("GET /api/v1/auth/me", deps.handleMe)
 	mux.HandleFunc("POST /api/v1/setup", deps.handleSetup)
+	registerProjectRoutes(mux, deps)
+	registerServiceRoutes(mux, deps)
+	registerDomainRoutes(mux, deps)
 }
 
 func (d apiDeps) handleLogin(w http.ResponseWriter, r *http.Request) {
@@ -174,6 +177,10 @@ func (d apiDeps) handleSetup(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := setup.MarkSetupTokenUsed(ctx, d.q); err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "setup token error")
+		return
+	}
+	if _, err := EnsureLocalServer(ctx, d.q); err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "server bootstrap error")
 		return
 	}
 	if err := d.startSession(w, r, userID); err != nil {

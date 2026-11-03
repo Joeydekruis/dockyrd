@@ -11,6 +11,18 @@ Backlog and sprints live on **GitHub** ([workflow](github-workflow.md)). Use **m
 
 Later sprints follow `roadmap.md` milestones **M1–M5**.
 
+## M1 · Sprint 1 issues (GitHub)
+
+Milestone: **M1 · Sprint 1 — Projects API**
+
+| Issue | Title | Local spec |
+|--|--|--|
+| #13 | [M1] Local server bootstrap and projects REST API | `docs/project/issues/13/` |
+| #14 | [M1] Docker client, labels, and network bootstrap | `docs/project/issues/14/` |
+| #15 | [M1] Caddy config renderer, platform domains, domains API | `docs/project/issues/15/` |
+
+Planned follow-ups: image deploy + reconciler (#16), logs SSE + env vars (#17), Projects UI (#18).
+
 ## Sprint 1 issues (GitHub)
 
 Create or track these as GitHub issues under milestone **M0 · Sprint 1 — Monorepo & CI**:

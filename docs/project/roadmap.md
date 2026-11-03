@@ -6,7 +6,7 @@ From briefing §15. Update when a milestone closes.
 |--|--|--|
 | **M0 · Fundament** | Repo, CI, Go skeleton, SQLite, install/systemd, setup-token, login, AppShell + tokens, ⌘K skeleton | Fresh VPS → install → login to empty dashboard |
 
-**Progress (2026-11-03):** M0 complete on `development` (Sprint 1–4, handoff #1–#12). Next milestone: **M1 · Apps**.
+**Progress (2026-11-03):** M0 complete on `development` (#1–#12). **M1 in progress** — #13–#15 shipped on `development`; next #16 deploy/reconciler.
 | **M1 · Apps image/Dockerfile** | Projects, services, Docker labels, Caddy, domains, blue/green, logs SSE, env vars, reconciler | Image + Dockerfile app on HTTPS domain, zero-downtime redeploy |
 | **M2 · GitHub + Railpack + static** | GitHub App, webhooks, Railpack builds, static sites, rollback | Next.js via push; static site rollback |
 | **M3 · Databases + storage** | Postgres, Valkey, Garage, reference vars | Next + Postgres + S3 end-to-end |
