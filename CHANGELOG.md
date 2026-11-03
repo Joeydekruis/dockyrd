@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.22] - 2026-11-03
+
+_Finished: 2026-11-03_
+
+### Fixed
+
+- **CI `go vet`** — run `ensure-ui-stub.sh` before vet/test so `web/embed.go` has `web/out` on clean checkouts
+
 ## [0.0.21] - 2026-11-03
 
 _Finished: 2026-11-03_

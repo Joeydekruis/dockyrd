@@ -13,7 +13,7 @@ web-build:
 test: ensure-ui-stub
 	go test ./...
 
-lint:
+lint: ensure-ui-stub
 	go vet ./...
 	@if [ -f web/package.json ]; then pnpm --dir web lint; fi
 	@./scripts/check-no-radix.sh
