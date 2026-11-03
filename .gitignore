@@ -4,3 +4,4 @@ web/.next/
 bin/
 /dockyard
 *.test
+web/tsconfig.tsbuildinfo
