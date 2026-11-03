@@ -14,6 +14,7 @@ Instructions for AI coding agents working in this repository.
 **Product truth:** [`docs/BRIEFING.md`](docs/BRIEFING.md)  
 **UI contract:** [`docs/design-index.json`](docs/design-index.json), [`docs/dockyrd-design.html`](docs/dockyrd-design.html)  
 **Project index:** [`docs/project/project.md`](docs/project/project.md)  
+**GitHub process:** [`docs/project/github-workflow.md`](docs/project/github-workflow.md)  
 **Verify commands:** [`docs/project/setup.md`](docs/project/setup.md)  
 **Milestones:** [`docs/project/roadmap.md`](docs/project/roadmap.md)
 
@@ -29,14 +30,14 @@ This is **not** a WordPress theme, Studio, or Atelier project. Ignore rules from
 
 - **Only branch:** `development` for day-to-day work. Never create `feature/*` or `fix/*`.
 - **`main`:** merge only when Joey asks — use skill [`.cursor/skills/push-to-main/SKILL.md`](.cursor/skills/push-to-main/SKILL.md).
-- **Commits in Cursor:** only when Joey explicitly asks, except when a finished Linear handoff requires push (see [`docs/project/project.md`](docs/project/project.md)).
+- **Commits in Cursor:** only when Joey explicitly asks, except when finishing a GitHub issue handoff requires push (see [`docs/project/project.md`](docs/project/project.md)).
 
 ## Work tracks
 
 | Track | When | What to do |
 |-------|------|------------|
-| **Feature** | New feature or big product/architecture change | Linear issue (`DY-nn`) + harness: discuss → plan → [design if needed] → generate → [reviewers if needed] → verify → changelog/handoff |
-| **Direct** | Feedback, polish, bugfixes | Research → implement → verify on `development`. No planner, no Linear ceremony, usually no reviewers |
+| **Feature** | New feature or big product/architecture change | GitHub issue `#n` + harness: discuss → plan → [design if needed] → generate → [reviewers if needed] → verify → changelog/handoff |
+| **Direct** | Feedback, polish, bugfixes | Research → implement → verify on `development`. No planner, no GitHub issue required, usually no reviewers |
 
 Pick the track yourself; do not ask the human to choose process, size, or design approval.
 
@@ -46,12 +47,12 @@ Pick the track yourself; do not ask the human to choose process, size, or design
 
 1. Discuss product gray areas only when wrong guess would waste work ([`.cursor/rules/discuss-gate.mdc`](.cursor/rules/discuss-gate.mdc)).
 2. Decide size (micro-S / S / M / L / XL) and state it.
-3. **`planner`** → `docs/project/issues/<id>/spec.md` + `rubric.md`; sync Linear.
+3. **`planner`** → `docs/project/issues/<n>/spec.md` + `rubric.md`; sync GitHub issue body/links.
 4. **`designer`** only if [`.cursor/rules/design-when.mdc`](.cursor/rules/design-when.mdc) applies (briefing §17 gaps, L/XL IA). Most screens already exist in the design export — skip designer.
 5. **`generator`** → TDD, update [`docs/project/generator-state.md`](docs/project/generator-state.md). Max **3** generator rounds per issue.
 6. **Reviewers** only when [`.cursor/rules/reviewer-defaults.mdc`](.cursor/rules/reviewer-defaults.mdc) or rubric requires — often **skipped** for micro-S/S.
-7. Run relevant gates from `setup.md`; capture output for Linear handoff.
-8. On Feature close: `CHANGELOG.md` patch bump, commit/push when handoff applies, Linear **In Review** (never **Done**) — [`.cursor/rules/linear-handoff.mdc`](.cursor/rules/linear-handoff.mdc).
+7. Run relevant gates from `setup.md`; capture output for GitHub handoff comment.
+8. On Feature close: `CHANGELOG.md` patch bump, commit/push when handoff applies, issue comment + `status/ready-for-review` — [`.cursor/rules/github-handoff.mdc`](.cursor/rules/github-handoff.mdc). **Do not close the issue** (maintainer verifies).
 
 Subagents live under [`.cursor/agents/`](.cursor/agents/). Each runs **once** per invocation; the parent owns the loop.
 
@@ -59,7 +60,7 @@ Subagents live under [`.cursor/agents/`](.cursor/agents/). Each runs **once** pe
 
 | Subagent | Role |
 |----------|------|
-| **planner** | Spec + rubric; Linear sync |
+| **planner** | Spec + rubric; GitHub issue sync |
 | **designer** | HTML wireframes for §17 / L-XL gaps only |
 | **architect** | ADRs in `docs/adr/` — human accepts before binding |
 | **generator** | Implementation + tests |
@@ -72,7 +73,7 @@ Subagents live under [`.cursor/agents/`](.cursor/agents/). Each runs **once** pe
 | **mcp-reviewer** | MCP tools if present |
 | **doc-updater** | User-facing docs after other reviewers PASS |
 
-Feature feedback files: `docs/project/feedback/<id>/<type>-i<n>.md`. Generator may only write `generator-response-i*.md`.
+Feature feedback files: `docs/project/feedback/<n>/<type>-i<iter>.md`. Generator may only write `generator-response-i*.md`.
 
 ## UI implementation
 
@@ -106,10 +107,11 @@ Feature feedback files: `docs/project/feedback/<id>/<type>-i<n>.md`. Generator m
 
 Do **not** pause for: process, size, reviewers, design approval, “shall I continue?”
 
-## Linear
+## GitHub Issues
 
-- Issue prefix: **`DY-nn`** (update team URL in handoff when Linear workspace is configured).
-- Status after Cursor finish: **`In Review`** with evidence comment — never **`Done`** (PM only).
+- **Backlog:** [github.com/Joeydekruis/dockyrd/issues](https://github.com/Joeydekruis/dockyrd/issues) — no Linear.
+- **Local specs:** `docs/project/issues/<issue-number>/`
+- **Handoff:** evidence comment on the issue after push — see [github-handoff](.cursor/rules/github-handoff.mdc).
 
 ---
 

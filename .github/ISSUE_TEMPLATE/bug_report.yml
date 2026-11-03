@@ -1,0 +1,34 @@
+---
+name: Bug report
+description: Something broken or regressed
+title: "[bug] "
+labels: ["type/bug"]
+body:
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      placeholder: e.g. 0.0.1 or git SHA
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: OS, Docker version, browser…

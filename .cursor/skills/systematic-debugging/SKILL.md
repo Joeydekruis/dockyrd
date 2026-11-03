@@ -18,7 +18,7 @@ Use for hard bugs, flaky tests, or unclear failures.
 
 ## Harness
 
-- Most bugs/finetunes are **Direct** track: reproduce → fix on `development` → regression test. No Linear/planner unless it is a **big** adjustment (then Feature track).
+- Most bugs/finetunes are **Direct** track: reproduce → fix on `development` → regression test. No GitHub issue/planner unless it is a **big** adjustment (then Feature track).
 - If inside a Feature generator round, document root cause in `generator-response`
 
 ## When to escalate

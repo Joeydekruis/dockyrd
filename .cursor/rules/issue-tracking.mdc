@@ -1,20 +1,18 @@
 ---
-description: >-
-  Linear = PM for features; Cursor = build/fix track; development branch only.
-  Apply for planning, backlog, and delivery.
+description: GitHub Issues = backlog; Cursor builds on development; no Linear
 alwaysApply: true
 ---
 
-# Issue tracking (Linear PM + Cursor build)
+# Issue tracking (GitHub + Cursor)
 
-Two audiences, two systems:
+**Single backlog:** [GitHub Issues](https://github.com/Joeydekruis/dockyrd/issues) on this repo. No Linear, no dual-tracking.
 
 | Who | System | Owns |
 |-|--|--|
-| **PM** | **Linear** | New features and big adjustments: status, priority, milestone, product discussion; **moves issues to Done** after checking Cursor handoff |
-| **Tester / developer** | **Cursor** | Day-to-day build, feedback, finetunes, bugfixes - optimize here; do not mirror that ceremony into Linear or heavy repo plans |
+| **Maintainers / community** | **GitHub** | Labels, milestones, triage, closing verified work |
+| **Agents / contributors** | **Cursor + git** | Implementation, specs in repo, PRs or pushes to `development` |
 
-**Never dual-track** the same item in Linear and GitHub.
+Process guide: [`docs/project/github-workflow.md`](../../docs/project/github-workflow.md).
 
 ---
 
@@ -22,10 +20,10 @@ Two audiences, two systems:
 
 | Track | When | What to do |
 |-|--|--|
-| **Feature** | New feature or **big** product/architecture adjustment | Create/update **Linear**; keep Linear current; run full harness (discuss → plan → [HTML design if UI] → generate → review). Local `issues/<id>/` holds AC. |
-| **Direct** | Feedback processing, finetuning, polish, bugfixes | **No** planner, **no** thorough discuss gate, **no** Linear ceremony. Research → implement on `development` in one go. Light notes only if useful. |
+| **Feature** | New feature or **big** product/architecture adjustment | **GitHub issue** + harness (discuss → plan → [design if UI] → generate → review). Local `docs/project/issues/<n>/` holds AC (`n` = issue number). |
+| **Direct** | Feedback, polish, bugfixes in chat | **No** planner, **no** GitHub issue required. Implement on `development`. Light notes only. |
 
-When a **new feature** is raised in Cursor chat: **always** create or update the Linear issue before/while planning - Linear is the PM source of truth.
+When a **new feature** is raised in Cursor: **create or update a GitHub issue** (via `gh issue create` / web) before or while planning.
 
 ---
 
@@ -33,103 +31,60 @@ When a **new feature** is raised in Cursor chat: **always** create or update the
 
 | Artefact | Owns |
 |--|--|
-| **Linear issue** (`DY-nn`) | Feature / big-adjustment backlog (PM) |
-| **Cursor chat + code** | Direct-track work (feedback, bugs, finetunes) |
-| **GitHub Issue** | Optional bug intake only - do not require for Direct fixes |
-| **`docs/project/project.md`** | What we build, why, lifecycle, delivery |
-| **`docs/project/roadmap.md`** | Phases, epic intent, ordering (update when a **feature** closes) |
-| **`docs/project/issues/<id>/spec.md`** | Feature scope and AC (planner) - Feature track only |
-| **`docs/project/issues/<id>/rubric.md`** | Done-criteria and reviewers - Feature track only |
-| **`docs/project/feedback/<id>/`** | Generator/reviewer artefacts - Feature track only |
-| **`development` branch** | All agent commits; **commit + push after each Linear task**; `main` via push-to-main |
-| **`docs/project/generator-state.md`** | Session handoff - not the team backlog |
-
-If **feature** scope changes materially: update **Linear** (+ local spec/roadmap as needed) - never silently diverge.
+| **GitHub issue `#n`** | Title, labels, milestone, discussion, close when verified |
+| **`docs/project/issues/<n>/spec.md`** | Feature AC (planner) |
+| **`docs/project/issues/<n>/rubric.md`** | Done-criteria; reviewers |
+| **`docs/project/feedback/<n>/`** | Generator/reviewer iterations |
+| **`docs/project/project.md`** | Product truth, lifecycle |
+| **`docs/project/roadmap.md`** | M0–M5 phases (update when features land) |
+| **`docs/project/sprints.md`** | Sprint ↔ milestone mapping |
+| **`development` branch** | Day-to-day commits; push when shipping issue work |
+| **`docs/project/generator-state.md`** | Agent session handoff — not the backlog |
 
 ---
 
 ## Issue ID convention
 
-- **Features:** Linear ID, e.g. `DY-12`. Folders: `docs/project/issues/DY-12/`, `docs/project/feedback/DY-12/`.
-- **Direct / bugs:** No Linear required. Optional GitHub `#n` if the team filed one; do not invent twins.
-- **Legacy:** numeric folders (`docs/project/issues/9/`) remain valid for in-flight work.
-- Feature spec frontmatter includes the Linear URL.
+- **Features:** folder key = GitHub issue number: `docs/project/issues/12/`, `docs/project/feedback/12/`.
+- **Direct:** optional `#n` if someone filed a bug; do not invent duplicate issues.
+- Spec frontmatter includes `github: https://github.com/Joeydekruis/dockyrd/issues/n`.
 
 ---
 
 ## Feature track MUST
 
-1. **Exist in Linear** (create if missing when the feature is discussed in Cursor).
-2. **Stay updated in Linear** - status, AC summary, links to local spec/rubric after planning.
-3. **Point to product docs** - `project.md`, `roadmap.md`, then `issues/<id>/spec.md` + `rubric.md`.
-4. **Declare size** - agent decides micro-S / S / M / L / XL (do not ask).
-5. **Harness** - plan → generate → review (lighten artefacts for small features; still run the loop).
-6. **Handoff, not Done** - after tests pass: **commit + push** → evidence comment → status **`In Review`** per [linear-handoff](linear-handoff.mdc). **Never** set Linear to **`Done`**. **Never** hand off uncommitted work.
+1. **Exist on GitHub** (create if missing when the feature is discussed).
+2. **Stay aligned** — issue body links to local spec after planning.
+3. **Harness** — plan → generate → review (lighten for micro-S/S).
+4. **Handoff** — commit + push → evidence comment on issue per [github-handoff](github-handoff.mdc). Do not close the issue.
 
 ## Sprint pickup (HARD)
 
 When the human says **“pick up sprint X”**:
 
-1. Resolve sprint X in Linear (cycle, milestone, or sprint label).
-2. Pick up **all** open issues in that sprint - do not stop at a subset unless blocked.
-3. Each issue: implement → test → **commit + push** → Linear handoff → **In Review**.
-4. Parallelize with subagents/subchats per issue when useful; each still gets its own commit + handoff.
+1. Resolve sprint X via GitHub **milestone** (see `sprints.md`).
+2. Pick up **all** open issues in that milestone.
+3. Each: implement → test → commit + push → GitHub handoff comment.
+
+---
 
 ## Direct track MUST NOT
 
-- Spin up planner / full discuss-gate / local issue folders unless the human asks or the change is actually a **big** adjustment (then switch to Feature track).
-- Update Linear for routine feedback, polish, or bugfixes.
-- Ask process questions or wait for “OK to continue.”
-
----
-
-## Agent vs human (assertiveness)
-
-| Agent decides (do not ask) | Human decides (ask / wait) |
-|--|--|
-| Track (Feature vs Direct) | Product gray areas **on Feature track** that block correct build |
-| Size, reviewers, harness steps | ADR acceptance |
-| Whether design/wireframe is needed ([design-when](design-when.mdc)) | Stop-early hard FAIL / round-3 triage |
-| Linear create/update; **commit + push** then handoff → **In Review** + evidence comment | External blocker (secrets, access) |
-| Sprint pickup - all issues, per-task ship | Marking Linear **Done** (PM / Joey only) |
-| Working only on `development` | |
-| Auto-continue after BLOCK (≤3); no design-approval pause | |
-
-State process choices in one line (“Feature track, size M - implementing”) and **continue**. Never ask about process, size, or design approval.
-
----
-
-## Naming
-
-Prefer titles like **`[<area>] Verb object`** (Linear + local spec).
+- Require GitHub issues for tiny fixes.
+- Spin full harness unless the change is actually a **big** adjustment (then Feature track).
 
 ---
 
 ## Git / delivery
 
-- **Always work on `development`.** Do not create `feature/*` or `fix/*` branches.
-- **Linear task finish:** run tests → update `CHANGELOG.md` + patch bump → **commit and push** `origin/development` (`Refs DY-nn`) → Linear evidence comment → **In Review**.
-- **Direct track:** no mandatory commit/push unless the human asks or a batch cycle closes.
-- Do **not** push to `main` during normal work - use skill **push-to-main** when the human asks.
-- Avoid shipping Feature-track work with open **CRITICAL/HIGH** in that issue’s required feedback files.
-
----
-
-## Planner / Linear (Feature track)
-
-After **`planner`** writes `docs/project/issues/<id>/spec.md` and `rubric.md`:
-
-1. Update **Linear** with those paths and a short AC summary.
-2. Map roadmap subtasks → Linear issues where reasonable.
-3. Prefer **Linear MCP** for PM updates - not chat-only.
+- Work on **`development`** only (see [git-branch](git-branch.mdc)).
+- Feature finish: tests → `CHANGELOG.md` patch bump → commit + push (`Fixes #n` or `Refs #n`) → issue comment.
+- **`main`:** merge only when Joey asks — skill **push-to-main**.
 
 ---
 
 ## What we do NOT do
 
-- Dual-maintain the same ticket in Linear and GitHub.
-- Put Direct-track ceremony (plans, long specs, status essays) into Linear or the repo.
-- Create per-feature git branches.
-- Ask the human to confirm process decisions the agent already owns.
-- Use a monolithic `docs/project/spec.md` or treat `generator-state.md` as the backlog.
-- Mark Feature issues **Done** in Linear - that is PM verification after [linear-handoff](linear-handoff.mdc).
+- Linear or any second issue tracker.
+- Per-feature git branches (`feature/*`).
+- Close Feature issues without maintainer verification after handoff.

@@ -8,6 +8,8 @@ Self-hosted, open-source deploy platform: one Go binary, Docker workloads, Caddy
 | [`docs/design-index.json`](../design-index.json) | UI navigation, tokens, shared blocks |
 | [`docs/dockyrd-design.html`](../dockyrd-design.html) | Design export (artboards) |
 | [`roadmap.md`](roadmap.md) | Milestones M0–M5 |
+| [`sprints.md`](sprints.md) | Sprint ↔ GitHub milestone mapping |
+| [`github-workflow.md`](github-workflow.md) | Issues, labels, handoff (open source) |
 | [`setup.md`](setup.md) | Local verify commands |
 
 ## Lifecycle stage
@@ -17,9 +19,10 @@ Self-hosted, open-source deploy platform: one Go binary, Docker workloads, Caddy
 ## Delivery
 
 - **Branch:** `development` (day-to-day); `main` only when Joey asks (`push-to-main` skill).
-- **Features:** Linear issue + harness (`docs/project/issues/<id>/`) when scope needs PM tracking.
-- **Direct fixes:** implement on `development` without Linear ceremony.
-- **Commits:** only when Joey asks in Cursor chat (unless a Linear handoff batch is explicitly requested).
+- **Backlog:** [GitHub Issues](https://github.com/Joeydekruis/dockyrd/issues) only — no Linear.
+- **Features:** GitHub issue `#n` + harness (`docs/project/issues/<n>/`) when scope needs tracking.
+- **Direct fixes:** implement on `development` without opening an issue unless useful for the community.
+- **Commits:** when Joey asks in Cursor chat, or when completing a GitHub issue handoff that requires push.
 
 ## Naming
 

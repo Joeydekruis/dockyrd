@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security
+    url: https://github.com/Joeydekruis/dockyrd/blob/development/SECURITY.md
+    about: Report vulnerabilities privately (see SECURITY.md)
+  - name: Briefing
+    url: https://github.com/Joeydekruis/dockyrd/blob/development/docs/BRIEFING.md
+    about: Architecture and product scope

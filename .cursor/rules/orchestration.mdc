@@ -15,14 +15,14 @@ Subagents complete **once** per invocation. They do **not** run the full loop or
 
 | Track | Loop |
 |-|--|
-| **Direct** (feedback, finetune, bugfix) | Research → implement → verify on `development`. Skip planner, discuss-gate, Linear updates, design step unless the change is actually a big adjustment. |
-| **Feature** (new feature / big adjustment) | Right-sized harness below (lighten for S/micro-S). Create/update Linear. Auto-continue after discuss-gate PASS. |
+| **Direct** (feedback, finetune, bugfix) | Research → implement → verify on `development`. Skip planner, discuss-gate, GitHub issue updates, design step unless the change is actually a big adjustment. |
+| **Feature** (new feature / big adjustment) | Right-sized harness below (lighten for S/micro-S). Create/update GitHub issue. Auto-continue after discuss-gate PASS. |
 
 ## Canonical loop (Feature track)
 
 1. **Discuss** - clear or defer **product** gray areas ([discuss-gate](discuss-gate.mdc)) only when blocked; otherwise assume and note.
 2. **Size** - agent **decides** micro-S / S / M / L / XL; state it; do not wait ([agent-behavior](agent-behavior.mdc)).
-3. **`planner`** - issue spec + rubric in `docs/project/issues/<id>/` (Linear body OK for micro-S). Update Linear.
+3. **`planner`** - issue spec + rubric in `docs/project/issues/<n>/` (GitHub body OK for micro-S). Update GitHub issue links.
 4. **Design?** → only per [design-when](design-when.mdc) (new/updated components, or **L/XL** UI that needs layout thinking). If yes: **`designer`** → HTML (no images) → **immediately** continue to generator. **Never** wait for design approval.
 5. **`generator`** - TDD; match wireframe/design HTML when those artefacts exist; otherwise implement from spec + patterns; update `generator-state.md`; reviewer handoff.
 6. **Reviewers** - only if [reviewer-defaults](reviewer-defaults.mdc) says so; often **skip** for micro-S/S; when run, **lean** ([lean-loop](lean-loop.mdc)); **except doc-updater**.
@@ -30,9 +30,9 @@ Subagents complete **once** per invocation. They do **not** run the full loop or
 8. **Stop early** - round-1 security CRITICAL or frontend hard FAIL (wrong intent / not matching wireframe) → **re-clarify with human**; do not auto-burn rounds 2-3.
 9. If blockers and generator round **≤ 3** (and not stop-early) → **`generator` immediately** with backlog + feedback paths.
 10. If required reviewers **PASS** (or none required) → **`doc-updater`** last only when docs need it.
-11. **Testing gate** - relevant `setup.md` commands; **capture output** for Linear handoff.
-12. **Ship on `development`** - changelog (version +0.0.1 + date) → **commit + push** (`Refs DY-nn`); never create feature branches. Merge to `main` only via skill `push-to-main` when the human asks.
-13. **Linear handoff** - evidence comment (**Ready for Review - DY-nn**) then status **`In Review`** ([linear-handoff](linear-handoff.mdc)); **never** **`Done`**. Never hand off before push.
+11. **Testing gate** - relevant `setup.md` commands; **capture output** for GitHub handoff comment.
+12. **Ship on `development`** - changelog (version +0.0.1 + date) → **commit + push** (`Refs #n`); never create feature branches. Merge to `main` only via skill `push-to-main` when the human asks.
+13. **GitHub handoff** - evidence comment on issue ([github-handoff](github-handoff.mdc)); **`status/ready-for-review`**; do **not** close the issue. Never hand off before push.
 
 ## Hard limits
 
@@ -44,14 +44,14 @@ Subagents complete **once** per invocation. They do **not** run the full loop or
 - **Never** pause for design/wireframe approval - agent decides when design is needed ([design-when](design-when.mdc)) and continues to implement.
 - **Never** pause for review approval or process questions - only pause per [lean-loop](lean-loop.mdc).
 - When reviewers run, they are **subagents** under `.cursor/agents/` - not inline chat pretending to be review.
-- **Never** dual-track features on GitHub - Linear for Feature PM; Cursor for Direct ([issue-tracking](issue-tracking.mdc)).
+- **Never** use a second issue tracker — GitHub Issues only ([issue-tracking](issue-tracking.mdc)).
 - **Always** work on branch `development` - see [git-branch](git-branch.mdc). Creating `feature/*` is a hard fail; checkout `development` immediately if off-branch.
 
 ## Reviewer handoff (from generator)
 
 ```markdown
 ## Reviewer handoff
-- Issue: DY-nn (legacy #n if applicable)
+- Issue: #n
 - Iteration: i
 - Subagents: [from rubric + reviewer-defaults]
 - Design artefacts: [paths or n/a]
@@ -66,11 +66,11 @@ Subagents complete **once** per invocation. They do **not** run the full loop or
 
 ## After Feature close
 
-Update `roadmap.md`, `generator-state.md`, `CHANGELOG.md` (dated version section + patch bump), **commit + push `development`**, then Linear evidence comment + **`In Review`** ([linear-handoff](linear-handoff.mdc)) - never **Done**. Extract recurring decisions into `docs/project/patterns/` when useful.
+Update `roadmap.md`, `generator-state.md`, `CHANGELOG.md` (dated version section + patch bump), **commit + push `development`**, then GitHub evidence comment ([github-handoff](github-handoff.mdc)). Extract recurring decisions into `docs/project/patterns/` when useful.
 
 ## Sprint pickup
 
-When instructed to pick up a sprint: load **all** its Linear issues, work each to completion with the per-task sequence (test → commit/push → Linear handoff). Subagents/subchats per issue are fine; no batch handoff at the end.
+When instructed to pick up a sprint: load **all** open issues in that GitHub **milestone**, work each to completion (test → commit/push → issue handoff). Subagents/subchats per issue are fine; no batch handoff at the end.
 
 ## Agent index
 

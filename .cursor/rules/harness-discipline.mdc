@@ -9,12 +9,12 @@ Enforced in agent workflow, not only CI. See `.cursor/rules/harness-artifacts.md
 
 ## Tracks
 
-- **Feature** (new feature / big adjustment): Linear + plan → generate → review. Keep Linear updated.
+- **Feature** (new feature / big adjustment): GitHub issue + plan → generate → review. Keep the issue updated.
 - **Direct** (feedback / finetune / bugs): no harness folders required; implement on `development`.
 
 ## Always (Feature track)
 
-- **Linear issue** (or create one) for every **feature** - PM status lives in Linear; AC lives in local docs.
+- **GitHub issue** (or create one) for every **feature** — discussion on GitHub; AC in local `docs/project/issues/<n>/`.
 - **plan → generate** - lighten artefacts for S/micro-S; **review is often skipped** (see reviewer-defaults); never overbuild the plan or reviewer set.
 - Update **`docs/project/generator-state.md`** when Feature implementation state changes.
 - Update **`docs/project/roadmap.md`** when a Feature issue closes.
@@ -24,7 +24,7 @@ Enforced in agent workflow, not only CI. See `.cursor/rules/harness-artifacts.md
 
 ## Feedback layout (Feature track)
 
-One folder per issue: `docs/project/feedback/<id>/` where `<id>` is the Linear ID (e.g. `DY-12`) or legacy numeric folder.
+One folder per issue: `docs/project/feedback/<n>/` where `<n>` is the GitHub issue number.
 
 Filenames: `<reviewer-type>-i<iteration>.md`, `generator-response-i<iteration>.md`
 

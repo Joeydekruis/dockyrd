@@ -22,7 +22,7 @@ Do it **well** (right product, working code, no CRITICAL/HIGH left when reviews 
 
 | Track | Behavior |
 |-|--|
-| **Direct** | Implement immediately on `development`. No planner, no Linear, **no reviewers**. |
+| **Direct** | Implement immediately on `development`. No planner, no mandatory GitHub issue, **no reviewers**. |
 | **Feature** | Right-sized harness; **review often skipped** for micro-S/S; light when M+. |
 
 ## Auto-continue (do not ask)
@@ -30,7 +30,7 @@ Do it **well** (right product, working code, no CRITICAL/HIGH left when reviews 
 On **Feature** track, once discuss-gate is PASS (or skipped with stated assumptions) and size is decided, **continue without asking**:
 
 ```text
-planner → [designer only if design-when - HTML] → generator → [reviewers only if needed] → fix if blocked → doc-updater if needed → changelog version+date → **commit + push development (Refs DY-nn)** → Linear evidence comment → **In Review**
+planner → [designer only if design-when - HTML] → generator → [reviewers only if needed] → fix if blocked → doc-updater if needed → changelog version+date → **commit + push development (Refs #n)** → GitHub evidence comment
 ```
 
 On **Direct** track: research → implement → verify. Do not wait for the human between steps.

@@ -83,8 +83,8 @@ If implementation needs a fork without an **accepted** ADR → stop; tell parent
 
 | DO | DO NOT |
 |--|--|
-| Work only on `development`; parent **commit + pushes per Linear task** then handoff | Create or use `feature/*` / `fix/*` branches |
-| Hand off with test output for parent to paste in Linear | Claim “tests green” without output; hand off before push |
+| Work only on `development`; parent **commit + pushes per GitHub issue** then handoff | Create or use `feature/*` / `fix/*` branches |
+| Hand off with test output for parent to paste on GitHub | Claim “tests green” without output; hand off before push |
 | Dated CHANGELOG + package.json patch bump on close | Vague Unreleased-only changelog |
 | Read feedback; fix CRITICAL/HIGH | Edit `*-review-i*.md` or `frontend-eval-i*.md` |
 | Stop at 3 rounds; escalate blockers | Self-approve merge readiness |

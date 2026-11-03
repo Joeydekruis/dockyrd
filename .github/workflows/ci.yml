@@ -1,0 +1,59 @@
+name: CI
+
+on:
+  push:
+    branches: [development, main]
+  pull_request:
+    branches: [development, main]
+
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25.x"
+      - name: Ensure UI stub for embed
+        run: ./scripts/ensure-ui-stub.sh
+      - run: go vet ./...
+      - run: go test ./...
+
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+      - run: pnpm install
+      - run: pnpm lint
+      - run: pnpm build
+      - name: Radix guard
+        run: ../scripts/check-no-radix.sh
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [go, web]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.25.x"
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+      - run: make build

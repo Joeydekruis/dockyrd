@@ -1,8 +1,8 @@
 ---
 name: issue-tracking
 description: >-
-  Linear = PM for features; Cursor = Direct build/fix. Per-task commit+push
-  and evidence handoff. Use when grooming backlog, sprints, or Linear delivery.
+  GitHub Issues = backlog; Cursor builds on development. Per-task commit+push
+  and evidence handoff. Use when grooming backlog, sprints, or delivery.
 ---
 
 # Issue tracking workflow
@@ -11,98 +11,54 @@ description: >-
 
 | Artefact | Role |
 |--|--|
-| **Linear (`DY-nn`)** | **PM** - new features and big adjustments: status, priority, milestone |
-| **Cursor** | **Tester/developer** - feedback, finetunes, bugs: implement without Linear ceremony |
+| **GitHub issue `#n`** | Backlog — features, bugs, milestones |
+| **Cursor** | Implementation; optional local specs under `docs/project/issues/<n>/` |
 | **`docs/project/project.md`** | Product truth |
-| **`docs/project/roadmap.md`** | Phases, ordering (update on Feature close) |
-| **`docs/project/issues/<id>/`** | Feature AC (planner) - Feature track only |
-| **`development`** | All commits; **commit + push after each Linear task**; `main` via push-to-main |
+| **`docs/project/github-workflow.md`** | How issues, labels, and handoff work |
+| **`development`** | Day-to-day commits; push when shipping issue work |
+
+**No Linear.** One tracker only.
 
 ## Tracks
 
-1. **Feature** - create/update Linear when raised in Cursor; plan → generate → review; keep Linear current.
-2. **Direct** - feedback / finetune / bugfix: no plans, no Linear updates, no mandatory commit unless asked.
+1. **Feature** — GitHub issue + harness; keep issue body linked to spec.
+2. **Direct** — chat fixes; no issue required; no mandatory commit unless asked.
 
-## Per Linear task sequence (automatic)
+## Per GitHub issue sequence (Feature track)
 
 ```text
-Pick up → In Progress
-Implement → run tests (capture output)
-Commit + push development (Refs DY-nn)
-Post Linear evidence comment (Ready for Review - DY-nn)
-Status → In Review (never Done)
+Pick up → implement → tests (capture output)
+Commit + push development (Fixes #n or Refs #n)
+Post evidence comment on issue (Ready for review)
+Label status/ready-for-review — do not close issue
 ```
 
-See [linear-handoff](../../rules/linear-handoff.mdc). Do **not** wait for the human to ask.
+See [github-handoff](../../rules/github-handoff.mdc).
 
 ## Sprint pickup
 
-**“Pick up sprint X”** → find **all** open issues in that sprint → complete each with the sequence above. Subagents/subchats per issue OK; **no** single batch commit at sprint end.
+**“Pick up sprint X”** → all open issues in that GitHub **milestone** → complete each with the sequence above.
 
-## Issue ID
+## Issue folders
 
-- Features: folder key = Linear ID (`DY-12`).
-- Direct/bugs: no Linear required.
-- Legacy numeric folders stay valid for in-flight work.
+- `docs/project/issues/<n>/spec.md` + `rubric.md` — Feature track
+- `docs/project/feedback/<n>/` — reviewer iterations
 
 ## Sizing (Feature only)
 
-Agent **decides** micro-S / S / M / L / XL. Do not wait for confirm. Escalate only when product-ambiguous and blocking.
-
-## Linear template (Feature)
-
-Keep Linear short; full AC in local spec:
-
-```markdown
-## Spec reference
-
-- **Project:** `docs/project/project.md`
-- **Roadmap:** `docs/project/roadmap.md`
-- **Issue spec:** `docs/project/issues/DY-NN/spec.md`
-- **Rubric:** `docs/project/issues/DY-NN/rubric.md`
-
-## Size
-
-M - agent decided
-
-## Acceptance criteria (summary)
-
-- [ ] _Short bullets; full list in local spec_
-```
-
-Template: [`docs/project/templates/linear-issue.md`](../../docs/project/templates/linear-issue.md)
+Agent decides micro-S / S / M / L / XL without asking.
 
 ## Close / handoff (Feature)
 
-When implementation + local reviewers are done:
+1. Run relevant tests — paste output in issue comment.
+2. Commit + push with issue reference.
+3. Post handoff comment; add `status/ready-for-review`.
+4. Maintainer closes after verification.
 
-1. Run relevant tests - **paste output** in handoff (not “tests green”).
-2. **Commit + push** `development` with `Refs DY-nn`.
-3. Post one evidence comment ([linear-handoff](../../rules/linear-handoff.mdc)); template: [`docs/project/templates/linear-handoff.md`](../../docs/project/templates/linear-handoff.md).
-4. Set Linear status to **`In Review`** - **never `Done`**.
-5. Update `roadmap.md` / `generator-state.md` to **In Review**, not Done.
-6. Do not wait for PM - they (or Joey) move to Done after checking.
-
-## Grooming checklist (Feature / planner)
-
-- [ ] Roadmap subtasks map to Linear issues.
-- [ ] Active Features have local spec/rubric when M+ (micro-S may stay Linear-body-light).
-- [ ] Finished Features have **pushed commit SHA** + evidence comment + **In Review** (not silently Done or uncommitted).
-- [ ] Direct work is **not** forced into Linear.
-
-## Integration
-
-- **git-workflow** - always `development`; `Refs DY-nn` on every Linear task commit.
-- **orchestration.mdc** - Feature harness vs Direct implement.
-- **issue-tracking.mdc** / **linear-handoff.mdc** - always-applied policy.
+Changelog + patch bump per [changelog](../../rules/changelog.mdc).
 
 ## Anti-patterns
 
-- Dual-tracking Linear + GitHub for the same item.
-- Linear ceremony for Direct feedback/bugs.
-- Handoff without commit/push (“uncommitted on development”).
-- Claims without test output or preview URL for visual work.
-- Cherry-picking a few sprint issues when told to pick up the whole sprint.
-- Asking the human to confirm size / process / track / handoff.
-- Per-feature git branches.
-- Setting Linear to **Done** from Cursor (false-completion risk).
+- Opening duplicate trackers (Linear, etc.).
+- Closing issues before maintainer review.
+- Cherry-picking part of a sprint when told to pick up the whole milestone.

@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
+:root {
+  --page-bg: #faf9f8;
+  --surface: #ffffff;
+  --border: #eceae6;
+  --ink-navy: #0b1f3a;
+  --muted-text: #5a6577;
+  --accent-blue: #3b93f5;
+  --card-radius: 20px;
+}
+
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: var(--page-bg);
+  color: var(--ink-navy);
+  font-size: 14px;
+  line-height: 1.45;
+}

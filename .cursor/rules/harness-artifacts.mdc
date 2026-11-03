@@ -18,27 +18,28 @@ Chat is ephemeral; these files are memory for **Feature** track. Direct track (f
 | `docs/project/setup.md` | human / generator | **Local verification commands**, MCPs, env vars |
 | `docs/project/patterns/` | human + agents | Recurring stack/UI decisions to reuse |
 | `docs/project/generator-state.md` | generator | Session handoff |
-| `docs/project/issues/<id>/spec.md` | planner | Feature scope (`<id>` = Linear ID e.g. `DY-12`) |
-| `docs/project/issues/<id>/rubric.md` | planner | Done-criteria; required reviewers |
-| `docs/project/issues/<id>/design-direction.md` | designer | Visual contract (UI Features) |
-| `docs/project/issues/<id>/assets/*-wireframe.html` | designer | **HTML** wireframe only - no generated images |
-| `docs/project/feedback/<id>/` | reviewers + generator | Iteration feedback (link from Linear handoff; do not replace it) |
-| `docs/project/templates/linear-handoff.md` | parent | Linear **Ready for Review** comment shape; then **In Review** status |
+| `docs/project/issues/<n>/spec.md` | planner | Feature scope (`<n>` = GitHub issue number) |
+| `docs/project/issues/<n>/rubric.md` | planner | Done-criteria; required reviewers |
+| `docs/project/issues/<n>/design-direction.md` | designer | Visual contract (UI Features) |
+| `docs/project/issues/<n>/assets/*-wireframe.html` | designer | **HTML** wireframe only - no generated images |
+| `docs/project/feedback/<n>/` | reviewers + generator | Iteration feedback (link from GitHub handoff comment) |
+| `docs/project/templates/github-handoff-comment.md` | parent | **Ready for review** issue comment shape |
+| `docs/project/github-workflow.md` | human + agents | Open-source issue process |
 | `docs/adr/NNNN-*.md` | architect → human accepts | Why decisions were made |
 | `CHANGELOG.md` | generator | **Required** - dated `## [x.y.z] - YYYY-MM-DD` + patch bump per cycle ([changelog](changelog.mdc)) |
 
 Templates: `docs/project/templates/`  
 Golden example: `docs/project/issues/_golden/`
 
-**PM:** Linear = features / big adjustments. **Build/fix:** Cursor Direct track. Never dual-track - see [issue-tracking](issue-tracking.mdc).
+**Backlog:** GitHub Issues only. **Build/fix:** Cursor Direct track. See [issue-tracking](issue-tracking.mdc).
 
 ## Work sizing (Feature track)
 
-Agent **decides** micro-S / S / M / L / XL. Features get Linear (create/update from Cursor) + plan → generate → review. Direct work skips this.
+Agent **decides** micro-S / S / M / L / XL. Features get a GitHub issue + plan → generate → review. Direct work skips this.
 
 | Size | Depth |
 |--|-|
-| micro-S | Linear body may serve as spec; **no code-reviewer** by default |
+| micro-S | GitHub issue body may serve as spec; **no code-reviewer** by default |
 | S | Light spec/rubric + dated CHANGELOG + patch bump; review optional unless specialist surface |
 | M | Full spec + rubric |
 | L | Multiple issues; design when UI |

@@ -1,0 +1,93 @@
+---
+description: HARD — GitHub Issues backlog; commit+push first; hand off with verifiable evidence on the issue
+alwaysApply: true
+---
+
+# GitHub handoff (HARD)
+
+Issue state on GitHub is not proof of completion when work was never pushed. **Maintainers cannot review code that is not on the remote.**
+
+## Mandatory sequence (every Feature-track GitHub issue)
+
+When a **GitHub issue** is finished (tests passed, ready for human review):
+
+```text
+1. Pick up issue      → assign yourself; optional `status/in-progress` label
+2. Implement + run    → relevant tests from setup.md; capture **actual output**
+3. Commit + push      → `development` only; message references issue (`Fixes #n` or `Refs #n`)
+4. GitHub comment     → one evidence post (template below) on the issue
+5. Labels             → add `status/ready-for-review`; remove `status/in-progress` if used
+```
+
+**Order is strict:** never post handoff before commit + push succeed. Never hand off with uncommitted work.
+
+## Who closes issues
+
+- **Agents:** do **not** close Feature issues. Post evidence and `status/ready-for-review`.
+- **Maintainers:** close after verifying the handoff (often when work is merged to `main` or accepted on `development`).
+
+Direct-track work may close without ceremony when the human asked for a one-off fix.
+
+## Sprint pickup
+
+When the human says **“pick up sprint X”**:
+
+1. List **all** open issues for that sprint (GitHub **milestone** or `sprint-*` label — see `docs/project/sprints.md`).
+2. Complete each issue with the sequence above.
+3. **Commit + push + issue comment after each issue** — not one batch at sprint end.
+
+Use **`gh`** for issue/milestone operations when available.
+
+## Required comment (single post)
+
+Post **after** push.
+
+```markdown
+## Ready for review — #n (YYYY-MM-DD)
+
+### Acceptance criteria
+- [x] <AC verbatim> — <evidence: file/line, endpoint, or UI path>
+- [ ] <AC unmet> — <why / what's left>
+
+### How to verify
+
+**Committed code**
+- Branch: `development`
+- Commit: `<full SHA>` — `<one-line subject>`
+- Issue: https://github.com/<org>/<repo>/issues/n
+
+**Tests** (paste output — not “tests green”)
+```text
+<paste relevant command + exit code + summary lines>
+```
+
+**UI / dashboard** (when visual AC applies)
+- Local: `make dev` / `make build` + `./bin/dockyard serve` → steps
+- OR preview URL / recording when available
+
+### Reviewer verdicts (Feature track, when reviewers ran)
+| Subagent | Verdict |
+|-|-|
+| code-reviewer | PASS / FAIL / N/A |
+| … | … |
+
+### Deviations from spec
+- **None** or explicit delta
+
+### Reference
+- Spec: `docs/project/issues/<n>/spec.md`
+- Feedback: `docs/project/feedback/<n>/` (when applicable)
+```
+
+## Evidence bar (HARD)
+
+| Required | Insufficient |
+|--|--|
+| `development` + **full commit SHA** after push | Local-only diff, missing SHA |
+| **Pasted test output** | “All pass” with no command |
+| AC checkboxes with **verifiable pointers** | Checkmarks without evidence |
+| Issue comment **after** push | Claiming done in chat only |
+
+Update `roadmap.md` / `generator-state.md` when a milestone slice lands. Changelog + patch bump per [changelog](changelog.mdc) when the issue cycle closes.
+
+Template copy: `docs/project/templates/github-handoff-comment.md`

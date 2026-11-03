@@ -9,7 +9,7 @@ Subagents live in **`.cursor/agents/`**. **Parent** picks Feature vs Direct per 
 
 | Subagent | When |
 |--|--|
-| **planner** | **Feature** track after discuss + size - issue spec + rubric; sync Linear |
+| **planner** | **Feature** track after discuss + size - issue spec + rubric; sync GitHub issue |
 | **designer** | Briefing §17 gaps or L/XL IA changes - HTML wireframes; skip when design-index covers the screen ([design-when](design-when.mdc)) |
 | **architect** | Stack, ADR drafts, unresolved forks |
 | **generator** | Feature implement (+ design HTML when present); TDD; `generator-state.md` on `development` |

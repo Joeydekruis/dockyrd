@@ -1,0 +1,11 @@
+Dockyard
+Copyright 2026 Joey de Kruis
+
+This product includes software developed as part of the Dockyard project.
+
+Third-party components will be listed here as they are bundled (e.g. embedded
+UI build output, Go module dependencies). See repository `go.mod` and
+`web/package.json` for runtime dependencies.
+
+Garage (when deployed as a separate container) is AGPL-3.0 — it is not linked
+into the Dockyard binary; see `docs/BRIEFING.md`.

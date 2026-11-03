@@ -1,0 +1,6 @@
+web/out/
+web/node_modules/
+web/.next/
+bin/
+dockyard
+*.test

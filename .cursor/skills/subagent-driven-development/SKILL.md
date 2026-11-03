@@ -1,51 +1,34 @@
 ---
 name: subagent-driven-development
 description: >-
-  Parent orchestrates Feature track (Linear + plan → design → generate → review)
-  or Direct track (implement now). Use for Feature closure and track selection.
+  Parent orchestrates Feature track (GitHub issue + plan → design → generate → review)
+  or Direct track (implement now).
 ---
 
-# Subagent-Driven Development (Final)
+# Subagent-driven development
 
-Parent owns the loop. Subagents do **one role** per `Task`.
+## Tracks
 
-## Pick track first
+| Track | Loop |
+|--|--|
+| **Feature** | GitHub issue → discuss → planner → [designer] → generator → [reviewers] → handoff |
+| **Direct** | Feedback, finetune, bugfix | Research → implement on `development` → verify. No planner/GitHub required. |
 
-| Track | When | Loop |
-|-|--|--|
-| **Feature** | New feature / big adjustment | Below |
-| **Direct** | Feedback, finetune, bugfix | Research → implement on `development` → verify. No planner/Linear. |
+## Feature sequence (parent)
 
-## Feature loop
+1. Create/update **GitHub issue** when a feature is raised in Cursor
+2. Discuss gate if needed
+3. Size (agent decides)
+4. `Task(planner)` → local spec + rubric; sync issue body
+5. [Optional] `Task(designer)` per design-when
+6. `Task(generator)` (max 3 rounds)
+7. [Optional] reviewers per rubric
+8. Testing gate → capture output → changelog → **commit + push `development` (`Refs #n`)** → issue comment; do **not** close. Main via `push-to-main` when asked.
 
-1. Create/update **Linear** (always when feature raised in Cursor)
-2. Discuss gate only if product gray areas **block** - else assume and note
-3. Size **decide** - state it; do not wait
-4. `Task(planner)` → local spec + rubric; sync Linear
-5. If [design-when](../../rules/design-when.mdc) → `Task(designer)` → HTML (no human approval)
-6. `Task(generator)` → code on `development` + handoff (immediately after designer, or after planner if designer skipped)
-7. `Task(reviewers)` **only if needed** - often skip for S/micro-S; when run, minimal + lean ([lean-loop](../../rules/lean-loop.mdc))
-8. Consolidate; **auto** generator i+1 unless stop-early
-9. Repeat generator if ≤3 rounds and not stop-early
-10. `Task(doc-updater)` after PASS **if docs need it** (skip if deferred / none required)
-11. Testing gate → capture output → changelog version + date → **commit + push `development` (`Refs DY-nn`)** → Linear evidence comment → **`In Review`**; never **Done**. Main ship only via `push-to-main` when asked.
+## Direct
+
+- No process pauses, no GitHub ceremony for tiny fixes
 
 ## Sprint pickup
 
-**“Pick up sprint X”** → all open issues in that sprint → each completes with its own test → commit/push → handoff. Parallel subagents OK.
-
-## Rules
-
-- **Efficient + good** - right-sized plans/checks; no over-plan or over-verify
-- **No heavy code review by default** - skip Direct/micro-S/many S; light when M+
-- Never nest full Feature closure inside one generator run
-- Never let generator self-approve when a reviewer *did* run
-- Design only per [design-when](../../rules/design-when.mdc); **never** pause for design approval
-- Max 3 generator rounds → human triage
-- Prefer skip or one specialist over stacking reviewers
-- Direct track: no process pauses, no Linear theater
-- Do not ask the human to confirm process, size, or design
-- **Auto-continue**; pause only per lean-loop pause table
-- Always work on **`development`** - no feature branches
-
-Enforced by `.cursor/rules/orchestration.mdc`, `discuss-gate.mdc`, `design-when.mdc`, `reviewer-defaults.mdc`, `issue-tracking.mdc`, `agent-behavior.mdc`, `lean-loop.mdc`.
+All open issues in milestone → each completes with its own commit/push + comment.

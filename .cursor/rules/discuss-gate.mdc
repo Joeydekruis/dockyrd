@@ -34,16 +34,16 @@ Do **not** plan Feature work with invented AC when product gray areas are truly 
 - Prefer concrete options (“A: dense table / B: cards”) over open essays.
 - Ask only about product/architecture that blocks correct build - never process.
 - Mark each area **resolved**, **deferred**, or **assumed** before `planner`.
-- Record durable Feature answers in **Linear** and/or the local issue spec.
+- Record durable Feature answers in the **GitHub issue** and/or the local issue spec.
 
 ## Exit criteria
 
 Discuss gate **PASS** when:
 
 1. Every **blocking** product/architecture area is resolved, deferred, or reasonably assumed, **or**
-2. Human said “good enough” / “just do it” and you stated assumptions in chat + Linear/local spec.
+2. Human said “good enough” / “just do it” and you stated assumptions in chat + GitHub issue/local spec.
 
-Then: **decide size** → `Task(planner)` → update Linear. Do **not** wait for size confirmation.
+Then: **decide size** → `Task(planner)` → update GitHub issue. Do **not** wait for size confirmation.
 
 ## Design handoff
 

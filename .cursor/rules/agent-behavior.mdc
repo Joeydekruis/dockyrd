@@ -15,13 +15,13 @@ Bias toward **efficient + good**: ship correct work on the shortest path. Bias t
 
 | Human | Agent (assertive - do not defer) |
 |-|--|
-| Product decisions that **block** Feature work | Process: track, size, harness, reviewers, whether design is needed, Linear updates for features |
+| Product decisions that **block** Feature work | Process: track, size, harness, reviewers, whether design is needed, GitHub issue updates for features |
 | ADR acceptance | **Auto-continue** plan → [design if needed] → generate → review → fix; Direct: implement now |
 | Stop-early hard FAIL / round-3 triage | Choosing Feature vs Direct; minimal reviewer set |
-| Ask to ship `main` (triggers push-to-main) | **Linear task:** test → commit + push → evidence comment → **In Review** (automatic; never ask) |
-| Mark Linear **Done** after checking handoff | Sprint pickup - all issues, per-task ship |
+| Ask to ship `main` (triggers push-to-main) | **GitHub issue:** test → commit + push → evidence comment when handoff applies |
+| Close issues after verifying handoff | Sprint pickup - all issues, per-task ship |
 
-- **Commits in Cursor:** only when Joey explicitly asks, unless finishing a Linear handoff that requires push (see `docs/project/project.md`).
+- **Commits in Cursor:** only when Joey explicitly asks, unless finishing a GitHub issue handoff requires push (see `docs/project/project.md`).
 
 Ask **only** when blocked on a product answer you cannot reasonably assume, or when the table says Human. Never ask process questions (size, design approval, “shall I continue?”).
 
@@ -29,16 +29,16 @@ See [lean-loop](lean-loop.mdc), [design-when](design-when.mdc), and [issue-track
 
 ## Track selection
 
-1. **New feature or big adjustment** → Feature track: Linear create/update + full harness.
-2. **Feedback, finetune, bugfix** → Direct track: implement on `development` without plans or Linear theater.
-3. If unsure whether it is “big”: prefer Direct unless UI/API/data shape clearly needs PM visibility - then Feature + Linear.
+1. **New feature or big adjustment** → Feature track: GitHub issue + full harness.
+2. **Feedback, finetune, bugfix** → Direct track: implement on `development` without plans or GitHub ceremony.
+3. If unsure whether it is “big”: prefer Direct unless UI/API/data shape clearly needs tracking — then Feature + GitHub issue.
 
 ## Discuss (Feature track only)
 
 - Follow [discuss-gate](discuss-gate.mdc) - but **only ask** when gray areas would cause wrong product.
 - Prefer assumptions + short note over a long questionnaire when the brief is good enough.
 - **Batch** any real blockers in **one** message - no drip questioning.
-- Never ask about process (size, reviewers, Linear, harness, branches).
+- Never ask about process (size, reviewers, GitHub issues, harness, branches).
 - If multiple **product** interpretations exist and picking wrong is costly, present options - do not pick silently.
 - If a simpler approach exists, say so.
 

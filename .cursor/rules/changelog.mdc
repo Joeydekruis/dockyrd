@@ -34,7 +34,7 @@ One cycle → one patch bump → one dated changelog section. Do not batch multi
 _Finished: YYYY-MM-DD_
 
 ### Added
-- **DY-nn / short title** - specific user-visible or technical outcome; Linear/GitHub link when applicable.
+- **#n / short title** - specific user-visible or technical outcome; link `https://github.com/Joeydekruis/dockyrd/issues/n` when applicable.
 
 ### Changed
 - …
