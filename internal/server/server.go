@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/Joeydekruis/dockyrd/internal/audit"
 	"github.com/Joeydekruis/dockyrd/internal/config"
 	"github.com/Joeydekruis/dockyrd/internal/db"
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
@@ -42,7 +43,7 @@ func Serve(cfg config.Config) error {
 		defer conn.Close()
 		q = queries
 	}
-	deps := apiDeps{cfg: cfg, q: q, events: hub}
+	deps := apiDeps{cfg: cfg, q: q, events: hub, audit: audit.Logger{Q: q}}
 	registerAPIRoutes(mux, deps)
 	mux.HandleFunc("GET /api/v1/setup/status", func(w http.ResponseWriter, r *http.Request) {
 		handleSetupStatus(w, r, q)

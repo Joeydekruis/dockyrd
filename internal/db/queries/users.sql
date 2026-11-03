@@ -20,3 +20,19 @@ SELECT
 FROM users
 WHERE email = ? COLLATE NOCASE
 LIMIT 1;
+
+-- name: ListUsers :many
+SELECT
+  id,
+  email,
+  name,
+  role,
+  created_at,
+  disabled_at
+FROM users
+ORDER BY created_at ASC;
+
+-- name: UpdateUserRole :exec
+UPDATE users
+SET role = ?, updated_at = ?
+WHERE id = ?;

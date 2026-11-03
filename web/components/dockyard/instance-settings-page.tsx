@@ -47,6 +47,13 @@ export function InstanceSettingsPage() {
     <DashboardShell title="Instance settings">
       <div className="mb-4 text-sm">
         <Link
+          href="/settings/team"
+          className="text-[var(--muted-foreground)] underline"
+        >
+          Team
+        </Link>
+        {" · "}
+        <Link
           href="/settings/profile"
           className="text-[var(--muted-foreground)] underline"
         >

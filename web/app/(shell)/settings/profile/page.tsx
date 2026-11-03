@@ -6,6 +6,13 @@ export default function SettingsProfilePage() {
     <DashboardShell title="Profile & security" breadcrumb="Settings">
       <p className="mb-4 text-sm">
         <a
+          href="/settings/team"
+          className="text-[var(--muted-foreground)] underline"
+        >
+          Team
+        </a>
+        {" · "}
+        <a
           href="/settings/instance"
           className="text-[var(--muted-foreground)] underline"
         >

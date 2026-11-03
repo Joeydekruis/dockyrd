@@ -12,6 +12,7 @@ import (
 	"github.com/oklog/ulid/v2"
 
 	"github.com/Joeydekruis/dockyrd/internal/auth"
+	"github.com/Joeydekruis/dockyrd/internal/audit"
 	"github.com/Joeydekruis/dockyrd/internal/config"
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
 	"github.com/Joeydekruis/dockyrd/internal/events"
@@ -24,6 +25,7 @@ type apiDeps struct {
 	cfg    config.Config
 	q      *sqlc.Queries
 	events *events.Hub
+	audit  audit.Logger
 }
 
 type loginRequest struct {
@@ -65,6 +67,7 @@ func registerAPIRoutes(mux *http.ServeMux, deps apiDeps) {
 	registerBucketKeyRoutes(mux, deps)
 	registerEventRoutes(mux, deps)
 	registerServerRoutes(mux, deps)
+	registerTeamRoutes(mux, deps)
 }
 
 func (d apiDeps) handleLogin(w http.ResponseWriter, r *http.Request) {

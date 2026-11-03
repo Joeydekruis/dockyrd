@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.10] - 2026-11-03
+
+_Finished: 2026-11-03_
+
+### Added
+
+- **#29 / Team & invites** — users/invites/audit API, `/settings/team` — https://github.com/Joeydekruis/dockyrd/issues/29
+
 ## [0.0.9] - 2026-11-03
 
 _Finished: 2026-11-03_

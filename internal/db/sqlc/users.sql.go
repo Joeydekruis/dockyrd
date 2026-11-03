@@ -80,3 +80,71 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEm
 	)
 	return i, err
 }
+
+const listUsers = `-- name: ListUsers :many
+SELECT
+  id,
+  email,
+  name,
+  role,
+  created_at,
+  disabled_at
+FROM users
+ORDER BY created_at ASC
+`
+
+type ListUsersRow struct {
+	ID         string
+	Email      string
+	Name       string
+	Role       string
+	CreatedAt  int64
+	DisabledAt sql.NullInt64
+}
+
+func (q *Queries) ListUsers(ctx context.Context) ([]ListUsersRow, error) {
+	rows, err := q.db.QueryContext(ctx, listUsers)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListUsersRow
+	for rows.Next() {
+		var i ListUsersRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Email,
+			&i.Name,
+			&i.Role,
+			&i.CreatedAt,
+			&i.DisabledAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateUserRole = `-- name: UpdateUserRole :exec
+UPDATE users
+SET role = ?, updated_at = ?
+WHERE id = ?
+`
+
+type UpdateUserRoleParams struct {
+	Role      string
+	UpdatedAt int64
+	ID        string
+}
+
+func (q *Queries) UpdateUserRole(ctx context.Context, arg UpdateUserRoleParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserRole, arg.Role, arg.UpdatedAt, arg.ID)
+	return err
+}

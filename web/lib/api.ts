@@ -293,3 +293,34 @@ export function listEvents(opts?: { limit?: number; category?: string }) {
 export function ackEvent(id: string) {
   return apiFetch<void>(`/api/v1/events/${id}/ack`, { method: "POST" });
 }
+
+export type TeamUser = {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  created_at: number;
+};
+
+export type TeamInvite = {
+  id: string;
+  email: string;
+  role: string;
+  expires_at: number;
+  token?: string;
+};
+
+export function listTeamUsers() {
+  return apiFetch<{ users: TeamUser[] }>("/api/v1/users");
+}
+
+export function listInvites() {
+  return apiFetch<{ invites: TeamInvite[] }>("/api/v1/invites");
+}
+
+export function createInvite(input: { email: string; role: string }) {
+  return apiFetch<TeamInvite>("/api/v1/invites", {
+    method: "POST",
+    json: input,
+  });
+}

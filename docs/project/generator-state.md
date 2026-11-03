@@ -4,7 +4,7 @@ _Last updated: 2026-11-03_
 
 ## Current focus
 
-**M4 Sprint 1** (#27 events, #28 metrics + Analytics UI) — implemented locally, not pushed.
+**M4 Sprint 1** (#27–#28) shipped @ `3fede93` / v0.0.9. **Sprint 2 #29** team API + UI implemented locally (pending push).
 
 ## Blockers
 
