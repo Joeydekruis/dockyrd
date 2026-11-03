@@ -32,7 +32,31 @@ Milestone: **M1 · Sprint 3 — Logs, env & Projects UI** — #17–#18
 | #17 | Encrypted env vars, runtime logs, SSE |
 | #18 | Projects dashboard wired to API |
 
-Post-M1 (briefing M1 exit): Dockerfile/Railpack builds (M2), app detail screens (§17), load-tested zero-downtime redeploy.
+Post-M1 (briefing M1 exit): Dockerfile builds (#19, M2 Sprint 1), Railpack (#20), app detail screens (§17), load-tested zero-downtime redeploy.
+
+## M2 · Sprint 1 — Dockerfile builds (GitHub) — #19
+
+Milestone: **M2 · Sprint 1 — Dockerfile builds**
+
+| Issue | Title |
+|--|--|
+| #19 | Git clone + Dockerfile build job |
+
+Local spec: `docs/project/issues/19/`
+
+## M2 · Sprint 2 — Railpack — #20
+
+Milestone: **M2 · Sprint 2 — Railpack builds** — Railpack prepare + BuildKit
+
+## M2 · Sprint 3 — GitHub App — #21
+
+Milestone: **M2 · Sprint 3 — GitHub App** — manifest, webhooks, auto-deploy
+
+## M2 · Sprint 4 — Static sites — #22
+
+Milestone: **M2 · Sprint 4 — Static sites** — releases, rollback, history
+
+**Status (2026-11-03):** Backend + minimal UI on `development` (unpushed). Automated gate: `./scripts/verify-m2-smoke.sh`. Docker-host E2E (push deploy, static promote) still manual for milestone exit.
 
 ## Sprint 1 issues (GitHub)
 

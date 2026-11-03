@@ -35,8 +35,34 @@ type createServiceRequest struct {
 }
 
 func registerServiceRoutes(mux *http.ServeMux, deps apiDeps) {
+	mux.HandleFunc("GET /api/v1/services", deps.handleListServices)
 	mux.HandleFunc("POST /api/v1/services", deps.handleCreateService)
 	mux.HandleFunc("GET /api/v1/services/{id}", deps.handleGetService)
+}
+
+func (d apiDeps) handleListServices(w http.ResponseWriter, r *http.Request) {
+	if _, ok := d.requireUser(w, r); !ok {
+		return
+	}
+	projectID := strings.TrimSpace(r.URL.Query().Get("project_id"))
+	if projectID == "" {
+		writeJSONError(w, http.StatusBadRequest, "project_id query required")
+		return
+	}
+	kind := strings.TrimSpace(r.URL.Query().Get("kind"))
+	rows, err := d.q.ListServicesByProject(r.Context(), projectID)
+	if err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "database error")
+		return
+	}
+	out := make([]serviceResponse, 0, len(rows))
+	for _, row := range rows {
+		if kind != "" && row.Kind != kind {
+			continue
+		}
+		out = append(out, serviceFromRow(row))
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"services": out})
 }
 
 func (d apiDeps) handleCreateService(w http.ResponseWriter, r *http.Request) {
@@ -57,12 +83,16 @@ func (d apiDeps) handleCreateService(w http.ResponseWriter, r *http.Request) {
 		writeJSONError(w, http.StatusBadRequest, "project_id, kind, and name required")
 		return
 	}
-	if body.Kind != "app" {
-		writeJSONError(w, http.StatusBadRequest, "only app services supported in this slice")
+	if body.Kind != "app" && body.Kind != "static_site" {
+		writeJSONError(w, http.StatusBadRequest, "only app and static_site services supported in this slice")
 		return
 	}
 	cfg := body.Config
 	if len(cfg) == 0 {
+		if body.Kind == "static_site" {
+			writeJSONError(w, http.StatusBadRequest, "config required for static_site")
+			return
+		}
 		cfg = json.RawMessage(`{"source":{"type":"image","ref":"nginx:alpine"},"port":80}`)
 	}
 

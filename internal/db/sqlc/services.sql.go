@@ -105,6 +105,47 @@ func (q *Queries) GetServiceByID(ctx context.Context, id string) (Service, error
 	return i, err
 }
 
+const listDeployableServices = `-- name: ListDeployableServices :many
+SELECT id, kind, config, slug
+FROM services
+WHERE kind IN ('app', 'static_site')
+`
+
+type ListDeployableServicesRow struct {
+	ID     string
+	Kind   string
+	Config interface{}
+	Slug   string
+}
+
+func (q *Queries) ListDeployableServices(ctx context.Context) ([]ListDeployableServicesRow, error) {
+	rows, err := q.db.QueryContext(ctx, listDeployableServices)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListDeployableServicesRow
+	for rows.Next() {
+		var i ListDeployableServicesRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Kind,
+			&i.Config,
+			&i.Slug,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listServicesByProject = `-- name: ListServicesByProject :many
 SELECT
   s.id,

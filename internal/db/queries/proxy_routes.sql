@@ -1,6 +1,7 @@
 -- name: GetServiceDeployContext :one
 SELECT
   s.id AS service_id,
+  s.kind AS service_kind,
   s.slug AS service_slug,
   s.config AS service_config,
   s.live_deployment_id,
@@ -25,3 +26,13 @@ FROM domains d
 JOIN services s ON s.id = d.service_id
 JOIN deployments dep ON dep.id = s.live_deployment_id
 WHERE s.kind = 'app' AND dep.status = 'live';
+
+-- name: ListLiveStaticProxyRoutes :many
+SELECT
+  d.hostname,
+  s.slug AS service_slug,
+  dep.release_path
+FROM domains d
+JOIN services s ON s.id = d.service_id
+JOIN deployments dep ON dep.id = s.live_deployment_id
+WHERE s.kind = 'static_site' AND dep.status = 'live' AND dep.release_path IS NOT NULL AND dep.release_path != '';

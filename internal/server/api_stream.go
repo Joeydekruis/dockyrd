@@ -1,8 +1,10 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -17,6 +19,17 @@ func (d apiDeps) handleStream(w http.ResponseWriter, r *http.Request) {
 	if d.events == nil {
 		writeJSONError(w, http.StatusServiceUnavailable, "stream unavailable")
 		return
+	}
+	topicFilter := strings.TrimSpace(r.URL.Query().Get("topics"))
+	var allowed map[string]struct{}
+	if topicFilter != "" {
+		allowed = make(map[string]struct{})
+		for _, t := range strings.Split(topicFilter, ",") {
+			t = strings.TrimSpace(t)
+			if t != "" {
+				allowed[t] = struct{}{}
+			}
+		}
 	}
 	flusher, ok := w.(http.Flusher)
 	if !ok {
@@ -42,6 +55,17 @@ func (d apiDeps) handleStream(w http.ResponseWriter, r *http.Request) {
 		case <-ctx.Done():
 			return
 		case msg := <-ch:
+			if allowed != nil {
+				var envelope struct {
+					Topic string `json:"topic"`
+				}
+				if err := json.Unmarshal(msg, &envelope); err != nil {
+					continue
+				}
+				if _, ok := allowed[envelope.Topic]; !ok {
+					continue
+				}
+			}
 			fmt.Fprintf(w, "event: message\ndata: %s\n\n", msg)
 			flusher.Flush()
 		case <-ticker.C:

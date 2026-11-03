@@ -40,6 +40,16 @@ pnpm --dir web build
 ./scripts/check-no-radix.sh        # when script exists
 ```
 
+## M2 slice (GitHub, builds, static sites)
+
+After M2 backend/UI changes on `development`:
+
+```bash
+./scripts/verify-m2-smoke.sh
+```
+
+Optional env for builds: `DOCKYARD_BUILD_TIMEOUT` (default `20m`), `DOCKYARD_MIN_FREE_DISK_PERCENT` (default `10`), `DOCKYARD_BUILDX_BUILDER` (default `dy-buildkit`), `DOCKYARD_PUBLIC_URL` for GitHub App callbacks/webhooks.
+
 ## Full pre-release check
 
 Use the matrix in **`.cursor/skills/push-to-main/SKILL.md`** before merging to `main`.

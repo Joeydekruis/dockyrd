@@ -39,6 +39,10 @@ SELECT
   trigger,
   triggered_by,
   image_ref,
+  release_path,
+  commit_sha,
+  branch,
+  build_log_path,
   error,
   queued_at,
   started_at,
@@ -59,6 +63,25 @@ WHERE id = ?;
 -- name: SetDeploymentImageRef :exec
 UPDATE deployments
 SET image_ref = ?
+WHERE id = ?;
+
+-- name: SetDeploymentBuildLogPath :exec
+UPDATE deployments
+SET build_log_path = ?
+WHERE id = ?;
+
+-- name: SetDeploymentReleasePath :exec
+UPDATE deployments
+SET release_path = ?
+WHERE id = ?;
+
+-- name: SetDeploymentGitMeta :exec
+UPDATE deployments
+SET
+  commit_sha = ?,
+  commit_message = ?,
+  commit_author = ?,
+  branch = ?
 WHERE id = ?;
 
 -- name: SupersedeLiveDeployments :exec

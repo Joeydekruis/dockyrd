@@ -9,9 +9,11 @@ import (
 	"time"
 
 	"github.com/Joeydekruis/dockyrd/internal/appconfig"
+	"github.com/Joeydekruis/dockyrd/internal/build"
 	"github.com/Joeydekruis/dockyrd/internal/config"
 	"github.com/Joeydekruis/dockyrd/internal/crypto"
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
+	"github.com/Joeydekruis/dockyrd/internal/github"
 	"github.com/Joeydekruis/dockyrd/internal/docker"
 	"github.com/Joeydekruis/dockyrd/internal/proxy"
 )
@@ -26,7 +28,7 @@ type Runtime struct {
 	Log    *slog.Logger
 }
 
-// RunDeployment executes blue/green deploy for one deployment row.
+// RunDeployment executes deploy for app or static_site services.
 func (rt *Runtime) RunDeployment(ctx context.Context, deploymentID string) error {
 	dep, err := rt.Q.GetDeploymentByID(ctx, deploymentID)
 	if err != nil {
@@ -35,7 +37,21 @@ func (rt *Runtime) RunDeployment(ctx context.Context, deploymentID string) error
 	if dep.Status != "queued" && dep.Status != "starting" {
 		return nil
 	}
+	svc, err := rt.Q.GetServiceByID(ctx, dep.ServiceID)
+	if err != nil {
+		return err
+	}
+	switch svc.Kind {
+	case "static_site":
+		return rt.RunStaticSiteDeployment(ctx, deploymentID)
+	case "app":
+		return rt.runAppDeployment(ctx, deploymentID, dep)
+	default:
+		return rt.fail(ctx, deploymentID, fmt.Errorf("deploy not supported for kind %q", svc.Kind))
+	}
+}
 
+func (rt *Runtime) runAppDeployment(ctx context.Context, deploymentID string, dep sqlc.Deployment) error {
 	ctxRow, err := rt.Q.GetServiceDeployContext(ctx, dep.ServiceID)
 	if err != nil {
 		return err
@@ -44,7 +60,8 @@ func (rt *Runtime) RunDeployment(ctx context.Context, deploymentID string) error
 	if err != nil {
 		return rt.fail(ctx, deploymentID, err)
 	}
-	imageRef, err := appCfg.ImageRef()
+	deployShort := docker.DeployShort(deploymentID)
+	imageRef, needsBuild, err := appCfg.DeploymentImageRef(ctxRow.ServiceSlug, deployShort)
 	if err != nil {
 		return rt.fail(ctx, deploymentID, err)
 	}
@@ -59,6 +76,57 @@ func (rt *Runtime) RunDeployment(ctx context.Context, deploymentID string) error
 	}); err != nil {
 		return err
 	}
+
+	if needsBuild {
+		if err := rt.Q.UpdateDeploymentStatus(ctx, sqlc.UpdateDeploymentStatusParams{
+			Status:    "building",
+			Error:     sql.NullString{},
+			StartedAt: sql.NullInt64{},
+			FinishedAt: sql.NullInt64{},
+			ID:        deploymentID,
+		}); err != nil {
+			return err
+		}
+		buildArgs, secrets, err := rt.buildArgs(ctx, dep.ServiceID)
+		if err != nil {
+			return rt.fail(ctx, deploymentID, err)
+		}
+		cloneURL, _, cloneErr := github.ResolveClone(ctx, rt.Q, rt.Cfg.SecretKeyPath(), appCfg.Source)
+		if cloneErr != nil {
+			return rt.fail(ctx, deploymentID, cloneErr)
+		}
+		buildCtx, cancel := context.WithTimeout(ctx, rt.Cfg.BuildTimeout())
+		defer cancel()
+		logPath, buildErr := build.RunGitAppBuild(buildCtx, build.GitAppBuildInput{
+			WorkDir:            rt.Cfg.BuildsDir(),
+			DataDir:            rt.Cfg.DataDir,
+			MinFreeDiskPercent: rt.Cfg.MinFreeDiskPercent(),
+			DeploymentID:       deploymentID,
+			ServiceID:          dep.ServiceID,
+			App:                appCfg,
+			Tag:                imageRef,
+			CloneURL:           cloneURL,
+			BuildArgs:          buildArgs,
+			ScrubSecrets:       secrets,
+		})
+		_ = rt.Q.SetDeploymentBuildLogPath(ctx, sqlc.SetDeploymentBuildLogPathParams{
+			BuildLogPath: sql.NullString{String: logPath, Valid: logPath != ""},
+			ID:           deploymentID,
+		})
+		if buildErr != nil {
+			return rt.fail(ctx, deploymentID, buildErr)
+		}
+		if err := rt.Q.UpdateDeploymentStatus(ctx, sqlc.UpdateDeploymentStatusParams{
+			Status:    "starting",
+			Error:     sql.NullString{},
+			StartedAt: sql.NullInt64{},
+			FinishedAt: sql.NullInt64{},
+			ID:        deploymentID,
+		}); err != nil {
+			return err
+		}
+	}
+
 	if err := rt.Q.SetDeploymentImageRef(ctx, sqlc.SetDeploymentImageRefParams{
 		ImageRef: sql.NullString{String: imageRef, Valid: true},
 		ID:       deploymentID,
@@ -70,8 +138,10 @@ func (rt *Runtime) RunDeployment(ctx context.Context, deploymentID string) error
 		return rt.fail(ctx, deploymentID, errors.New("docker unavailable"))
 	}
 
-	if err := rt.Docker.PullImage(ctx, imageRef); err != nil {
-		return rt.fail(ctx, deploymentID, fmt.Errorf("pull: %w", err))
+	if !needsBuild {
+		if err := rt.Docker.PullImage(ctx, imageRef); err != nil {
+			return rt.fail(ctx, deploymentID, fmt.Errorf("pull: %w", err))
+		}
 	}
 
 	env, err := rt.runtimeEnv(ctx, dep.ServiceID)
@@ -144,6 +214,12 @@ func (rt *Runtime) RunDeployment(ctx context.Context, deploymentID string) error
 	if err := proxy.SyncFromDB(ctx, rt.Q, rt.Cfg); err != nil && rt.Log != nil {
 		rt.Log.Warn("proxy sync after deploy", "err", err)
 	}
+	if needsBuild && rt.Docker != nil {
+		slug := ctxRow.ServiceSlug
+		go func() {
+			_ = rt.Docker.PruneServiceImages(context.Background(), slug, 5)
+		}()
+	}
 	return nil
 }
 
@@ -168,6 +244,34 @@ func (rt *Runtime) runtimeEnv(ctx context.Context, serviceID string) ([]string, 
 		out = append(out, fmt.Sprintf("%s=%s", row.Key, string(val)))
 	}
 	return out, nil
+}
+
+func (rt *Runtime) buildArgs(ctx context.Context, serviceID string) (map[string]string, []string, error) {
+	key, err := crypto.LoadMasterKey(rt.Cfg.SecretKeyPath())
+	if err != nil {
+		return nil, nil, err
+	}
+	rows, err := rt.Q.ListVariablesForService(ctx, serviceID)
+	if err != nil {
+		return nil, nil, err
+	}
+	args := make(map[string]string)
+	secrets := make([]string, 0)
+	for _, row := range rows {
+		if row.AtBuild == 0 {
+			continue
+		}
+		val, err := crypto.Decrypt(key, row.ValueEnc)
+		if err != nil {
+			return nil, nil, err
+		}
+		s := string(val)
+		args[row.Key] = s
+		if row.IsSecret != 0 {
+			secrets = append(secrets, s)
+		}
+	}
+	return args, secrets, nil
 }
 
 func (rt *Runtime) stopSupersededContainers(ctx context.Context, serviceID, liveDeploymentID string, grace int) {

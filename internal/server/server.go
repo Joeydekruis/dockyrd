@@ -77,6 +77,17 @@ func handleHealth(w http.ResponseWriter, _ *http.Request) {
 	_ = json.NewEncoder(w).Encode(healthResponse{Status: "ok"})
 }
 
+func spaExportFallback(rel string) string {
+	switch {
+	case strings.HasPrefix(rel, "projects/"):
+		return "projects/_/index.html"
+	case strings.HasPrefix(rel, "settings/instance"):
+		return "settings/instance/index.html"
+	default:
+		return ""
+	}
+}
+
 func mountUI(mux *http.ServeMux, root fs.FS) {
 	fileServer := http.FileServer(http.FS(root))
 	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -87,6 +98,13 @@ func mountUI(mux *http.ServeMux, root fs.FS) {
 		rel := strings.TrimPrefix(r.URL.Path, "/")
 		if rel == "" {
 			rel = "index.html"
+		}
+		if _, err := fs.Stat(root, rel); err != nil {
+			if alt := spaExportFallback(rel); alt != "" {
+				if _, err2 := fs.Stat(root, alt); err2 == nil {
+					rel = alt
+				}
+			}
 		}
 		if _, err := fs.Stat(root, rel); err != nil {
 			f, err := root.Open("index.html")

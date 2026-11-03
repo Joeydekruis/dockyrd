@@ -58,6 +58,7 @@ func registerAPIRoutes(mux *http.ServeMux, deps apiDeps) {
 	registerVariableRoutes(mux, deps)
 	registerLogRoutes(mux, deps)
 	registerStreamRoutes(mux, deps)
+	registerGitHubRoutes(mux, deps)
 }
 
 func (d apiDeps) handleLogin(w http.ResponseWriter, r *http.Request) {

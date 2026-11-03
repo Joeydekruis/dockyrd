@@ -100,6 +100,10 @@ SELECT
   trigger,
   triggered_by,
   image_ref,
+  release_path,
+  commit_sha,
+  branch,
+  build_log_path,
   error,
   queued_at,
   started_at,
@@ -110,16 +114,20 @@ ORDER BY queued_at DESC
 `
 
 type ListDeploymentsForServiceRow struct {
-	ID          string
-	ServiceID   string
-	Status      string
-	Trigger     string
-	TriggeredBy sql.NullString
-	ImageRef    sql.NullString
-	Error       sql.NullString
-	QueuedAt    sql.NullInt64
-	StartedAt   sql.NullInt64
-	FinishedAt  sql.NullInt64
+	ID           string
+	ServiceID    string
+	Status       string
+	Trigger      string
+	TriggeredBy  sql.NullString
+	ImageRef     sql.NullString
+	ReleasePath  sql.NullString
+	CommitSha    sql.NullString
+	Branch       sql.NullString
+	BuildLogPath sql.NullString
+	Error        sql.NullString
+	QueuedAt     sql.NullInt64
+	StartedAt    sql.NullInt64
+	FinishedAt   sql.NullInt64
 }
 
 func (q *Queries) ListDeploymentsForService(ctx context.Context, serviceID string) ([]ListDeploymentsForServiceRow, error) {
@@ -138,6 +146,10 @@ func (q *Queries) ListDeploymentsForService(ctx context.Context, serviceID strin
 			&i.Trigger,
 			&i.TriggeredBy,
 			&i.ImageRef,
+			&i.ReleasePath,
+			&i.CommitSha,
+			&i.Branch,
+			&i.BuildLogPath,
 			&i.Error,
 			&i.QueuedAt,
 			&i.StartedAt,
@@ -170,6 +182,51 @@ func (q *Queries) MarkInterruptedDeployments(ctx context.Context, finishedAt sql
 	return err
 }
 
+const setDeploymentBuildLogPath = `-- name: SetDeploymentBuildLogPath :exec
+UPDATE deployments
+SET build_log_path = ?
+WHERE id = ?
+`
+
+type SetDeploymentBuildLogPathParams struct {
+	BuildLogPath sql.NullString
+	ID           string
+}
+
+func (q *Queries) SetDeploymentBuildLogPath(ctx context.Context, arg SetDeploymentBuildLogPathParams) error {
+	_, err := q.db.ExecContext(ctx, setDeploymentBuildLogPath, arg.BuildLogPath, arg.ID)
+	return err
+}
+
+const setDeploymentGitMeta = `-- name: SetDeploymentGitMeta :exec
+UPDATE deployments
+SET
+  commit_sha = ?,
+  commit_message = ?,
+  commit_author = ?,
+  branch = ?
+WHERE id = ?
+`
+
+type SetDeploymentGitMetaParams struct {
+	CommitSha     sql.NullString
+	CommitMessage sql.NullString
+	CommitAuthor  sql.NullString
+	Branch        sql.NullString
+	ID            string
+}
+
+func (q *Queries) SetDeploymentGitMeta(ctx context.Context, arg SetDeploymentGitMetaParams) error {
+	_, err := q.db.ExecContext(ctx, setDeploymentGitMeta,
+		arg.CommitSha,
+		arg.CommitMessage,
+		arg.CommitAuthor,
+		arg.Branch,
+		arg.ID,
+	)
+	return err
+}
+
 const setDeploymentImageRef = `-- name: SetDeploymentImageRef :exec
 UPDATE deployments
 SET image_ref = ?
@@ -183,6 +240,22 @@ type SetDeploymentImageRefParams struct {
 
 func (q *Queries) SetDeploymentImageRef(ctx context.Context, arg SetDeploymentImageRefParams) error {
 	_, err := q.db.ExecContext(ctx, setDeploymentImageRef, arg.ImageRef, arg.ID)
+	return err
+}
+
+const setDeploymentReleasePath = `-- name: SetDeploymentReleasePath :exec
+UPDATE deployments
+SET release_path = ?
+WHERE id = ?
+`
+
+type SetDeploymentReleasePathParams struct {
+	ReleasePath sql.NullString
+	ID          string
+}
+
+func (q *Queries) SetDeploymentReleasePath(ctx context.Context, arg SetDeploymentReleasePathParams) error {
+	_, err := q.db.ExecContext(ctx, setDeploymentReleasePath, arg.ReleasePath, arg.ID)
 	return err
 }
 

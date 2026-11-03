@@ -11,12 +11,19 @@ type AppRoute struct {
 	UpstreamDial string
 }
 
+// StaticRoute serves files from a host filesystem root (static sites).
+type StaticRoute struct {
+	Hostname string
+	Root     string
+}
+
 // RenderInput controls global Caddy options.
 type RenderInput struct {
-	ACMEEmail   string
-	AccessLog   string
-	AppRoutes   []AppRoute
-	AdminListen string
+	ACMEEmail    string
+	AccessLog    string
+	AppRoutes    []AppRoute
+	StaticRoutes []StaticRoute
+	AdminListen  string
 }
 
 // Render builds the full Caddy JSON document (briefing bijlage B).
@@ -31,18 +38,34 @@ func Render(in RenderInput) ([]byte, error) {
 		in.ACMEEmail = "ops@localhost"
 	}
 
-	routes := make([]any, 0, len(in.AppRoutes))
-	sorted := append([]AppRoute(nil), in.AppRoutes...)
-	sort.Slice(sorted, func(i, j int) bool {
-		return sorted[i].Hostname < sorted[j].Hostname
+	routes := make([]any, 0, len(in.AppRoutes)+len(in.StaticRoutes))
+
+	sortedApps := append([]AppRoute(nil), in.AppRoutes...)
+	sort.Slice(sortedApps, func(i, j int) bool {
+		return sortedApps[i].Hostname < sortedApps[j].Hostname
 	})
-	for _, r := range sorted {
+	for _, r := range sortedApps {
 		routes = append(routes, map[string]any{
 			"match": []any{map[string]any{"host": []string{r.Hostname}}},
 			"handle": []any{map[string]any{
 				"handler": "reverse_proxy",
 				"upstreams": []any{map[string]any{"dial": r.UpstreamDial}},
 				"load_balancing": map[string]any{"try_duration": "5s"},
+			}},
+			"terminal": true,
+		})
+	}
+
+	sortedStatic := append([]StaticRoute(nil), in.StaticRoutes...)
+	sort.Slice(sortedStatic, func(i, j int) bool {
+		return sortedStatic[i].Hostname < sortedStatic[j].Hostname
+	})
+	for _, r := range sortedStatic {
+		routes = append(routes, map[string]any{
+			"match": []any{map[string]any{"host": []string{r.Hostname}}},
+			"handle": []any{map[string]any{
+				"handler": "file_server",
+				"root":    r.Root,
 			}},
 			"terminal": true,
 		})

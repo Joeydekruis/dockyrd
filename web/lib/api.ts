@@ -88,3 +88,97 @@ export function createProject(input: { name: string; description?: string }) {
     json: input,
   });
 }
+
+export type Service = {
+  id: string;
+  environment_id: string;
+  kind: string;
+  name: string;
+  slug: string;
+  desired_state: string;
+  config: Record<string, unknown>;
+  created_at: number;
+  updated_at: number;
+};
+
+export function listServices(projectId: string, kind?: string) {
+  const q = new URLSearchParams({ project_id: projectId });
+  if (kind) q.set("kind", kind);
+  return apiFetch<{ services: Service[] }>(`/api/v1/services?${q}`);
+}
+
+export function createService(input: {
+  project_id: string;
+  kind: "app" | "static_site";
+  name: string;
+  config?: Record<string, unknown>;
+}) {
+  return apiFetch<Service>("/api/v1/services", {
+    method: "POST",
+    json: { environment: "production", ...input },
+  });
+}
+
+export type Deployment = {
+  id: string;
+  service_id: string;
+  status: string;
+  trigger: string;
+  image_ref?: string;
+  release_path?: string;
+  commit_sha?: string;
+  branch?: string;
+  build_log_path?: string;
+  error?: string;
+  queued_at: number;
+  started_at?: number;
+  finished_at?: number;
+};
+
+export function listDeployments(serviceId: string) {
+  return apiFetch<{ deployments: Deployment[] }>(
+    `/api/v1/services/${serviceId}/deployments`,
+  );
+}
+
+export function createDeployment(serviceId: string) {
+  return apiFetch<Deployment>(`/api/v1/services/${serviceId}/deployments`, {
+    method: "POST",
+    json: {},
+  });
+}
+
+export function promoteDeployment(deploymentId: string) {
+  return apiFetch<Deployment>(`/api/v1/deployments/${deploymentId}/promote`, {
+    method: "POST",
+    json: {},
+  });
+}
+
+export type GitHubStatus = {
+  linked: boolean;
+  slug?: string;
+  installation_id?: number;
+};
+
+export function getGitHubStatus() {
+  return apiFetch<GitHubStatus>("/api/v1/github/status");
+}
+
+export function startGitHubAppLink() {
+  return apiFetch<{ url: string; state: string }>(
+    "/api/v1/github/app/manifest",
+    { method: "POST", json: {} },
+  );
+}
+
+export type GitHubRepo = {
+  full_name: string;
+  default_branch: string;
+  private: boolean;
+};
+
+export function listGitHubRepos(query?: string) {
+  const q = query ? `?q=${encodeURIComponent(query)}` : "";
+  return apiFetch<{ repos: GitHubRepo[] }>(`/api/v1/github/repos${q}`);
+}

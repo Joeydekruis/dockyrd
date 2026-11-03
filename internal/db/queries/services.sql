@@ -54,3 +54,8 @@ FROM services s
 JOIN environments e ON e.id = s.environment_id
 WHERE e.project_id = ?
 ORDER BY s.created_at DESC;
+
+-- name: ListDeployableServices :many
+SELECT id, kind, config, slug
+FROM services
+WHERE kind IN ('app', 'static_site');

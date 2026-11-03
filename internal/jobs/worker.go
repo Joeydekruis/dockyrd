@@ -12,10 +12,12 @@ import (
 
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
 	"github.com/Joeydekruis/dockyrd/internal/deploy"
+	"github.com/Joeydekruis/dockyrd/internal/docker"
 )
 
 const (
 	KindDeploy = "deploy"
+	KindPrune  = "prune"
 	lockSeconds = 120
 )
 
@@ -28,6 +30,7 @@ type DeployPayload struct {
 type Worker struct {
 	Q       *sqlc.Queries
 	Deploy  *deploy.Runtime
+	Docker  *docker.Client
 	Log     *slog.Logger
 }
 
@@ -86,6 +89,16 @@ func (w *Worker) ProcessOnce(ctx context.Context) (bool, error) {
 			runErr = w.Deploy.RunDeployment(ctx, payload.DeploymentID)
 		} else {
 			runErr = errors.New("deploy runtime not configured")
+		}
+	case row.Kind.Valid && row.Kind.String == KindPrune:
+		var payload PrunePayload
+		raw, err := payloadBytes(row.Payload)
+		if err != nil {
+			runErr = err
+		} else if err := json.Unmarshal(raw, &payload); err != nil {
+			runErr = err
+		} else {
+			runErr = RunImagePrune(ctx, w.Docker, payload.ServiceSlug)
 		}
 	default:
 		runErr = errors.New("unknown job kind")

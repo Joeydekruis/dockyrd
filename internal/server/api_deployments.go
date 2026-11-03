@@ -4,11 +4,12 @@ import (
 	"database/sql"
 	"errors"
 	"net/http"
+	"os"
 	"time"
 
-	"github.com/oklog/ulid/v2"
-
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
+	"github.com/Joeydekruis/dockyrd/internal/deploy"
+	"github.com/Joeydekruis/dockyrd/internal/docker"
 	"github.com/Joeydekruis/dockyrd/internal/jobs"
 )
 
@@ -17,8 +18,12 @@ type deploymentResponse struct {
 	ServiceID  string  `json:"service_id"`
 	Status     string  `json:"status"`
 	Trigger    string  `json:"trigger"`
-	ImageRef   *string `json:"image_ref,omitempty"`
-	Error      *string `json:"error,omitempty"`
+	ImageRef    *string `json:"image_ref,omitempty"`
+	ReleasePath *string `json:"release_path,omitempty"`
+	BuildLogPath *string `json:"build_log_path,omitempty"`
+	CommitSHA    *string `json:"commit_sha,omitempty"`
+	Branch       *string `json:"branch,omitempty"`
+	Error        *string `json:"error,omitempty"`
 	QueuedAt   int64   `json:"queued_at"`
 	StartedAt  *int64  `json:"started_at,omitempty"`
 	FinishedAt *int64  `json:"finished_at,omitempty"`
@@ -28,6 +33,9 @@ func registerDeploymentRoutes(mux *http.ServeMux, deps apiDeps) {
 	mux.HandleFunc("GET /api/v1/services/{id}/deployments", deps.handleListDeployments)
 	mux.HandleFunc("POST /api/v1/services/{id}/deployments", deps.handleCreateDeployment)
 	mux.HandleFunc("POST /api/v1/deployments/{id}/cancel", deps.handleCancelDeployment)
+	mux.HandleFunc("POST /api/v1/deployments/{id}/promote", deps.handlePromoteDeployment)
+	mux.HandleFunc("POST /api/v1/deployments/{id}/redeploy", deps.handleRedeployDeployment)
+	mux.HandleFunc("GET /api/v1/deployments/{id}/log", deps.handleDeploymentLog)
 }
 
 func (d apiDeps) handleListDeployments(w http.ResponseWriter, r *http.Request) {
@@ -70,22 +78,9 @@ func (d apiDeps) handleCreateDeployment(w http.ResponseWriter, r *http.Request) 
 		writeJSONError(w, http.StatusInternalServerError, "database error")
 		return
 	}
-	now := time.Now().Unix()
-	deploymentID := ulid.Make().String()
-	if err := d.q.CreateDeployment(ctx, sqlc.CreateDeploymentParams{
-		ID:          deploymentID,
-		ServiceID:   serviceID,
-		Status:      "queued",
-		Trigger:     "manual",
-		TriggeredBy: sql.NullString{String: user.ID, Valid: true},
-		ImageRef:    sql.NullString{},
-		QueuedAt:    sql.NullInt64{Int64: now, Valid: true},
-	}); err != nil {
+	deploymentID, err := jobs.EnqueueServiceDeploy(ctx, d.q, serviceID, "manual", user.ID, jobs.GitMeta{})
+	if err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "create deployment error")
-		return
-	}
-	if err := jobs.EnqueueDeploy(ctx, d.q, deploymentID); err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "enqueue job error")
 		return
 	}
 	if d.events != nil {
@@ -132,14 +127,152 @@ func (d apiDeps) handleCancelDeployment(w http.ResponseWriter, r *http.Request) 
 	w.WriteHeader(http.StatusNoContent)
 }
 
+func (d apiDeps) handleRedeployDeployment(w http.ResponseWriter, r *http.Request) {
+	user, ok := d.requireUser(w, r)
+	if !ok {
+		return
+	}
+	id := r.PathValue("id")
+	ctx := r.Context()
+	row, err := d.q.GetDeploymentByID(ctx, id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeJSONError(w, http.StatusNotFound, "deployment not found")
+			return
+		}
+		writeJSONError(w, http.StatusInternalServerError, "database error")
+		return
+	}
+	newID, err := jobs.EnqueueServiceDeploy(ctx, d.q, row.ServiceID, "redeploy", user.ID, jobs.GitMeta{})
+	if err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "enqueue error")
+		return
+	}
+	rec, err := d.q.GetDeploymentByID(ctx, newID)
+	if err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "database error")
+		return
+	}
+	writeJSON(w, http.StatusCreated, deploymentFromFullRow(rec))
+}
+
+func (d apiDeps) handlePromoteDeployment(w http.ResponseWriter, r *http.Request) {
+	if _, ok := d.requireUser(w, r); !ok {
+		return
+	}
+	id := r.PathValue("id")
+	ctx := r.Context()
+	row, err := d.q.GetDeploymentByID(ctx, id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeJSONError(w, http.StatusNotFound, "deployment not found")
+			return
+		}
+		writeJSONError(w, http.StatusInternalServerError, "database error")
+		return
+	}
+	rt := &deploy.Runtime{Cfg: d.cfg, Q: d.q}
+	if cli, err := docker.NewClient(); err == nil {
+		if err := cli.Ping(r.Context()); err == nil {
+			rt.Docker = cli
+		} else {
+			_ = cli.Close()
+		}
+	}
+	if err := rt.PromoteRelease(r.Context(), row.ServiceID, id); err != nil {
+		writeJSONError(w, http.StatusConflict, err.Error())
+		return
+	}
+	updated, err := d.q.GetDeploymentByID(ctx, id)
+	if err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "database error")
+		return
+	}
+	writeJSON(w, http.StatusOK, deploymentFromFullRow(updated))
+}
+
+func (d apiDeps) handleDeploymentLog(w http.ResponseWriter, r *http.Request) {
+	if _, ok := d.requireUser(w, r); !ok {
+		return
+	}
+	id := r.PathValue("id")
+	row, err := d.q.GetDeploymentByID(r.Context(), id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeJSONError(w, http.StatusNotFound, "deployment not found")
+			return
+		}
+		writeJSONError(w, http.StatusInternalServerError, "database error")
+		return
+	}
+	if !row.BuildLogPath.Valid || row.BuildLogPath.String == "" {
+		writeJSONError(w, http.StatusNotFound, "build log not available")
+		return
+	}
+	if r.URL.Query().Get("stream") == "1" {
+		d.streamBuildLog(w, r, row.BuildLogPath.String)
+		return
+	}
+	data, err := os.ReadFile(row.BuildLogPath.String)
+	if err != nil {
+		writeJSONError(w, http.StatusNotFound, "build log not found")
+		return
+	}
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	_, _ = w.Write(data)
+}
+
+func (d apiDeps) streamBuildLog(w http.ResponseWriter, r *http.Request, path string) {
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		writeJSONError(w, http.StatusInternalServerError, "streaming unsupported")
+		return
+	}
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set("Connection", "keep-alive")
+	offset := int64(0)
+	ticker := time.NewTicker(500 * time.Millisecond)
+	defer ticker.Stop()
+	for {
+		select {
+		case <-r.Context().Done():
+			return
+		case <-ticker.C:
+			f, err := os.Open(path)
+			if err != nil {
+				continue
+			}
+			info, _ := f.Stat()
+			if info.Size() > offset {
+				buf := make([]byte, info.Size()-offset)
+				_, _ = f.Seek(offset, 0)
+				n, _ := f.Read(buf)
+				offset += int64(n)
+				if n > 0 {
+					_, _ = w.Write([]byte("data: "))
+					_, _ = w.Write(buf[:n])
+					_, _ = w.Write([]byte("\n\n"))
+					flusher.Flush()
+				}
+			}
+			_ = f.Close()
+		}
+	}
+}
+
 func deploymentFromRow(row sqlc.ListDeploymentsForServiceRow) deploymentResponse {
 	return deploymentResponse{
 		ID:         row.ID,
 		ServiceID:  row.ServiceID,
 		Status:     row.Status,
 		Trigger:    row.Trigger,
-		ImageRef:   nullStrPtr(row.ImageRef),
-		Error:      nullStrPtr(row.Error),
+		ImageRef:     nullStrPtr(row.ImageRef),
+		ReleasePath:  nullStrPtr(row.ReleasePath),
+		CommitSHA:    nullStrPtr(row.CommitSha),
+		Branch:       nullStrPtr(row.Branch),
+		BuildLogPath: nullStrPtr(row.BuildLogPath),
+		Error:        nullStrPtr(row.Error),
 		QueuedAt:   nullInt64(row.QueuedAt),
 		StartedAt:  nullInt64Ptr(row.StartedAt),
 		FinishedAt: nullInt64Ptr(row.FinishedAt),
@@ -152,8 +285,12 @@ func deploymentFromFullRow(row sqlc.Deployment) deploymentResponse {
 		ServiceID:  row.ServiceID,
 		Status:     row.Status,
 		Trigger:    row.Trigger,
-		ImageRef:   nullStrPtr(row.ImageRef),
-		Error:      nullStrPtr(row.Error),
+		ImageRef:     nullStrPtr(row.ImageRef),
+		ReleasePath:  nullStrPtr(row.ReleasePath),
+		CommitSHA:    nullStrPtr(row.CommitSha),
+		Branch:       nullStrPtr(row.Branch),
+		BuildLogPath: nullStrPtr(row.BuildLogPath),
+		Error:        nullStrPtr(row.Error),
 		QueuedAt:   nullInt64(row.QueuedAt),
 		StartedAt:  nullInt64Ptr(row.StartedAt),
 		FinishedAt: nullInt64Ptr(row.FinishedAt),

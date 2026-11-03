@@ -28,8 +28,17 @@ func startBackground(ctx context.Context, cfg config.Config, q *sqlc.Queries, hu
 	}
 
 	deployRT := &deploy.Runtime{Cfg: cfg, Q: q, Docker: dockerCli, Log: log}
-	worker := &jobs.Worker{Q: q, Deploy: deployRT, Log: log}
+	worker := &jobs.Worker{Q: q, Deploy: deployRT, Docker: dockerCli, Log: log}
 	rec := &reconcile.Loop{Cfg: cfg, Q: q, Docker: dockerCli, Log: log}
+
+	if dockerCli != nil {
+		if err := dockerCli.EnsureEdgeNetwork(ctx); err != nil && log != nil {
+			log.Warn("ensure dy-edge", "err", err)
+		}
+		if err := dockerCli.EnsureBuildkit(ctx); err != nil && log != nil {
+			log.Warn("ensure dy-buildkit", "err", err)
+		}
+	}
 
 	go worker.RunLoop(ctx, 2*time.Second)
 	go rec.Run(ctx, 30*time.Second)

@@ -9,15 +9,17 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/config"
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
 	"github.com/Joeydekruis/dockyrd/internal/docker"
+	"github.com/Joeydekruis/dockyrd/internal/prune"
 	"github.com/Joeydekruis/dockyrd/internal/proxy"
 )
 
 // Loop marks interrupted deploys and syncs proxy config periodically.
 type Loop struct {
-	Cfg    config.Config
-	Q      *sqlc.Queries
-	Docker *docker.Client
-	Log    *slog.Logger
+	Cfg       config.Config
+	Q         *sqlc.Queries
+	Docker    *docker.Client
+	Log       *slog.Logger
+	tickCount int
 }
 
 // Tick runs one reconcile pass.
@@ -33,6 +35,10 @@ func (l *Loop) Tick(ctx context.Context) {
 	}
 	if err := proxy.SyncFromDB(ctx, l.Q, l.Cfg); err != nil && l.Log != nil {
 		l.Log.Debug("proxy sync", "err", err)
+	}
+	l.tickCount++
+	if l.Docker != nil && l.tickCount%10 == 0 {
+		prune.AllAppServiceImages(ctx, l.Q, l.Docker, 5)
 	}
 }
 
