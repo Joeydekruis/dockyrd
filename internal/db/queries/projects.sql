@@ -10,6 +10,14 @@ SELECT
 FROM projects
 ORDER BY created_at DESC;
 
+-- name: SearchProjects :many
+SELECT id, name, slug
+FROM projects
+WHERE name LIKE ?
+   OR slug LIKE ?
+ORDER BY name ASC
+LIMIT 20;
+
 -- name: GetProjectByID :one
 SELECT
   id,

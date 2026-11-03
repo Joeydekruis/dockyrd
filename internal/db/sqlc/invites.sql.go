@@ -42,6 +42,43 @@ func (q *Queries) CreateInvite(ctx context.Context, arg CreateInviteParams) erro
 	return err
 }
 
+const getPendingInviteByTokenHash = `-- name: GetPendingInviteByTokenHash :one
+SELECT
+  id,
+  email,
+  role,
+  expires_at
+FROM invites
+WHERE token_hash = ?
+  AND accepted_at IS NULL
+  AND expires_at > ?
+LIMIT 1
+`
+
+type GetPendingInviteByTokenHashParams struct {
+	TokenHash []byte
+	ExpiresAt sql.NullInt64
+}
+
+type GetPendingInviteByTokenHashRow struct {
+	ID        string
+	Email     sql.NullString
+	Role      sql.NullString
+	ExpiresAt sql.NullInt64
+}
+
+func (q *Queries) GetPendingInviteByTokenHash(ctx context.Context, arg GetPendingInviteByTokenHashParams) (GetPendingInviteByTokenHashRow, error) {
+	row := q.db.QueryRowContext(ctx, getPendingInviteByTokenHash, arg.TokenHash, arg.ExpiresAt)
+	var i GetPendingInviteByTokenHashRow
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.Role,
+		&i.ExpiresAt,
+	)
+	return i, err
+}
+
 const listPendingInvites = `-- name: ListPendingInvites :many
 SELECT
   id,
@@ -90,4 +127,20 @@ func (q *Queries) ListPendingInvites(ctx context.Context, expiresAt sql.NullInt6
 		return nil, err
 	}
 	return items, nil
+}
+
+const markInviteAccepted = `-- name: MarkInviteAccepted :exec
+UPDATE invites
+SET accepted_at = ?
+WHERE id = ?
+`
+
+type MarkInviteAcceptedParams struct {
+	AcceptedAt sql.NullInt64
+	ID         string
+}
+
+func (q *Queries) MarkInviteAccepted(ctx context.Context, arg MarkInviteAcceptedParams) error {
+	_, err := q.db.ExecContext(ctx, markInviteAccepted, arg.AcceptedAt, arg.ID)
+	return err
 }

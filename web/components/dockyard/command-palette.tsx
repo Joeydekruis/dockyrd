@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { globalSearch, type SearchResult } from "@/lib/api";
 import { palettePages } from "@/lib/nav";
 
 type CommandPaletteProps = {
@@ -11,10 +12,12 @@ type CommandPaletteProps = {
 
 export function CommandPalette({ open, onClose }: CommandPaletteProps) {
   const [query, setQuery] = useState("");
+  const [remote, setRemote] = useState<SearchResult[] | null>(null);
 
   useEffect(() => {
     if (!open) {
       setQuery("");
+      setRemote(null);
     }
   }, [open]);
 
@@ -27,11 +30,43 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    const q = query.trim();
+    if (q === "") {
+      setRemote(null);
+      return;
+    }
+    const timer = window.setTimeout(() => {
+      globalSearch(q)
+        .then((res) => {
+          if (!cancelled) setRemote(res.results);
+        })
+        .catch(() => {
+          if (!cancelled) setRemote([]);
+        });
+    }, 200);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timer);
+    };
+  }, [open, query]);
+
   const filtered = useMemo(() => {
+    if (remote) return remote;
     const q = query.trim().toLowerCase();
-    if (!q) return palettePages;
-    return palettePages.filter((p) => p.label.toLowerCase().includes(q));
-  }, [query]);
+    if (!q) {
+      return palettePages.map((p) => ({
+        kind: "page",
+        label: p.label,
+        href: p.href,
+      }));
+    }
+    return palettePages
+      .filter((p) => p.label.toLowerCase().includes(q))
+      .map((p) => ({ kind: "page", label: p.label, href: p.href }));
+  }, [query, remote]);
 
   if (!open) return null;
 
@@ -48,25 +83,26 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
           autoFocus
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search pages…"
+          placeholder="Search pages and projects…"
           className="w-full border-b px-4 py-3 text-sm outline-none"
           style={{ borderColor: "var(--border)" }}
         />
         <ul className="max-h-80 overflow-auto p-2">
           {filtered.map((page) => (
-            <li key={page.href}>
+            <li key={`${page.kind}-${page.href}`}>
               <Link
                 href={page.href}
                 onClick={onClose}
-                className="block rounded-lg px-3 py-2 text-sm hover:bg-[var(--hover-row)]"
+                className="flex items-center justify-between rounded-lg px-3 py-2 text-sm hover:bg-[var(--hover-row)]"
               >
-                {page.label}
+                <span>{page.label}</span>
+                <span className="text-xs capitalize text-[var(--muted-foreground)]">{page.kind}</span>
               </Link>
             </li>
           ))}
           {filtered.length === 0 ? (
             <li className="px-3 py-6 text-center text-sm" style={{ color: "var(--muted-text)" }}>
-              No matches (M0 skeleton)
+              No matches
             </li>
           ) : null}
         </ul>
@@ -87,5 +123,9 @@ export function useCommandPalette() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
-  return { open, setOpen, close: () => setOpen(false) };
+  return {
+    open,
+    setOpen,
+    close: () => setOpen(false),
+  };
 }

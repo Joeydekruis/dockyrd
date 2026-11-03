@@ -68,6 +68,8 @@ func registerAPIRoutes(mux *http.ServeMux, deps apiDeps) {
 	registerEventRoutes(mux, deps)
 	registerServerRoutes(mux, deps)
 	registerTeamRoutes(mux, deps)
+	registerInvitePublicRoutes(mux, deps)
+	registerSearchRoutes(mux, deps)
 }
 
 func (d apiDeps) handleLogin(w http.ResponseWriter, r *http.Request) {

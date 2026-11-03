@@ -106,8 +106,12 @@ export function TeamSettingsPage() {
         </form>
         {lastToken ? (
           <p className="text-sm text-[var(--muted-foreground)]">
-            Invite link token (copy now — shown once):{" "}
-            <code className="break-all rounded bg-[var(--muted)]/30 px-1">{lastToken}</code>
+            Share this link with the invitee (token in URL):{" "}
+            <code className="break-all rounded bg-[var(--muted)]/30 px-1">
+              {typeof window !== "undefined"
+                ? `${window.location.origin}/accept-invite?token=${lastToken}`
+                : `/accept-invite?token=${lastToken}`}
+            </code>
           </p>
         ) : null}
       </section>

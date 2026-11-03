@@ -324,3 +324,28 @@ export function createInvite(input: { email: string; role: string }) {
     json: input,
   });
 }
+
+export function previewInvite(token: string) {
+  const q = new URLSearchParams({ token });
+  return apiFetch<{ email: string; role: string; expires_at: number }>(
+    `/api/v1/invites/preview?${q}`,
+  );
+}
+
+export function acceptInvite(input: { token: string; name: string; password: string }) {
+  return apiFetch<{ ok: boolean }>("/api/v1/invites/accept", {
+    method: "POST",
+    json: input,
+  });
+}
+
+export type SearchResult = {
+  kind: string;
+  label: string;
+  href: string;
+};
+
+export function globalSearch(q: string) {
+  const params = new URLSearchParams({ q });
+  return apiFetch<{ results: SearchResult[] }>(`/api/v1/search?${params}`);
+}

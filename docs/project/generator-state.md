@@ -4,7 +4,7 @@ _Last updated: 2026-11-03_
 
 ## Current focus
 
-**M4 Sprint 1** (#27–#28) shipped @ `3fede93` / v0.0.9. **Sprint 2 #29** team API + UI implemented locally (pending push).
+**M4 Sprint 2:** #29 team shipped @ `1230a7b`; #30 invite accept + #31 search ready to push.
 
 ## Blockers
 

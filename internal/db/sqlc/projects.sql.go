@@ -173,6 +173,49 @@ func (q *Queries) ListProjects(ctx context.Context) ([]Project, error) {
 	return items, nil
 }
 
+const searchProjects = `-- name: SearchProjects :many
+SELECT id, name, slug
+FROM projects
+WHERE name LIKE ?
+   OR slug LIKE ?
+ORDER BY name ASC
+LIMIT 20
+`
+
+type SearchProjectsParams struct {
+	Name string
+	Slug string
+}
+
+type SearchProjectsRow struct {
+	ID   string
+	Name string
+	Slug string
+}
+
+func (q *Queries) SearchProjects(ctx context.Context, arg SearchProjectsParams) ([]SearchProjectsRow, error) {
+	rows, err := q.db.QueryContext(ctx, searchProjects, arg.Name, arg.Slug)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []SearchProjectsRow
+	for rows.Next() {
+		var i SearchProjectsRow
+		if err := rows.Scan(&i.ID, &i.Name, &i.Slug); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateProject = `-- name: UpdateProject :exec
 UPDATE projects
 SET
