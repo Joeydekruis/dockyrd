@@ -10,6 +10,7 @@ import (
 
 	"github.com/Joeydekruis/dockyrd/internal/auth"
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
+	"github.com/Joeydekruis/dockyrd/internal/mail"
 )
 
 func registerPasswordResetRoutes(mux *http.ServeMux, deps apiDeps) {
@@ -58,10 +59,22 @@ func (d apiDeps) handlePasswordForgot(w http.ResponseWriter, r *http.Request) {
 		writeJSONError(w, http.StatusInternalServerError, "database error")
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{
-		"ok":         true,
-		"reset_path": "/reset-password?token=" + plain,
-	})
+	resp := map[string]any{"ok": true}
+	smtpCfg, _, base, smtpOK := d.smtpReady(ctx)
+	resp["smtp_configured"] = smtpOK
+	if smtpOK {
+		link := "/reset-password?token=" + plain
+		if base != "" {
+			link = base + link
+		}
+		text := "Use this link within one hour to choose a new password:\n\n" + link + "\n"
+		if err := mail.SendPlain(smtpCfg, body.Email, "Reset your Dockyard password", text); err != nil {
+			writeJSONError(w, http.StatusBadGateway, "could not send reset email")
+			return
+		}
+		resp["email_sent"] = true
+	}
+	writeJSON(w, http.StatusOK, resp)
 }
 
 func (d apiDeps) handlePasswordReset(w http.ResponseWriter, r *http.Request) {

@@ -12,6 +12,7 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/audit"
 	"github.com/Joeydekruis/dockyrd/internal/auth"
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
+	"github.com/Joeydekruis/dockyrd/internal/mail"
 )
 
 func registerTeamRoutes(mux *http.ServeMux, deps apiDeps) {
@@ -37,6 +38,7 @@ type inviteResponse struct {
 	Role      string `json:"role"`
 	ExpiresAt int64  `json:"expires_at"`
 	Token     string `json:"token,omitempty"`
+	EmailSent bool   `json:"email_sent,omitempty"`
 }
 
 type auditResponse struct {
@@ -196,12 +198,25 @@ func (d apiDeps) handleCreateInvite(w http.ResponseWriter, r *http.Request) {
 		Meta:       map[string]any{"email": body.Email, "role": body.Role},
 		IP:         clientIP(r),
 	})
+	emailSent := false
+	smtpCfg, _, base, smtpOK := d.smtpReady(ctx)
+	if smtpOK {
+		link := "/accept-invite?token=" + plain
+		if base != "" {
+			link = base + link
+		}
+		text := "You have been invited to join this Dockyard panel.\n\nAccept the invite:\n" + link + "\n"
+		if err := mail.SendPlain(smtpCfg, body.Email, "Dockyard team invite", text); err == nil {
+			emailSent = true
+		}
+	}
 	writeJSON(w, http.StatusCreated, inviteResponse{
 		ID:        id,
 		Email:     body.Email,
 		Role:      body.Role,
 		ExpiresAt: expires,
 		Token:     plain,
+		EmailSent: emailSent,
 	})
 }
 

@@ -4,13 +4,13 @@ _Last updated: 2026-11-03_
 
 ## Current focus
 
-**M5 exit / v0.1.0:** briefing §19 (full install e2e on Ubuntu, Playwright UI flows, UI update modal, push-to-main).
+**M3–M5 batch:** code on `development` @ **0.0.19**; SMTP + instance settings landed (Refs #29, #34). GitHub **#23–#44** still open for maintainer close.
 
 ## Next
 
-- Playwright fixtures under `e2e/fixtures/`
-- First tagged release after maintainer review
-- Close M3–M5 issues on GitHub
+- Maintainer verify + close M3/M4/M5 issues
+- §19 gaps: Ubuntu install CI, `e2e/fixtures/`, UI update modal, owner 2FA mandate
+- Optional: push-to-main + tag after review
 
 ## Blockers
 

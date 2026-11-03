@@ -17,6 +17,7 @@ const (
 	envConfigDir     = "DOCKYARD_CONFIG_DIR"
 	envListen        = "DOCKYARD_LISTEN"
 	envPublicIPv4    = "DOCKYARD_PUBLIC_IPV4"
+	envPublicURL     = "DOCKYARD_PUBLIC_URL"
 )
 
 // Config holds process-level paths and network binding.
@@ -121,6 +122,15 @@ func (c Config) BuildTimeout() time.Duration {
 		}
 	}
 	return defaultBuildTimeout
+}
+
+// PublicURL is the external HTTPS origin for links in email (optional env override).
+func (c Config) PublicURL() string {
+	v := strings.TrimSpace(os.Getenv(envPublicURL))
+	for len(v) > 0 && v[len(v)-1] == '/' {
+		v = v[:len(v)-1]
+	}
+	return v
 }
 
 // MinFreeDiskPercent is the minimum free disk ratio required before builds (default 10).

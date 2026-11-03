@@ -1,26 +1,31 @@
 "use client";
 
 import Link from "next/link";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 import { AuthLayout } from "@/components/dockyard/auth-layout";
-import { requestPasswordReset } from "@/lib/api";
+import { getPublicSettings, requestPasswordReset } from "@/lib/api";
 
 export function ForgotPasswordClient() {
   const [email, setEmail] = useState("");
-  const [resetPath, setResetPath] = useState<string | null>(null);
+  const [smtpConfigured, setSmtpConfigured] = useState<boolean | null>(null);
+  const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    void getPublicSettings()
+      .then((s) => setSmtpConfigured(s.smtp_configured))
+      .catch(() => setSmtpConfigured(false));
+  }, []);
 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    setResetPath(null);
+    setSent(false);
     try {
-      const res = await requestPasswordReset(email.trim());
-      if (res.reset_path) {
-        setResetPath(res.reset_path);
-      }
+      await requestPasswordReset(email.trim());
+      setSent(true);
     } catch {
       setError("Could not start reset");
     } finally {
@@ -30,10 +35,20 @@ export function ForgotPasswordClient() {
 
   return (
     <AuthLayout title="Forgot password?">
-      <p className="mb-4 text-sm" style={{ color: "var(--muted-text)" }}>
-        Email delivery is not configured yet. When your account exists, the
-        reset link is shown here (self-hosted).
-      </p>
+      {smtpConfigured === false ? (
+        <p className="mb-4 text-sm" style={{ color: "var(--muted-text)" }}>
+          Email is not configured on this server. Ask an admin, or run{" "}
+          <code className="rounded bg-black/5 px-1">
+            sudo dockyard admin reset-password
+          </code>{" "}
+          on the host.
+        </p>
+      ) : (
+        <p className="mb-4 text-sm" style={{ color: "var(--muted-text)" }}>
+          Enter your account email. If it exists, we send a reset link (valid
+          for one hour).
+        </p>
+      )}
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
         <label className="block text-sm">
           <span
@@ -48,14 +63,13 @@ export function ForgotPasswordClient() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="field-input"
+            disabled={smtpConfigured === false}
           />
         </label>
-        {resetPath ? (
+        {sent && smtpConfigured !== false ? (
           <p className="text-sm text-green-700" role="status">
-            Use this link within 1 hour:{" "}
-            <Link href={resetPath} className="underline">
-              Reset password
-            </Link>
+            If an account exists for that address, check your inbox for a reset
+            link.
           </p>
         ) : null}
         {error ? (
@@ -69,8 +83,8 @@ export function ForgotPasswordClient() {
         ) : null}
         <button
           type="submit"
-          disabled={loading}
-          className="min-h-11 rounded-[10px] font-mono text-xs uppercase tracking-wide text-white"
+          disabled={loading || smtpConfigured === false}
+          className="min-h-11 rounded-[10px] font-mono text-xs uppercase tracking-wide text-white disabled:opacity-50"
           style={{ background: "var(--ink-navy)" }}
         >
           {loading ? "Please wait…" : "Request reset link"}

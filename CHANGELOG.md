@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.19] - 2026-11-03
+
+_Finished: 2026-11-03_
+
+### Added
+
+- **SMTP & instance settings** — `GET|PATCH /api/v1/settings/instance`, `POST /api/v1/settings/smtp/test`, `GET /api/v1/settings/public`; encrypted SMTP password in SQLite; password-reset and invite emails when configured — closes M4 gap (Refs #29, #34)
+- **User docs** — `docs/user/email-smtp.md`
+
+### Changed
+
+- **Forgot password** — briefing-compliant copy when SMTP is off; email delivery when SMTP is on (no reset link in API)
+- **Instance settings UI** — panel URL, ACME/wildcard fields, SMTP form and test
+
 ## [0.0.18] - 2026-11-03
 
 _Finished: 2026-11-03_

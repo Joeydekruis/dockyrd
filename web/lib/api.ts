@@ -382,6 +382,7 @@ export type TeamInvite = {
   role: string;
   expires_at: number;
   token?: string;
+  email_sent?: boolean;
 };
 
 export function listTeamUsers() {
@@ -465,6 +466,58 @@ export function getServerInfo() {
   return apiFetch<ServerInfo>("/api/v1/server");
 }
 
+export type PublicSettings = {
+  smtp_configured: boolean;
+};
+
+export function getPublicSettings() {
+  return apiFetch<PublicSettings>("/api/v1/settings/public");
+}
+
+export type InstanceSettings = {
+  public_url: string;
+  acme_email: string;
+  wildcard_domain: string;
+  smtp: {
+    host: string;
+    port: number;
+    username: string;
+    from: string;
+    use_tls: boolean;
+    configured: boolean;
+  };
+};
+
+export function getInstanceSettings() {
+  return apiFetch<InstanceSettings>("/api/v1/settings/instance");
+}
+
+export function patchInstanceSettings(body: {
+  public_url?: string;
+  acme_email?: string;
+  wildcard_domain?: string;
+  smtp?: {
+    host: string;
+    port: number;
+    username: string;
+    from: string;
+    use_tls: boolean;
+    password?: string;
+  };
+}) {
+  return apiFetch<InstanceSettings>("/api/v1/settings/instance", {
+    method: "PATCH",
+    json: body,
+  });
+}
+
+export function testSMTP(to: string) {
+  return apiFetch<{ ok: boolean }>("/api/v1/settings/smtp/test", {
+    method: "POST",
+    json: { to },
+  });
+}
+
 export function postServerCleanup(targets: string[]) {
   return apiFetch<{ reclaimed: Record<string, number> }>(
     "/api/v1/server/cleanup",
@@ -476,13 +529,14 @@ export function postServerCleanup(targets: string[]) {
 }
 
 export function requestPasswordReset(email: string) {
-  return apiFetch<{ ok: boolean; reset_path?: string }>(
-    "/api/v1/auth/password/forgot",
-    {
-      method: "POST",
-      json: { email },
-    },
-  );
+  return apiFetch<{
+    ok: boolean;
+    smtp_configured?: boolean;
+    email_sent?: boolean;
+  }>("/api/v1/auth/password/forgot", {
+    method: "POST",
+    json: { email },
+  });
 }
 
 export function resetPassword(token: string, password: string) {

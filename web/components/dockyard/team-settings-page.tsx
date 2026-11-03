@@ -19,6 +19,7 @@ export function TeamSettingsPage() {
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("member");
   const [lastToken, setLastToken] = useState<string | null>(null);
+  const [inviteEmailed, setInviteEmailed] = useState(false);
   const [audit, setAudit] = useState<AuditEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -56,6 +57,7 @@ export function TeamSettingsPage() {
     try {
       const inv = await createInvite({ email: email.trim(), role });
       setLastToken(inv.token ?? null);
+      setInviteEmailed(Boolean(inv.email_sent));
       setEmail("");
       await refresh();
     } catch (err) {
@@ -123,14 +125,26 @@ export function TeamSettingsPage() {
           </button>
         </form>
         {lastToken ? (
-          <p className="text-sm text-[var(--muted-foreground)]">
-            Share this link with the invitee (token in URL):{" "}
-            <code className="break-all rounded bg-[var(--muted)]/30 px-1">
-              {typeof window !== "undefined"
-                ? `${window.location.origin}/accept-invite?token=${lastToken}`
-                : `/accept-invite?token=${lastToken}`}
-            </code>
-          </p>
+          <>
+            {inviteEmailed ? (
+              <p className="mb-2 text-sm text-green-700" role="status">
+                Invite email sent via SMTP.
+              </p>
+            ) : (
+              <p className="mb-2 text-sm text-[var(--muted-foreground)]">
+                SMTP not configured — copy the link below (or set SMTP under
+                Instance settings).
+              </p>
+            )}
+            <p className="text-sm text-[var(--muted-foreground)]">
+              Share this link with the invitee (token in URL):{" "}
+              <code className="break-all rounded bg-[var(--muted)]/30 px-1">
+                {typeof window !== "undefined"
+                  ? `${window.location.origin}/accept-invite?token=${lastToken}`
+                  : `/accept-invite?token=${lastToken}`}
+              </code>
+            </p>
+          </>
         ) : null}
       </section>
 

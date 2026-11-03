@@ -2,16 +2,20 @@ package server
 
 import (
 	"bytes"
+	"context"
+	"database/sql"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"path/filepath"
-	"strings"
 	"testing"
+	"time"
 
 	"github.com/Joeydekruis/dockyrd/internal/audit"
+	"github.com/Joeydekruis/dockyrd/internal/auth"
 	"github.com/Joeydekruis/dockyrd/internal/config"
 	"github.com/Joeydekruis/dockyrd/internal/db"
+	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
 	"github.com/Joeydekruis/dockyrd/internal/setup"
 )
 
@@ -45,6 +49,23 @@ func TestPasswordResetFlow(t *testing.T) {
 	reqSetup := httptest.NewRequest(http.MethodPost, "/api/v1/setup", bytes.NewReader(setupBody))
 	mux.ServeHTTP(recSetup, reqSetup)
 
+	plain, hash, err := auth.NewSessionToken()
+	if err != nil {
+		t.Fatal(err)
+	}
+	expires := time.Now().Add(time.Hour).Unix()
+	user, err := q.GetUserByEmail(context.Background(), "owner@example.com")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := q.InsertPasswordReset(context.Background(), sqlc.InsertPasswordResetParams{
+		TokenHash: hash,
+		UserID:    sqlNullUserID(user.ID),
+		ExpiresAt: sql.NullInt64{Int64: expires, Valid: true},
+	}); err != nil {
+		t.Fatal(err)
+	}
+
 	forgotBody, _ := json.Marshal(map[string]string{"email": "owner@example.com"})
 	recForgot := httptest.NewRecorder()
 	reqForgot := httptest.NewRequest(http.MethodPost, "/api/v1/auth/password/forgot", bytes.NewReader(forgotBody))
@@ -52,16 +73,9 @@ func TestPasswordResetFlow(t *testing.T) {
 	if recForgot.Code != http.StatusOK {
 		t.Fatalf("forgot status=%d %s", recForgot.Code, recForgot.Body.String())
 	}
-	var forgotResp struct {
-		ResetPath string `json:"reset_path"`
-	}
-	if err := json.NewDecoder(recForgot.Body).Decode(&forgotResp); err != nil || forgotResp.ResetPath == "" {
-		t.Fatalf("missing reset_path: %v", err)
-	}
-	token := forgotResp.ResetPath[strings.LastIndex(forgotResp.ResetPath, "=")+1:]
 
 	resetBody, _ := json.Marshal(map[string]string{
-		"token":    token,
+		"token":    plain,
 		"password": "brandnewpassword1",
 	})
 	recReset := httptest.NewRecorder()

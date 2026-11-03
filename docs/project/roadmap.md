@@ -11,9 +11,9 @@ From briefing §15. Update when a milestone closes.
 | **M4 · Observability + team** | Metrics, events, Analytics, team/2FA/audit/search | All 19 design screens functional |
 | **M5 · v0.1.0 release** | Self-update, doctor, docs, e2e green | Public release |
 
-**Progress (2026-11-03):** **M5** through Sprint 2 on `development` @ **0.0.16** (doctor, update, CI, e2e, GoReleaser). Tag `v*` on default branch publishes release assets. M3/M4/M5 Sprint 1 await maintainer close.
+**Progress (2026-11-03):** **M3–M5** implementation on `development` @ **0.0.19** (SMTP for reset/invites, instance settings API/UI). Issues **#23–#44** await maintainer verification on GitHub. **§19 v0.1.0** polish (fixtures, update modal, owner 2FA mandate) remains post-close.
 
-**Post-M4 (briefing, not blocking M5 kickoff):** Caddy request analytics, ECharts depth, per-container CPU/RAM, SMTP for invites/reset, owner 2FA mandate, full §17 service detail tabs.
+**Post-M4 (briefing, not blocking release):** Caddy request analytics, ECharts depth, per-container CPU/RAM, owner 2FA mandate, full §17 service detail tabs.
 
 ## Post-MVP (briefing)
 
