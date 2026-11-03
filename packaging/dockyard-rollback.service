@@ -1,0 +1,11 @@
+[Unit]
+Description=Rollback Dockyard after failed service start
+After=dockyard.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/dockyard update --rollback
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

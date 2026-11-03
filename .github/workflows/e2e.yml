@@ -23,5 +23,13 @@ jobs:
           cache-dependency-path: web/pnpm-lock.yaml
       - name: Install web deps
         run: pnpm --dir web install --frozen-lockfile
+      - name: Build binary
+        run: make build
       - name: E2E smoke
         run: chmod +x e2e/smoke.sh && ./e2e/smoke.sh
+      - name: Playwright UI
+        run: |
+          chmod +x scripts/e2e-webserver.sh
+          pnpm --dir e2e install --frozen-lockfile || pnpm --dir e2e install
+          pnpm --dir e2e exec playwright install chromium --with-deps
+          pnpm --dir e2e test

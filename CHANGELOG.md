@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.17] - 2026-11-03
+
+_Finished: 2026-11-03_
+
+### Added
+
+- **#41 / Playwright** — `e2e/` UI tests, `make e2e-ui`, CI Playwright job — https://github.com/Joeydekruis/dockyrd/issues/41
+- **#42 / Server info API** — `GET /api/v1/server`, instance settings version block — https://github.com/Joeydekruis/dockyrd/issues/42
+- **`packaging/dockyard-rollback.service`** — oneshot rollback unit stub
+
+### Fixed
+
+- **Static UI routes** — `/sign-in/` and similar paths resolve to `*/index.html` without redirect loops
+
 ## [0.0.16] - 2026-11-03
 
 _Finished: 2026-11-03_

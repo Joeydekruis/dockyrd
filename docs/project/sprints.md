@@ -111,7 +111,7 @@ Milestone: **M5 · Sprint 2 — E2E & release** — #39, #40
 | #39 | E2E smoke + `e2e.yml` |
 | #40 | GoReleaser + `release.yml` + install download |
 
-**Status (2026-11-03):** `development` @ **v0.0.16**. First public binary: tag `v0.0.16` on `main` triggers release workflow.
+**Status (2026-11-03):** `development` @ **v0.0.16–0.0.17**. #41 Playwright + #42 server info API ready for review.
 
 **Superseded** — see “M5 · Sprint 2 — complete” above.
 

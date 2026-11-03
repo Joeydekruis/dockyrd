@@ -25,6 +25,7 @@ func main() {
 
 	switch os.Args[1] {
 	case "serve":
+		server.SetBuildVersion(version)
 		if err := server.Serve(cfg); err != nil {
 			fmt.Fprintf(os.Stderr, "serve: %v\n", err)
 			os.Exit(1)

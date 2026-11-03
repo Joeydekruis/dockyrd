@@ -450,6 +450,16 @@ export function getServerCleanup() {
   return apiFetch<CleanupSummary>("/api/v1/server/cleanup");
 }
 
+export type ServerInfo = {
+  version: string;
+  update_available: boolean;
+  latest_tag?: string;
+};
+
+export function getServerInfo() {
+  return apiFetch<ServerInfo>("/api/v1/server");
+}
+
 export function postServerCleanup(targets: string[]) {
   return apiFetch<{ reclaimed: Record<string, number> }>(
     "/api/v1/server/cleanup",

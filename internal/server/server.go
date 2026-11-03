@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"net/http"
 	"os"
+	"path"
 	"strings"
 
 	"github.com/Joeydekruis/dockyrd/internal/audit"
@@ -110,6 +111,12 @@ func mountUI(mux *http.ServeMux, root fs.FS) {
 		rel := strings.TrimPrefix(r.URL.Path, "/")
 		if rel == "" {
 			rel = "index.html"
+		}
+		if _, err := fs.Stat(root, rel); err != nil {
+			indexHTML := path.Join(rel, "index.html")
+			if _, err2 := fs.Stat(root, indexHTML); err2 == nil {
+				rel = indexHTML
+			}
 		}
 		if _, err := fs.Stat(root, rel); err != nil {
 			if alt := spaExportFallback(rel); alt != "" {

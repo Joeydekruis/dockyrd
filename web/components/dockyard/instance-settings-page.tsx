@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
-import { getGitHubStatus, startGitHubAppLink } from "@/lib/api";
+import { getGitHubStatus, getServerInfo, startGitHubAppLink } from "@/lib/api";
 
 export function InstanceSettingsPage() {
   const search = useSearchParams();
@@ -16,12 +16,21 @@ export function InstanceSettingsPage() {
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [serverInfo, setServerInfo] = useState<{
+    version: string;
+    update_available: boolean;
+    latest_tag?: string;
+  } | null>(null);
 
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      const st = await getGitHubStatus();
+      const [st, info] = await Promise.all([
+        getGitHubStatus(),
+        getServerInfo().catch(() => null),
+      ]);
       setStatus(st);
+      setServerInfo(info);
       setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load settings");
@@ -60,6 +69,43 @@ export function InstanceSettingsPage() {
           Profile & security
         </Link>
       </div>
+      <section
+        aria-label="Dockyard version"
+        className="mb-6 max-w-xl space-y-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6"
+      >
+        <h2 className="text-lg font-medium">Updates</h2>
+        {serverInfo ? (
+          <>
+            <p className="text-sm text-[var(--muted-foreground)]">
+              Running version{" "}
+              <span className="font-mono text-[var(--foreground)]">
+                {serverInfo.version}
+              </span>
+            </p>
+            {serverInfo.update_available ? (
+              <p className="text-sm">
+                Update available:{" "}
+                <span className="font-mono">{serverInfo.latest_tag}</span>. On
+                the server run{" "}
+                <code className="rounded bg-[var(--muted)]/40 px-1">
+                  sudo dockyard update
+                </code>
+                .
+              </p>
+            ) : (
+              <p className="text-sm text-[var(--muted-foreground)]">
+                Up to date (or update check unavailable).
+              </p>
+            )}
+          </>
+        ) : loading ? (
+          <p className="text-sm text-[var(--muted-foreground)]">Loading version…</p>
+        ) : (
+          <p className="text-sm text-[var(--muted-foreground)]">
+            Could not load version info.
+          </p>
+        )}
+      </section>
       <section
         aria-label="GitHub integration"
         className="max-w-xl space-y-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6"

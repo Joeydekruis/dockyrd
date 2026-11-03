@@ -31,5 +31,11 @@ e2e:
 	chmod +x e2e/smoke.sh
 	./e2e/smoke.sh
 
+e2e-ui: build
+	chmod +x scripts/e2e-webserver.sh
+	pnpm --dir e2e install
+	pnpm --dir e2e exec playwright install chromium
+	pnpm --dir e2e test
+
 release-snapshot:
 	goreleaser release --snapshot --clean --skip=publish
