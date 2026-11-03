@@ -452,6 +452,7 @@ export function getServerCleanup() {
 
 export type ServerInfo = {
   version: string;
+  uptime_sec: number;
   update_available: boolean;
   latest_tag?: string;
 };

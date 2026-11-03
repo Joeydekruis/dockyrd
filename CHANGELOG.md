@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.18] - 2026-11-03
+
+_Finished: 2026-11-03_
+
+### Added
+
+- **#43 / Install preflight** — arch/curl checks, `DOCKYARD_SKIP_*`, `verify-install.sh` — https://github.com/Joeydekruis/dockyrd/issues/43
+- **#44 / User docs** — `docs/user/nextjs.md`, `domains-dns.md` — https://github.com/Joeydekruis/dockyrd/issues/44
+- **E2E setup flow** — Playwright API setup + login; `uptime_sec` on `GET /api/v1/server`
+
+### Changed
+
+- **`install.sh`** — configurable `DOCKYARD_BIN_DEST`; checksum verify fix
+
 ## [0.0.17] - 2026-11-03
 
 _Finished: 2026-11-03_

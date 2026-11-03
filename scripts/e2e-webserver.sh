@@ -7,8 +7,14 @@ export DOCKYARD_DATA_DIR="${DOCKYARD_DATA_DIR:-/tmp/dockyard-e2e/data}"
 export DOCKYARD_CONFIG_DIR="${DOCKYARD_CONFIG_DIR:-/tmp/dockyard-e2e/etc}"
 export DOCKYARD_LISTEN=":${PORT}"
 
+if [ "${E2E_FRESH:-1}" = "1" ]; then
+  rm -rf "$DOCKYARD_DATA_DIR" "$DOCKYARD_CONFIG_DIR"
+fi
+
 mkdir -p "$DOCKYARD_DATA_DIR" "$DOCKYARD_CONFIG_DIR"
-if [ ! -f "$DOCKYARD_CONFIG_DIR/secret.key" ]; then
-  "$ROOT/bin/dockyard" init >/dev/null
+init_out="$("$ROOT/bin/dockyard" init 2>&1)"
+token=$(printf '%s' "$init_out" | sed -n 's/.*token=\([^[:space:]]*\).*/\1/p' | head -n1)
+if [ -n "$token" ]; then
+  printf '%s' "$token" >"$DOCKYARD_CONFIG_DIR/e2e-setup-token"
 fi
 exec "$ROOT/bin/dockyard" serve

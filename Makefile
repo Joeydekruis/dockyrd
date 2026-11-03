@@ -33,9 +33,9 @@ e2e:
 
 e2e-ui: build
 	chmod +x scripts/e2e-webserver.sh
-	pnpm --dir e2e install
+	E2E_FRESH=1 pnpm --dir e2e install
 	pnpm --dir e2e exec playwright install chromium
-	pnpm --dir e2e test
+	E2E_FRESH=1 pnpm --dir e2e test
 
 release-snapshot:
 	goreleaser release --snapshot --clean --skip=publish

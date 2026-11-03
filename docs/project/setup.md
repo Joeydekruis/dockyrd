@@ -55,6 +55,7 @@ Optional env for builds: `DOCKYARD_BUILD_TIMEOUT` (default `20m`), `DOCKYARD_MIN
 
 ```bash
 ./scripts/verify-m5-smoke.sh
+./scripts/verify-install.sh
 go run ./cmd/dockyard doctor
 ```
 

@@ -18,5 +18,9 @@ export default defineConfig({
     url: `${baseURL}/api/v1/health`,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
+    env: {
+      ...process.env,
+      E2E_SETUP_TOKEN_FILE: "/tmp/dockyard-e2e/etc/e2e-setup-token",
+    },
   },
 });

@@ -34,9 +34,12 @@ Set `DOCKYARD_DEV_UI=http://localhost:3000` when running the Next.js dev server 
 dockyard doctor
 ```
 
-Fix any `✗` lines before going to production. See [troubleshooting](./troubleshooting.md).
+Fix any `✗` lines before going to production. See [troubleshooting](./troubleshooting.md) and [domains & DNS](./domains-dns.md).
 
-## Updates
+## Next steps
+
+- [First app](./first-app.md)
+- [Next.js guide](./nextjs.md)
 
 ```bash
 dockyard update --check

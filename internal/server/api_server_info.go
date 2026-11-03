@@ -10,6 +10,7 @@ import (
 
 type serverInfoResponse struct {
 	Version         string `json:"version"`
+	UptimeSec       int64  `json:"uptime_sec"`
 	UpdateAvailable bool   `json:"update_available"`
 	LatestTag       string `json:"latest_tag,omitempty"`
 }
@@ -19,7 +20,10 @@ func (d apiDeps) handleServerInfo(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		return
 	}
-	resp := serverInfoResponse{Version: BuildVersion()}
+	resp := serverInfoResponse{
+		Version:   BuildVersion(),
+		UptimeSec: time.Now().Unix() - ProcessStartedAt(),
+	}
 	if user.Role == "owner" || user.Role == "admin" {
 		ctx, cancel := context.WithTimeout(r.Context(), 5*time.Second)
 		defer cancel()

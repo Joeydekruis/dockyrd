@@ -27,8 +27,11 @@ jobs:
         run: make build
       - name: E2E smoke
         run: chmod +x e2e/smoke.sh && ./e2e/smoke.sh
+      - name: Install preflight (local binary)
+        run: chmod +x scripts/verify-install.sh && ./scripts/verify-install.sh
       - name: Playwright UI
         run: |
+          rm -rf /tmp/dockyard-e2e
           chmod +x scripts/e2e-webserver.sh
           pnpm --dir e2e install --frozen-lockfile || pnpm --dir e2e install
           pnpm --dir e2e exec playwright install chromium --with-deps
