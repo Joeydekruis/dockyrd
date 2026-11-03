@@ -369,10 +369,15 @@ export function AnalyticsPage() {
             <h2 className="text-lg font-semibold">Needs attention</h2>
             <ul className="mt-3 space-y-2">
               {needsAttention.length === 0 ? (
-                <li className="text-sm text-[var(--muted-foreground)]">Nothing flagged.</li>
+                <li className="text-sm text-[var(--muted-foreground)]">
+                  Nothing flagged.
+                </li>
               ) : (
                 needsAttention.slice(0, 5).map((ev) => (
-                  <li key={ev.id} className="flex items-center justify-between gap-2 text-sm">
+                  <li
+                    key={ev.id}
+                    className="flex items-center justify-between gap-2 text-sm"
+                  >
                     <span>{ev.title}</span>
                     {ev.action_href ? (
                       <Link href={ev.action_href} className="text-xs underline">

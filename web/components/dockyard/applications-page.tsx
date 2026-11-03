@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
-import { listApplications, type ApplicationRow } from "@/lib/api";
+import { type ApplicationRow, listApplications } from "@/lib/api";
 
 export function ApplicationsPage() {
   const [rows, setRows] = useState<ApplicationRow[]>([]);
@@ -44,13 +44,20 @@ export function ApplicationsPage() {
         ) : (
           <ul className="divide-y divide-[var(--border)] rounded-xl border border-[var(--border)] bg-[var(--surface)]">
             {rows.map((app) => (
-              <li key={app.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm">
+              <li
+                key={app.id}
+                className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm"
+              >
                 <div>
                   <p className="font-medium">{app.name}</p>
-                  <p className="text-xs text-[var(--muted-foreground)]">{app.project_name}</p>
+                  <p className="text-xs text-[var(--muted-foreground)]">
+                    {app.project_name}
+                  </p>
                 </div>
                 <div className="flex items-center gap-3">
-                  <span className="text-[var(--muted-foreground)]">{app.desired_state}</span>
+                  <span className="text-[var(--muted-foreground)]">
+                    {app.desired_state}
+                  </span>
                   <Link
                     href={`/projects/${app.project_slug}`}
                     className="text-xs text-[var(--primary)] underline"

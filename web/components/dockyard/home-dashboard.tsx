@@ -55,7 +55,9 @@ function QuickCard({
       {count !== undefined ? (
         <p className="mt-2 text-3xl font-semibold tabular-nums">{count}</p>
       ) : (
-        <p className="mt-2 text-sm text-[var(--muted-foreground)]">Server metrics & events</p>
+        <p className="mt-2 text-sm text-[var(--muted-foreground)]">
+          Server metrics & events
+        </p>
       )}
     </Link>
   );

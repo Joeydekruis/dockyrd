@@ -351,7 +351,11 @@ export type DockyardEvent = {
   action_href?: string;
 };
 
-export function listEvents(opts?: { limit?: number; category?: string; needsAttention?: boolean }) {
+export function listEvents(opts?: {
+  limit?: number;
+  category?: string;
+  needsAttention?: boolean;
+}) {
   const q = new URLSearchParams();
   if (opts?.limit) q.set("limit", String(opts.limit));
   if (opts?.category) q.set("category", opts.category);

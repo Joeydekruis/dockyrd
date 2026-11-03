@@ -99,7 +99,9 @@ export function InstanceSettingsPage() {
             )}
           </>
         ) : loading ? (
-          <p className="text-sm text-[var(--muted-foreground)]">Loading version…</p>
+          <p className="text-sm text-[var(--muted-foreground)]">
+            Loading version…
+          </p>
         ) : (
           <p className="text-sm text-[var(--muted-foreground)]">
             Could not load version info.

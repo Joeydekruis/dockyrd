@@ -1,5 +1,5 @@
-import { ApplicationsPage } from "@/components/dockyard/applications-page";
 import { AnalyticsPage } from "@/components/dockyard/analytics-page";
+import { ApplicationsPage } from "@/components/dockyard/applications-page";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import { DatabasesPage } from "@/components/dockyard/databases-page";
 import { EmptyState } from "@/components/dockyard/empty-state";

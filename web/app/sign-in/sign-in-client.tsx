@@ -102,7 +102,9 @@ export function SignInClient() {
                 setError(null);
               }}
             >
-              {useRecovery ? "Use authenticator app instead" : "Use a recovery code"}
+              {useRecovery
+                ? "Use authenticator app instead"
+                : "Use a recovery code"}
             </button>
           </>
         ) : (
