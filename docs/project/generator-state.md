@@ -4,12 +4,13 @@ _Last updated: 2026-11-03_
 
 ## Current focus
 
-**M1 · Apps** — #13–#15 pushed on `development`. Next: **#16** image deploy + reconciler.
+**M1 wrap-up** — #16–#18 coded locally; push + verify on Docker host (deploy + Caddy). M2: GitHub/Railpack/static.
 
 ## Blockers
 
-None.
+None (needs commit/push + maintainer close #16–#18).
 
 ## Next
 
-- #16: deploy job, container start, reconciler, Caddy reload after live deploy.
+- Integration smoke: `nginx:alpine` deploy + platform domain + redeploy on machine with Docker + dy-proxy.
+- M2 milestone planning (#19+).

@@ -1,6 +1,6 @@
 {
   "name": "dockyrd",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "private": true,
   "description": "Dockyard monorepo — app version source of truth for CHANGELOG"
 }

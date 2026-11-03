@@ -11,6 +11,7 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/config"
 	"github.com/Joeydekruis/dockyrd/internal/db"
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
+	"github.com/Joeydekruis/dockyrd/internal/events"
 	"github.com/Joeydekruis/dockyrd/internal/setup"
 	"github.com/Joeydekruis/dockyrd/web"
 )
@@ -24,8 +25,13 @@ type setupStatusResponse struct {
 }
 
 func Serve(cfg config.Config) error {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/v1/health", handleHealth)
+
+	hub := events.NewHub()
 
 	var q *sqlc.Queries
 	if _, err := os.Stat(cfg.DatabasePath()); err == nil {
@@ -36,11 +42,15 @@ func Serve(cfg config.Config) error {
 		defer conn.Close()
 		q = queries
 	}
-	deps := apiDeps{cfg: cfg, q: q}
+	deps := apiDeps{cfg: cfg, q: q, events: hub}
 	registerAPIRoutes(mux, deps)
 	mux.HandleFunc("GET /api/v1/setup/status", func(w http.ResponseWriter, r *http.Request) {
 		handleSetupStatus(w, r, q)
 	})
+
+	if q != nil {
+		startBackground(ctx, cfg, q, hub)
+	}
 
 	ui, err := web.Assets()
 	if err == nil {

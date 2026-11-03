@@ -1,5 +1,6 @@
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import { EmptyState } from "@/components/dockyard/empty-state";
+import { ProjectsPage } from "@/components/dockyard/projects-page";
 
 const pages = [
   { segment: "applications", title: "Applications", description: "Application list arrives in M1." },
@@ -20,6 +21,9 @@ export default async function SegmentPlaceholder({
   params: Promise<{ segment: string }>;
 }) {
   const { segment } = await params;
+  if (segment === "projects") {
+    return <ProjectsPage />;
+  }
   const page = pages.find((p) => p.segment === segment) ?? pages[0];
   return (
     <DashboardShell title={page.title}>

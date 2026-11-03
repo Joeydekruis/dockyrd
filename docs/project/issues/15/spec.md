@@ -11,12 +11,12 @@ size: M
 
 ## Acceptance criteria
 
-- [ ] `proxy.Render` builds Caddy JSON from app reverse-proxy routes (briefing bijlage B)
-- [ ] `proxy.Load` POSTs config to admin unix socket
-- [ ] `PlatformHostname(serviceSlug, publicIPv4)` → `<slug>-<rand4>.<ip-dashes>.sslip.io`
-- [ ] sqlc domains + minimal app `POST /api/v1/services` (image stub config) to attach domains in tests
-- [ ] `GET|POST /api/v1/services/{id}/domains`, `DELETE /api/v1/domains/{id}`
-- [ ] Go tests: render golden fragment, platform hostname, domains API flow
+- [x] `proxy.Render` builds Caddy JSON from app reverse-proxy routes (briefing bijlage B)
+- [x] `proxy.Load` POSTs config to admin unix socket
+- [x] `PlatformHostname(serviceSlug, publicIPv4)` → `<slug>-<rand4>.<ip-dashes>.sslip.io`
+- [x] sqlc domains + minimal app `POST /api/v1/services` (image stub config) to attach domains in tests
+- [x] `GET|POST /api/v1/services/{id}/domains`, `DELETE /api/v1/domains/{id}`
+- [x] Go tests: render golden fragment, platform hostname, domains API flow
 
 ## References
 

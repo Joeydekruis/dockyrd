@@ -1,0 +1,75 @@
+-- name: CreateDeployment :exec
+INSERT INTO deployments (
+  id,
+  service_id,
+  status,
+  trigger,
+  triggered_by,
+  image_ref,
+  queued_at
+) VALUES (?, ?, ?, ?, ?, ?, ?);
+
+-- name: GetDeploymentByID :one
+SELECT
+  id,
+  service_id,
+  status,
+  trigger,
+  triggered_by,
+  commit_sha,
+  commit_message,
+  commit_author,
+  branch,
+  image_ref,
+  release_path,
+  error,
+  build_log_path,
+  queued_at,
+  started_at,
+  finished_at
+FROM deployments
+WHERE id = ?
+LIMIT 1;
+
+-- name: ListDeploymentsForService :many
+SELECT
+  id,
+  service_id,
+  status,
+  trigger,
+  triggered_by,
+  image_ref,
+  error,
+  queued_at,
+  started_at,
+  finished_at
+FROM deployments
+WHERE service_id = ?
+ORDER BY queued_at DESC;
+
+-- name: UpdateDeploymentStatus :exec
+UPDATE deployments
+SET
+  status = ?,
+  error = ?,
+  started_at = COALESCE(?, started_at),
+  finished_at = COALESCE(?, finished_at)
+WHERE id = ?;
+
+-- name: SetDeploymentImageRef :exec
+UPDATE deployments
+SET image_ref = ?
+WHERE id = ?;
+
+-- name: SupersedeLiveDeployments :exec
+UPDATE deployments
+SET status = 'superseded', finished_at = ?
+WHERE service_id = ? AND status = 'live' AND id != ?;
+
+-- name: MarkInterruptedDeployments :exec
+UPDATE deployments
+SET
+  status = 'failed',
+  error = 'interrupted',
+  finished_at = ?
+WHERE status IN ('building', 'starting', 'healthchecking');

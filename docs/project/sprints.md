@@ -11,17 +11,28 @@ Backlog and sprints live on **GitHub** ([workflow](github-workflow.md)). Use **m
 
 Later sprints follow `roadmap.md` milestones **M1–M5**.
 
-## M1 · Sprint 1 issues (GitHub)
+## M1 · Sprint 1 issues (GitHub) — complete 2026-11-03
 
-Milestone: **M1 · Sprint 1 — Projects API**
+Milestone: **M1 · Sprint 1 — Projects API** (closed) — #13–#15
 
-| Issue | Title | Local spec |
-|--|--|--|
-| #13 | [M1] Local server bootstrap and projects REST API | `docs/project/issues/13/` |
-| #14 | [M1] Docker client, labels, and network bootstrap | `docs/project/issues/14/` |
-| #15 | [M1] Caddy config renderer, platform domains, domains API | `docs/project/issues/15/` |
+## M1 · Sprint 2 — Deploy & reconciler
 
-Planned follow-ups: image deploy + reconciler (#16), logs SSE + env vars (#17), Projects UI (#18).
+Milestone: **M1 · Sprint 2 — Deploy & reconciler** — #16
+
+| Issue | Title |
+|--|--|
+| #16 | Image deploy, job queue, reconciler, Caddy sync |
+
+## M1 · Sprint 3 — Logs, env, UI
+
+Milestone: **M1 · Sprint 3 — Logs, env & Projects UI** — #17–#18
+
+| Issue | Title |
+|--|--|
+| #17 | Encrypted env vars, runtime logs, SSE |
+| #18 | Projects dashboard wired to API |
+
+Post-M1 (briefing M1 exit): Dockerfile/Railpack builds (M2), app detail screens (§17), load-tested zero-downtime redeploy.
 
 ## Sprint 1 issues (GitHub)
 

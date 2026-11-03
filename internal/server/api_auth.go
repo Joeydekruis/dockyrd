@@ -14,14 +14,16 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/auth"
 	"github.com/Joeydekruis/dockyrd/internal/config"
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
+	"github.com/Joeydekruis/dockyrd/internal/events"
 	"github.com/Joeydekruis/dockyrd/internal/setup"
 )
 
 const sessionCookie = "dy_session"
 
 type apiDeps struct {
-	cfg config.Config
-	q   *sqlc.Queries
+	cfg    config.Config
+	q      *sqlc.Queries
+	events *events.Hub
 }
 
 type loginRequest struct {
@@ -52,6 +54,10 @@ func registerAPIRoutes(mux *http.ServeMux, deps apiDeps) {
 	registerProjectRoutes(mux, deps)
 	registerServiceRoutes(mux, deps)
 	registerDomainRoutes(mux, deps)
+	registerDeploymentRoutes(mux, deps)
+	registerVariableRoutes(mux, deps)
+	registerLogRoutes(mux, deps)
+	registerStreamRoutes(mux, deps)
 }
 
 func (d apiDeps) handleLogin(w http.ResponseWriter, r *http.Request) {

@@ -11,12 +11,12 @@ Bootstrap the local `servers` row on setup and expose authenticated `/api/v1/pro
 
 ## Acceptance criteria
 
-- [ ] Setup completion creates one local `servers` row (idempotent if already present)
-- [ ] sqlc queries for servers, projects, environments, project_members
-- [ ] `GET|POST /api/v1/projects`, `GET|PATCH|DELETE /api/v1/projects/{id}` (session cookie auth)
-- [ ] `POST /projects` creates default `production` environment and adds creator to `project_members`
-- [ ] Slug derived from name, unique across projects
-- [ ] Go tests cover setup → create → list → patch → delete
+- [x] Setup completion creates one local `servers` row (idempotent if already present)
+- [x] sqlc queries for servers, projects, environments, project_members
+- [x] `GET|POST /api/v1/projects`, `GET|PATCH|DELETE /api/v1/projects/{id}` (session cookie auth)
+- [x] `POST /projects` creates default `production` environment and adds creator to `project_members`
+- [x] Slug derived from name, unique across projects
+- [x] Go tests cover setup → create → list → patch → delete
 
 ## References
 

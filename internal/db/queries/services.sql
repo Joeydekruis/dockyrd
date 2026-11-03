@@ -32,3 +32,25 @@ SELECT
 FROM services
 WHERE id = ?
 LIMIT 1;
+
+-- name: SetServiceLiveDeployment :exec
+UPDATE services
+SET live_deployment_id = ?, updated_at = ?
+WHERE id = ?;
+
+-- name: ListServicesByProject :many
+SELECT
+  s.id,
+  s.environment_id,
+  s.kind,
+  s.name,
+  s.slug,
+  s.desired_state,
+  s.config,
+  s.live_deployment_id,
+  s.created_at,
+  s.updated_at
+FROM services s
+JOIN environments e ON e.id = s.environment_id
+WHERE e.project_id = ?
+ORDER BY s.created_at DESC;

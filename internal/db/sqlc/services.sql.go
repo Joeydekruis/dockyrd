@@ -104,3 +104,72 @@ func (q *Queries) GetServiceByID(ctx context.Context, id string) (Service, error
 	)
 	return i, err
 }
+
+const listServicesByProject = `-- name: ListServicesByProject :many
+SELECT
+  s.id,
+  s.environment_id,
+  s.kind,
+  s.name,
+  s.slug,
+  s.desired_state,
+  s.config,
+  s.live_deployment_id,
+  s.created_at,
+  s.updated_at
+FROM services s
+JOIN environments e ON e.id = s.environment_id
+WHERE e.project_id = ?
+ORDER BY s.created_at DESC
+`
+
+func (q *Queries) ListServicesByProject(ctx context.Context, projectID string) ([]Service, error) {
+	rows, err := q.db.QueryContext(ctx, listServicesByProject, projectID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Service
+	for rows.Next() {
+		var i Service
+		if err := rows.Scan(
+			&i.ID,
+			&i.EnvironmentID,
+			&i.Kind,
+			&i.Name,
+			&i.Slug,
+			&i.DesiredState,
+			&i.Config,
+			&i.LiveDeploymentID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const setServiceLiveDeployment = `-- name: SetServiceLiveDeployment :exec
+UPDATE services
+SET live_deployment_id = ?, updated_at = ?
+WHERE id = ?
+`
+
+type SetServiceLiveDeploymentParams struct {
+	LiveDeploymentID sql.NullString
+	UpdatedAt        sql.NullInt64
+	ID               string
+}
+
+func (q *Queries) SetServiceLiveDeployment(ctx context.Context, arg SetServiceLiveDeploymentParams) error {
+	_, err := q.db.ExecContext(ctx, setServiceLiveDeployment, arg.LiveDeploymentID, arg.UpdatedAt, arg.ID)
+	return err
+}

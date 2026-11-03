@@ -67,3 +67,24 @@ export function completeSetup(input: {
     json: input,
   });
 }
+
+export type Project = {
+  id: string;
+  server_id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  created_at: number;
+  updated_at: number;
+};
+
+export function listProjects() {
+  return apiFetch<{ projects: Project[] }>("/api/v1/projects");
+}
+
+export function createProject(input: { name: string; description?: string }) {
+  return apiFetch<Project>("/api/v1/projects", {
+    method: "POST",
+    json: input,
+  });
+}

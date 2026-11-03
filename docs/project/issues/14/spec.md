@@ -11,12 +11,12 @@ Thin `internal/docker` wrapper: moby client, Dockyard label contract, determinis
 
 ## Acceptance criteria
 
-- [ ] `internal/docker` package with label keys/helpers per briefing §3.3–3.4
-- [ ] Naming helpers: edge network, project network, app container name
-- [ ] Client connects via `DOCKER_HOST` or default unix socket; `Ping` for health
-- [ ] `EnsureEdgeNetwork`, `EnsureProjectNetwork` idempotent (create if missing)
-- [ ] `ListManaged` filters containers with `dev.dockyard.managed=true`
-- [ ] Unit tests for labels/names; optional `integration` test when Docker available
+- [x] `internal/docker` package with label keys/helpers per briefing §3.3–3.4
+- [x] Naming helpers: edge network, project network, app container name
+- [x] Client connects via `DOCKER_HOST` or default unix socket; `Ping` for health
+- [x] `EnsureEdgeNetwork`, `EnsureProjectNetwork` idempotent (create if missing)
+- [x] `ListManaged` filters containers with `dev.dockyard.managed=true`
+- [x] Unit tests for labels/names; optional `integration` test when Docker available
 
 ## References
 
