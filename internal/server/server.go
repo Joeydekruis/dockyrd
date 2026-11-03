@@ -1,12 +1,17 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"io/fs"
 	"net/http"
+	"os"
 	"strings"
 
-	"github.com/Joeydekruis/dockyrd/internal/auth"
+	"github.com/Joeydekruis/dockyrd/internal/config"
+	"github.com/Joeydekruis/dockyrd/internal/db"
+	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
+	"github.com/Joeydekruis/dockyrd/internal/setup"
 	"github.com/Joeydekruis/dockyrd/web"
 )
 
@@ -14,17 +19,45 @@ type healthResponse struct {
 	Status string `json:"status"`
 }
 
-func Serve(addr string) error {
+type setupStatusResponse struct {
+	Complete bool `json:"complete"`
+}
+
+func Serve(cfg config.Config) error {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/v1/health", handleHealth)
-	mux.HandleFunc("GET /api/v1/setup/status", auth.HandleSetupStatus)
+
+	var q *sqlc.Queries
+	if _, err := os.Stat(cfg.DatabasePath()); err == nil {
+		conn, queries, err := db.Open(cfg.DatabasePath())
+		if err != nil {
+			return err
+		}
+		defer conn.Close()
+		q = queries
+	}
+	mux.HandleFunc("GET /api/v1/setup/status", func(w http.ResponseWriter, r *http.Request) {
+		handleSetupStatus(w, r, q)
+	})
 
 	ui, err := web.Assets()
 	if err == nil {
 		mountUI(mux, ui)
 	}
 
-	return http.ListenAndServe(addr, mux)
+	return http.ListenAndServe(cfg.Listen, mux)
+}
+
+func handleSetupStatus(w http.ResponseWriter, _ *http.Request, q *sqlc.Queries) {
+	w.Header().Set("Content-Type", "application/json")
+	complete := false
+	if q != nil {
+		ok, err := setup.IsComplete(context.Background(), q)
+		if err == nil {
+			complete = ok
+		}
+	}
+	_ = json.NewEncoder(w).Encode(setupStatusResponse{Complete: complete})
 }
 
 func handleHealth(w http.ResponseWriter, _ *http.Request) {

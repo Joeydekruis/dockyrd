@@ -31,6 +31,14 @@ Issue numbers may differ after creation — update this table and rename `docs/p
 | #5 | [foundation] Config paths and environment | `docs/project/issues/5/` |
 | #6 | [foundation] Auth package stubs | `docs/project/issues/6/` |
 
+## Sprint 3 issues (GitHub)
+
+| Issue | Title | Local spec |
+|--|--|--|
+| #7 | [foundation] install.sh skeleton and paths | `docs/project/issues/7/` |
+| #8 | [foundation] systemd unit and service install | `docs/project/issues/8/` |
+| #9 | [foundation] dockyard init and setup-token | `docs/project/issues/9/` |
+
 ## Pickup order
 
 1. Sprint 1 issues in table order

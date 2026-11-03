@@ -1,0 +1,21 @@
+[Unit]
+Description=Dockyard
+After=network-online.target docker.service
+Requires=docker.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/dockyard serve
+Restart=always
+RestartSec=2
+EnvironmentFile=-/etc/dockyard/dockyard.env
+LimitNOFILE=65536
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/dockyard /etc/dockyard /usr/local/bin
+
+[Install]
+WantedBy=multi-user.target
