@@ -39,6 +39,14 @@ Issue numbers may differ after creation — update this table and rename `docs/p
 | #8 | [foundation] systemd unit and service install | `docs/project/issues/8/` |
 | #9 | [foundation] dockyard init and setup-token | `docs/project/issues/9/` |
 
+## Sprint 4 issues (GitHub)
+
+| Issue | Title | Local spec |
+|--|--|--|
+| #10 | [foundation] AppShell, sidebar, and empty dashboard | `docs/project/issues/10/` |
+| #11 | [foundation] Sign-in, setup wizard, and auth API | `docs/project/issues/11/` |
+| #12 | [foundation] Command palette skeleton | `docs/project/issues/12/` |
+
 ## Pickup order
 
 1. Sprint 1 issues in table order

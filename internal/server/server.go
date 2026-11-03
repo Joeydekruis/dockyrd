@@ -36,6 +36,8 @@ func Serve(cfg config.Config) error {
 		defer conn.Close()
 		q = queries
 	}
+	deps := apiDeps{cfg: cfg, q: q}
+	registerAPIRoutes(mux, deps)
 	mux.HandleFunc("GET /api/v1/setup/status", func(w http.ResponseWriter, r *http.Request) {
 		handleSetupStatus(w, r, q)
 	})

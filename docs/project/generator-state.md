@@ -4,7 +4,7 @@ _Last updated: (session)_
 
 ## Current focus
 
-**M0 · Sprint 4** — AppShell, login/setup routes, ⌘K skeleton (issues TBD on GitHub).
+**M1 · Apps** — not started; plan GitHub issues when picking up M1.
 
 ## Blockers
 
@@ -12,4 +12,4 @@ None.
 
 ## Next
 
-Create Sprint 4 milestone/issues; implement dashboard shell per `docs/design-index.json`.
+M0 closed on `development` (2026-11-03). Maintainer verify Sprint 4 handoff #10–#12.
