@@ -18,6 +18,8 @@ _Finished: 2026-11-03_
 
 - **M5 milestone closed** — doctor, admin CLI, CI, self-update, e2e, GoReleaser, Playwright, server API, install verify, user docs (#35–#44); gates `verify-m5-smoke.sh`, `verify-install.sh`, `make e2e`
 - **Issue specs** — AC marked complete for #35–#44; `roadmap.md` / `sprints.md`
+- **Release** — `development` merged to `main`; tag **`v0.0.21`** (M3 SMTP, M4 team, M5 ship since v0.0.18)
+- **`docs/project/m5-exit.md`** — pre-release checklist
 
 ## [0.0.20] - 2026-11-03
 
