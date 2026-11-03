@@ -4,13 +4,14 @@ _Last updated: 2026-11-03_
 
 ## Current focus
 
-**M4 Sprint 2:** #29 team shipped @ `1230a7b`; #30 invite accept + #31 search ready to push.
+**M4 Sprint 2** — #29–#32 shipped on `development` (team, invite accept, search, 2FA/profile).
+
+## Next (M4 remainder)
+
+- Analytics: running containers + Docker cleanup (Docker API)
+- Forgot-password flow (placeholder route exists)
+- Optional: recovery code field on sign-in MFA step; disable 2FA; owner mandate 2FA
 
 ## Blockers
 
-None. M3 (#23–#26) awaits maintainer close; M4 Sprint 2 (team/2FA/audit/search) not started.
-
-## Next
-
-- Commit + push M4 slice (Refs #27 #28), CHANGELOG 0.0.9, GitHub handoff comments.
-- M4 Sprint 2: team users, invites, 2FA login step, audit log, ⌘K search, container metrics table.
+None.
