@@ -1,0 +1,2351 @@
+{
+    "$schema_note": "Navigation index for the Dockyrd UI design export. Line numbers are 1-based and refer to the files as published (project/<file>). Every page is a self-contained .dc.html with inline styles; use `search_anchors` strings if line numbers drift.",
+    "project": {
+     "name": "Dockyrd",
+     "spelling": "Always 'Dockyrd' (not Dockyard).",
+     "description": "Open-source, self-hosted deployment platform; lean, reliable, safe alternative to Coolify. Positioning: the Sevalla experience on your own hardware, without Coolify complexity.",
+     "language_of_ui": "English",
+     "design_language": "Calendly-inspired, light mode only"
+    },
+    "format": {
+     "artifact_type": "Claude Design (canvas of artboards)",
+     "canvas_file": "project/canvas.json (boards: x/y/w/h/title, order[]).",
+     "artboard_files": "project/*.dc.html, one per artboard; each is a \"Design Component\".",
+     "dc_syntax": {
+      "root": "<x-dc> ... </x-dc>",
+      "head_assets": "<helmet> contains font <link> and a tiny <style> (hover rules for .nav, .btn-primary, .btn-outline, .row, .name)",
+      "bindings": "{{name}} or {{obj.field}} holes only (no expressions)",
+      "loops": "<sc-for list=\"{{items}}\" as=\"x\" hint-placeholder-count=\"N\">",
+      "conditionals": "<sc-if value=\"{{flag}}\" hint-placeholder-val=\"{{ true }}\">",
+      "events": "onClick/onInput/onSubmit/onKeyDown/onMouseEnter=\"{{handler}}\"",
+      "logic": "<script type=\"text/x-dc\" data-dc-script data-props='{\"$preview\":{\"width\":1360,\"height\":N}}'> class Component extends DCLogic { constructor(props){super(props);this.state={...}} renderVals(){ return {...bindings} } }",
+      "support": "<script src=\"./support.js\"> in <head> must stay"
+     },
+     "conventions": [
+      "All styling is inline style=\"\" attributes (no CSS classes except the hover helpers).",
+      "Artboards are fluid (expand: fill), width 1360 preview, flex-wrap layouts.",
+      "No <sc-for> inside <svg> or <table>; charts bind attributes like d=\"{{path}}\"; tables are div role=\"table\".",
+      "Touch targets >= 44px; real <button>/<a>/<input> with aria-labels.",
+      "Sample data is consistent across pages (see sample_data)."
+     ]
+    },
+    "design_tokens": {
+     "colors": {
+      "page_bg": "#FAF9F8",
+      "surface": "#FFFFFF",
+      "border": "#ECEAE6",
+      "input_border": "#E1DFDA",
+      "ink_navy": "#0B1F3A",
+      "muted_text": "#5A6577",
+      "secondary_text": "#3A4A63",
+      "chip_bg": "#F1F0ED",
+      "accent_blue": "#3B93F5",
+      "link_blue": "#0B57C9",
+      "light_blue_active": "#E3F0FF",
+      "banner_blue": "#8EBEFF",
+      "primary_button": "#0B1F3A",
+      "primary_button_hover": "#1A3358",
+      "secondary_button_border": "#CBD0D8",
+      "hover_row": "#F6F5F2",
+      "danger": "#B3261E"
+     },
+     "hero_gradient": "radial-gradient(circle at 85% 15%, rgba(214,150,230,.55), transparent 45%), radial-gradient(circle at 70% 95%, rgba(255,160,190,.4), transparent 40%), linear-gradient(120deg,#2F4A8A,#4767BC 55%,#7088DA)",
+     "status_pills": {
+      "ok": {
+       "fg": "#176B3D",
+       "bg": "#E6F4EC",
+       "dot": "#1A7F4B"
+      },
+      "warn": {
+       "fg": "#8A5200",
+       "bg": "#FBF0DC",
+       "dot": "#D98A00"
+      },
+      "err": {
+       "fg": "#B3261E",
+       "bg": "#FBE8E6",
+       "dot": "#B3261E"
+      },
+      "idle": {
+       "fg": "#4A5361",
+       "bg": "#ECEEF1",
+       "dot": "#6B7686"
+      },
+      "info": {
+       "fg": "#0B3D91",
+       "bg": "#E3F0FF"
+      }
+     },
+     "typography": {
+      "sans": "Geist (400/500/600)",
+      "mono": "Geist Mono (400/500)",
+      "h1": "44px / 600 / letter-spacing -0.04em (detail page h1 36px)",
+      "h2": "20px / 600 / -0.03em",
+      "body": "14px / 1.45",
+      "mono_labels": "Geist Mono 11-12px, uppercase, letter-spacing .06em (chips, pills, field labels, stat labels)",
+      "buttons": "Geist Mono 12px, weight 500, uppercase, letter-spacing .02em"
+     },
+     "shape": {
+      "card_radius": "20px",
+      "button_radius": "10px",
+      "chip_radius": "6px",
+      "input_radius": "10px",
+      "pill_radius": "6px (status), 999px (segmented control)"
+     },
+     "logo": {
+      "sidebar_light": "inline SVG wordmark, width 150, aria-label=\"Dockyrd\", inside <a aria-label=\"Dockyrd home\"> in the sidebar",
+      "auth_dark": "white wordmark, width 170, in the gradient panel of SignIn/ForgotPassword",
+      "mask_ids": "lk1 (light) / lk2 (dark)"
+     }
+    },
+    "shared_blocks": {
+     "sidebar": {
+      "files": "all pages except SignIn and ForgotPassword (Settings uses a variant)",
+      "anchor": "<aside",
+      "structure": [
+       "logo link",
+       "nav aria-label=\"Main\": Dashboard, Projects",
+       "div role=\"group\" aria-label=\"Project sections\": Applications, Databases, Static sites, Object storage (full menu items, margin-bottom 28px)",
+       "mono label \"Server\" then Analytics (href Server.dc.html)",
+       "Settings (href Settings.dc.html)",
+       "server health card at bottom (green dot, v0.1.0 chip)"
+      ],
+      "active_item_style": "background #E3F0FF; color #0B1F3A; aria-current=\"page\"",
+      "search_anchors": [
+       "aria-label=\"Project sections\"",
+       ">Server</span>",
+       "aria-label=\"Dockyrd home\""
+      ]
+     },
+     "settings_sidebar": {
+      "file": "Settings.dc.html",
+      "anchor": "nav aria-label=\"Settings\"",
+      "structure": [
+       "Back to dashboard",
+       "Personal: Profile & security (active), Notifications, API tokens",
+       "Instance: General, Team, Git providers, Backup storage, Updates"
+      ]
+     },
+     "top_header": {
+      "anchor": "<header",
+      "content": "breadcrumb nav aria-label=\"Breadcrumb\" left; right: search trigger link (aria-label=\"Search pages, resources and actions\", href Search.dc.html, shows ⌘K) + secondary button \"Docs\".",
+      "note": "The \"Add service\" header button was removed everywhere."
+     },
+     "announcement_banner": {
+      "anchor": "role=\"region\" aria-label=\"Announcement\"",
+      "state": "banner (dismiss)",
+      "color": "#8EBEFF"
+     },
+     "buttons": {
+      "primary": "background #0B1F3A, white mono uppercase text, class btn-primary",
+      "secondary": "transparent, border 1.5px solid #CBD0D8, navy mono uppercase text, class btn-outline",
+      "hero_on_gradient": "Main.dc.html classes btn-white / btn-ghost"
+     },
+     "chips": "padding 3px 8px; radius 6px; bg #F1F0ED; mono 11px uppercase .06em",
+     "stat_tile": "white card radius 20, mono uppercase label, 40px/600 number, 13px muted sub-text",
+     "list_row": "class \"row\", border-top 1px #ECEAE6, icon tile 40px #E3F0FF, name link class \"name\", status pill, mono url, sha chip + message right-aligned",
+     "tabs": "role=\"tablist\" buttons with 2px bottom border (active navy); state.tab drives sc-if panels",
+     "switch": "button role=\"switch\" aria-checked; state keys auto/lfs/tf"
+    },
+    "navigation_graph": {
+     "Dashboard.dc.html": [
+      "Applications.dc.html",
+      "Dashboard.dc.html",
+      "Databases.dc.html",
+      "Main.dc.html",
+      "ObjectStorage.dc.html",
+      "Project.dc.html",
+      "Search.dc.html",
+      "Server.dc.html",
+      "Settings.dc.html",
+      "StaticSites.dc.html"
+     ],
+     "Main.dc.html": [
+      "Applications.dc.html",
+      "Dashboard.dc.html",
+      "Databases.dc.html",
+      "Main.dc.html",
+      "ObjectStorage.dc.html",
+      "Project.dc.html",
+      "Search.dc.html",
+      "Server.dc.html",
+      "Settings.dc.html",
+      "StaticSites.dc.html"
+     ],
+     "Project.dc.html": [
+      "Applications.dc.html",
+      "Dashboard.dc.html",
+      "Databases.dc.html",
+      "Main.dc.html",
+      "ObjectStorage.dc.html",
+      "Project.dc.html",
+      "Search.dc.html",
+      "Server.dc.html",
+      "Settings.dc.html",
+      "StaticSites.dc.html"
+     ],
+     "Server.dc.html": [
+      "Applications.dc.html",
+      "Dashboard.dc.html",
+      "Databases.dc.html",
+      "Main.dc.html",
+      "ObjectStorage.dc.html",
+      "Project.dc.html",
+      "Search.dc.html",
+      "Server.dc.html",
+      "Settings.dc.html",
+      "StaticSites.dc.html"
+     ],
+     "Applications.dc.html": [
+      "Applications.dc.html",
+      "Dashboard.dc.html",
+      "Databases.dc.html",
+      "Main.dc.html",
+      "ObjectStorage.dc.html",
+      "Project.dc.html",
+      "Search.dc.html",
+      "Server.dc.html",
+      "Settings.dc.html",
+      "StaticSites.dc.html"
+     ],
+     "Databases.dc.html": [
+      "Applications.dc.html",
+      "Dashboard.dc.html",
+      "Databases.dc.html",
+      "Main.dc.html",
+      "ObjectStorage.dc.html",
+      "Search.dc.html",
+      "Server.dc.html",
+      "Settings.dc.html",
+      "StaticSites.dc.html"
+     ],
+     "StaticSites.dc.html": [
+      "Applications.dc.html",
+      "Dashboard.dc.html",
+      "Databases.dc.html",
+      "Main.dc.html",
+      "ObjectStorage.dc.html",
+      "Search.dc.html",
+      "Server.dc.html",
+      "Settings.dc.html",
+      "StaticSites.dc.html"
+     ],
+     "ObjectStorage.dc.html": [
+      "Applications.dc.html",
+      "Dashboard.dc.html",
+      "Databases.dc.html",
+      "Main.dc.html",
+      "ObjectStorage.dc.html",
+      "Search.dc.html",
+      "Server.dc.html",
+      "Settings.dc.html",
+      "StaticSites.dc.html"
+     ],
+     "StaticSiteDetail.dc.html": [
+      "Applications.dc.html",
+      "Dashboard.dc.html",
+      "Databases.dc.html",
+      "Main.dc.html",
+      "ObjectStorage.dc.html",
+      "Project.dc.html",
+      "Search.dc.html",
+      "Server.dc.html",
+      "Settings.dc.html",
+      "StaticSites.dc.html"
+     ],
+     "StaticSiteDeployments.dc.html": [
+      "Applications.dc.html",
+      "Dashboard.dc.html",
+      "Databases.dc.html",
+      "Main.dc.html",
+      "ObjectStorage.dc.html",
+      "Project.dc.html",
+      "Search.dc.html",
+      "Server.dc.html",
+      "Settings.dc.html",
+      "StaticSites.dc.html"
+     ],
+     "StaticSiteLogs.dc.html": [
+      "Applications.dc.html",
+      "Dashboard.dc.html",
+      "Databases.dc.html",
+      "Main.dc.html",
+      "ObjectStorage.dc.html",
+      "Project.dc.html",
+      "Search.dc.html",
+      "Server.dc.html",
+      "Settings.dc.html",
+      "StaticSites.dc.html"
+     ],
+     "StaticSiteAnalytics.dc.html": [
+      "Applications.dc.html",
+      "Dashboard.dc.html",
+      "Databases.dc.html",
+      "Main.dc.html",
+      "ObjectStorage.dc.html",
+      "Project.dc.html",
+      "Search.dc.html",
+      "Server.dc.html",
+      "Settings.dc.html",
+      "StaticSites.dc.html"
+     ],
+     "StaticSiteEnvironment.dc.html": [
+      "Applications.dc.html",
+      "Dashboard.dc.html",
+      "Databases.dc.html",
+      "Main.dc.html",
+      "ObjectStorage.dc.html",
+      "Project.dc.html",
+      "Search.dc.html",
+      "Server.dc.html",
+      "Settings.dc.html",
+      "StaticSites.dc.html"
+     ],
+     "StaticSiteDomains.dc.html": [
+      "Applications.dc.html",
+      "Dashboard.dc.html",
+      "Databases.dc.html",
+      "Main.dc.html",
+      "ObjectStorage.dc.html",
+      "Project.dc.html",
+      "Search.dc.html",
+      "Server.dc.html",
+      "Settings.dc.html",
+      "StaticSites.dc.html"
+     ],
+     "StaticSiteSettings.dc.html": [
+      "Applications.dc.html",
+      "Dashboard.dc.html",
+      "Databases.dc.html",
+      "Main.dc.html",
+      "ObjectStorage.dc.html",
+      "Project.dc.html",
+      "Search.dc.html",
+      "Server.dc.html",
+      "Settings.dc.html",
+      "StaticSites.dc.html"
+     ],
+     "SignIn.dc.html": [
+      "ForgotPassword.dc.html"
+     ],
+     "ForgotPassword.dc.html": [
+      "SignIn.dc.html"
+     ],
+     "Settings.dc.html": [
+      "Dashboard.dc.html",
+      "Search.dc.html"
+     ],
+     "Search.dc.html": [
+      "Applications.dc.html",
+      "Dashboard.dc.html",
+      "Databases.dc.html",
+      "Main.dc.html",
+      "ObjectStorage.dc.html",
+      "Server.dc.html",
+      "Settings.dc.html",
+      "StaticSites.dc.html"
+     ]
+    },
+    "pages": [
+     {
+      "file": "Dashboard.dc.html",
+      "name": "Dashboard",
+      "route": "/",
+      "kind": "page",
+      "desc": "Home overview: greeting, 4 stat tiles (Applications 9, Databases 5, Static sites 2, Domains 7), attention bar, recently updated, latest deployments, server usage chart (cpu/mem SVG built in renderVals via line()), backups.",
+      "nav_active": "Dashboard",
+      "canvas": {
+       "x": 0,
+       "y": 0,
+       "w": 1360,
+       "h": 1320,
+       "title": "Dashboard"
+      },
+      "lines": 334,
+      "bytes": 32500,
+      "landmarks": {
+       "x_dc_open": 9,
+       "aside_sidebar": 37,
+       "header_topbar": 91,
+       "main_content": 101,
+       "script_logic": 284
+      },
+      "headings": [
+       {
+        "line": 108,
+        "tag": "h1",
+        "text": "Dashboard"
+       },
+       {
+        "line": 157,
+        "tag": "h2",
+        "text": "Recently updated"
+       },
+       {
+        "line": 188,
+        "tag": "h2",
+        "text": "Latest deployments"
+       },
+       {
+        "line": 214,
+        "tag": "h2",
+        "text": "Server usage"
+       },
+       {
+        "line": 263,
+        "tag": "h2",
+        "text": "Backups"
+       }
+      ],
+      "aria_regions": [
+       {
+        "line": 40,
+        "element": "nav",
+        "aria": "Main"
+       },
+       {
+        "line": 49,
+        "element": "div",
+        "aria": "Project sections"
+       },
+       {
+        "line": 92,
+        "element": "nav",
+        "aria": "Breadcrumb"
+       },
+       {
+        "line": 112,
+        "element": "section",
+        "aria": "Services overview"
+       },
+       {
+        "line": 147,
+        "element": "section",
+        "aria": "Needs attention"
+       },
+       {
+        "line": 155,
+        "element": "section",
+        "aria": "upd-h"
+       },
+       {
+        "line": 186,
+        "element": "section",
+        "aria": "dep-h"
+       },
+       {
+        "line": 211,
+        "element": "section",
+        "aria": "use-h"
+       },
+       {
+        "line": 260,
+        "element": "section",
+        "aria": "bkp-h"
+       }
+      ],
+      "state_keys": [
+       "banner"
+      ],
+      "bindings": [
+       "b",
+       "backups",
+       "cpuLine",
+       "d",
+       "deploys",
+       "dismiss",
+       "false",
+       "memLine",
+       "showBanner",
+       "true",
+       "u",
+       "updated"
+      ],
+      "sc_for_lists": [
+       "backups",
+       "deploys",
+       "updated"
+      ],
+      "sc_if_flags": [
+       "showBanner"
+      ],
+      "links_to": [
+       "Applications.dc.html",
+       "Dashboard.dc.html",
+       "Databases.dc.html",
+       "Main.dc.html",
+       "ObjectStorage.dc.html",
+       "Project.dc.html",
+       "Search.dc.html",
+       "Server.dc.html",
+       "Settings.dc.html",
+       "StaticSites.dc.html"
+      ],
+      "handlers": [
+       {
+        "label": "Dismiss announcement",
+        "handler": "dismiss"
+       }
+      ]
+     },
+     {
+      "file": "Main.dc.html",
+      "name": "Projects",
+      "route": "/projects",
+      "kind": "page",
+      "desc": "Projects list. Banner with dismiss, gradient hero with quick-add card (state kind = app|db|site), server strip, project card grid, recent activity.",
+      "nav_active": "Projects",
+      "canvas": {
+       "x": 1440,
+       "y": 0,
+       "w": 1360,
+       "h": 1240,
+       "title": "Projects"
+      },
+      "lines": 271,
+      "bytes": 27331,
+      "landmarks": {
+       "x_dc_open": 9,
+       "aside_sidebar": 40,
+       "header_topbar": 94,
+       "main_content": 104,
+       "script_logic": 212
+      },
+      "headings": [
+       {
+        "line": 109,
+        "tag": "h1",
+        "text": "Deploy to your own servers. Without the mess."
+       },
+       {
+        "line": 137,
+        "tag": "h2",
+        "text": "{{kindTitle}}"
+       },
+       {
+        "line": 146,
+        "tag": "h2",
+        "text": "Server"
+       },
+       {
+        "line": 167,
+        "tag": "h2",
+        "text": "Your projects"
+       },
+       {
+        "line": 193,
+        "tag": "h2",
+        "text": "Recent activity"
+       }
+      ],
+      "aria_regions": [
+       {
+        "line": 43,
+        "element": "nav",
+        "aria": "Main"
+       },
+       {
+        "line": 52,
+        "element": "div",
+        "aria": "Project sections"
+       },
+       {
+        "line": 95,
+        "element": "nav",
+        "aria": "Breadcrumb"
+       },
+       {
+        "line": 106,
+        "element": "section",
+        "aria": "Welcome"
+       },
+       {
+        "line": 122,
+        "element": "div",
+        "aria": "Service type"
+       },
+       {
+        "line": 144,
+        "element": "section",
+        "aria": "srv-h"
+       },
+       {
+        "line": 172,
+        "element": "section",
+        "aria": "All projects"
+       },
+       {
+        "line": 192,
+        "element": "section",
+        "aria": "act-h"
+       }
+      ],
+      "state_keys": [
+       "kind",
+       "banner"
+      ],
+      "bindings": [
+       "a",
+       "activity",
+       "appBg",
+       "appBorder",
+       "appPressed",
+       "dbBg",
+       "dbBorder",
+       "dbPressed",
+       "dismiss",
+       "e",
+       "kindText",
+       "kindTitle",
+       "m",
+       "meters",
+       "p",
+       "pickApp",
+       "pickDb",
+       "pickSite",
+       "projects",
+       "showBanner",
+       "siteBg",
+       "siteBorder",
+       "sitePressed",
+       "true"
+      ],
+      "sc_for_lists": [
+       "activity",
+       "meters",
+       "projects"
+      ],
+      "sc_if_flags": [
+       "showBanner"
+      ],
+      "links_to": [
+       "Applications.dc.html",
+       "Dashboard.dc.html",
+       "Databases.dc.html",
+       "Main.dc.html",
+       "ObjectStorage.dc.html",
+       "Project.dc.html",
+       "Search.dc.html",
+       "Server.dc.html",
+       "Settings.dc.html",
+       "StaticSites.dc.html"
+      ],
+      "handlers": [
+       {
+        "label": "Dismiss announcement",
+        "handler": "dismiss"
+       },
+       {
+        "label": "App",
+        "handler": "pickApp"
+       },
+       {
+        "label": "Database",
+        "handler": "pickDb"
+       },
+       {
+        "label": "Static site",
+        "handler": "pickSite"
+       }
+      ]
+     },
+     {
+      "file": "Project.dc.html",
+      "name": "Project overview (Client X)",
+      "route": "/projects/client-x",
+      "kind": "page",
+      "desc": "One project: header, tabs Services / Project settings, service cards, dashed Add-service card. Production/Staging switcher was removed; state.env stays \"production\".",
+      "nav_active": "Projects",
+      "canvas": {
+       "x": 2880,
+       "y": 0,
+       "w": 1360,
+       "h": 960,
+       "title": "Project overview"
+      },
+      "lines": 220,
+      "bytes": 22264,
+      "landmarks": {
+       "x_dc_open": 9,
+       "aside_sidebar": 37,
+       "header_topbar": 91,
+       "main_content": 105,
+       "script_logic": 171
+      },
+      "headings": [
+       {
+        "line": 109,
+        "tag": "h1",
+        "text": "Client X"
+       }
+      ],
+      "aria_regions": [
+       {
+        "line": 40,
+        "element": "nav",
+        "aria": "Main"
+       },
+       {
+        "line": 49,
+        "element": "div",
+        "aria": "Project sections"
+       },
+       {
+        "line": 92,
+        "element": "nav",
+        "aria": "Breadcrumb"
+       },
+       {
+        "line": 114,
+        "element": "nav",
+        "aria": "Project"
+       },
+       {
+        "line": 119,
+        "element": "section",
+        "aria": "Services"
+       }
+      ],
+      "state_keys": [
+       "env",
+       "banner"
+      ],
+      "bindings": [
+       "count",
+       "dismiss",
+       "envLabel",
+       "false",
+       "s",
+       "services",
+       "showBanner",
+       "true"
+      ],
+      "sc_for_lists": [
+       "services"
+      ],
+      "sc_if_flags": [
+       "showBanner"
+      ],
+      "links_to": [
+       "Applications.dc.html",
+       "Dashboard.dc.html",
+       "Databases.dc.html",
+       "Main.dc.html",
+       "ObjectStorage.dc.html",
+       "Project.dc.html",
+       "Search.dc.html",
+       "Server.dc.html",
+       "Settings.dc.html",
+       "StaticSites.dc.html"
+      ],
+      "handlers": [
+       {
+        "label": "Dismiss announcement",
+        "handler": "dismiss"
+       }
+      ]
+     },
+     {
+      "file": "Server.dc.html",
+      "name": "Analytics",
+      "route": "/analytics",
+      "kind": "page",
+      "desc": "NOTE file name is Server.dc.html but the page is titled Analytics (renamed from Server). Server monitoring: range pills, 4 sparkline tiles, Important events feed with filter chips, Needs attention, Docker cleanup, running containers table (div role=table).",
+      "nav_active": "Analytics",
+      "canvas": {
+       "x": 4320,
+       "y": 0,
+       "w": 1360,
+       "h": 1600,
+       "title": "Analytics"
+      },
+      "lines": 317,
+      "bytes": 32703,
+      "landmarks": {
+       "x_dc_open": 9,
+       "aside_sidebar": 37,
+       "header_topbar": 91,
+       "main_content": 101,
+       "script_logic": 230
+      },
+      "headings": [
+       {
+        "line": 110,
+        "tag": "h1",
+        "text": "Analytics"
+       },
+       {
+        "line": 139,
+        "tag": "h2",
+        "text": "Important events"
+       },
+       {
+        "line": 165,
+        "tag": "h2",
+        "text": "Needs attention"
+       },
+       {
+        "line": 181,
+        "tag": "h2",
+        "text": "Docker cleanup"
+       },
+       {
+        "line": 199,
+        "tag": "h2",
+        "text": "Running containers"
+       }
+      ],
+      "aria_regions": [
+       {
+        "line": 40,
+        "element": "nav",
+        "aria": "Main"
+       },
+       {
+        "line": 49,
+        "element": "div",
+        "aria": "Project sections"
+       },
+       {
+        "line": 92,
+        "element": "nav",
+        "aria": "Breadcrumb"
+       },
+       {
+        "line": 113,
+        "element": "div",
+        "aria": "Time range"
+       },
+       {
+        "line": 121,
+        "element": "section",
+        "aria": "Resource usage"
+       },
+       {
+        "line": 136,
+        "element": "section",
+        "aria": "evt-h"
+       },
+       {
+        "line": 142,
+        "element": "div",
+        "aria": "Filter events"
+       },
+       {
+        "line": 163,
+        "element": "section",
+        "aria": "att-h"
+       },
+       {
+        "line": 179,
+        "element": "section",
+        "aria": "cln-h"
+       },
+       {
+        "line": 197,
+        "element": "section",
+        "aria": "ctr-h"
+       },
+       {
+        "line": 203,
+        "element": "div",
+        "aria": "ctr-h"
+       }
+      ],
+      "state_keys": [
+       "banner",
+       "range",
+       "filter"
+      ],
+      "bindings": [
+       "bg1h",
+       "bg24h",
+       "bg30d",
+       "bg7d",
+       "c",
+       "cleanup",
+       "containers",
+       "dismiss",
+       "e",
+       "events",
+       "fAllBg",
+       "fAllBorder",
+       "fAllFg",
+       "fAllP",
+       "fDeploysBg",
+       "fDeploysBorder",
+       "fDeploysFg",
+       "fDeploysP",
+       "fIssuesBg",
+       "fIssuesBorder",
+       "fIssuesFg",
+       "fIssuesP",
+       "fSystemBg",
+       "fSystemBorder",
+       "fSystemFg",
+       "fSystemP",
+       "filterAll",
+       "filterDeploys",
+       "filterIssues",
+       "filterSystem",
+       "p1h",
+       "p24h",
+       "p30d",
+       "p7d",
+       "pick1h",
+       "pick24h",
+       "pick30d",
+       "pick7d",
+       "sh1h",
+       "sh24h",
+       "sh30d",
+       "sh7d",
+       "showBanner",
+       "t",
+       "tiles",
+       "true",
+       "x"
+      ],
+      "sc_for_lists": [
+       "cleanup",
+       "containers",
+       "events",
+       "tiles"
+      ],
+      "sc_if_flags": [
+       "showBanner"
+      ],
+      "links_to": [
+       "Applications.dc.html",
+       "Dashboard.dc.html",
+       "Databases.dc.html",
+       "Main.dc.html",
+       "ObjectStorage.dc.html",
+       "Project.dc.html",
+       "Search.dc.html",
+       "Server.dc.html",
+       "Settings.dc.html",
+       "StaticSites.dc.html"
+      ],
+      "handlers": [
+       {
+        "label": "Dismiss announcement",
+        "handler": "dismiss"
+       },
+       {
+        "label": "1h",
+        "handler": "pick1h"
+       },
+       {
+        "label": "24h",
+        "handler": "pick24h"
+       },
+       {
+        "label": "7d",
+        "handler": "pick7d"
+       },
+       {
+        "label": "30d",
+        "handler": "pick30d"
+       },
+       {
+        "label": "All",
+        "handler": "filterAll"
+       },
+       {
+        "label": "Issues",
+        "handler": "filterIssues"
+       },
+       {
+        "label": "Deploys",
+        "handler": "filterDeploys"
+       },
+       {
+        "label": "System",
+        "handler": "filterSystem"
+       }
+      ]
+     },
+     {
+      "file": "Applications.dc.html",
+      "name": "Applications",
+      "route": "/applications",
+      "kind": "page",
+      "desc": "Overview of all 9 applications: 4 summary tiles, filter input (state q), list rows linking to Project.dc.html.",
+      "nav_active": "Applications",
+      "canvas": {
+       "x": 0,
+       "y": 1740,
+       "w": 1360,
+       "h": 1180,
+       "title": "Applications"
+      },
+      "lines": 208,
+      "bytes": 22373,
+      "landmarks": {
+       "x_dc_open": 9,
+       "aside_sidebar": 37,
+       "header_topbar": 91,
+       "main_content": 103,
+       "script_logic": 170
+      },
+      "headings": [
+       {
+        "line": 107,
+        "tag": "h1",
+        "text": "Applications"
+       },
+       {
+        "line": 141,
+        "tag": "h2",
+        "text": "All applications"
+       }
+      ],
+      "aria_regions": [
+       {
+        "line": 40,
+        "element": "nav",
+        "aria": "Main"
+       },
+       {
+        "line": 49,
+        "element": "div",
+        "aria": "Project sections"
+       },
+       {
+        "line": 92,
+        "element": "nav",
+        "aria": "Breadcrumb"
+       },
+       {
+        "line": 116,
+        "element": "section",
+        "aria": "Summary"
+       },
+       {
+        "line": 139,
+        "element": "section",
+        "aria": "list-h"
+       }
+      ],
+      "state_keys": [
+       "banner",
+       "q"
+      ],
+      "bindings": [
+       "a",
+       "apps",
+       "countLabel",
+       "dismiss",
+       "onFilter",
+       "showBanner",
+       "true"
+      ],
+      "sc_for_lists": [
+       "apps"
+      ],
+      "sc_if_flags": [
+       "showBanner"
+      ],
+      "links_to": [
+       "Applications.dc.html",
+       "Dashboard.dc.html",
+       "Databases.dc.html",
+       "Main.dc.html",
+       "ObjectStorage.dc.html",
+       "Project.dc.html",
+       "Search.dc.html",
+       "Server.dc.html",
+       "Settings.dc.html",
+       "StaticSites.dc.html"
+      ],
+      "handlers": [
+       {
+        "label": "Dismiss announcement",
+        "handler": "dismiss"
+       }
+      ]
+     },
+     {
+      "file": "Databases.dc.html",
+      "name": "Databases",
+      "route": "/databases",
+      "kind": "page",
+      "desc": "Overview of 5 databases (4 Postgres, 1 Redis) with engine chip, size, backup info.",
+      "nav_active": "Databases",
+      "canvas": {
+       "x": 1440,
+       "y": 1740,
+       "w": 1360,
+       "h": 1060,
+       "title": "Databases"
+      },
+      "lines": 189,
+      "bytes": 21123,
+      "landmarks": {
+       "x_dc_open": 9,
+       "aside_sidebar": 37,
+       "header_topbar": 91,
+       "main_content": 103,
+       "script_logic": 162
+      },
+      "headings": [
+       {
+        "line": 107,
+        "tag": "h1",
+        "text": "Databases"
+       },
+       {
+        "line": 136,
+        "tag": "h2",
+        "text": "All databases"
+       }
+      ],
+      "aria_regions": [
+       {
+        "line": 40,
+        "element": "nav",
+        "aria": "Main"
+       },
+       {
+        "line": 49,
+        "element": "div",
+        "aria": "Project sections"
+       },
+       {
+        "line": 92,
+        "element": "nav",
+        "aria": "Breadcrumb"
+       },
+       {
+        "line": 115,
+        "element": "section",
+        "aria": "Summary"
+       },
+       {
+        "line": 134,
+        "element": "section",
+        "aria": "list-h"
+       }
+      ],
+      "state_keys": [
+       "banner"
+      ],
+      "bindings": [
+       "a",
+       "countLabel",
+       "dismiss",
+       "items",
+       "showBanner",
+       "true"
+      ],
+      "sc_for_lists": [
+       "items"
+      ],
+      "sc_if_flags": [
+       "showBanner"
+      ],
+      "links_to": [
+       "Applications.dc.html",
+       "Dashboard.dc.html",
+       "Databases.dc.html",
+       "Main.dc.html",
+       "ObjectStorage.dc.html",
+       "Search.dc.html",
+       "Server.dc.html",
+       "Settings.dc.html",
+       "StaticSites.dc.html"
+      ],
+      "handlers": [
+       {
+        "label": "Dismiss announcement",
+        "handler": "dismiss"
+       }
+      ]
+     },
+     {
+      "file": "StaticSites.dc.html",
+      "name": "Static sites",
+      "route": "/static-sites",
+      "kind": "page",
+      "desc": "Overview of 2 static sites (marketing, docs) linking to StaticSiteDetail.dc.html, plus dashed Create static site row.",
+      "nav_active": "Static sites",
+      "canvas": {
+       "x": 2880,
+       "y": 1740,
+       "w": 1360,
+       "h": 900,
+       "title": "Static sites"
+      },
+      "lines": 188,
+      "bytes": 20920,
+      "landmarks": {
+       "x_dc_open": 9,
+       "aside_sidebar": 37,
+       "header_topbar": 91,
+       "main_content": 103,
+       "script_logic": 164
+      },
+      "headings": [
+       {
+        "line": 107,
+        "tag": "h1",
+        "text": "Static sites"
+       },
+       {
+        "line": 136,
+        "tag": "h2",
+        "text": "All static sites"
+       }
+      ],
+      "aria_regions": [
+       {
+        "line": 40,
+        "element": "nav",
+        "aria": "Main"
+       },
+       {
+        "line": 49,
+        "element": "div",
+        "aria": "Project sections"
+       },
+       {
+        "line": 92,
+        "element": "nav",
+        "aria": "Breadcrumb"
+       },
+       {
+        "line": 115,
+        "element": "section",
+        "aria": "Summary"
+       },
+       {
+        "line": 134,
+        "element": "section",
+        "aria": "list-h"
+       }
+      ],
+      "state_keys": [
+       "banner"
+      ],
+      "bindings": [
+       "a",
+       "countLabel",
+       "dismiss",
+       "items",
+       "showBanner",
+       "true"
+      ],
+      "sc_for_lists": [
+       "items"
+      ],
+      "sc_if_flags": [
+       "showBanner"
+      ],
+      "links_to": [
+       "Applications.dc.html",
+       "Dashboard.dc.html",
+       "Databases.dc.html",
+       "Main.dc.html",
+       "ObjectStorage.dc.html",
+       "Search.dc.html",
+       "Server.dc.html",
+       "Settings.dc.html",
+       "StaticSites.dc.html"
+      ],
+      "handlers": [
+       {
+        "label": "Dismiss announcement",
+        "handler": "dismiss"
+       }
+      ]
+     },
+     {
+      "file": "ObjectStorage.dc.html",
+      "name": "Object storage",
+      "route": "/object-storage",
+      "kind": "page",
+      "desc": "Empty state: 0 buckets, gradient hero, Garage and MinIO install cards.",
+      "nav_active": "Object storage",
+      "canvas": {
+       "x": 4320,
+       "y": 1740,
+       "w": 1360,
+       "h": 960,
+       "title": "Object storage"
+      },
+      "lines": 165,
+      "bytes": 20494,
+      "landmarks": {
+       "x_dc_open": 9,
+       "aside_sidebar": 37,
+       "header_topbar": 91,
+       "main_content": 103,
+       "script_logic": 152
+      },
+      "headings": [
+       {
+        "line": 107,
+        "tag": "h1",
+        "text": "Object storage"
+       },
+       {
+        "line": 136,
+        "tag": "h2",
+        "text": "No buckets yet"
+       },
+       {
+        "line": 140,
+        "tag": "h3",
+        "text": "Garage"
+       },
+       {
+        "line": 144,
+        "tag": "h3",
+        "text": "MinIO"
+       }
+      ],
+      "aria_regions": [
+       {
+        "line": 40,
+        "element": "nav",
+        "aria": "Main"
+       },
+       {
+        "line": 49,
+        "element": "div",
+        "aria": "Project sections"
+       },
+       {
+        "line": 92,
+        "element": "nav",
+        "aria": "Breadcrumb"
+       },
+       {
+        "line": 115,
+        "element": "section",
+        "aria": "Summary"
+       },
+       {
+        "line": 134,
+        "element": "section",
+        "aria": "empty-h"
+       },
+       {
+        "line": 139,
+        "element": "section",
+        "aria": "Storage servers"
+       }
+      ],
+      "state_keys": [
+       "banner"
+      ],
+      "bindings": [
+       "dismiss",
+       "showBanner",
+       "true"
+      ],
+      "sc_for_lists": [],
+      "sc_if_flags": [
+       "showBanner"
+      ],
+      "links_to": [
+       "Applications.dc.html",
+       "Dashboard.dc.html",
+       "Databases.dc.html",
+       "Main.dc.html",
+       "ObjectStorage.dc.html",
+       "Search.dc.html",
+       "Server.dc.html",
+       "Settings.dc.html",
+       "StaticSites.dc.html"
+      ],
+      "handlers": [
+       {
+        "label": "Dismiss announcement",
+        "handler": "dismiss"
+       }
+      ]
+     },
+     {
+      "file": "StaticSiteDetail.dc.html",
+      "name": "Static site detail · Overview",
+      "route": "/static-sites/marketing",
+      "kind": "page",
+      "desc": "Detail page for static site \"marketing\" (Client X). 7 tabs controlled by state.tab: Overview, Deployments, Logs, Analytics, Environment, Domains, Settings. Networking merged into Domains. This is the master file of the 7 StaticSite* boards.",
+      "nav_active": "Static sites",
+      "canvas": {
+       "x": 0,
+       "y": 3040,
+       "w": 1360,
+       "h": 1000,
+       "title": "Static site · Overview"
+      },
+      "lines": 288,
+      "bytes": 60209,
+      "landmarks": {
+       "x_dc_open": 9,
+       "aside_sidebar": 37,
+       "header_topbar": 91,
+       "main_content": 103,
+       "script_logic": 216
+      },
+      "headings": [
+       {
+        "line": 107,
+        "tag": "h1",
+        "text": "marketing"
+       },
+       {
+        "line": 114,
+        "tag": "h2",
+        "text": "Details"
+       },
+       {
+        "line": 117,
+        "tag": "h2",
+        "text": "Recent deployments"
+       },
+       {
+        "line": 130,
+        "tag": "h2",
+        "text": "Deployments"
+       },
+       {
+        "line": 174,
+        "tag": "h3",
+        "text": "Requests per minute"
+       },
+       {
+        "line": 176,
+        "tag": "h3",
+        "text": "Response time"
+       },
+       {
+        "line": 178,
+        "tag": "h3",
+        "text": "Status codes"
+       },
+       {
+        "line": 180,
+        "tag": "h3",
+        "text": "Bandwidth"
+       },
+       {
+        "line": 186,
+        "tag": "h2",
+        "text": "Environment variables"
+       },
+       {
+        "line": 192,
+        "tag": "h2",
+        "text": "Platform domain"
+       },
+       {
+        "line": 194,
+        "tag": "h2",
+        "text": "Custom domains"
+       },
+       {
+        "line": 202,
+        "tag": "h2",
+        "text": "General"
+       },
+       {
+        "line": 203,
+        "tag": "h2",
+        "text": "Source"
+       },
+       {
+        "line": 204,
+        "tag": "h2",
+        "text": "Build settings"
+       },
+       {
+        "line": 205,
+        "tag": "h2",
+        "text": "Deploys"
+       },
+       {
+        "line": 208,
+        "tag": "h2",
+        "text": "Delete static site"
+       }
+      ],
+      "aria_regions": [
+       {
+        "line": 40,
+        "element": "nav",
+        "aria": "Main"
+       },
+       {
+        "line": 49,
+        "element": "div",
+        "aria": "Project sections"
+       },
+       {
+        "line": 92,
+        "element": "nav",
+        "aria": "Breadcrumb"
+       },
+       {
+        "line": 110,
+        "element": "div",
+        "aria": "Static site sections"
+       },
+       {
+        "line": 114,
+        "element": "section",
+        "aria": "det-h"
+       },
+       {
+        "line": 117,
+        "element": "section",
+        "aria": "rd-h"
+       },
+       {
+        "line": 130,
+        "element": "section",
+        "aria": "dp-h"
+       },
+       {
+        "line": 143,
+        "element": "section",
+        "aria": "Logs"
+       },
+       {
+        "line": 145,
+        "element": "div",
+        "aria": "Log type"
+       },
+       {
+        "line": 186,
+        "element": "section",
+        "aria": "env-h"
+       },
+       {
+        "line": 192,
+        "element": "section",
+        "aria": "pd-h"
+       },
+       {
+        "line": 194,
+        "element": "section",
+        "aria": "cd-h"
+       },
+       {
+        "line": 202,
+        "element": "section",
+        "aria": "gs-h"
+       },
+       {
+        "line": 203,
+        "element": "section",
+        "aria": "sr-h"
+       },
+       {
+        "line": 204,
+        "element": "section",
+        "aria": "bs-h"
+       },
+       {
+        "line": 205,
+        "element": "section",
+        "aria": "ad-h"
+       },
+       {
+        "line": 208,
+        "element": "section",
+        "aria": "dz-h"
+       }
+      ],
+      "state_keys": [
+       "banner",
+       "tab",
+       "logKind",
+       "paused",
+       "reveal",
+       "bulk",
+       "auto",
+       "lfs",
+       "deployed",
+       "dns"
+      ],
+      "bindings": [
+       "autoBg",
+       "autoLeft",
+       "autoOn",
+       "autoToggle",
+       "avgPath",
+       "b",
+       "bars",
+       "bulk",
+       "bulkToggle",
+       "bwArea",
+       "bwPath",
+       "c",
+       "checkDns",
+       "codes",
+       "d",
+       "deployNow",
+       "deploys",
+       "dismiss",
+       "dnsMsg",
+       "false",
+       "isAnalytics",
+       "isDeployments",
+       "isDomains",
+       "isEnv",
+       "isLogs",
+       "isOverview",
+       "isSettings",
+       "justDeployed",
+       "k",
+       "l",
+       "lfsBg",
+       "lfsLeft",
+       "lfsOn",
+       "lfsToggle",
+       "logKinds",
+       "logLines",
+       "p90Path",
+       "p95Path",
+       "p99Path",
+       "pauseLabel",
+       "pauseToggle",
+       "recent",
+       "reqArea",
+       "reqPath",
+       "revealLabel",
+       "revealToggle",
+       "s",
+       "showBanner",
+       "stack",
+       "t",
+       "tabs",
+       "true",
+       "v",
+       "vars"
+      ],
+      "sc_for_lists": [
+       "bars",
+       "codes",
+       "deploys",
+       "logKinds",
+       "logLines",
+       "recent",
+       "stack",
+       "tabs",
+       "vars"
+      ],
+      "sc_if_flags": [
+       "bulk",
+       "isAnalytics",
+       "isDeployments",
+       "isDomains",
+       "isEnv",
+       "isLogs",
+       "isOverview",
+       "isSettings",
+       "justDeployed",
+       "showBanner"
+      ],
+      "links_to": [
+       "Applications.dc.html",
+       "Dashboard.dc.html",
+       "Databases.dc.html",
+       "Main.dc.html",
+       "ObjectStorage.dc.html",
+       "Project.dc.html",
+       "Search.dc.html",
+       "Server.dc.html",
+       "Settings.dc.html",
+       "StaticSites.dc.html"
+      ],
+      "handlers": [
+       {
+        "label": "Dismiss announcement",
+        "handler": "dismiss"
+       },
+       {
+        "label": "Deploy now",
+        "handler": "deployNow"
+       },
+       {
+        "label": "{{t.label}}",
+        "handler": "t.go"
+       },
+       {
+        "label": "{{k.label}}",
+        "handler": "k.go"
+       },
+       {
+        "label": "{{pauseLabel}}",
+        "handler": "pauseToggle"
+       },
+       {
+        "label": "{{revealLabel}}",
+        "handler": "revealToggle"
+       },
+       {
+        "label": "Paste .env",
+        "handler": "bulkToggle"
+       },
+       {
+        "label": "Check again",
+        "handler": "checkDns"
+       },
+       {
+        "label": "Auto-deploy",
+        "handler": "autoToggle"
+       },
+       {
+        "label": "Git LFS",
+        "handler": "lfsToggle"
+       }
+      ]
+     },
+     {
+      "file": "StaticSiteDeployments.dc.html",
+      "name": "Static site detail · Deployments",
+      "route": "/static-sites/marketing#deployments",
+      "kind": "page",
+      "desc": "Same markup/logic as StaticSiteDetail.dc.html but state.tab initialised to \"Deployments\" and a different preview height. Edit StaticSiteDetail.dc.html logic, then regenerate these copies (only `tab:` initial value and heights differ).",
+      "nav_active": "Static sites",
+      "variant_of": "StaticSiteDetail.dc.html",
+      "canvas": {
+       "x": 0,
+       "y": 4780,
+       "w": 1360,
+       "h": 900,
+       "title": "Static site · Deployments"
+      },
+      "lines": 288,
+      "landmarks": {
+       "x_dc_open": 9,
+       "aside_sidebar": 37,
+       "header_topbar": 91,
+       "main_content": 103,
+       "script_logic": 216
+      },
+      "links_to": [
+       "Applications.dc.html",
+       "Dashboard.dc.html",
+       "Databases.dc.html",
+       "Main.dc.html",
+       "ObjectStorage.dc.html",
+       "Project.dc.html",
+       "Search.dc.html",
+       "Server.dc.html",
+       "Settings.dc.html",
+       "StaticSites.dc.html"
+      ],
+      "initial_tab": "Deployments",
+      "note": "Identical structure to StaticSiteDetail.dc.html; see that entry for headings, regions, state, bindings and handlers."
+     },
+     {
+      "file": "StaticSiteLogs.dc.html",
+      "name": "Static site detail · Logs",
+      "route": "/static-sites/marketing#logs",
+      "kind": "page",
+      "desc": "Same markup/logic as StaticSiteDetail.dc.html but state.tab initialised to \"Logs\" and a different preview height. Edit StaticSiteDetail.dc.html logic, then regenerate these copies (only `tab:` initial value and heights differ).",
+      "nav_active": "Static sites",
+      "variant_of": "StaticSiteDetail.dc.html",
+      "canvas": {
+       "x": 1440,
+       "y": 4780,
+       "w": 1360,
+       "h": 1250,
+       "title": "Static site · Logs"
+      },
+      "lines": 288,
+      "landmarks": {
+       "x_dc_open": 9,
+       "aside_sidebar": 37,
+       "header_topbar": 91,
+       "main_content": 103,
+       "script_logic": 216
+      },
+      "links_to": [
+       "Applications.dc.html",
+       "Dashboard.dc.html",
+       "Databases.dc.html",
+       "Main.dc.html",
+       "ObjectStorage.dc.html",
+       "Project.dc.html",
+       "Search.dc.html",
+       "Server.dc.html",
+       "Settings.dc.html",
+       "StaticSites.dc.html"
+      ],
+      "initial_tab": "Logs",
+      "note": "Identical structure to StaticSiteDetail.dc.html; see that entry for headings, regions, state, bindings and handlers."
+     },
+     {
+      "file": "StaticSiteAnalytics.dc.html",
+      "name": "Static site detail · Analytics",
+      "route": "/static-sites/marketing#analytics",
+      "kind": "page",
+      "desc": "Same markup/logic as StaticSiteDetail.dc.html but state.tab initialised to \"Analytics\" and a different preview height. Edit StaticSiteDetail.dc.html logic, then regenerate these copies (only `tab:` initial value and heights differ).",
+      "nav_active": "Static sites",
+      "variant_of": "StaticSiteDetail.dc.html",
+      "canvas": {
+       "x": 2880,
+       "y": 4780,
+       "w": 1360,
+       "h": 1500,
+       "title": "Static site · Analytics"
+      },
+      "lines": 288,
+      "landmarks": {
+       "x_dc_open": 9,
+       "aside_sidebar": 37,
+       "header_topbar": 91,
+       "main_content": 103,
+       "script_logic": 216
+      },
+      "links_to": [
+       "Applications.dc.html",
+       "Dashboard.dc.html",
+       "Databases.dc.html",
+       "Main.dc.html",
+       "ObjectStorage.dc.html",
+       "Project.dc.html",
+       "Search.dc.html",
+       "Server.dc.html",
+       "Settings.dc.html",
+       "StaticSites.dc.html"
+      ],
+      "initial_tab": "Analytics",
+      "note": "Identical structure to StaticSiteDetail.dc.html; see that entry for headings, regions, state, bindings and handlers."
+     },
+     {
+      "file": "StaticSiteEnvironment.dc.html",
+      "name": "Static site detail · Environment",
+      "route": "/static-sites/marketing#environment",
+      "kind": "page",
+      "desc": "Same markup/logic as StaticSiteDetail.dc.html but state.tab initialised to \"Environment\" and a different preview height. Edit StaticSiteDetail.dc.html logic, then regenerate these copies (only `tab:` initial value and heights differ).",
+      "nav_active": "Static sites",
+      "variant_of": "StaticSiteDetail.dc.html",
+      "canvas": {
+       "x": 0,
+       "y": 6420,
+       "w": 1360,
+       "h": 950,
+       "title": "Static site · Environment"
+      },
+      "lines": 288,
+      "landmarks": {
+       "x_dc_open": 9,
+       "aside_sidebar": 37,
+       "header_topbar": 91,
+       "main_content": 103,
+       "script_logic": 216
+      },
+      "links_to": [
+       "Applications.dc.html",
+       "Dashboard.dc.html",
+       "Databases.dc.html",
+       "Main.dc.html",
+       "ObjectStorage.dc.html",
+       "Project.dc.html",
+       "Search.dc.html",
+       "Server.dc.html",
+       "Settings.dc.html",
+       "StaticSites.dc.html"
+      ],
+      "initial_tab": "Environment",
+      "note": "Identical structure to StaticSiteDetail.dc.html; see that entry for headings, regions, state, bindings and handlers."
+     },
+     {
+      "file": "StaticSiteDomains.dc.html",
+      "name": "Static site detail · Domains",
+      "route": "/static-sites/marketing#domains",
+      "kind": "page",
+      "desc": "Same markup/logic as StaticSiteDetail.dc.html but state.tab initialised to \"Domains\" and a different preview height. Edit StaticSiteDetail.dc.html logic, then regenerate these copies (only `tab:` initial value and heights differ).",
+      "nav_active": "Static sites",
+      "variant_of": "StaticSiteDetail.dc.html",
+      "canvas": {
+       "x": 1440,
+       "y": 6420,
+       "w": 1360,
+       "h": 1150,
+       "title": "Static site · Domains"
+      },
+      "lines": 288,
+      "landmarks": {
+       "x_dc_open": 9,
+       "aside_sidebar": 37,
+       "header_topbar": 91,
+       "main_content": 103,
+       "script_logic": 216
+      },
+      "links_to": [
+       "Applications.dc.html",
+       "Dashboard.dc.html",
+       "Databases.dc.html",
+       "Main.dc.html",
+       "ObjectStorage.dc.html",
+       "Project.dc.html",
+       "Search.dc.html",
+       "Server.dc.html",
+       "Settings.dc.html",
+       "StaticSites.dc.html"
+      ],
+      "initial_tab": "Domains",
+      "note": "Identical structure to StaticSiteDetail.dc.html; see that entry for headings, regions, state, bindings and handlers."
+     },
+     {
+      "file": "StaticSiteSettings.dc.html",
+      "name": "Static site detail · Settings",
+      "route": "/static-sites/marketing#settings",
+      "kind": "page",
+      "desc": "Same markup/logic as StaticSiteDetail.dc.html but state.tab initialised to \"Settings\" and a different preview height. Edit StaticSiteDetail.dc.html logic, then regenerate these copies (only `tab:` initial value and heights differ).",
+      "nav_active": "Static sites",
+      "variant_of": "StaticSiteDetail.dc.html",
+      "canvas": {
+       "x": 2880,
+       "y": 6420,
+       "w": 1360,
+       "h": 1500,
+       "title": "Static site · Settings"
+      },
+      "lines": 288,
+      "landmarks": {
+       "x_dc_open": 9,
+       "aside_sidebar": 37,
+       "header_topbar": 91,
+       "main_content": 103,
+       "script_logic": 216
+      },
+      "links_to": [
+       "Applications.dc.html",
+       "Dashboard.dc.html",
+       "Databases.dc.html",
+       "Main.dc.html",
+       "ObjectStorage.dc.html",
+       "Project.dc.html",
+       "Search.dc.html",
+       "Server.dc.html",
+       "Settings.dc.html",
+       "StaticSites.dc.html"
+      ],
+      "initial_tab": "Settings",
+      "note": "Identical structure to StaticSiteDetail.dc.html; see that entry for headings, regions, state, bindings and handlers."
+     },
+     {
+      "file": "SignIn.dc.html",
+      "name": "Sign in",
+      "route": "/sign-in",
+      "kind": "auth",
+      "desc": "Split layout, gradient brand panel left (dark logo), form right: email, password with Show/Hide, Forgot password link, GitHub button. Submit shows error state (state.err).",
+      "nav_active": null,
+      "canvas": {
+       "x": 0,
+       "y": 8060,
+       "w": 1360,
+       "h": 820,
+       "title": "Sign in"
+      },
+      "lines": 60,
+      "bytes": 10763,
+      "landmarks": {
+       "x_dc_open": 9,
+       "main_content": 28,
+       "script_logic": 40
+      },
+      "headings": [
+       {
+        "line": 28,
+        "tag": "h1",
+        "text": "Sign in"
+       }
+      ],
+      "aria_regions": [],
+      "state_keys": [
+       "show",
+       "err"
+      ],
+      "bindings": [
+       "false",
+       "hasError",
+       "pwType",
+       "showLabel",
+       "submit",
+       "toggleShow"
+      ],
+      "sc_for_lists": [],
+      "sc_if_flags": [
+       "hasError"
+      ],
+      "links_to": [
+       "ForgotPassword.dc.html"
+      ],
+      "handlers": [
+       {
+        "label": "{{showLabel}}",
+        "handler": "toggleShow"
+       }
+      ]
+     },
+     {
+      "file": "ForgotPassword.dc.html",
+      "name": "Forgot password",
+      "route": "/forgot-password",
+      "kind": "auth",
+      "desc": "Same split layout. Form state -> success state \"Check your inbox\" (state.sent). Includes CLI hint `dockyrd reset-password`.",
+      "nav_active": null,
+      "canvas": {
+       "x": 1440,
+       "y": 8060,
+       "w": 1360,
+       "h": 820,
+       "title": "Forgot password"
+      },
+      "lines": 56,
+      "bytes": 10164,
+      "landmarks": {
+       "x_dc_open": 9,
+       "main_content": 28,
+       "script_logic": 39
+      },
+      "headings": [
+       {
+        "line": 30,
+        "tag": "h1",
+        "text": "Forgot password?"
+       },
+       {
+        "line": 35,
+        "tag": "h1",
+        "text": "Check your inbox"
+       }
+      ],
+      "aria_regions": [],
+      "state_keys": [
+       "sent"
+      ],
+      "bindings": [
+       "again",
+       "false",
+       "notSent",
+       "send",
+       "sent",
+       "true"
+      ],
+      "sc_for_lists": [],
+      "sc_if_flags": [
+       "notSent",
+       "sent"
+      ],
+      "links_to": [
+       "SignIn.dc.html"
+      ],
+      "handlers": [
+       {
+        "label": "Use another email",
+        "handler": "again"
+       }
+      ]
+     },
+     {
+      "file": "Settings.dc.html",
+      "name": "Settings · Profile & security",
+      "route": "/settings/profile",
+      "kind": "page",
+      "desc": "Settings page with a different sidebar (back link + Personal group + Instance group). Content (max 880px, centered): Profile, Password, Two-factor switch, Active sessions.",
+      "nav_active": "Profile & security (settings sidebar)",
+      "canvas": {
+       "x": 2880,
+       "y": 8060,
+       "w": 1360,
+       "h": 1400,
+       "title": "Settings · Profile & security"
+      },
+      "lines": 103,
+      "bytes": 23875,
+      "landmarks": {
+       "x_dc_open": 9,
+       "aside_sidebar": 37,
+       "header_topbar": 55,
+       "main_content": 68,
+       "script_logic": 85
+      },
+      "headings": [
+       {
+        "line": 69,
+        "tag": "h1",
+        "text": "Profile & security"
+       },
+       {
+        "line": 70,
+        "tag": "h2",
+        "text": "Profile"
+       },
+       {
+        "line": 74,
+        "tag": "h2",
+        "text": "Password"
+       },
+       {
+        "line": 77,
+        "tag": "h2",
+        "text": "Two-factor authentication"
+       },
+       {
+        "line": 79,
+        "tag": "h2",
+        "text": "Active sessions"
+       }
+      ],
+      "aria_regions": [
+       {
+        "line": 40,
+        "element": "nav",
+        "aria": "Settings"
+       },
+       {
+        "line": 56,
+        "element": "nav",
+        "aria": "Breadcrumb"
+       },
+       {
+        "line": 70,
+        "element": "section",
+        "aria": "pf-h"
+       },
+       {
+        "line": 74,
+        "element": "section",
+        "aria": "pw-h"
+       },
+       {
+        "line": 77,
+        "element": "section",
+        "aria": "tf-h"
+       },
+       {
+        "line": 79,
+        "element": "section",
+        "aria": "ss-h"
+       }
+      ],
+      "state_keys": [
+       "banner",
+       "saved",
+       "tf"
+      ],
+      "bindings": [
+       "dismiss",
+       "save",
+       "savedMsg",
+       "showBanner",
+       "tfBg",
+       "tfLeft",
+       "tfOn",
+       "tfToggle",
+       "true"
+      ],
+      "sc_for_lists": [],
+      "sc_if_flags": [
+       "showBanner"
+      ],
+      "links_to": [
+       "Dashboard.dc.html",
+       "Search.dc.html"
+      ],
+      "handlers": [
+       {
+        "label": "Dismiss announcement",
+        "handler": "dismiss"
+       },
+       {
+        "label": "Save changes",
+        "handler": "save"
+       },
+       {
+        "label": "Authenticator app",
+        "handler": "tfToggle"
+       }
+      ]
+     },
+     {
+      "file": "Search.dc.html",
+      "name": "Search · active (command palette)",
+      "route": "overlay",
+      "kind": "overlay",
+      "desc": "Active search state: blurred dashboard background + centered palette (groups Pages, Resources, Actions; filter by typing; ArrowUp/Down/Enter). The header search trigger on every sidebar page links here.",
+      "nav_active": "Dashboard",
+      "canvas": {
+       "x": 4320,
+       "y": 8060,
+       "w": 1360,
+       "h": 1000,
+       "title": "Search · active"
+      },
+      "lines": 203,
+      "bytes": 24927,
+      "landmarks": {
+       "x_dc_open": 9,
+       "aside_sidebar": 37,
+       "header_topbar": 91,
+       "main_content": 103,
+       "script_logic": 152
+      },
+      "headings": [
+       {
+        "line": 107,
+        "tag": "h1",
+        "text": "Good evening, Joey"
+       },
+       {
+        "line": 134,
+        "tag": "h2",
+        "text": "Recently updated"
+       },
+       {
+        "line": 134,
+        "tag": "h2",
+        "text": "Latest deployments"
+       },
+       {
+        "line": 134,
+        "tag": "h2",
+        "text": "Server usage"
+       }
+      ],
+      "aria_regions": [
+       {
+        "line": 40,
+        "element": "nav",
+        "aria": "Main"
+       },
+       {
+        "line": 49,
+        "element": "div",
+        "aria": "Project sections"
+       },
+       {
+        "line": 92,
+        "element": "nav",
+        "aria": "Breadcrumb"
+       },
+       {
+        "line": 115,
+        "element": "section",
+        "aria": "Summary"
+       },
+       {
+        "line": 136,
+        "element": "div",
+        "aria": "Search"
+       },
+       {
+        "line": 139,
+        "element": "div",
+        "aria": "Results"
+       }
+      ],
+      "state_keys": [
+       "banner",
+       "q",
+       "sel"
+      ],
+      "bindings": [
+       "dismiss",
+       "empty",
+       "false",
+       "onKey",
+       "onQ",
+       "q",
+       "r",
+       "rows",
+       "showBanner",
+       "true"
+      ],
+      "sc_for_lists": [
+       "rows"
+      ],
+      "sc_if_flags": [
+       "empty",
+       "showBanner"
+      ],
+      "links_to": [
+       "Applications.dc.html",
+       "Dashboard.dc.html",
+       "Databases.dc.html",
+       "Main.dc.html",
+       "ObjectStorage.dc.html",
+       "Server.dc.html",
+       "Settings.dc.html",
+       "StaticSites.dc.html"
+      ],
+      "handlers": [
+       {
+        "label": "Dismiss announcement",
+        "handler": "dismiss"
+       }
+      ]
+     }
+    ],
+    "sample_data": {
+     "projects": [
+      "Client X",
+      "Webshop",
+      "Docs site",
+      "Internal tools",
+      "Analytics",
+      "Sandbox"
+     ],
+     "counts": {
+      "applications": 9,
+      "databases": 5,
+      "static_sites": 2,
+      "domains": 7,
+      "services_total": 16
+     },
+     "databases": "4 Postgres (PG 15/16) + 1 Redis 7",
+     "static_sites": [
+      {
+       "name": "marketing",
+       "project": "Client X",
+       "domain": "clientx.nl",
+       "repo": "client-x/site",
+       "branch": "main"
+      },
+      {
+       "name": "docs",
+       "project": "Docs site",
+       "domain": "docs.example.nl"
+      }
+     ],
+     "commit_shas": [
+      "e4f5a6b",
+      "a1b2c3d",
+      "9c8d7e6",
+      "3b2a1c0",
+      "5f6e7d8"
+     ],
+     "user": {
+      "name": "Joey de Kruis",
+      "initials": "JK",
+      "email": "joey@derisory.nl"
+     },
+     "instance_host": "dockyrd.clientx.nl",
+     "version_chip": "v0.1.0"
+    },
+    "how_to_find": {
+     "change_sidebar_everywhere": "Edit the <aside> block in each file (same markup, only the active item differs).",
+     "change_button_style": "Search for \"btn-primary\" / \"btn-outline\" and the shared inline style strings; there is no shared stylesheet.",
+     "static_site_tabs": "StaticSiteDetail.dc.html: tab panels are <sc-if value=\"{{isOverview|isDeployments|isLogs|isAnalytics|isEnv|isDomains|isSettings}}\"> blocks; data (deploys, logs, vars, chart paths) is built in renderVals().",
+     "search_palette": "Search.dc.html: role=\"dialog\" aria-label=\"Search\"; item data + filtering in renderVals() (groups Pages/Resources/Actions).",
+     "analytics_page": "Server.dc.html (title Analytics).",
+     "canvas_layout": "project/canvas.json: rows y=0 (Dashboard, Projects, Project, Analytics), y=1740 (Applications, Databases, Static sites, Object storage), y=3040 (Static site Overview), y=4780/6420 (other static site tabs), y=8060 (Sign in, Forgot password, Settings, Search)."
+    },
+    "open_items": [
+     "Settings sub-pages other than Profile & security (General, Team, Git providers, Backup storage, Updates, Notifications, API tokens) are not designed yet.",
+     "Application detail and Database detail pages are not designed yet.",
+     "Object storage bucket detail not designed.",
+     "navy logo variant (f36a9077-dockyard-logo-navy.svg) provided but unused."
+    ]
+   }

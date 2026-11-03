@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeShellExecution": [
+      {
+        "command": ".cursor/hooks/block-feature-branches.sh",
+        "matcher": "git\\s+(checkout|switch|branch)",
+        "failClosed": true
+      }
+    ]
+  }
+}

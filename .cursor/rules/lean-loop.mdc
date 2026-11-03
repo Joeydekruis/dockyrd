@@ -1,0 +1,106 @@
+---
+description: Auto-continue; skip or light reviews; pause only when product-blocked
+alwaysApply: true
+---
+
+# Lean loop (efficient + good)
+
+**Bar:** good enough to ship correctly - not exhaustive planning or verification theater.
+
+Do it **well** (right product, working code, no CRITICAL/HIGH left when reviews ran). Do it **efficiently** (shortest path: light plan, minimal checks, **skip reviews often**, no redo of work already done).
+
+## Anti-overkill (always)
+
+- **Do not** over-plan - specs/rubrics only as deep as size needs; no essays.
+- **Do not** over-check - run the gates that matter for *this* change; skip unrelated suites.
+- **Do not** launch heavy `code-reviewer` every time - see [reviewer-defaults](reviewer-defaults.mdc).
+- **Do not** re-research / re-audit the whole repo when the touch set is clear.
+- **Do not** add “nice to have” reviewers, docs, or ADRs unless the change requires them.
+- **One pass** of research → decide → act. Prefer shipping a correct small slice over polishing the process.
+
+## Tracks
+
+| Track | Behavior |
+|-|--|
+| **Direct** | Implement immediately on `development`. No planner, no Linear, **no reviewers**. |
+| **Feature** | Right-sized harness; **review often skipped** for micro-S/S; light when M+. |
+
+## Auto-continue (do not ask)
+
+On **Feature** track, once discuss-gate is PASS (or skipped with stated assumptions) and size is decided, **continue without asking**:
+
+```text
+planner → [designer only if design-when - HTML] → generator → [reviewers only if needed] → fix if blocked → doc-updater if needed → changelog version+date → **commit + push development (Refs DY-nn)** → Linear evidence comment → **In Review**
+```
+
+On **Direct** track: research → implement → verify. Do not wait for the human between steps.
+
+**Never ask** before: launching planner/generator/reviewers, starting the next fix round, consolidating PASS/BLOCK, or continuing Direct work.
+
+**Pause only when** the human must act:
+
+| Pause | Why |
+|-|-|
+| Product question that **blocks** correct Feature work | Missing Visual / API / Content / Data that cannot be assumed |
+| ADR acceptance | Architectural fork |
+| Stop-early | Security CRITICAL or wrong-intent frontend FAIL on i1 |
+| Generator round 3 exhausted | Human triage |
+| External blocker | Secrets, credentials, env the agent cannot obtain |
+
+Do **not** pause for: process, size, reviewers, design/wireframe approval, “OK to implement?”, “shall I continue?”, or testing-gate sign-off theater.
+
+One-line status updates are fine. Prefer **doing** over waiting. Designer is **not** the default for S-M UI - see [design-when](design-when.mdc).
+
+## Lean reviews (when they run)
+
+Bias: **skip**. When a reviewer *does* run, keep it **diff-scoped and short**.
+
+### Scope
+
+- Read **only** the files / hunks this issue changed (plus AC checklist skim).
+- Do **not** re-audit the whole repo or paste large code blocks.
+
+### Output budget (hard)
+
+Feedback ≤~25-40 lines. Prefer:
+
+```markdown
+# <type> - <id> i<n>
+## Verdict: PASS | BLOCK
+## Gates (one line each)
+- typecheck: pass
+## Blockers (CRITICAL/HIGH only)
+- `path:line` - problem → fix
+## Notes (optional, ≤2 bullets, or omit)
+```
+
+Rules:
+
+- Empty CRITICAL/HIGH → omit or `None`.
+- No long MEDIUM/LOW catalogs.
+- Prefer `file:line` + one-sentence fix.
+
+### Parent Task prompts
+
+Short: issue id, iteration, paths, “lean review”, output path. Prefer faster models unless auth/crypto.
+
+### Reviewer set
+
+See [reviewer-defaults](reviewer-defaults.mdc). **Bias to skip.**
+
+- Direct / micro-S / docs-only → **no reviewers**
+- S Feature → usually **no** `code-reviewer`; specialists only if API/auth/UI/DB touched
+- M+ → light `code-reviewer` **or** one specialist - not both for the same concern
+- Never add “nice to have” reviewers
+
+## Efficient + good
+
+| Do | Don't |
+|--|-|
+| Light Feature plan that encodes testable AC | Multi-page specs for S work |
+| Skip or light reviews | Heavy `code-reviewer` every time |
+| Targeted `setup.md` commands for touched surfaces | Re-run every gate on a one-line fix |
+| TDD on changed behavior | Speculative tests for untouched paths |
+| Fix CRITICAL/HIGH only when a review ran | Endless MEDIUM/LOW polish loops |
+
+Direct: fix fast with a regression test when behavior changes.

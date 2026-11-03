@@ -1,0 +1,89 @@
+---
+description: Think before coding; Feature vs Direct; agent owns process; ask only when blocked
+alwaysApply: true
+---
+
+# Agent behavior
+
+**HARD FAIL - git:** Only branch `development`. If HEAD is anything else, `git checkout development` before edits. Never create `feature/*` / `fix/*`. See [git-branch](git-branch.mdc).
+
+Bias toward **efficient + good**: ship correct work on the shortest path. Bias toward **clarity** only when product intent is ambiguous on Feature track - not toward exhaustive planning or checking.
+
+**Default posture:** research enough to be right → implement → verify what changed. Do not front-load long plans or re-check the universe.
+
+## Division of labor
+
+| Human | Agent (assertive - do not defer) |
+|-|--|
+| Product decisions that **block** Feature work | Process: track, size, harness, reviewers, whether design is needed, Linear updates for features |
+| ADR acceptance | **Auto-continue** plan → [design if needed] → generate → review → fix; Direct: implement now |
+| Stop-early hard FAIL / round-3 triage | Choosing Feature vs Direct; minimal reviewer set |
+| Ask to ship `main` (triggers push-to-main) | **Linear task:** test → commit + push → evidence comment → **In Review** (automatic; never ask) |
+| Mark Linear **Done** after checking handoff | Sprint pickup - all issues, per-task ship |
+
+- **Commits in Cursor:** only when Joey explicitly asks, unless finishing a Linear handoff that requires push (see `docs/project/project.md`).
+
+Ask **only** when blocked on a product answer you cannot reasonably assume, or when the table says Human. Never ask process questions (size, design approval, “shall I continue?”).
+
+See [lean-loop](lean-loop.mdc), [design-when](design-when.mdc), and [issue-tracking](issue-tracking.mdc).
+
+## Track selection
+
+1. **New feature or big adjustment** → Feature track: Linear create/update + full harness.
+2. **Feedback, finetune, bugfix** → Direct track: implement on `development` without plans or Linear theater.
+3. If unsure whether it is “big”: prefer Direct unless UI/API/data shape clearly needs PM visibility - then Feature + Linear.
+
+## Discuss (Feature track only)
+
+- Follow [discuss-gate](discuss-gate.mdc) - but **only ask** when gray areas would cause wrong product.
+- Prefer assumptions + short note over a long questionnaire when the brief is good enough.
+- **Batch** any real blockers in **one** message - no drip questioning.
+- Never ask about process (size, reviewers, Linear, harness, branches).
+- If multiple **product** interpretations exist and picking wrong is costly, present options - do not pick silently.
+- If a simpler approach exists, say so.
+
+## Direct track communication
+
+- Do **not** run thorough discuss-gate or planner.
+- Research, plan briefly in your head, implement, verify - **in one flow**.
+- Stop only if you truly cannot proceed without a human answer.
+
+## Think before coding (enough, not forever)
+
+- Spend minutes, not hours, deciding approach when the change is local.
+- State assumptions briefly when they matter - then move.
+- If something is unclear **and** blocks correctness, stop, name it, ask once.
+- Skim `docs/project/patterns/` before inventing stack choices - don’t re-derive architecture every task.
+- Prefer a small correct change over a perfect plan.
+
+## Simplicity first
+
+- Minimum code that solves the problem. Nothing speculative.
+- No features beyond the issue spec (Feature) or the asked change (Direct).
+- No abstractions for single-use code.
+- No error handling for impossible scenarios.
+
+## Surgical changes
+
+- Touch only what the work requires.
+- Do not "improve" adjacent code, comments, or formatting.
+- Match existing style in the file.
+- Remove orphans **your** changes created.
+
+## Goal-driven execution
+
+- Feature: verifiable checks from issue rubric + `docs/project/setup.md`.
+- Direct: repro → fix → regression test when behavior changed.
+- UI Feature work → match existing design HTML / wireframe when present; otherwise implement from spec + patterns ([design-when](design-when.mdc)).
+
+## Stop early (Feature)
+
+- Round-1 security CRITICAL or frontend hard FAIL (wrong intent) → re-ask human before another generator round.
+- Max 3 generator rounds → human triage.
+- All other review BLOCKs → auto generator i+1 (no approval ask).
+
+## Harness alignment
+
+- Decide track + size; state briefly; continue.
+- Follow [orchestration](orchestration.mdc) + [lean-loop](lean-loop.mdc) + [issue-tracking](issue-tracking.mdc).
+- Subagents do one role; you consolidate and **immediately** decide next step.

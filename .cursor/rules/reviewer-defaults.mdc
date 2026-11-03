@@ -1,0 +1,58 @@
+---
+description: When to skip vs run reviews; light code-reviewer by default
+alwaysApply: true
+---
+
+# Reviewer defaults (when + how light)
+
+**Default bias: skip or go light.** Do not launch `code-reviewer` (or any reviewer) on every change. Prefer implement + targeted verify. See [lean-loop](lean-loop.mdc).
+
+## When to skip reviewers entirely
+
+| Situation | Reviewers |
+|-|-|
+| **Direct** (feedback / finetune / bugfix) | **None** - parent verifies; skip unless auth/secrets risk or human asks |
+| **micro-S** Feature (copy, config, tiny obvious fix) | **None** - generator/parent gates enough |
+| **Docs-only / changelog-only** | **None** (doc-updater only if user-facing docs need sync) |
+| Rubric says `reviewers: none` or deferred | Honor that |
+
+## When to run (Feature track)
+
+Launch **only** the specialists the change actually needs. Prefer **specialists over a heavy general code review**.
+
+| Change type | Default subagents | Skip |
+|-|-|--|
+| **S** (small, non-auth, non-API) | **None** or optional light `code-reviewer` if risk is unclear | Don’t add others |
+| **M+ general code** | Light `code-reviewer` | Don’t add specialists you don’t need |
+| **UI only** | `frontend-evaluator` only if design HTML / wireframe exists or L/XL; light `code-reviewer` **only if** non-trivial logic | api/mcp/db; skip frontend-eval for S-M with no design artefacts |
+| **API / routes** (no new auth) | `api-reviewer` | security unless trust boundary changed; skip heavy code-reviewer if api-reviewer covers it |
+| **MCP** | `mcp-reviewer` + `security-reviewer` | - |
+| **DB / migrations / RLS** | `database-reviewer` + `security-reviewer` | RLS only if introduced; Dockyard control plane uses SQLite/goose |
+| **Auth / secrets / trust** | `security-reviewer` (+ light `code-reviewer` if large) | api unless new public contract |
+| **Perf / budgets** | `performance-evaluator` | - |
+
+**Rule of thumb:** one specialist > stacking `code-reviewer` + specialist for the same concern. Do not launch the full roster.
+
+## How light is code-reviewer
+
+When `code-reviewer` **does** run:
+
+- Diff-only, ≤~25 lines feedback, CRITICAL/HIGH only (≤3 optional notes)
+- Trust generator’s already-run gates - re-run only if missing or suspicious
+- No style essays, no whole-repo audit, no MEDIUM/LOW catalogs
+- Prefer faster model
+
+## Always
+
+- **`doc-updater`** last only if required reviewers ran and PASS (or no reviewers required and docs need update).
+- Parent consolidates BLOCK → auto-continue generator (≤3) - do not ask human to approve reviews.
+- Prefer smaller set; when unsure, **skip** code-reviewer rather than launch “just in case.”
+
+## Stop early (do not auto-loop)
+
+After iteration **1**, pause and re-clarify when:
+
+- `security-reviewer` returns **CRITICAL**, or
+- `frontend-evaluator` **FAIL** (wrong wireframe / product intent)
+
+All other BLOCKs → auto generator i+1 without asking.

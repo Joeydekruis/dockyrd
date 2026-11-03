@@ -1,0 +1,50 @@
+---
+description: GSD gray-area discuss gate - Feature track only; ask only when blocked
+alwaysApply: true
+---
+
+# Discuss gate (Feature track)
+
+Inspired by Get Shit Done discuss-phase thinking. Applies to **new features and big adjustments** only - **not** to feedback, finetunes, or bugfixes ([issue-tracking](issue-tracking.mdc)).
+
+Process (size, track, reviewers, branches) is owned by the agent - **never ask the human about process.**
+
+## When this applies
+
+- **Yes:** Feature track briefing is incomplete and a wrong guess would waste a round.
+- **No / skip:** Direct track (feedback, polish, bugs); human already answered; “just do it”; assumptions are safe - state them and proceed.
+
+Do **not** plan Feature work with invented AC when product gray areas are truly blocking. Prefer **few sharp questions** over thorough questionnaires.
+
+**Cap:** at most a handful of blocking questions (aim ≤5). If you can assume safely, assume and note it - do not interview every GSD area “for completeness.”
+
+## Areas (ask only if blocking)
+
+| Area | Clarify |
+|--|-|
+| **Visual / UX** | Layout, density, interactions, empty/loading/error, breakpoints, primary action |
+| **APIs / CLIs / commands** | Response shape, flags, errors, idempotency |
+| **Content** | Structure, tone, depth, localization, copy ownership |
+| **Organization / data** | Grouping, naming, duplicates, migration |
+| **Architecture** | Stack forks, trust boundaries, persistence - only when a real decision is needed |
+
+## How to ask
+
+- **Batch all blocking questions in one message** - no drip.
+- Prefer concrete options (“A: dense table / B: cards”) over open essays.
+- Ask only about product/architecture that blocks correct build - never process.
+- Mark each area **resolved**, **deferred**, or **assumed** before `planner`.
+- Record durable Feature answers in **Linear** and/or the local issue spec.
+
+## Exit criteria
+
+Discuss gate **PASS** when:
+
+1. Every **blocking** product/architecture area is resolved, deferred, or reasonably assumed, **or**
+2. Human said “good enough” / “just do it” and you stated assumptions in chat + Linear/local spec.
+
+Then: **decide size** → `Task(planner)` → update Linear. Do **not** wait for size confirmation.
+
+## Design handoff
+
+If [design-when](design-when.mdc) applies (new/updated components, or **L/XL** UI needing layout thinking), after planner run **`designer`** → HTML + design direction (no generated images), then **continue straight to `generator`**. Do **not** wait for human design approval. For S-M UI, skip designer.

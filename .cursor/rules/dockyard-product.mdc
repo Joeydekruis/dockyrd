@@ -1,0 +1,25 @@
+---
+description: Dockyard MVP product truth — briefing, milestones, Definition of Done
+alwaysApply: true
+---
+
+# Dockyard product
+
+**Source of truth:** `docs/BRIEFING.md` (architecture, API, milestones, NFRs). Shorter index: `docs/project/project.md`, phases: `docs/project/roadmap.md`.
+
+## MVP constraints (do not violate without ADR)
+
+- One **Go binary** on the host (systemd): API, jobs, reconciler, metrics, **embedded static UI** (`go:embed` of `web/out`).
+- **SQLite** only for control-plane state (WAL, goose migrations, sqlc queries). Postgres/Redis are **user services** in Docker, not app DB.
+- **Caddy** (`dy-proxy`) is separate from the panel; full JSON config reload via admin socket — panel restart must not drop live traffic.
+- **Docker Engine** via local socket (no SSH to own host in MVP).
+- Auth from day one: sessions, argon2id, TOTP, RBAC, audit log, setup-token on fresh install.
+
+## UI
+
+- Implement dashboard against **`docs/design-index.json`** (routes, tokens, shared blocks) and artboards in **`docs/dockyrd-design.html`**.
+- Missing screens listed in briefing **§17** may get new HTML wireframes under `docs/project/issues/<id>/assets/` — not a rewrite of existing artboards.
+
+## Done bar for releases
+
+Briefing **§19** (install script, zero-downtime deploy, self-update, no Radix in `web/`, no external font CDN from UI, docs set). Track milestone exit in `docs/project/roadmap.md`.

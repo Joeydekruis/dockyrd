@@ -1,0 +1,16 @@
+---
+description: This repo is Dockyard control plane — not WordPress, Studio, or Atelier
+alwaysApply: true
+---
+
+# Dockyard scope (HARD)
+
+This repository builds **Dockyard**: a self-hosted deploy platform (Go binary + embedded Next.js UI). Ignore WordPress theme / Gutenberg / Marketing Site Bible rules from other Cursor plugins when they conflict.
+
+| In scope | Out of scope |
+|--|--|
+| `cmd/`, `internal/`, `web/`, `scripts/`, `e2e/`, `packaging/` | WordPress themes, WP blocks, Studio, `@atelier/*` |
+| SQLite control plane (goose + sqlc) | Drizzle/Postgres as app ORM |
+| Design contract: `docs/design-index.json`, `docs/dockyrd-design.html`, briefing §9–10 | `docs/components/` Atelier section parity, WP `/render` |
+
+Product docs: `docs/BRIEFING.md`, `docs/project/project.md`. Verification: `docs/project/setup.md`.

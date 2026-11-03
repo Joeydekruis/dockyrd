@@ -1,0 +1,37 @@
+---
+description: When to run designer — gaps vs existing Claude Design export
+alwaysApply: true
+---
+
+# Design when (wireframes)
+
+## Never ask
+
+Do **not** ask the human to approve designs, confirm size, confirm track, or “OK to implement?”. Decide and continue.
+
+## Default contract (most UI work)
+
+**Skip `designer`.** Implement from:
+
+- `docs/design-index.json` + `docs/dockyrd-design.html`
+- `docs/BRIEFING.md` §9–10 (components + routes)
+- `docs/project/patterns/`
+
+Existing artboards cover the 19 dashboard screens; treat them as the visual contract.
+
+## When to run `designer`
+
+| Run designer | Skip |
+|--|--|
+| Briefing **§17 gaps** (setup wizard, create-flows, team/instance settings, 2FA login step, …) with no artboard yet | Pages already in design-index |
+| **L / XL** Feature that changes app shell or IA materially | S / M wiring, API-only, proxy/reconciler internals |
+| Human explicitly asks for a wireframe pass | Token polish matching existing screens |
+
+Outputs: `docs/project/issues/<id>/design-direction.md` + `assets/<slug>-wireframe.html` (HTML visual only). Parent continues to **generator** without approval pause.
+
+## Not used in this repo
+
+- Atelier `docs/components/<id>/` wireflow/design packages  
+- Studio → WordPress section parity gates
+
+UI exit quality: [dockyard-design-contract](dockyard-design-contract.mdc).

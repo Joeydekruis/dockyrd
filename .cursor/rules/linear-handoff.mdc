@@ -1,0 +1,114 @@
+---
+description: HARD - never Linear Done; per-task commit+push first; hand off In Review with verifiable evidence
+alwaysApply: true
+---
+
+# Linear handoff (HARD)
+
+Linear status alone is not proof of completion when work was never pushed. **PM cannot review work that is not committed and pushed.**
+
+## Mandatory sequence (every Linear task)
+
+Do this **automatically** when a Linear issue is finished - **do not wait for the human to ask**:
+
+```text
+1. Pick up task     → set Linear **In Progress** (from Backlog/Todo)
+2. Implement + run  → relevant tests from setup.md; capture **actual output**
+3. Commit + push    → `development` only; title/body links Linear issue
+4. Linear comment   → one evidence post (template below) - **before** status change
+5. Linear status    → **In Review** (never **Done**)
+```
+
+**Order is strict:** never post a handoff or move to **In Review** before commit + push succeed. Never hand off with “uncommitted on development”.
+
+## Status names
+
+- Review queue status: **`In Review`** (Linear MCP `save_issue` state name).
+- Comment title uses **`Ready for Review - DY-nn`** so it is clear **Cursor** is asserting completion - not an auto-advance or PM sign-off.
+- **Never** set **`Done`** - PM (Joey) moves to Done after checking evidence.
+
+## Sprint pickup
+
+When the human says **“pick up sprint X”**:
+
+1. Find that sprint’s **all** open issues in Linear (by sprint/cycle label or milestone - do not cherry-pick a subset).
+2. Work each issue as its own task with the sequence above.
+3. **Commit + push + Linear handoff after each individual issue** - not one batch at sprint end.
+4. Parallelize freely (`Task` subagents or separate subchats) - each worker still finishes with its own commit/push + handoff.
+
+## Rule
+
+**Never** set a Linear issue to **`Done`**. Applies to **every Feature-track Linear issue**, including micro-S. Direct-track work has no Linear ceremony and **no** mandatory commit/push unless the human asked or a Direct batch cycle closes.
+
+## Required comment (single post)
+
+Post **after** push; then set status **In Review**.
+
+```markdown
+## Ready for Review - DY-nn (YYYY-MM-DD)
+
+### Acceptance criteria
+- [x] <AC verbatim> - <evidence: file/line, endpoint, or UI path>
+- [ ] <AC unmet> - <why / what's left>
+
+### How to verify
+
+**Committed code**
+- Branch: `development`
+- Commit: `<full SHA>` - `<one-line subject>`
+- Linear: https://linear.app/<team>/issue/DY-nn/...
+
+**Tests** (paste output or link - not “tests green”)
+```text
+<paste relevant command + exit code + summary lines>
+```
+
+**UI / dashboard** (required for anything visual)
+- Preview URL: <deploy or `make dev` tunnel>
+- OR screen recording: <link>
+- OR local: `make dev` → numbered steps (last resort)
+
+**API / backend**
+```bash
+# command
+# → expected status + body shape
+```
+
+**Data / schema**
+- Migration / confirm command + how to check
+
+### Reviewer verdicts
+| Subagent | Verdict |
+|-|-|
+| code-reviewer | PASS / FAIL / N/A |
+| security-reviewer | PASS / FAIL / N/A |
+| api-reviewer | PASS / FAIL / N/A |
+| database-reviewer | PASS / FAIL / N/A |
+| frontend-evaluator | PASS / FAIL / N/A |
+
+### Deviations from spec
+- <diff vs AC/spec, or **None** - must state explicitly>
+
+### Reference
+- Spec: `docs/project/issues/DY-nn/spec.md`
+- Feedback: `docs/project/feedback/DY-nn/` (when applicable)
+```
+
+## Evidence bar (HARD - insufficient handoffs)
+
+| Required | Insufficient |
+|--|--|
+| `development` + **full commit SHA** after push | “Uncommitted on development”, local-only diff, or missing SHA |
+| **Pasted or linked test run output** | “Tests green”, “all pass”, or no command shown |
+| **Preview URL or screen recording** for UI/visual AC | File-path list only; “see component file” without how to run |
+| AC checkboxes with **verifiable pointers** | ✅ next to AC text alone |
+| Comment posted **before** status → **In Review** | Status jump with no comment or empty comment |
+
+- Mid-issue scope growth → call out under **Deviations** (even if approved).
+- Prefer Linear MCP (`save_comment` then `save_issue` status) over chat-only claims.
+
+## Local vs Linear
+
+- Repo feedback files stay the detailed review trail; Linear holds the **PM-checkable summary**.
+- Update `roadmap.md` / `generator-state.md` to **In Review** (not Done) when you hand off.
+- Changelog + patch bump per [changelog](changelog.mdc) when the Linear issue cycle closes (same commit as the task, or immediately before handoff).

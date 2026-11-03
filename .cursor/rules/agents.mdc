@@ -1,0 +1,31 @@
+---
+description: Subagent roster and delegation triggers - invoke via Task tool
+alwaysApply: true
+---
+
+# Agent orchestration index
+
+Subagents live in **`.cursor/agents/`**. **Parent** picks Feature vs Direct per `.cursor/rules/issue-tracking.mdc`, then runs `.cursor/rules/orchestration.mdc`.
+
+| Subagent | When |
+|--|--|
+| **planner** | **Feature** track after discuss + size - issue spec + rubric; sync Linear |
+| **designer** | Briefing §17 gaps or L/XL IA changes - HTML wireframes; skip when design-index covers the screen ([design-when](design-when.mdc)) |
+| **architect** | Stack, ADR drafts, unresolved forks |
+| **generator** | Feature implement (+ design HTML when present); TDD; `generator-state.md` on `development` |
+| **code-reviewer** | Optional light diff - skip Direct/micro-S/many S; M+ or risk |
+| **api-reviewer** | Huma `/api/v1` handlers, webhooks, SSE |
+| **mcp-reviewer** | MCP tools, schemas, auth |
+| **database-reviewer** | goose migrations, sqlc, SQLite constraints |
+| **security-reviewer** | Auth, secrets, OWASP surfaces |
+| **frontend-evaluator** | Live UI vs design-index / wireframe + rubric |
+| **performance-evaluator** | Footprint / Lighthouse when rubric requires |
+| **doc-updater** | **After** all other required reviewers PASS |
+
+**Direct track:** usually no subagent fan-out - parent implements on `development`.
+
+Reviewer selection: `.cursor/rules/reviewer-defaults.mdc` + issue rubric (Feature).
+
+All Feature reviewers write to `docs/project/feedback/<issue>/<type>-i<iter>.md`.
+
+Skills: `.cursor/skills/README.md` — start with **dockyard-dev** for implementation.

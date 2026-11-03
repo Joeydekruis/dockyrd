@@ -1,0 +1,38 @@
+---
+description: Dashboard UI vs Claude Design export — structure, tokens, Playwright
+globs: "web/**/*.{ts,tsx,css},docs/design-index.json,docs/*.html"
+alwaysApply: false
+---
+
+# Design contract (control plane UI)
+
+## Primary references
+
+1. **`docs/design-index.json`** — routes, navigation, tokens, shared blocks (sidebar, header, pills, list rows), sample data conventions.
+2. **`docs/dockyrd-design.html`** — consolidated design export; per-screen `.dc.html` semantics in the index.
+3. **`docs/BRIEFING.md` §9–10** — component library list (`web/components/dockyard/*`) and route → API map.
+
+Existing artboards are the default contract. Do not invent alternate information architecture (e.g. removed "Add service" header button stays removed).
+
+## Implementation rules
+
+- Reuse **`web/components/dockyard/*`** before one-off page markup; extend the library when a pattern repeats.
+- Match **tokens** (colors, radii, Geist/Geist Mono roles) from design-index — implement as CSS variables in `globals.css`.
+- **Accessibility:** real `<button>` / `<a>`, `aria-current="page"`, icon-only controls with `aria-label`, touch targets ≥ 44px where design specifies.
+- **English UI copy** in the product (design language).
+
+## Verification (new or changed screens)
+
+1. **Structure:** sidebar groups, breadcrumbs, tabs, and primary CTA placement match the artboard for that route.
+2. **Components:** status pills, stat tiles, resource rows use shared components — not ad-hoc duplicates.
+3. **Playwright** (when `e2e/` exists): cover must-pass flows from issue rubric (login, create service, env editor, etc.).
+4. **Visual regression** (optional, when harness adds it): compare key pages at **1360** and **390** against design export — report diffs; no WP/Studio baseline.
+
+## Gaps (briefing §17)
+
+Setup wizard, create-flows, team/instance settings, 2FA step — may use **`designer`** issue wireframes (`docs/project/issues/<id>/assets/*.html`) until merged into the main export. After implementation, update design-index notes if navigation changes.
+
+## Not applicable
+
+- Atelier `wireflow.html` / `design.html` section parity.
+- WordPress block editor WYSIWYG gates.

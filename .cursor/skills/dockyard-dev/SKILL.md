@@ -1,0 +1,54 @@
+---
+name: dockyard-dev
+description: >-
+  Dockyard monorepo dev loop — embed build, code generation, local serve,
+  Radix check. Use when touching Go API, SQLite, web UI, or Makefile.
+---
+
+# Dockyard development
+
+Read **`docs/BRIEFING.md` §5–6** and **`docs/project/setup.md`**.
+
+## Typical loop
+
+```bash
+make generate   # sqlc + OpenAPI + TS types (when wired)
+make dev        # local panel
+make test
+make lint
+```
+
+## Web + embed
+
+```bash
+pnpm --dir web install
+pnpm --dir web build    # → web/out
+go build -o dockyard ./cmd/dockyard
+```
+
+Never commit `web/out`.
+
+## After API or schema change
+
+1. Update goose SQL under `internal/db/migrations/`
+2. Update sqlc queries → `make generate`
+3. Regenerate OpenAPI / TS client for `web/lib/api`
+4. Adjust TanStack Query hooks + zod forms as needed
+
+## After `web/package.json` change
+
+```bash
+./scripts/check-no-radix.sh
+```
+
+Base UI only — no `@radix-ui/*`, avoid cmdk/vaul.
+
+## UI work
+
+- Contract: `docs/design-index.json`, components in `web/components/dockyard/`
+- Tokens: `web/styles/globals.css`
+- Rule: [dockyard-design-contract](../../rules/dockyard-design-contract.mdc)
+
+## Integration / e2e
+
+Docker required. See `e2e/` and briefing §14.2 when present.

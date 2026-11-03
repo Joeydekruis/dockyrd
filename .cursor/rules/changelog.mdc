@@ -1,0 +1,69 @@
+---
+description: Strict CHANGELOG versioning - patch +0.0.1 per cycle with finish dates
+alwaysApply: true
+---
+
+# Changelog & versioning (HARD)
+
+`CHANGELOG.md` is the release memory. Be **specific and strict** - vague “misc” lines are a fail.
+
+## Version policy
+
+- Source of truth for the app version: root `package.json` `"version"`.
+- SemVer **patch** only for routine cycles: each completed **cycle** bumps `x.y.Z` by **+0.0.1** (e.g. `0.1.0` → `0.1.1`).
+- Do **not** invent minor/major bumps unless the human explicitly asks.
+- Keep `package.json` version in lockstep with the newest dated section in `CHANGELOG.md`.
+
+## What is a cycle
+
+A **cycle** ends when a Feature issue closes **or** a Direct-track task batch is done and ready to leave on `development` (same moment as commit + push - see [git-branch](git-branch.mdc)).
+
+One cycle → one patch bump → one dated changelog section. Do not batch multiple finished Features into one version unless the human asked for a single ship.
+
+## On every cycle close (mandatory)
+
+1. Read current `package.json` version; compute `next = patch + 1`.
+2. Update root `package.json` `"version"` to `next`.
+3. In `CHANGELOG.md`:
+   - Ensure work for this cycle is listed under concrete `### Added` / `### Changed` / `### Fixed` / `### Removed` (Keep a Changelog).
+   - Promote that work into a new top section (below the title blurb):
+
+```markdown
+## [<next>] - YYYY-MM-DD
+
+_Finished: YYYY-MM-DD_
+
+### Added
+- **DY-nn / short title** - specific user-visible or technical outcome; Linear/GitHub link when applicable.
+
+### Changed
+- …
+
+### Fixed
+- …
+```
+
+   - Use the **actual finish date** (today in the user/session context, ISO `YYYY-MM-DD`).
+   - `_Finished: …_` must match the section date (cycle finish day).
+4. Leave `## [Unreleased]` empty (or omit until new work starts). Never leave finished cycle notes only under Unreleased.
+5. Entries must be **specific**: issue id, what shipped, surfaces touched (Go / `web/` / docs), and refs. No “various fixes” / “updates”.
+
+## During a cycle (before close)
+
+- Draft bullets under `## [Unreleased]` as work lands (still specific).
+- On close, move them into `## [version] - date` and bump `package.json`.
+
+## Required vs optional
+
+| Work | CHANGELOG |
+|--|-|
+| Feature S+ / user-facing micro-S | **Required** - versioned section on cycle close |
+| Direct user-facing fix / polish | **Required** |
+| Internal-only harness/docs with no product impact | Optional note under `### Changed` if useful; still bump if you close a cycle that commits product code |
+
+## Anti-patterns
+
+- Shipping a cycle with no dated section / no version bump
+- Bumping version without matching `CHANGELOG.md` section
+- Dates missing or “sometime this week”
+- Duplicate Unreleased + versioned copies of the same bullets

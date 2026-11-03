@@ -1,0 +1,14 @@
+---
+description: Dockyard vs Dockyrd spelling — binary/docs vs UI
+alwaysApply: true
+---
+
+# Product naming
+
+| Context | Name | Examples |
+|--|--|--|
+| CLI, binary, systemd, Go module, domains, installer | **Dockyard** | `dockyard serve`, `get.dockyard.dev`, Apache NOTICE |
+| Dashboard UI, logo, aria-labels, marketing copy in app | **Dockyrd** | sidebar wordmark, `aria-label="Dockyrd home"` |
+| Repo folder | `dockyrd` | GitHub path only — do not show "dockyrd" in user-facing UI |
+
+When adding strings, pick the row that matches the surface. Do not mix spellings on the same screen without a deliberate rebrand decision recorded in an ADR.

@@ -1,0 +1,52 @@
+---
+description: HARD FAIL - only development; commit+push after each Linear task; main via push-to-main
+alwaysApply: true
+---
+
+# Git branch policy (HARD FAIL)
+
+This repo uses **one** implementation branch: **`development`**.
+
+## Before any code change
+
+1. Run `git rev-parse --abbrev-ref HEAD`.
+2. If the result is **not** exactly `development` → `git checkout development` (carry uncommitted work) **before** editing.
+3. If a `feature/*`, `fix/*`, or `jdekruis/*` branch exists → delete it after moving work to `development`. Do not keep working there.
+
+## After completing a Linear task (mandatory)
+
+When a **Linear issue** (`DY-nn`) is finished (tests passed, ready for PM review):
+
+1. **Commit** on `development` - Conventional Commits; **title or body must link the Linear issue** (`Refs DY-nn` + URL when useful).
+2. **Push** `origin/development` (`git push -u origin HEAD` if needed).
+3. **Then** post Linear handoff comment + set status **In Review** per [linear-handoff](linear-handoff.mdc).
+
+Do **not** leave finished Linear-task work uncommitted or unpushed. PM cannot review code that is not on the remote.
+
+**Sprints:** same rule **per issue** - commit + push + Linear handoff after **each** task, not one commit at sprint end.
+
+## After Direct-track work (optional commit)
+
+Direct track (feedback, finetune, bugfix **without** a Linear issue): **no** mandatory commit/push. Commit only when:
+
+- the human explicitly asks, or
+- a Direct batch/cycle closes and you are shipping to `development` anyway.
+
+## Changelog
+
+Feature / Linear task close: update `CHANGELOG.md` + patch bump per [changelog](changelog.mdc) in the same commit as the task (or immediately before handoff).
+
+## Forbidden (never do these)
+
+- `git checkout -b feature/…`, `git switch -c feature/…`, `fix/…`, or any per-issue branch
+- Cursor / Linear “Create branch” for an issue
+- `Task` with `best-of-n-runner` or `environment: cloud` just to get a private branch (use local work on `development`)
+- Committing or pushing to **`main`** during normal work - use skill **`push-to-main`** only when the human asks to ship/merge to main
+- Handing off a Linear issue before commit + push succeed
+
+## Allowed
+
+- Work, commit, and push on **`development` only** for day-to-day delivery
+- Merge to **`main`** only via [push-to-main](../skills/push-to-main/SKILL.md) when the human requests it (full build gate first)
+
+**Feature track ≠ feature branch.** “Feature track” means Linear + harness. Git stays on `development` until a requested main ship.

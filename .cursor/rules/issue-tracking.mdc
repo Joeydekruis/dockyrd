@@ -1,0 +1,135 @@
+---
+description: >-
+  Linear = PM for features; Cursor = build/fix track; development branch only.
+  Apply for planning, backlog, and delivery.
+alwaysApply: true
+---
+
+# Issue tracking (Linear PM + Cursor build)
+
+Two audiences, two systems:
+
+| Who | System | Owns |
+|-|--|--|
+| **PM** | **Linear** | New features and big adjustments: status, priority, milestone, product discussion; **moves issues to Done** after checking Cursor handoff |
+| **Tester / developer** | **Cursor** | Day-to-day build, feedback, finetunes, bugfixes - optimize here; do not mirror that ceremony into Linear or heavy repo plans |
+
+**Never dual-track** the same item in Linear and GitHub.
+
+---
+
+## Work tracks (pick one)
+
+| Track | When | What to do |
+|-|--|--|
+| **Feature** | New feature or **big** product/architecture adjustment | Create/update **Linear**; keep Linear current; run full harness (discuss → plan → [HTML design if UI] → generate → review). Local `issues/<id>/` holds AC. |
+| **Direct** | Feedback processing, finetuning, polish, bugfixes | **No** planner, **no** thorough discuss gate, **no** Linear ceremony. Research → implement on `development` in one go. Light notes only if useful. |
+
+When a **new feature** is raised in Cursor chat: **always** create or update the Linear issue before/while planning - Linear is the PM source of truth.
+
+---
+
+## Separation of concerns
+
+| Artefact | Owns |
+|--|--|
+| **Linear issue** (`DY-nn`) | Feature / big-adjustment backlog (PM) |
+| **Cursor chat + code** | Direct-track work (feedback, bugs, finetunes) |
+| **GitHub Issue** | Optional bug intake only - do not require for Direct fixes |
+| **`docs/project/project.md`** | What we build, why, lifecycle, delivery |
+| **`docs/project/roadmap.md`** | Phases, epic intent, ordering (update when a **feature** closes) |
+| **`docs/project/issues/<id>/spec.md`** | Feature scope and AC (planner) - Feature track only |
+| **`docs/project/issues/<id>/rubric.md`** | Done-criteria and reviewers - Feature track only |
+| **`docs/project/feedback/<id>/`** | Generator/reviewer artefacts - Feature track only |
+| **`development` branch** | All agent commits; **commit + push after each Linear task**; `main` via push-to-main |
+| **`docs/project/generator-state.md`** | Session handoff - not the team backlog |
+
+If **feature** scope changes materially: update **Linear** (+ local spec/roadmap as needed) - never silently diverge.
+
+---
+
+## Issue ID convention
+
+- **Features:** Linear ID, e.g. `DY-12`. Folders: `docs/project/issues/DY-12/`, `docs/project/feedback/DY-12/`.
+- **Direct / bugs:** No Linear required. Optional GitHub `#n` if the team filed one; do not invent twins.
+- **Legacy:** numeric folders (`docs/project/issues/9/`) remain valid for in-flight work.
+- Feature spec frontmatter includes the Linear URL.
+
+---
+
+## Feature track MUST
+
+1. **Exist in Linear** (create if missing when the feature is discussed in Cursor).
+2. **Stay updated in Linear** - status, AC summary, links to local spec/rubric after planning.
+3. **Point to product docs** - `project.md`, `roadmap.md`, then `issues/<id>/spec.md` + `rubric.md`.
+4. **Declare size** - agent decides micro-S / S / M / L / XL (do not ask).
+5. **Harness** - plan → generate → review (lighten artefacts for small features; still run the loop).
+6. **Handoff, not Done** - after tests pass: **commit + push** → evidence comment → status **`In Review`** per [linear-handoff](linear-handoff.mdc). **Never** set Linear to **`Done`**. **Never** hand off uncommitted work.
+
+## Sprint pickup (HARD)
+
+When the human says **“pick up sprint X”**:
+
+1. Resolve sprint X in Linear (cycle, milestone, or sprint label).
+2. Pick up **all** open issues in that sprint - do not stop at a subset unless blocked.
+3. Each issue: implement → test → **commit + push** → Linear handoff → **In Review**.
+4. Parallelize with subagents/subchats per issue when useful; each still gets its own commit + handoff.
+
+## Direct track MUST NOT
+
+- Spin up planner / full discuss-gate / local issue folders unless the human asks or the change is actually a **big** adjustment (then switch to Feature track).
+- Update Linear for routine feedback, polish, or bugfixes.
+- Ask process questions or wait for “OK to continue.”
+
+---
+
+## Agent vs human (assertiveness)
+
+| Agent decides (do not ask) | Human decides (ask / wait) |
+|--|--|
+| Track (Feature vs Direct) | Product gray areas **on Feature track** that block correct build |
+| Size, reviewers, harness steps | ADR acceptance |
+| Whether design/wireframe is needed ([design-when](design-when.mdc)) | Stop-early hard FAIL / round-3 triage |
+| Linear create/update; **commit + push** then handoff → **In Review** + evidence comment | External blocker (secrets, access) |
+| Sprint pickup - all issues, per-task ship | Marking Linear **Done** (PM / Joey only) |
+| Working only on `development` | |
+| Auto-continue after BLOCK (≤3); no design-approval pause | |
+
+State process choices in one line (“Feature track, size M - implementing”) and **continue**. Never ask about process, size, or design approval.
+
+---
+
+## Naming
+
+Prefer titles like **`[<area>] Verb object`** (Linear + local spec).
+
+---
+
+## Git / delivery
+
+- **Always work on `development`.** Do not create `feature/*` or `fix/*` branches.
+- **Linear task finish:** run tests → update `CHANGELOG.md` + patch bump → **commit and push** `origin/development` (`Refs DY-nn`) → Linear evidence comment → **In Review**.
+- **Direct track:** no mandatory commit/push unless the human asks or a batch cycle closes.
+- Do **not** push to `main` during normal work - use skill **push-to-main** when the human asks.
+- Avoid shipping Feature-track work with open **CRITICAL/HIGH** in that issue’s required feedback files.
+
+---
+
+## Planner / Linear (Feature track)
+
+After **`planner`** writes `docs/project/issues/<id>/spec.md` and `rubric.md`:
+
+1. Update **Linear** with those paths and a short AC summary.
+2. Map roadmap subtasks → Linear issues where reasonable.
+3. Prefer **Linear MCP** for PM updates - not chat-only.
+
+---
+
+## What we do NOT do
+
+- Dual-maintain the same ticket in Linear and GitHub.
+- Put Direct-track ceremony (plans, long specs, status essays) into Linear or the repo.
+- Create per-feature git branches.
+- Ask the human to confirm process decisions the agent already owns.
+- Use a monolithic `docs/project/spec.md` or treat `generator-state.md` as the backlog.
+- Mark Feature issues **Done** in Linear - that is PM verification after [linear-handoff](linear-handoff.mdc).

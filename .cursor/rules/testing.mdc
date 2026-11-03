@@ -1,0 +1,78 @@
+---
+description: Testing - Go, web, integration, e2e, TDD (Dockyard)
+alwaysApply: true
+---
+
+# Testing requirements
+
+Use commands from **`docs/project/setup.md`** and the **Makefile** when present — do not assume scripts that are not in the repo yet.
+
+See **`.cursor/agents/generator.md`** and **`.cursor/rules/code-review.mdc`**.
+
+---
+
+## Coverage expectation
+
+Aim for **~80%** on new/changed **logic** (Go packages, `web/lib`, hooks) once coverage tooling exists. UI-only token tweaks may skip new tests when nothing behavioral changed — say so in the handoff.
+
+---
+
+## Test layers
+
+| Layer | Scope | Tooling |
+|--|--|--|
+| **Unit** | Pure Go, renderers, RBAC helpers, route-param parsing, formatters | `go test ./...` |
+| **Integration** | Docker API, reconcile, Caddy load, deploy state machine | `go test -tags=integration` (Docker required) |
+| **Web unit/component** | React hooks, form validation, API client helpers | Vitest/Playwright component tests when added under `web/` |
+| **E2E** | Install script, setup, deploy fixture app, critical UI flows | `e2e/` Playwright + shell (briefing §14.2) |
+| **UI contract** | New/changed dashboard screens | Structure vs `design-index.json` + Playwright flows — [dockyard-design-contract](dockyard-design-contract.mdc) |
+
+---
+
+## SQLite migrations (control plane)
+
+When changing **`internal/db/migrations/`** or sqlc queries:
+
+- Run `go test ./internal/db/...` (or project equivalent).
+- Apply migrations on a clean DB in tests or `make test` — forward-only in production.
+- Invoke **`database-reviewer`** on non-trivial schema changes (constraints, secrets columns, auth tables).
+
+User **Postgres/Redis** services are provisioned by Dockyard in Docker — not migrated via app Drizzle. E2E fixtures may use Prisma/Drizzle in **sample apps only** under `e2e/fixtures/`.
+
+---
+
+## CI
+
+Briefing §14.3 expects **`.github/workflows/`** (`ci.yml`, `e2e.yml`, `release.yml`). Maintain workflows when adding gates (Go lint, `pnpm` web build, Radix check, integration on main/nightly).
+
+Local runs should mirror CI subsets for touched surfaces — full matrix before release / `push-to-main`.
+
+---
+
+## Radix guard (web)
+
+After dependency changes in `web/`:
+
+```bash
+./scripts/check-no-radix.sh
+```
+
+Must pass before merge — use Base UI primitives only.
+
+---
+
+## TDD workflow
+
+For behavioral work:
+
+1. **RED** — failing test for the desired behavior  
+2. **Run** — confirm failure for the right reason  
+3. **GREEN** — minimal fix  
+4. **Run** — relevant packages green  
+5. **Refactor** — without semantic change  
+
+---
+
+## Review integration
+
+**`code-reviewer`** may spot-check tests; trust generator-reported gates unless suspicious. Keep tests deterministic (fixed time, no flaky sleeps).
