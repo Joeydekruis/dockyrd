@@ -18,7 +18,8 @@ Commands below match **briefing §5 / §14**. Until the Makefile and workflows l
 | `make test` | Unit Go tests |
 | `make lint` | Go + Biome |
 | `make generate` | sqlc, OpenAPI, TS types |
-| `make e2e` | Install + Playwright |
+| `make e2e` | `e2e/smoke.sh` (init + serve + HTTP checks) |
+| `make release-snapshot` | Local GoReleaser snapshot (requires `goreleaser` CLI) |
 
 ## Go (when present)
 

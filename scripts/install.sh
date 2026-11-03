@@ -30,10 +30,60 @@ install_binary() {
 		install -m 755 "$INSTALL_BIN" /usr/local/bin/dockyard
 		return 0
 	fi
-	log "Release download is not wired in the M0 skeleton." >&2
+	if download_release_binary; then
+		return 0
+	fi
+	log "Could not download a release binary." >&2
 	log "Build locally (make build) and re-run with:" >&2
 	log "  DOCKYARD_INSTALL_BIN=/path/to/dockyard $0" >&2
 	exit 1
+}
+
+github_latest_tag() {
+	repo="$1"
+	curl -sf "https://api.github.com/repos/$repo/releases/latest" \
+		| sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p' | head -n1
+}
+
+download_release_binary() {
+	repo="${DOCKYARD_GITHUB_REPO:-Joeydekruis/dockyrd}"
+	tag="${DOCKYARD_VERSION:-}"
+	if [ -z "$tag" ] || [ "$tag" = "dev" ]; then
+		tag=$(github_latest_tag "$repo") || return 1
+	fi
+	case "$tag" in
+	v*) ;;
+	*) tag="v$tag" ;;
+	esac
+	ver="${tag#v}"
+	os_name=$(uname -s | tr '[:upper:]' '[:lower:]')
+	arch=$(uname -m)
+	case "$arch" in
+	x86_64 | amd64) arch=amd64 ;;
+	aarch64 | arm64) arch=arm64 ;;
+	*) return 1 ;;
+	esac
+	asset="dockyard_${ver}_${os_name}_${arch}.tar.gz"
+	base="https://github.com/${repo}/releases/download/${tag}"
+	tmp=$(mktemp -d) || return 1
+	trap 'rm -rf "$tmp"' EXIT
+	if ! curl -sfL "${base}/${asset}" -o "${tmp}/${asset}"; then
+		return 1
+	fi
+	if curl -sfL "${base}/checksums.txt" -o "${tmp}/checksums.txt"; then
+		(
+			cd "$tmp" || exit 1
+			want=$(grep " ${asset}$" checksums.txt | awk '{print $1}')
+			got=$(sha256sum "$asset" | awk '{print $1}')
+			if [ -n "$want" ] && [ "$want" != "$got" ]; then
+				log "Checksum mismatch for ${asset}" >&2
+				return 1
+			fi
+		) || return 1
+	fi
+	tar -xzf "${tmp}/${asset}" -C "$tmp" dockyard || return 1
+	install -m 755 "${tmp}/dockyard" /usr/local/bin/dockyard
+	return 0
 }
 
 install_systemd() {

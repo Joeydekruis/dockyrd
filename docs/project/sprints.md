@@ -102,9 +102,18 @@ Milestone: **M5 · Sprint 1 — Doctor & admin CLI** — #35–#38
 
 **Status (2026-11-03):** `development` @ **v0.0.15** — gate `./scripts/verify-m5-smoke.sh`. User docs under `docs/user/`.
 
-## M5 · Sprint 2 — E2E & release (planned)
+## M5 · Sprint 2 — E2E & release — complete (ready for review)
 
-Release workflow, Playwright e2e, cosign — briefing §14.3 / §19.
+Milestone: **M5 · Sprint 2 — E2E & release** — #39, #40
+
+| Issue | Title |
+|--|--|
+| #39 | E2E smoke + `e2e.yml` |
+| #40 | GoReleaser + `release.yml` + install download |
+
+**Status (2026-11-03):** `development` @ **v0.0.16**. First public binary: tag `v0.0.16` on `main` triggers release workflow.
+
+**Superseded** — see “M5 · Sprint 2 — complete” above.
 
 ## Sprint 1 issues (GitHub)
 

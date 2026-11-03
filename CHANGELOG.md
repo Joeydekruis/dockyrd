@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.16] - 2026-11-03
+
+_Finished: 2026-11-03_
+
+### Added
+
+- **#39 / E2E smoke** — `e2e/smoke.sh`, `e2e.yml`, `make e2e` — https://github.com/Joeydekruis/dockyrd/issues/39
+- **#40 / Release pipeline** — `.goreleaser.yaml`, `release.yml`, cosign checksum signing, `install.sh` GitHub download — https://github.com/Joeydekruis/dockyrd/issues/40
+
+### Changed
+
+- **Makefile** — embed `package.json` version via `-ldflags -X main.version=…`
+
 ## [0.0.15] - 2026-11-03
 
 _Finished: 2026-11-03_

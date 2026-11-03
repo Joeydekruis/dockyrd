@@ -1,7 +1,10 @@
-.PHONY: build test lint dev ensure-ui-stub web-build generate
+.PHONY: build test lint dev ensure-ui-stub web-build generate e2e release-snapshot
+
+VERSION := $(shell node -p "require('./package.json').version" 2>/dev/null || echo dev)
+LDFLAGS := -s -w -X main.version=$(VERSION)
 
 build: web-build
-	go build -o bin/dockyard ./cmd/dockyard
+	go build -ldflags "$(LDFLAGS)" -o bin/dockyard ./cmd/dockyard
 
 web-build:
 	pnpm --dir web install
@@ -23,3 +26,10 @@ ensure-ui-stub:
 
 generate:
 	go run github.com/sqlc-dev/sqlc/cmd/sqlc@v1.29.0 generate
+
+e2e:
+	chmod +x e2e/smoke.sh
+	./e2e/smoke.sh
+
+release-snapshot:
+	goreleaser release --snapshot --clean --skip=publish

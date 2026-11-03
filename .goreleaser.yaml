@@ -1,0 +1,61 @@
+version: 2
+
+project_name: dockyard
+
+before:
+  hooks:
+    - go mod tidy
+    - pnpm --dir web install --frozen-lockfile
+    - pnpm --dir web build
+
+builds:
+  - id: dockyard
+    main: ./cmd/dockyard
+    binary: dockyard
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
+
+archives:
+  - id: default
+    format: tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - LICENSE
+      - NOTICE
+      - README.md
+
+checksum:
+  name_template: checksums.txt
+
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+
+release:
+  github:
+    owner: Joeydekruis
+    name: dockyrd
+  name_template: "Dockyard {{.Version}}"
+
+changelog:
+  disable: true
+
+signs:
+  - cmd: cosign
+    env:
+      - COSIGN_EXPERIMENTAL=1
+    certificate: "${artifact}.pem"
+    args:
+      - sign-blob
+      - "--yes"
+      - "${artifact}"
+      - "--output-signature=${signature}"
+      - "--output-certificate=${certificate}"
+    artifacts: checksum

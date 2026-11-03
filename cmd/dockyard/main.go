@@ -13,7 +13,7 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/updater"
 )
 
-var version = "0.0.14-dev"
+var version = "dev"
 
 func main() {
 	if len(os.Args) < 2 {
