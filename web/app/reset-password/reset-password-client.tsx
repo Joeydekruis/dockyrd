@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { type FormEvent, useState } from "react";
 import { AuthLayout } from "@/components/dockyard/auth-layout";
 import { resetPassword } from "@/lib/api";
 
@@ -33,7 +33,10 @@ export function ResetPasswordClient() {
     <AuthLayout title="Reset password">
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
         <label className="block text-sm">
-          <span className="mb-1 block font-mono text-[11px] uppercase tracking-widest" style={{ color: "var(--muted-text)" }}>
+          <span
+            className="mb-1 block font-mono text-[11px] uppercase tracking-widest"
+            style={{ color: "var(--muted-text)" }}
+          >
             New password (12+ characters)
           </span>
           <input
@@ -46,7 +49,11 @@ export function ResetPasswordClient() {
           />
         </label>
         {error ? (
-          <p className="text-sm" style={{ color: "var(--danger)" }} role="alert">
+          <p
+            className="text-sm"
+            style={{ color: "var(--danger)" }}
+            role="alert"
+          >
             {error}
           </p>
         ) : null}
@@ -59,7 +66,11 @@ export function ResetPasswordClient() {
           {loading ? "Saving…" : "Update password"}
         </button>
       </form>
-      <Link href="/sign-in" className="mt-6 inline-block text-sm" style={{ color: "var(--link-blue)" }}>
+      <Link
+        href="/sign-in"
+        className="mt-6 inline-block text-sm"
+        style={{ color: "var(--link-blue)" }}
+      >
         Back to sign in
       </Link>
     </AuthLayout>

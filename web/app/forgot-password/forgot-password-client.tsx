@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import { type FormEvent, useState } from "react";
 import { AuthLayout } from "@/components/dockyard/auth-layout";
 import { requestPasswordReset } from "@/lib/api";
 
@@ -31,12 +31,15 @@ export function ForgotPasswordClient() {
   return (
     <AuthLayout title="Forgot password?">
       <p className="mb-4 text-sm" style={{ color: "var(--muted-text)" }}>
-        Email delivery is not configured yet. When your account exists, the reset link is shown
-        here (self-hosted).
+        Email delivery is not configured yet. When your account exists, the
+        reset link is shown here (self-hosted).
       </p>
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
         <label className="block text-sm">
-          <span className="mb-1 block font-mono text-[11px] uppercase tracking-widest" style={{ color: "var(--muted-text)" }}>
+          <span
+            className="mb-1 block font-mono text-[11px] uppercase tracking-widest"
+            style={{ color: "var(--muted-text)" }}
+          >
             Email
           </span>
           <input
@@ -56,7 +59,11 @@ export function ForgotPasswordClient() {
           </p>
         ) : null}
         {error ? (
-          <p className="text-sm" style={{ color: "var(--danger)" }} role="alert">
+          <p
+            className="text-sm"
+            style={{ color: "var(--danger)" }}
+            role="alert"
+          >
             {error}
           </p>
         ) : null}
@@ -69,7 +76,11 @@ export function ForgotPasswordClient() {
           {loading ? "Please wait…" : "Request reset link"}
         </button>
       </form>
-      <Link href="/sign-in" className="mt-6 inline-block text-sm" style={{ color: "var(--link-blue)" }}>
+      <Link
+        href="/sign-in"
+        className="mt-6 inline-block text-sm"
+        style={{ color: "var(--link-blue)" }}
+      >
         Back to sign in
       </Link>
     </AuthLayout>

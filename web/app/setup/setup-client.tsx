@@ -1,7 +1,7 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { type FormEvent, useEffect, useState } from "react";
 import { AuthLayout } from "@/components/dockyard/auth-layout";
 import { completeSetup, getSetupStatus } from "@/lib/api";
 
@@ -46,10 +46,20 @@ export function SetupClient() {
     <AuthLayout title="Create owner account">
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
         <Field label="Setup token">
-          <input required value={token} onChange={(e) => setToken(e.target.value)} className="field-input" />
+          <input
+            required
+            value={token}
+            onChange={(e) => setToken(e.target.value)}
+            className="field-input"
+          />
         </Field>
         <Field label="Name">
-          <input required value={name} onChange={(e) => setName(e.target.value)} className="field-input" />
+          <input
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="field-input"
+          />
         </Field>
         <Field label="Email">
           <input
@@ -73,7 +83,11 @@ export function SetupClient() {
           />
         </Field>
         {error ? (
-          <p className="text-sm" style={{ color: "var(--danger)" }} role="alert">
+          <p
+            className="text-sm"
+            style={{ color: "var(--danger)" }}
+            role="alert"
+          >
             {error}
           </p>
         ) : null}
@@ -90,16 +104,22 @@ export function SetupClient() {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
   return (
-    <label className="block text-sm">
-      <span
-        className="mb-1 block font-mono text-[11px] uppercase tracking-widest"
+    <fieldset className="m-0 block border-0 p-0 text-sm">
+      <legend
+        className="mb-1 block w-full font-mono text-[11px] uppercase tracking-widest"
         style={{ color: "var(--muted-text)" }}
       >
         {label}
-      </span>
+      </legend>
       {children}
-    </label>
+    </fieldset>
   );
 }

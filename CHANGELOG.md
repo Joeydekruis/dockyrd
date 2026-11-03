@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.14] - 2026-11-03
+
+_Finished: 2026-11-03_
+
+### Added
+
+- **M4 capstone** — `GET /api/v1/applications`, home dashboard counts, Applications screen — https://github.com/Joeydekruis/dockyrd/issues/27 (Analytics/dashboard AC)
+- **Event deep links** — `action_href` on service-related events; Analytics “Needs attention” list — #27
+- **Static release cleanup** — reclaimable bytes + `old_releases` cleanup target — #33
+
+### Changed
+
+- **Sign-in MFA** — optional recovery code path — #32
+
 ## [0.0.13] - 2026-11-03
 
 _Finished: 2026-11-03_

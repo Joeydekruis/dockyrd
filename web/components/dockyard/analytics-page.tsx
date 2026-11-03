@@ -1,18 +1,19 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import {
   ackEvent,
+  type CleanupSummary,
   type DockyardEvent,
   getMe,
   getServerCleanup,
   getServerContainers,
   getServerMetrics,
   listEvents,
-  postServerCleanup,
-  type CleanupSummary,
   type MetricRange,
+  postServerCleanup,
   type ServerContainer,
   type ServerMetricsResponse,
 } from "@/lib/api";
@@ -40,7 +41,13 @@ function formatBytes(n: number): string {
   return `${v.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
 }
 
-function Sparkline({ values, stroke = "var(--primary)" }: { values: number[]; stroke?: string }) {
+function Sparkline({
+  values,
+  stroke = "var(--primary)",
+}: {
+  values: number[];
+  stroke?: string;
+}) {
   if (values.length < 2) {
     return (
       <div className="h-8 w-full rounded bg-[var(--muted)]/30" aria-hidden />
@@ -93,7 +100,9 @@ function MetricTile({
       <p className="text-xs font-medium uppercase tracking-wide text-[var(--muted-foreground)]">
         {label}
       </p>
-      <p className="mt-1 text-2xl font-semibold tabular-nums text-[var(--foreground)]">{value}</p>
+      <p className="mt-1 text-2xl font-semibold tabular-nums text-[var(--foreground)]">
+        {value}
+      </p>
       {sub ? (
         <p className="text-xs text-[var(--muted-foreground)]">{sub}</p>
       ) : null}
@@ -108,7 +117,8 @@ export function AnalyticsPage() {
   const [range, setRange] = useState<MetricRange>("24h");
   const [metrics, setMetrics] = useState<ServerMetricsResponse | null>(null);
   const [events, setEvents] = useState<DockyardEvent[]>([]);
-  const [eventFilter, setEventFilter] = useState<(typeof eventFilters)[number]["id"]>("all");
+  const [eventFilter, setEventFilter] =
+    useState<(typeof eventFilters)[number]["id"]>("all");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [containers, setContainers] = useState<ServerContainer[]>([]);
@@ -121,7 +131,10 @@ export function AnalyticsPage() {
     try {
       const [m, ev] = await Promise.all([
         getServerMetrics(range),
-        listEvents({ limit: 50, category: eventFilter === "all" ? undefined : eventFilter }),
+        listEvents({
+          limit: 50,
+          category: eventFilter === "all" ? undefined : eventFilter,
+        }),
       ]);
       setMetrics(m);
       setEvents(ev.events);
@@ -160,7 +173,10 @@ export function AnalyticsPage() {
     [metrics],
   );
   const memSeries = useMemo(
-    () => (metrics?.points ?? []).map((p) => (p.mem_total > 0 ? (p.mem_used / p.mem_total) * 100 : 0)),
+    () =>
+      (metrics?.points ?? []).map((p) =>
+        p.mem_total > 0 ? (p.mem_used / p.mem_total) * 100 : 0,
+      ),
     [metrics],
   );
   const diskSeries = useMemo(
@@ -185,6 +201,10 @@ export function AnalyticsPage() {
   }
 
   const visibleEvents = events.filter((ev) => !ev.acknowledged_at);
+  const needsAttention = events.filter(
+    (ev) =>
+      !ev.acknowledged_at && (ev.level === "error" || ev.level === "warning"),
+  );
 
   async function onCleanup(targets: string[]) {
     setCleanupBusy(true);
@@ -236,7 +256,9 @@ export function AnalyticsPage() {
         ) : null}
 
         {loading && !metrics ? (
-          <p className="text-sm text-[var(--muted-foreground)]">Loading metrics…</p>
+          <p className="text-sm text-[var(--muted-foreground)]">
+            Loading metrics…
+          </p>
         ) : (
           <section
             className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
@@ -312,11 +334,18 @@ export function AnalyticsPage() {
               </li>
             ) : (
               visibleEvents.map((ev) => (
-                <li key={ev.id} className="flex flex-wrap items-start justify-between gap-3 px-4 py-3">
+                <li
+                  key={ev.id}
+                  className="flex flex-wrap items-start justify-between gap-3 px-4 py-3"
+                >
                   <div>
-                    <p className="text-sm font-medium text-[var(--foreground)]">{ev.title}</p>
+                    <p className="text-sm font-medium text-[var(--foreground)]">
+                      {ev.title}
+                    </p>
                     {ev.detail ? (
-                      <p className="mt-0.5 text-sm text-[var(--muted-foreground)]">{ev.detail}</p>
+                      <p className="mt-0.5 text-sm text-[var(--muted-foreground)]">
+                        {ev.detail}
+                      </p>
                     ) : null}
                     <p className="mt-1 text-xs text-[var(--muted-foreground)]">
                       {ev.level} · {ev.category || "general"}
@@ -338,17 +367,38 @@ export function AnalyticsPage() {
         <section className="grid gap-6 lg:grid-cols-2">
           <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
             <h2 className="text-lg font-semibold">Needs attention</h2>
-            <p className="mt-2 text-sm text-[var(--muted-foreground)]">
-              Service health alerts arrive in a later M4 slice.
-            </p>
+            <ul className="mt-3 space-y-2">
+              {needsAttention.length === 0 ? (
+                <li className="text-sm text-[var(--muted-foreground)]">Nothing flagged.</li>
+              ) : (
+                needsAttention.slice(0, 5).map((ev) => (
+                  <li key={ev.id} className="flex items-center justify-between gap-2 text-sm">
+                    <span>{ev.title}</span>
+                    {ev.action_href ? (
+                      <Link href={ev.action_href} className="text-xs underline">
+                        Open service
+                      </Link>
+                    ) : null}
+                  </li>
+                ))
+              )}
+            </ul>
           </div>
           <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
             <h2 className="text-lg font-semibold">Docker cleanup</h2>
             {cleanup ? (
               <ul className="mt-3 space-y-2 text-sm">
                 <li>Build cache: {formatBytes(cleanup.build_cache_bytes)}</li>
-                <li>Dangling images: {formatBytes(cleanup.dangling_images_bytes)}</li>
-                <li>Stopped unmanaged containers: {cleanup.stopped_unmanaged_containers}</li>
+                <li>
+                  Dangling images: {formatBytes(cleanup.dangling_images_bytes)}
+                </li>
+                <li>
+                  Stopped unmanaged containers:{" "}
+                  {cleanup.stopped_unmanaged_containers}
+                </li>
+                <li>
+                  Old static releases: {formatBytes(cleanup.old_releases_bytes)}
+                </li>
               </ul>
             ) : (
               <p className="mt-2 text-sm text-[var(--muted-foreground)]">
@@ -361,7 +411,12 @@ export function AnalyticsPage() {
                 disabled={cleanupBusy}
                 className="mt-4 rounded-md bg-[var(--primary)] px-3 py-1.5 text-xs text-[var(--primary-foreground)]"
                 onClick={() =>
-                  void onCleanup(["dangling_images", "build_cache", "stopped_unmanaged"])
+                  void onCleanup([
+                    "dangling_images",
+                    "build_cache",
+                    "stopped_unmanaged",
+                    "old_releases",
+                  ])
                 }
               >
                 {cleanupBusy ? "Cleaning…" : "Review and clean up"}
@@ -372,11 +427,16 @@ export function AnalyticsPage() {
 
         <section className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
           <h2 className="text-lg font-semibold">Running containers</h2>
-          <div className="mt-3 overflow-x-auto" role="table" aria-label="Running containers">
+          <div className="mt-3 overflow-x-auto">
             {containers.length === 0 ? (
-              <p className="text-sm text-[var(--muted-foreground)]">No running Dockyard containers.</p>
+              <p className="text-sm text-[var(--muted-foreground)]">
+                No running Dockyard containers.
+              </p>
             ) : (
-              <table className="w-full text-left text-sm">
+              <table
+                className="w-full text-left text-sm"
+                aria-label="Running containers"
+              >
                 <thead>
                   <tr className="text-[var(--muted-foreground)]">
                     <th className="pb-2 pr-4 font-medium">Name</th>

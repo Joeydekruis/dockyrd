@@ -7,6 +7,8 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
+
+	"github.com/Joeydekruis/dockyrd/internal/staticsite"
 )
 
 var ErrUnavailable = errors.New("docker unavailable")
@@ -95,7 +97,7 @@ func (c *Client) ListContainerRows(ctx context.Context) ([]ContainerRow, error) 
 }
 
 // RunCleanup prunes selected targets; never removes running managed workloads.
-func (c *Client) RunCleanup(ctx context.Context, targets []string) (map[string]int64, error) {
+func (c *Client) RunCleanup(ctx context.Context, sitesRoot string, targets []string) (map[string]int64, error) {
 	if c == nil || c.moby == nil {
 		return nil, ErrUnavailable
 	}
@@ -120,6 +122,8 @@ func (c *Client) RunCleanup(ctx context.Context, targets []string) (map[string]i
 				return results, err
 			}
 			results[t] = n
+		case "old_releases":
+			results[t] = staticsite.PruneAllOldReleases(sitesRoot, staticsite.DefaultReleaseKeep)
 		}
 	}
 	return results, nil

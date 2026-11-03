@@ -4,12 +4,12 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import {
+  type AuthSession,
   enableTotp,
   getAuthSecurity,
   listAuthSessions,
   revokeAuthSession,
   setupTotp,
-  type AuthSession,
 } from "@/lib/api";
 
 export function ProfileSettingsPage() {
@@ -25,7 +25,10 @@ export function ProfileSettingsPage() {
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      const [sec, sess] = await Promise.all([getAuthSecurity(), listAuthSessions()]);
+      const [sec, sess] = await Promise.all([
+        getAuthSecurity(),
+        listAuthSessions(),
+      ]);
       setTotpEnabled(sec.totp_enabled);
       setSessions(sess.sessions);
       setError(null);
@@ -55,7 +58,10 @@ export function ProfileSettingsPage() {
     e.preventDefault();
     if (!setupSecret || !confirmCode.trim()) return;
     try {
-      const res = await enableTotp({ secret: setupSecret, code: confirmCode.trim() });
+      const res = await enableTotp({
+        secret: setupSecret,
+        code: confirmCode.trim(),
+      });
       setRecoveryCodes(res.recovery_codes ?? []);
       setSetupSecret(null);
       setSetupURL(null);
@@ -78,11 +84,19 @@ export function ProfileSettingsPage() {
   return (
     <DashboardShell title="Profile & security" breadcrumb="Settings">
       <nav className="mb-6 flex flex-wrap gap-4 text-sm">
-        <span className="font-medium text-[var(--foreground)]">Profile & security</span>
-        <Link href="/settings/team" className="text-[var(--muted-foreground)] underline">
+        <span className="font-medium text-[var(--foreground)]">
+          Profile & security
+        </span>
+        <Link
+          href="/settings/team"
+          className="text-[var(--muted-foreground)] underline"
+        >
           Team
         </Link>
-        <Link href="/settings/instance" className="text-[var(--muted-foreground)] underline">
+        <Link
+          href="/settings/instance"
+          className="text-[var(--muted-foreground)] underline"
+        >
           Instance settings
         </Link>
       </nav>
@@ -98,17 +112,23 @@ export function ProfileSettingsPage() {
         {loading ? (
           <p className="text-sm text-[var(--muted-foreground)]">Loading…</p>
         ) : totpEnabled ? (
-          <p className="text-sm text-green-700">Authenticator app is enabled for this account.</p>
+          <p className="text-sm text-green-700">
+            Authenticator app is enabled for this account.
+          </p>
         ) : setupSecret ? (
           <form onSubmit={onEnableTotp} className="space-y-3">
             {setupURL ? (
               <p className="break-all text-xs text-[var(--muted-foreground)]">
                 Add this account in your app (or scan URL):{" "}
-                <code className="rounded bg-[var(--muted)]/30 px-1">{setupSecret}</code>
+                <code className="rounded bg-[var(--muted)]/30 px-1">
+                  {setupSecret}
+                </code>
               </p>
             ) : null}
             <label className="flex flex-col gap-1 text-sm">
-              <span className="text-[var(--muted-foreground)]">6-digit code</span>
+              <span className="text-[var(--muted-foreground)]">
+                6-digit code
+              </span>
               <input
                 value={confirmCode}
                 onChange={(e) => setConfirmCode(e.target.value)}
@@ -135,8 +155,12 @@ export function ProfileSettingsPage() {
         )}
         {recoveryCodes ? (
           <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
-            <p className="font-medium">Save these recovery codes (shown once):</p>
-            <pre className="mt-2 whitespace-pre-wrap font-mono text-xs">{recoveryCodes.join("\n")}</pre>
+            <p className="font-medium">
+              Save these recovery codes (shown once):
+            </p>
+            <pre className="mt-2 whitespace-pre-wrap font-mono text-xs">
+              {recoveryCodes.join("\n")}
+            </pre>
           </div>
         ) : null}
       </section>
@@ -145,10 +169,15 @@ export function ProfileSettingsPage() {
         <h2 className="text-lg font-medium">Active sessions</h2>
         <ul className="divide-y divide-[var(--border)] rounded-xl border border-[var(--border)] bg-[var(--surface)]">
           {sessions.length === 0 ? (
-            <li className="px-4 py-4 text-sm text-[var(--muted-foreground)]">No sessions.</li>
+            <li className="px-4 py-4 text-sm text-[var(--muted-foreground)]">
+              No sessions.
+            </li>
           ) : (
             sessions.map((s) => (
-              <li key={s.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm">
+              <li
+                key={s.id}
+                className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm"
+              >
                 <div>
                   <p>{s.user_agent || "Unknown device"}</p>
                   <p className="text-xs text-[var(--muted-foreground)]">

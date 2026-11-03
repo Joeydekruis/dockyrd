@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { globalSearch, type SearchResult } from "@/lib/api";
 import { palettePages } from "@/lib/nav";
 
@@ -13,12 +13,15 @@ type CommandPaletteProps = {
 export function CommandPalette({ open, onClose }: CommandPaletteProps) {
   const [query, setQuery] = useState("");
   const [remote, setRemote] = useState<SearchResult[] | null>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!open) {
       setQuery("");
       setRemote(null);
+      return;
     }
+    searchInputRef.current?.focus();
   }, [open]);
 
   useEffect(() => {
@@ -80,7 +83,7 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
         style={{ background: "var(--surface)", borderColor: "var(--border)" }}
       >
         <input
-          autoFocus
+          ref={searchInputRef}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search pages and projects…"
@@ -96,12 +99,17 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
                 className="flex items-center justify-between rounded-lg px-3 py-2 text-sm hover:bg-[var(--hover-row)]"
               >
                 <span>{page.label}</span>
-                <span className="text-xs capitalize text-[var(--muted-foreground)]">{page.kind}</span>
+                <span className="text-xs capitalize text-[var(--muted-foreground)]">
+                  {page.kind}
+                </span>
               </Link>
             </li>
           ))}
           {filtered.length === 0 ? (
-            <li className="px-3 py-6 text-center text-sm" style={{ color: "var(--muted-text)" }}>
+            <li
+              className="px-3 py-6 text-center text-sm"
+              style={{ color: "var(--muted-text)" }}
+            >
               No matches
             </li>
           ) : null}

@@ -4,11 +4,11 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import {
+  type AuditEntry,
   createInvite,
   listAuditLog,
   listInvites,
   listTeamUsers,
-  type AuditEntry,
   type TeamInvite,
   type TeamUser,
 } from "@/lib/api";
@@ -66,10 +66,16 @@ export function TeamSettingsPage() {
   return (
     <DashboardShell title="Team" breadcrumb="Settings">
       <nav className="mb-6 flex flex-wrap gap-4 text-sm">
-        <Link href="/settings/profile" className="text-[var(--muted-foreground)] underline">
+        <Link
+          href="/settings/profile"
+          className="text-[var(--muted-foreground)] underline"
+        >
           Profile & security
         </Link>
-        <Link href="/settings/instance" className="text-[var(--muted-foreground)] underline">
+        <Link
+          href="/settings/instance"
+          className="text-[var(--muted-foreground)] underline"
+        >
           Instance settings
         </Link>
         <span className="font-medium text-[var(--foreground)]">Team</span>
@@ -83,7 +89,10 @@ export function TeamSettingsPage() {
 
       <section className="mb-8 max-w-xl space-y-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6">
         <h2 className="text-lg font-medium">Invite member</h2>
-        <form onSubmit={onInvite} className="flex flex-col gap-3 sm:flex-row sm:items-end">
+        <form
+          onSubmit={onInvite}
+          className="flex flex-col gap-3 sm:flex-row sm:items-end"
+        >
           <label className="flex flex-1 flex-col gap-1 text-sm">
             <span className="text-[var(--muted-foreground)]">Email</span>
             <input
@@ -147,12 +156,19 @@ export function TeamSettingsPage() {
         <h2 className="text-lg font-medium">Pending invites</h2>
         <ul className="divide-y divide-[var(--border)] rounded-xl border border-[var(--border)] bg-[var(--surface)]">
           {invites.length === 0 ? (
-            <li className="px-4 py-4 text-sm text-[var(--muted-foreground)]">No pending invites.</li>
+            <li className="px-4 py-4 text-sm text-[var(--muted-foreground)]">
+              No pending invites.
+            </li>
           ) : (
             invites.map((inv) => (
-              <li key={inv.id} className="flex justify-between px-4 py-3 text-sm">
+              <li
+                key={inv.id}
+                className="flex justify-between px-4 py-3 text-sm"
+              >
                 <span>{inv.email}</span>
-                <span className="text-[var(--muted-foreground)]">{inv.role}</span>
+                <span className="text-[var(--muted-foreground)]">
+                  {inv.role}
+                </span>
               </li>
             ))
           )}

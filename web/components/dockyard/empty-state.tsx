@@ -17,7 +17,10 @@ export function EmptyState({
       style={{ background: "var(--surface)", borderColor: "var(--border)" }}
     >
       <h2 className="text-xl font-semibold tracking-tight">{title}</h2>
-      <p className="mx-auto mt-2 max-w-md" style={{ color: "var(--muted-text)" }}>
+      <p
+        className="mx-auto mt-2 max-w-md"
+        style={{ color: "var(--muted-text)" }}
+      >
         {description}
       </p>
       {actionLabel && actionHref ? (

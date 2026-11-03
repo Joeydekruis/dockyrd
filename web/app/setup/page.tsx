@@ -5,7 +5,10 @@ export default function SetupPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-dvh items-center justify-center text-sm" style={{ color: "var(--muted-text)" }}>
+        <div
+          className="flex min-h-dvh items-center justify-center text-sm"
+          style={{ color: "var(--muted-text)" }}
+        >
           Loading…
         </div>
       }

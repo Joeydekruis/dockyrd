@@ -46,16 +46,19 @@ export function getSetupStatus() {
 }
 
 export function login(email: string, password: string) {
-  return apiFetch<{ ok?: boolean; mfa_required?: boolean }>("/api/v1/auth/login", {
-    method: "POST",
-    json: { email, password, remember: true },
-  });
+  return apiFetch<{ ok?: boolean; mfa_required?: boolean }>(
+    "/api/v1/auth/login",
+    {
+      method: "POST",
+      json: { email, password, remember: true },
+    },
+  );
 }
 
-export function submitMfa(code: string) {
+export function submitMfa(code: string, recoveryCode?: string) {
   return apiFetch<{ ok: boolean }>("/api/v1/auth/mfa", {
     method: "POST",
-    json: { code },
+    json: recoveryCode ? { recovery_code: recoveryCode } : { code },
   });
 }
 
@@ -66,10 +69,13 @@ export function getAuthSecurity() {
 }
 
 export function setupTotp() {
-  return apiFetch<{ secret: string; otpauth_url: string }>("/api/v1/auth/totp/setup", {
-    method: "POST",
-    json: {},
-  });
+  return apiFetch<{ secret: string; otpauth_url: string }>(
+    "/api/v1/auth/totp/setup",
+    {
+      method: "POST",
+      json: {},
+    },
+  );
 }
 
 export function enableTotp(input: { secret: string; code: string }) {
@@ -342,12 +348,14 @@ export type DockyardEvent = {
   deployment_id?: string;
   acknowledged_at?: number;
   created_at: number;
+  action_href?: string;
 };
 
-export function listEvents(opts?: { limit?: number; category?: string }) {
+export function listEvents(opts?: { limit?: number; category?: string; needsAttention?: boolean }) {
   const q = new URLSearchParams();
   if (opts?.limit) q.set("limit", String(opts.limit));
   if (opts?.category) q.set("category", opts.category);
+  if (opts?.needsAttention) q.set("needs_attention", "1");
   const suffix = q.size ? `?${q}` : "";
   return apiFetch<{ events: DockyardEvent[] }>(`/api/v1/events${suffix}`);
 }
@@ -394,7 +402,11 @@ export function previewInvite(token: string) {
   );
 }
 
-export function acceptInvite(input: { token: string; name: string; password: string }) {
+export function acceptInvite(input: {
+  token: string;
+  name: string;
+  password: string;
+}) {
   return apiFetch<{ ok: boolean }>("/api/v1/invites/accept", {
     method: "POST",
     json: input,
@@ -429,7 +441,9 @@ export type CleanupSummary = {
 };
 
 export function getServerContainers() {
-  return apiFetch<{ containers: ServerContainer[] }>("/api/v1/server/containers");
+  return apiFetch<{ containers: ServerContainer[] }>(
+    "/api/v1/server/containers",
+  );
 }
 
 export function getServerCleanup() {
@@ -437,17 +451,23 @@ export function getServerCleanup() {
 }
 
 export function postServerCleanup(targets: string[]) {
-  return apiFetch<{ reclaimed: Record<string, number> }>("/api/v1/server/cleanup", {
-    method: "POST",
-    json: { targets },
-  });
+  return apiFetch<{ reclaimed: Record<string, number> }>(
+    "/api/v1/server/cleanup",
+    {
+      method: "POST",
+      json: { targets },
+    },
+  );
 }
 
 export function requestPasswordReset(email: string) {
-  return apiFetch<{ ok: boolean; reset_path?: string }>("/api/v1/auth/password/forgot", {
-    method: "POST",
-    json: { email },
-  });
+  return apiFetch<{ ok: boolean; reset_path?: string }>(
+    "/api/v1/auth/password/forgot",
+    {
+      method: "POST",
+      json: { email },
+    },
+  );
 }
 
 export function resetPassword(token: string, password: string) {
@@ -455,4 +475,18 @@ export function resetPassword(token: string, password: string) {
     method: "POST",
     json: { token, password },
   });
+}
+
+export type ApplicationRow = {
+  id: string;
+  name: string;
+  slug: string;
+  desired_state: string;
+  project_id: string;
+  project_name: string;
+  project_slug: string;
+};
+
+export function listApplications() {
+  return apiFetch<{ applications: ApplicationRow[] }>("/api/v1/applications");
 }

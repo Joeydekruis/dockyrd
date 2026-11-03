@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/Joeydekruis/dockyrd/internal/docker"
+	"github.com/Joeydekruis/dockyrd/internal/staticsite"
 )
 
 func (d apiDeps) requireDocker(w http.ResponseWriter) (*docker.Client, bool) {
@@ -49,6 +50,7 @@ func (d apiDeps) handleServerCleanupGet(w http.ResponseWriter, r *http.Request) 
 		writeJSONError(w, http.StatusInternalServerError, "docker error")
 		return
 	}
+	sum.OldReleaseBytes = staticsite.ReclaimableReleaseBytes(d.cfg.SitesDir(), staticsite.DefaultReleaseKeep)
 	writeJSON(w, http.StatusOK, sum)
 }
 
@@ -71,7 +73,7 @@ func (d apiDeps) handleServerCleanupPost(w http.ResponseWriter, r *http.Request)
 		writeJSONError(w, http.StatusBadRequest, "targets required")
 		return
 	}
-	results, err := cli.RunCleanup(r.Context(), body.Targets)
+	results, err := cli.RunCleanup(r.Context(), d.cfg.SitesDir(), body.Targets)
 	if err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "cleanup failed")
 		return

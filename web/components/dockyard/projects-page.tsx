@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import { createProject, listProjects, type Project } from "@/lib/api";
 
@@ -86,7 +86,9 @@ export function ProjectsPage() {
                   className="block rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 hover:border-[var(--primary)]"
                 >
                   <h2 className="font-medium">{p.name}</h2>
-                  <p className="text-sm text-[var(--muted-foreground)]">{p.slug}</p>
+                  <p className="text-sm text-[var(--muted-foreground)]">
+                    {p.slug}
+                  </p>
                 </Link>
               </li>
             ))}

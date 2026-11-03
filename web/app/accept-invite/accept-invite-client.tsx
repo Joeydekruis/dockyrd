@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { type FormEvent, useEffect, useState } from "react";
 import { AuthLayout } from "@/components/dockyard/auth-layout";
 import { acceptInvite, previewInvite } from "@/lib/api";
 
@@ -55,7 +55,10 @@ export function AcceptInviteClient() {
       ) : null}
       <form onSubmit={onSubmit} className="flex flex-col gap-4">
         <label className="block text-sm">
-          <span className="mb-1 block font-mono text-[11px] uppercase tracking-widest" style={{ color: "var(--muted-text)" }}>
+          <span
+            className="mb-1 block font-mono text-[11px] uppercase tracking-widest"
+            style={{ color: "var(--muted-text)" }}
+          >
             Your name
           </span>
           <input
@@ -66,7 +69,10 @@ export function AcceptInviteClient() {
           />
         </label>
         <label className="block text-sm">
-          <span className="mb-1 block font-mono text-[11px] uppercase tracking-widest" style={{ color: "var(--muted-text)" }}>
+          <span
+            className="mb-1 block font-mono text-[11px] uppercase tracking-widest"
+            style={{ color: "var(--muted-text)" }}
+          >
             Password (12+ characters)
           </span>
           <input
@@ -79,7 +85,11 @@ export function AcceptInviteClient() {
           />
         </label>
         {error ? (
-          <p className="text-sm" style={{ color: "var(--danger)" }} role="alert">
+          <p
+            className="text-sm"
+            style={{ color: "var(--danger)" }}
+            role="alert"
+          >
             {error}
           </p>
         ) : null}

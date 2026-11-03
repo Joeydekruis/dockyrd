@@ -4,12 +4,13 @@ _Last updated: 2026-11-03_
 
 ## Current focus
 
-M4 Sprint 2 largely complete on `development` (#27–#34). Remaining M4: needs-attention events, old releases cleanup, SMTP email, Caddy static analytics.
+**M4 (#27–#34)** capstone shipped on `development` @ **0.0.14**: applications API/UI, home dashboard, Analytics needs-attention + old-release cleanup, MFA recovery on sign-in. Awaiting maintainer close.
 
 ## Next
 
-- Maintainer review/close open M3–M4 issues
-- M5 prep or briefing gaps (§17 app detail screens)
+- Maintainer verify/close M3 (#23–#26) and M4 issues
+- **M5** — self-update, doctor, e2e, v0.1.0
+- Post-M4 briefing gaps: SMTP, Caddy analytics, ECharts, §17 service detail depth
 
 ## Blockers
 

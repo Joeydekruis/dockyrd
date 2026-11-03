@@ -62,7 +62,11 @@ export function DatabasesPage() {
   async function onReveal(id: string) {
     try {
       const { variables } = await getServiceConnection(id, true);
-      setConnection(variables.DATABASE_URL ?? variables.REDIS_URL ?? JSON.stringify(variables));
+      setConnection(
+        variables.DATABASE_URL ??
+          variables.REDIS_URL ??
+          JSON.stringify(variables),
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : "Reveal failed");
     }
@@ -95,7 +99,9 @@ export function DatabasesPage() {
             <select
               className="rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2"
               value={kind}
-              onChange={(ev) => setKind(ev.target.value as "postgres" | "redis")}
+              onChange={(ev) =>
+                setKind(ev.target.value as "postgres" | "redis")
+              }
             >
               <option value="postgres">Postgres 17</option>
               <option value="redis">Redis (Valkey 8)</option>
@@ -132,7 +138,9 @@ export function DatabasesPage() {
         {loading ? (
           <p className="text-sm text-[var(--muted-foreground)]">Loading…</p>
         ) : rows.length === 0 ? (
-          <p className="text-sm text-[var(--muted-foreground)]">No managed databases yet.</p>
+          <p className="text-sm text-[var(--muted-foreground)]">
+            No managed databases yet.
+          </p>
         ) : (
           <ul className="divide-y divide-[var(--border)] rounded-xl border border-[var(--border)] bg-[var(--surface)]">
             {rows.map((row) => (

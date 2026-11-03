@@ -73,6 +73,7 @@ func registerAPIRoutes(mux *http.ServeMux, deps apiDeps) {
 	registerInvitePublicRoutes(mux, deps)
 	registerSearchRoutes(mux, deps)
 	registerAuthSecurityRoutes(mux, deps)
+	registerApplicationRoutes(mux, deps)
 	registerPasswordResetRoutes(mux, deps)
 }
 

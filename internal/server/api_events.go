@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"net/http"
@@ -27,6 +28,7 @@ type eventResponse struct {
 	DeploymentID   string `json:"deployment_id,omitempty"`
 	AcknowledgedAt int64  `json:"acknowledged_at,omitempty"`
 	CreatedAt      int64  `json:"created_at"`
+	ActionHref     string `json:"action_href,omitempty"`
 }
 
 func (d apiDeps) handleListEvents(w http.ResponseWriter, r *http.Request) {
@@ -46,9 +48,15 @@ func (d apiDeps) handleListEvents(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	out := make([]eventResponse, 0, len(rows))
+	ctx := r.Context()
 	for _, row := range rows {
 		ev := eventFromRow(row)
+		d.enrichEvent(ctx, &ev)
 		if category != "" && category != "all" && ev.Category != category {
+			continue
+		}
+		needsOnly := strings.TrimSpace(r.URL.Query().Get("needs_attention")) == "1"
+		if needsOnly && !eventNeedsAttention(ev) {
 			continue
 		}
 		out = append(out, ev)
@@ -111,4 +119,27 @@ func eventFromRow(row sqlc.Event) eventResponse {
 		ev.CreatedAt = row.CreatedAt.Int64
 	}
 	return ev
+}
+
+func eventNeedsAttention(ev eventResponse) bool {
+	if ev.AcknowledgedAt != 0 {
+		return false
+	}
+	switch ev.Level {
+	case "error", "warning":
+		return true
+	default:
+		return false
+	}
+}
+
+func (d apiDeps) enrichEvent(ctx context.Context, ev *eventResponse) {
+	if ev == nil || ev.ServiceID == "" || d.q == nil {
+		return
+	}
+	slug, err := d.q.GetServiceProjectSlug(ctx, ev.ServiceID)
+	if err != nil {
+		return
+	}
+	ev.ActionHref = "/projects/" + slug
 }

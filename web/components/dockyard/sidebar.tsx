@@ -2,17 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  mainNav,
-  projectNav,
-  serverNav,
-  settingsNav,
-} from "@/lib/nav";
 import { DockyrdLogo } from "@/components/dockyard/dockyrd-logo";
+import { mainNav, projectNav, serverNav, settingsNav } from "@/lib/nav";
 
 function NavLink({ href, label }: { href: string; label: string }) {
   const pathname = usePathname();
-  const active = pathname === href || (href !== "/" && pathname.startsWith(href));
+  const active =
+    pathname === href || (href !== "/" && pathname.startsWith(href));
   return (
     <Link
       href={href}
@@ -42,15 +38,14 @@ export function Sidebar() {
           <NavLink key={item.href} href={item.href} label={item.label} />
         ))}
       </nav>
-      <div
-        role="group"
+      <fieldset
         aria-label="Project sections"
-        className="mt-6 flex flex-col gap-1"
+        className="mt-6 m-0 flex flex-col gap-1 border-0 p-0"
       >
         {projectNav.map((item) => (
           <NavLink key={item.href} href={item.href} label={item.label} />
         ))}
-      </div>
+      </fieldset>
       <p
         className="mt-6 mb-2 font-mono text-[11px] uppercase tracking-widest"
         style={{ color: "var(--muted-text)" }}
@@ -77,7 +72,10 @@ export function Sidebar() {
           />
           <span className="font-medium">Server healthy</span>
         </div>
-        <p className="mt-1 font-mono text-[11px]" style={{ color: "var(--muted-text)" }}>
+        <p
+          className="mt-1 font-mono text-[11px]"
+          style={{ color: "var(--muted-text)" }}
+        >
           v0.0.3-dev
         </p>
       </div>

@@ -5,7 +5,10 @@ type DockyrdLogoProps = {
   width?: number;
 };
 
-export function DockyrdLogo({ variant = "light", width = 150 }: DockyrdLogoProps) {
+export function DockyrdLogo({
+  variant = "light",
+  width = 150,
+}: DockyrdLogoProps) {
   return (
     <Image
       src="/dockyrd-logo.svg"

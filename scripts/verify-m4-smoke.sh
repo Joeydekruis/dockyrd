@@ -15,6 +15,7 @@ cat <<'MANUAL'
 
 1. make build && ./bin/dockyard serve
 2. Analytics → range pills show CPU/memory/disk/load sparklines after ~1 min
-3. Trigger a deploy → Important events shows deploy row → Dismiss acks it
+3. Home → project/service counts; Applications lists app services
+4. Trigger a deploy → Important events shows deploy row → Dismiss acks it; warning/error rows link via Open service
 
 MANUAL

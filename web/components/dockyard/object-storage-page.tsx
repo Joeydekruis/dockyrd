@@ -57,7 +57,9 @@ export function ObjectStoragePage() {
         project_id: projectId,
         kind: "bucket",
         name: bucketName.trim(),
-        config: { bucket_name: bucketName.trim().toLowerCase().replace(/\s+/g, "-") },
+        config: {
+          bucket_name: bucketName.trim().toLowerCase().replace(/\s+/g, "-"),
+        },
       });
       setBucketName("");
       await refresh();
@@ -72,7 +74,8 @@ export function ObjectStoragePage() {
         <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
           <h2 className="text-sm font-semibold">Garage (recommended)</h2>
           <p className="mt-1 text-sm text-[var(--muted-foreground)]">
-            Self-hosted S3-compatible storage on this server. MinIO is not offered in MVP.
+            Self-hosted S3-compatible storage on this server. MinIO is not
+            offered in MVP.
           </p>
           <p className="mt-2 font-mono text-xs text-[var(--muted-foreground)]">
             {status?.installed
@@ -111,7 +114,9 @@ export function ObjectStoragePage() {
               </select>
             </label>
             <label className="flex flex-1 flex-col gap-1 text-sm">
-              <span className="text-[var(--muted-foreground)]">Bucket name</span>
+              <span className="text-[var(--muted-foreground)]">
+                Bucket name
+              </span>
               <input
                 className="rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2"
                 value={bucketName}
@@ -137,14 +142,20 @@ export function ObjectStoragePage() {
         {loading ? (
           <p className="text-sm text-[var(--muted-foreground)]">Loading…</p>
         ) : (status?.buckets?.length ?? 0) === 0 ? (
-          <p className="text-sm text-[var(--muted-foreground)]">No buckets yet.</p>
+          <p className="text-sm text-[var(--muted-foreground)]">
+            No buckets yet.
+          </p>
         ) : (
           <ul className="divide-y divide-[var(--border)] rounded-xl border border-[var(--border)] bg-[var(--surface)]">
             {status?.buckets?.map((b) => (
               <li key={b.id} className="px-4 py-3 text-sm">
                 <p className="font-medium">{b.name}</p>
                 <p className="text-[var(--muted-foreground)]">
-                  {b.project_name} · {String((b.config as { bucket_name?: string }).bucket_name ?? b.slug)}
+                  {b.project_name} ·{" "}
+                  {String(
+                    (b.config as { bucket_name?: string }).bucket_name ??
+                      b.slug,
+                  )}
                 </p>
               </li>
             ))}

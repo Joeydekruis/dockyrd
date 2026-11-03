@@ -11,7 +11,9 @@ From briefing §15. Update when a milestone closes.
 | **M4 · Observability + team** | Metrics, events, Analytics, team/2FA/audit/search | All 19 design screens functional |
 | **M5 · v0.1.0 release** | Self-update, doctor, docs, e2e green | Public release |
 
-**Progress (2026-11-03):** M0–M2 closed. **M3 (#23–#26)** on `development` @ `0.0.8`, ready for maintainer review. **M4 Sprint 1 (#27–#28)** events + host metrics + Analytics UI implemented locally (unpushed).
+**Progress (2026-11-03):** M0–M2 closed. **M3 (#23–#26)** and **M4 (#27–#34)** implemented on `development` @ **0.0.14** — maintainer review (`status/ready-for-review`). M4 exit: dashboard home counts, Applications list, Analytics needs-attention + old-release cleanup, MFA recovery codes on sign-in.
+
+**Post-M4 (briefing, not blocking M5 kickoff):** Caddy request analytics, ECharts depth, per-container CPU/RAM, SMTP for invites/reset, owner 2FA mandate, full §17 service detail tabs.
 
 ## Post-MVP (briefing)
 
