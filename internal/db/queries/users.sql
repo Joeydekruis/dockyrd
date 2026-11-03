@@ -65,3 +65,8 @@ ORDER BY created_at ASC;
 UPDATE users
 SET role = ?, updated_at = ?
 WHERE id = ?;
+
+-- name: UpdateUserPassword :exec
+UPDATE users
+SET password_hash = ?, updated_at = ?
+WHERE id = ?;

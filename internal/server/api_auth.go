@@ -15,6 +15,7 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/audit"
 	"github.com/Joeydekruis/dockyrd/internal/config"
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
+	"github.com/Joeydekruis/dockyrd/internal/docker"
 	"github.com/Joeydekruis/dockyrd/internal/events"
 	"github.com/Joeydekruis/dockyrd/internal/setup"
 )
@@ -26,6 +27,7 @@ type apiDeps struct {
 	q      *sqlc.Queries
 	events *events.Hub
 	audit  audit.Logger
+	docker *docker.Client
 }
 
 type loginRequest struct {
@@ -71,6 +73,7 @@ func registerAPIRoutes(mux *http.ServeMux, deps apiDeps) {
 	registerInvitePublicRoutes(mux, deps)
 	registerSearchRoutes(mux, deps)
 	registerAuthSecurityRoutes(mux, deps)
+	registerPasswordResetRoutes(mux, deps)
 }
 
 func (d apiDeps) handleLogin(w http.ResponseWriter, r *http.Request) {

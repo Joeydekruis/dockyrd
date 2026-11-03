@@ -4,13 +4,12 @@ _Last updated: 2026-11-03_
 
 ## Current focus
 
-**M4 Sprint 2** — #29–#32 shipped on `development` (team, invite accept, search, 2FA/profile).
+M4 Sprint 2 largely complete on `development` (#27–#34). Remaining M4: needs-attention events, old releases cleanup, SMTP email, Caddy static analytics.
 
-## Next (M4 remainder)
+## Next
 
-- Analytics: running containers + Docker cleanup (Docker API)
-- Forgot-password flow (placeholder route exists)
-- Optional: recovery code field on sign-in MFA step; disable 2FA; owner mandate 2FA
+- Maintainer review/close open M3–M4 issues
+- M5 prep or briefing gaps (§17 app detail screens)
 
 ## Blockers
 

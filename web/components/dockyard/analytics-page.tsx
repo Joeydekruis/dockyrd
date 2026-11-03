@@ -5,9 +5,15 @@ import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import {
   ackEvent,
   type DockyardEvent,
+  getMe,
+  getServerCleanup,
+  getServerContainers,
   getServerMetrics,
   listEvents,
+  postServerCleanup,
+  type CleanupSummary,
   type MetricRange,
+  type ServerContainer,
   type ServerMetricsResponse,
 } from "@/lib/api";
 
@@ -105,6 +111,10 @@ export function AnalyticsPage() {
   const [eventFilter, setEventFilter] = useState<(typeof eventFilters)[number]["id"]>("all");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [containers, setContainers] = useState<ServerContainer[]>([]);
+  const [cleanup, setCleanup] = useState<CleanupSummary | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [cleanupBusy, setCleanupBusy] = useState(false);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -115,6 +125,23 @@ export function AnalyticsPage() {
       ]);
       setMetrics(m);
       setEvents(ev.events);
+      try {
+        const [{ containers: cs }, sum] = await Promise.all([
+          getServerContainers(),
+          getServerCleanup(),
+        ]);
+        setContainers(cs.filter((c) => c.state === "running"));
+        setCleanup(sum);
+      } catch {
+        setContainers([]);
+        setCleanup(null);
+      }
+      try {
+        const me = await getMe();
+        setIsAdmin(me.role === "owner" || me.role === "admin");
+      } catch {
+        setIsAdmin(false);
+      }
       setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load analytics");
@@ -158,6 +185,18 @@ export function AnalyticsPage() {
   }
 
   const visibleEvents = events.filter((ev) => !ev.acknowledged_at);
+
+  async function onCleanup(targets: string[]) {
+    setCleanupBusy(true);
+    try {
+      await postServerCleanup(targets);
+      await refresh();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Cleanup failed");
+    } finally {
+      setCleanupBusy(false);
+    }
+  }
 
   return (
     <DashboardShell title="Analytics">
@@ -305,17 +344,58 @@ export function AnalyticsPage() {
           </div>
           <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
             <h2 className="text-lg font-semibold">Docker cleanup</h2>
-            <p className="mt-2 text-sm text-[var(--muted-foreground)]">
-              Prune recommendations connect to the reconciler prune job next.
-            </p>
+            {cleanup ? (
+              <ul className="mt-3 space-y-2 text-sm">
+                <li>Build cache: {formatBytes(cleanup.build_cache_bytes)}</li>
+                <li>Dangling images: {formatBytes(cleanup.dangling_images_bytes)}</li>
+                <li>Stopped unmanaged containers: {cleanup.stopped_unmanaged_containers}</li>
+              </ul>
+            ) : (
+              <p className="mt-2 text-sm text-[var(--muted-foreground)]">
+                Docker is not available on this host.
+              </p>
+            )}
+            {isAdmin && cleanup ? (
+              <button
+                type="button"
+                disabled={cleanupBusy}
+                className="mt-4 rounded-md bg-[var(--primary)] px-3 py-1.5 text-xs text-[var(--primary-foreground)]"
+                onClick={() =>
+                  void onCleanup(["dangling_images", "build_cache", "stopped_unmanaged"])
+                }
+              >
+                {cleanupBusy ? "Cleaning…" : "Review and clean up"}
+              </button>
+            ) : null}
           </div>
         </section>
 
         <section className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
           <h2 className="text-lg font-semibold">Running containers</h2>
-          <p className="mt-2 text-sm text-[var(--muted-foreground)]">
-            Container metrics table ships with Docker stats API wiring.
-          </p>
+          <div className="mt-3 overflow-x-auto" role="table" aria-label="Running containers">
+            {containers.length === 0 ? (
+              <p className="text-sm text-[var(--muted-foreground)]">No running Dockyard containers.</p>
+            ) : (
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="text-[var(--muted-foreground)]">
+                    <th className="pb-2 pr-4 font-medium">Name</th>
+                    <th className="pb-2 pr-4 font-medium">Kind</th>
+                    <th className="pb-2 font-medium">State</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {containers.map((c) => (
+                    <tr key={c.id} className="border-t border-[var(--border)]">
+                      <td className="py-2 pr-4 font-mono text-xs">{c.name}</td>
+                      <td className="py-2 pr-4">{c.kind || "—"}</td>
+                      <td className="py-2">{c.state}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
         </section>
       </div>
     </DashboardShell>

@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.13] - 2026-11-03
+
+_Finished: 2026-11-03_
+
+### Added
+
+- **#33 / Analytics Docker** — server containers + cleanup API, Analytics UI — https://github.com/Joeydekruis/dockyrd/issues/33
+- **#34 / Password reset** — forgot/reset API and pages (link shown in UI until SMTP) — https://github.com/Joeydekruis/dockyrd/issues/34
+
 ## [0.0.12] - 2026-11-03
 
 _Finished: 2026-11-03_

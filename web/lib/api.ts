@@ -411,3 +411,48 @@ export function globalSearch(q: string) {
   const params = new URLSearchParams({ q });
   return apiFetch<{ results: SearchResult[] }>(`/api/v1/search?${params}`);
 }
+
+export type ServerContainer = {
+  id: string;
+  name: string;
+  state: string;
+  kind?: string;
+  service_id?: string;
+};
+
+export type CleanupSummary = {
+  build_cache_bytes: number;
+  dangling_images_bytes: number;
+  stopped_unmanaged_containers: number;
+  old_releases_bytes: number;
+  docker_available: boolean;
+};
+
+export function getServerContainers() {
+  return apiFetch<{ containers: ServerContainer[] }>("/api/v1/server/containers");
+}
+
+export function getServerCleanup() {
+  return apiFetch<CleanupSummary>("/api/v1/server/cleanup");
+}
+
+export function postServerCleanup(targets: string[]) {
+  return apiFetch<{ reclaimed: Record<string, number> }>("/api/v1/server/cleanup", {
+    method: "POST",
+    json: { targets },
+  });
+}
+
+export function requestPasswordReset(email: string) {
+  return apiFetch<{ ok: boolean; reset_path?: string }>("/api/v1/auth/password/forgot", {
+    method: "POST",
+    json: { email },
+  });
+}
+
+export function resetPassword(token: string, password: string) {
+  return apiFetch<{ ok: boolean }>("/api/v1/auth/password/reset", {
+    method: "POST",
+    json: { token, password },
+  });
+}

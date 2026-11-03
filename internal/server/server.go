@@ -12,6 +12,7 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/config"
 	"github.com/Joeydekruis/dockyrd/internal/db"
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
+	"github.com/Joeydekruis/dockyrd/internal/docker"
 	"github.com/Joeydekruis/dockyrd/internal/events"
 	"github.com/Joeydekruis/dockyrd/internal/setup"
 	"github.com/Joeydekruis/dockyrd/web"
@@ -43,7 +44,15 @@ func Serve(cfg config.Config) error {
 		defer conn.Close()
 		q = queries
 	}
-	deps := apiDeps{cfg: cfg, q: q, events: hub, audit: audit.Logger{Q: q}}
+	var dockerCli *docker.Client
+	if cli, err := docker.NewClient(); err == nil {
+		if err := cli.Ping(context.Background()); err == nil {
+			dockerCli = cli
+		} else {
+			_ = cli.Close()
+		}
+	}
+	deps := apiDeps{cfg: cfg, q: q, events: hub, audit: audit.Logger{Q: q}, docker: dockerCli}
 	registerAPIRoutes(mux, deps)
 	mux.HandleFunc("GET /api/v1/setup/status", func(w http.ResponseWriter, r *http.Request) {
 		handleSetupStatus(w, r, q)
@@ -84,6 +93,8 @@ func spaExportFallback(rel string) string {
 		return "projects/_/index.html"
 	case strings.HasPrefix(rel, "settings/instance"):
 		return "settings/instance/index.html"
+	case strings.HasPrefix(rel, "reset-password"):
+		return "reset-password/index.html"
 	default:
 		return ""
 	}

@@ -12,6 +12,9 @@ import (
 
 func registerServerRoutes(mux *http.ServeMux, deps apiDeps) {
 	mux.HandleFunc("GET /api/v1/server/metrics", deps.handleServerMetrics)
+	mux.HandleFunc("GET /api/v1/server/containers", deps.handleServerContainers)
+	mux.HandleFunc("GET /api/v1/server/cleanup", deps.handleServerCleanupGet)
+	mux.HandleFunc("POST /api/v1/server/cleanup", deps.handleServerCleanupPost)
 }
 
 type hostMetricPoint struct {
