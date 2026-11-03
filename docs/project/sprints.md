@@ -15,48 +15,35 @@ Later sprints follow `roadmap.md` milestones **M1–M5**.
 
 Milestone: **M1 · Sprint 1 — Projects API** (closed) — #13–#15
 
-## M1 · Sprint 2 — Deploy & reconciler
+## M1 · Sprint 2 — Deploy & reconciler — complete 2026-11-03
 
-Milestone: **M1 · Sprint 2 — Deploy & reconciler** — #16
+Milestone: **M1 · Sprint 2 — Deploy & reconciler** (closed) — #16
 
-| Issue | Title |
-|--|--|
-| #16 | Image deploy, job queue, reconciler, Caddy sync |
+## M1 · Sprint 3 — Logs, env, UI — complete 2026-11-03
 
-## M1 · Sprint 3 — Logs, env, UI
-
-Milestone: **M1 · Sprint 3 — Logs, env & Projects UI** — #17–#18
-
-| Issue | Title |
-|--|--|
-| #17 | Encrypted env vars, runtime logs, SSE |
-| #18 | Projects dashboard wired to API |
+Milestone: **M1 · Sprint 3 — Logs, env & Projects UI** (closed) — #17–#18
 
 Post-M1 (briefing M1 exit): Dockerfile builds (#19, M2 Sprint 1), Railpack (#20), app detail screens (§17), load-tested zero-downtime redeploy.
 
-## M2 · Sprint 1 — Dockerfile builds (GitHub) — #19
+## M2 · Sprint 1 — Dockerfile builds — complete 2026-11-03
 
-Milestone: **M2 · Sprint 1 — Dockerfile builds**
-
-| Issue | Title |
-|--|--|
-| #19 | Git clone + Dockerfile build job |
+Milestone: **M2 · Sprint 1 — Dockerfile builds** (closed) — #19
 
 Local spec: `docs/project/issues/19/`
 
-## M2 · Sprint 2 — Railpack — #20
+## M2 · Sprint 2 — Railpack — complete 2026-11-03
 
-Milestone: **M2 · Sprint 2 — Railpack builds** — Railpack prepare + BuildKit
+Milestone: **M2 · Sprint 2 — Railpack builds** (closed) — #20
 
-## M2 · Sprint 3 — GitHub App — #21
+## M2 · Sprint 3 — GitHub App — complete 2026-11-03
 
-Milestone: **M2 · Sprint 3 — GitHub App** — manifest, webhooks, auto-deploy
+Milestone: **M2 · Sprint 3 — GitHub App** (closed) — #21
 
-## M2 · Sprint 4 — Static sites — #22
+## M2 · Sprint 4 — Static sites — complete 2026-11-03
 
-Milestone: **M2 · Sprint 4 — Static sites** — releases, rollback, history
+Milestone: **M2 · Sprint 4 — Static sites** (closed) — #22
 
-**Status (2026-11-03):** Backend + minimal UI on `development` (unpushed). Automated gate: `./scripts/verify-m2-smoke.sh`. Docker-host E2E (push deploy, static promote) still manual for milestone exit.
+**Status (2026-11-03):** All M2 issues closed on GitHub (`status/done`). Gate: `./scripts/verify-m2-smoke.sh`.
 
 ## Sprint 1 issues (GitHub)
 

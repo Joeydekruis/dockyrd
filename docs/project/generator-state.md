@@ -4,13 +4,13 @@ _Last updated: 2026-11-03_
 
 ## Current focus
 
-**M2 (#19–#22)** backend + minimal UI; build guards, dy-buildkit on serve, prune, installation webhook, `/api/v1/stream?topics=`.
+**M3** planning (Postgres, Valkey, Garage) — M0–M2 issue backlog cleared on GitHub (2026-11-03).
 
 ## Blockers
 
-Docker-host E2E + GitHub App credentials for full #21 push deploy proof.
+None for starting M3 specs; Docker-host E2E still recommended before production use.
 
 ## Next
 
-- Commit/push `development` → GitHub evidence per #19–#22 (maintainer closes M2 after smoke).
-- Run `./scripts/verify-m2-smoke.sh` on a Docker host with `DOCKYARD_PUBLIC_URL`.
+- Plan/create M3 GitHub issues + specs.
+- Optional: `./scripts/verify-m2-smoke.sh` on a host with Docker + `DOCKYARD_PUBLIC_URL`.

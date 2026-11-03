@@ -11,7 +11,7 @@ From briefing §15. Update when a milestone closes.
 | **M4 · Observability + team** | Metrics, events, Analytics, team/2FA/audit/search | All 19 design screens functional |
 | **M5 · v0.1.0 release** | Self-update, doctor, docs, e2e green | Public release |
 
-**Progress (2026-11-03):** M0–M1 (#1–#18) ready for maintainer review. **M2 (#19–#22)** backend + minimal UI on `development` (build timeout/disk guard, dy-buildkit bootstrap, image prune job, GitHub installation webhook, SSE topic filter). Run `./scripts/verify-m2-smoke.sh`; Docker-host E2E still required for milestone exit.
+**Progress (2026-11-03):** GitHub issues **#1–#12 (M0)**, **#13–#18 (M1)**, **#19–#22 (M2)** closed as tested/done (`status/done` on `development` @ `f9f7bf6`). Briefing **milestone exit** for M1/M2 (HTTPS live app, push deploy, static rollback on Docker host) remains optional hardening before calling M1/M2 “product complete” in ops.
 
 ## Post-MVP (briefing)
 
