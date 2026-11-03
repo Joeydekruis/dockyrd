@@ -4,13 +4,13 @@ _Last updated: 2026-11-03_
 
 ## Current focus
 
-**M3 complete locally** (#23–#26 on `development`). Next roadmap slice: **M4** (observability + team).
+**M4 Sprint 1** (#27 events, #28 metrics + Analytics UI) — implemented locally, not pushed.
 
 ## Blockers
 
-None for planning M4; M3 product exit still needs Docker-host manual smoke.
+None. M3 (#23–#26) awaits maintainer close; M4 Sprint 2 (team/2FA/audit/search) not started.
 
 ## Next
 
-- Maintainer verify M3 on host; close GitHub #23–#26 when accepted.
-- Plan M4 GitHub issues (metrics, events, Analytics, team/2FA).
+- Commit + push M4 slice (Refs #27 #28), CHANGELOG 0.0.9, GitHub handoff comments.
+- M4 Sprint 2: team users, invites, 2FA login step, audit log, ⌘K search, container metrics table.

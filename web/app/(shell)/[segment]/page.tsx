@@ -1,5 +1,6 @@
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import { EmptyState } from "@/components/dockyard/empty-state";
+import { AnalyticsPage } from "@/components/dockyard/analytics-page";
 import { DatabasesPage } from "@/components/dockyard/databases-page";
 import { ObjectStoragePage } from "@/components/dockyard/object-storage-page";
 import { ProjectsPage } from "@/components/dockyard/projects-page";
@@ -35,6 +36,9 @@ export default async function SegmentPlaceholder({
   }
   if (segment === "object-storage") {
     return <ObjectStoragePage />;
+  }
+  if (segment === "analytics") {
+    return <AnalyticsPage />;
   }
   const page = pages.find((p) => p.segment === segment) ?? pages[0];
   return (

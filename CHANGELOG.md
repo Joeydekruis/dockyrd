@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.9] - 2026-11-03
+
+_Finished: 2026-11-03_
+
+### Added
+
+- **#27 / Event log** — `events` table queries, list/ack API, deploy live/failed events, SSE topic — https://github.com/Joeydekruis/dockyrd/issues/27
+- **#28 / Host metrics & Analytics** — `metric_host` collector, `GET /api/v1/server/metrics`, `/analytics` UI — https://github.com/Joeydekruis/dockyrd/issues/28
+- **`scripts/verify-m4-smoke.sh`** — M4 Sprint 1 automated gates
+
 ## [0.0.8] - 2026-11-03
 
 _Finished: 2026-11-03_

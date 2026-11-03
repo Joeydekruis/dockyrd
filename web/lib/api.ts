@@ -245,3 +245,51 @@ export function listGitHubRepos(query?: string) {
   const q = query ? `?q=${encodeURIComponent(query)}` : "";
   return apiFetch<{ repos: GitHubRepo[] }>(`/api/v1/github/repos${q}`);
 }
+
+export type MetricRange = "1h" | "24h" | "7d";
+
+export type HostMetricPoint = {
+  ts: number;
+  cpu: number;
+  mem_used: number;
+  mem_total: number;
+  disk_used: number;
+  disk_total: number;
+  load1: number;
+};
+
+export type ServerMetricsResponse = {
+  range: MetricRange;
+  res_sec: number;
+  points: HostMetricPoint[];
+};
+
+export function getServerMetrics(range: MetricRange = "24h") {
+  const q = new URLSearchParams({ range });
+  return apiFetch<ServerMetricsResponse>(`/api/v1/server/metrics?${q}`);
+}
+
+export type DockyardEvent = {
+  id: string;
+  level: string;
+  category: string;
+  title: string;
+  detail?: string;
+  project_id?: string;
+  service_id?: string;
+  deployment_id?: string;
+  acknowledged_at?: number;
+  created_at: number;
+};
+
+export function listEvents(opts?: { limit?: number; category?: string }) {
+  const q = new URLSearchParams();
+  if (opts?.limit) q.set("limit", String(opts.limit));
+  if (opts?.category) q.set("category", opts.category);
+  const suffix = q.size ? `?${q}` : "";
+  return apiFetch<{ events: DockyardEvent[] }>(`/api/v1/events${suffix}`);
+}
+
+export function ackEvent(id: string) {
+  return apiFetch<void>(`/api/v1/events/${id}/ack`, { method: "POST" });
+}

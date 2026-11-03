@@ -53,15 +53,30 @@ Milestone: **M3 · Sprint 1 — Postgres & Valkey** — #23
 
 Milestone: **M3 · Sprint 2 — Reference variables** — #24
 
-## M3 · Sprint 3 — Garage install — in progress (local)
+## M3 · Sprint 3 — Garage install — complete (local)
 
 Milestone: **M3 · Sprint 3 — Garage install** — #25
 
-## M3 · Sprint 4 — Buckets & UI — planned
+## M3 · Sprint 4 — Buckets & UI — complete (local)
 
 Milestone: **M3 · Sprint 4 — Buckets & UI** — #26
 
-**Status (2026-11-03):** M3 issues **#23–#26** implemented on `development` @ pending push after #26. Gate: `./scripts/verify-m3-smoke.sh`.
+**Status (2026-11-03):** M3 issues **#23–#26** on `development` @ `7854f7a` / v0.0.8 — **`status/ready-for-review`**. Gate: `./scripts/verify-m3-smoke.sh`.
+
+## M4 · Sprint 1 — Events & host metrics — in progress (local)
+
+Milestone: **M4 · Sprint 1 — Events & host metrics** — #27, #28
+
+| Issue | Title |
+|--|--|
+| #27 | Event log API and deploy events |
+| #28 | Host metrics and Analytics UI |
+
+**Status:** Implemented locally; gate `./scripts/verify-m4-smoke.sh`. Commit/push + handoff pending.
+
+## M4 · Sprint 2 — Team & audit (planned)
+
+Milestone: **M4 · Sprint 2 — Team & audit (planned)** — issues TBD (users, 2FA, audit, search).
 
 ## Sprint 1 issues (GitHub)
 

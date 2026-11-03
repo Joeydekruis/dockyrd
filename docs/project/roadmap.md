@@ -11,7 +11,7 @@ From briefing §15. Update when a milestone closes.
 | **M4 · Observability + team** | Metrics, events, Analytics, team/2FA/audit/search | All 19 design screens functional |
 | **M5 · v0.1.0 release** | Self-update, doctor, docs, e2e green | Public release |
 
-**Progress (2026-11-03):** M0–M2 closed. **M3 (#23–#26)** implemented on `development` (Postgres/Valkey, refs, Garage, buckets UI). M3 briefing exit (live Next + Postgres + S3 on Docker host) still manual via `verify-m3-smoke.sh`.
+**Progress (2026-11-03):** M0–M2 closed. **M3 (#23–#26)** on `development` @ `0.0.8`, ready for maintainer review. **M4 Sprint 1 (#27–#28)** events + host metrics + Analytics UI implemented locally (unpushed).
 
 ## Post-MVP (briefing)
 

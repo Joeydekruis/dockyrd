@@ -10,8 +10,10 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
 	"github.com/Joeydekruis/dockyrd/internal/deploy"
 	"github.com/Joeydekruis/dockyrd/internal/docker"
+	"github.com/Joeydekruis/dockyrd/internal/eventlog"
 	"github.com/Joeydekruis/dockyrd/internal/events"
 	"github.com/Joeydekruis/dockyrd/internal/jobs"
+	"github.com/Joeydekruis/dockyrd/internal/metrics"
 	"github.com/Joeydekruis/dockyrd/internal/reconcile"
 )
 
@@ -27,9 +29,12 @@ func startBackground(ctx context.Context, cfg config.Config, q *sqlc.Queries, hu
 		}
 	}
 
-	deployRT := &deploy.Runtime{Cfg: cfg, Q: q, Docker: dockerCli, Log: log}
+	eventLog := &eventlog.Logger{Q: q, Hub: hub}
+	deployRT := &deploy.Runtime{Cfg: cfg, Q: q, Docker: dockerCli, Log: log, Events: eventLog}
 	worker := &jobs.Worker{Q: q, Deploy: deployRT, Docker: dockerCli, Log: log}
 	rec := &reconcile.Loop{Cfg: cfg, Q: q, Docker: dockerCli, Log: log}
+
+	go metrics.RunHostCollector(ctx, cfg, q, log, 10*time.Second)
 
 	if dockerCli != nil {
 		if err := dockerCli.EnsureEdgeNetwork(ctx); err != nil && log != nil {

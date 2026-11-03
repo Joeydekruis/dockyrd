@@ -13,8 +13,9 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/config"
 	"github.com/Joeydekruis/dockyrd/internal/crypto"
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
-	"github.com/Joeydekruis/dockyrd/internal/github"
 	"github.com/Joeydekruis/dockyrd/internal/docker"
+	"github.com/Joeydekruis/dockyrd/internal/eventlog"
+	"github.com/Joeydekruis/dockyrd/internal/github"
 	"github.com/Joeydekruis/dockyrd/internal/proxy"
 	"github.com/Joeydekruis/dockyrd/internal/refs"
 )
@@ -27,6 +28,7 @@ type Runtime struct {
 	Q      *sqlc.Queries
 	Docker *docker.Client
 	Log    *slog.Logger
+	Events *eventlog.Logger
 }
 
 // RunDeployment executes deploy for app or static_site services.
@@ -215,6 +217,7 @@ func (rt *Runtime) runAppDeployment(ctx context.Context, deploymentID string, de
 	if err := proxy.SyncFromDB(ctx, rt.Q, rt.Cfg); err != nil && rt.Log != nil {
 		rt.Log.Warn("proxy sync after deploy", "err", err)
 	}
+	rt.recordDeployEvent(ctx, dep.ServiceID, deploymentID, "info", "Deploy live", "")
 	if needsBuild && rt.Docker != nil {
 		slug := ctxRow.ServiceSlug
 		go func() {
@@ -320,6 +323,7 @@ func (rt *Runtime) stopSupersededContainers(ctx context.Context, serviceID, live
 func (rt *Runtime) fail(ctx context.Context, deploymentID string, err error) error {
 	msg := err.Error()
 	finished := time.Now().Unix()
+	dep, _ := rt.Q.GetDeploymentByID(ctx, deploymentID)
 	_ = rt.Q.UpdateDeploymentStatus(ctx, sqlc.UpdateDeploymentStatusParams{
 		Status:    "failed",
 		Error:     sql.NullString{String: msg, Valid: true},
@@ -327,5 +331,27 @@ func (rt *Runtime) fail(ctx context.Context, deploymentID string, err error) err
 		FinishedAt: sql.NullInt64{Int64: finished, Valid: true},
 		ID:        deploymentID,
 	})
+	if dep.ServiceID != "" {
+		rt.recordDeployEvent(ctx, dep.ServiceID, deploymentID, "error", "Deploy failed", msg)
+	}
 	return err
+}
+
+func (rt *Runtime) recordDeployEvent(ctx context.Context, serviceID, deploymentID, level, title, detail string) {
+	if rt.Events == nil {
+		return
+	}
+	ctxRow, err := rt.Q.GetServiceDeployContext(ctx, serviceID)
+	if err != nil {
+		return
+	}
+	_ = rt.Events.Record(ctx, eventlog.RecordInput{
+		Level:        level,
+		Category:     "deploys",
+		Title:        title,
+		Detail:       detail,
+		ProjectID:    ctxRow.ProjectID,
+		ServiceID:    serviceID,
+		DeploymentID: deploymentID,
+	})
 }
