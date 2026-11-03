@@ -61,33 +61,21 @@ Milestone: **M3 · Sprint 3 — Garage install** — #25
 
 Milestone: **M3 · Sprint 4 — Buckets & UI** — #26
 
-**Status (2026-11-03):** M3 issues **#23–#26** on `development` @ `7854f7a` / v0.0.8 — **`status/ready-for-review`**. Gate: `./scripts/verify-m3-smoke.sh`.
+**Status (2026-11-03):** **Closed on GitHub** — issues **#23–#26**; gate `./scripts/verify-m3-smoke.sh` @ `development` v0.0.19+.
 
-## M4 · Sprint 1 — Events & host metrics — complete
+## M4 · Sprint 1 — Events & host metrics — closed
 
 Milestone: **M4 · Sprint 1 — Events & host metrics** — #27, #28
 
-**Status (2026-11-03):** On `development` @ v0.0.9–0.0.10 — `status/ready-for-review`. Gate: `./scripts/verify-m4-smoke.sh`.
+**Status (2026-11-03):** **Closed on GitHub** — #27, #28.
 
-## M4 · Sprint 2 — Team & audit — complete
+## M4 · Sprint 2 — Team & audit — closed
 
 Milestone: **M4 · Sprint 2 — Team & audit** — #29, #30
 
-**Status:** v0.0.10–0.0.11 — invites, accept flow, audit log, team settings.
+**Status:** **Closed on GitHub** — #29, #30, #31, #32, #33, #34 (SMTP reset/invites v0.0.19).
 
-## M4 · Sprint 3 — Search & 2FA — complete
-
-Milestone: **M4 · Sprint 3 — Search & 2FA** — #31, #32
-
-**Status:** v0.0.11–0.0.12 — global search API + ⌘K; TOTP, MFA login, profile sessions.
-
-## M4 · Sprint 4 — Docker cleanup & password reset — complete
-
-Milestone: **M4 · Sprint 4 — Docker cleanup & password reset** — #33, #34
-
-**Status:** v0.0.13–0.0.14 — containers/cleanup API, Analytics UI, forgot/reset password; capstone: applications API, home dashboard, event `action_href`, old static release prune.
-
-**M4 milestone:** issues **#27–#34** — `status/ready-for-review` (maintainer close).
+**M4 milestone:** **done** — maintainer closed 2026-11-03. Gate: `./scripts/verify-m4-smoke.sh`.
 
 ## M5 · Sprint 1 — Doctor & admin CLI — complete (ready for review)
 

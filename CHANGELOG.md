@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.20] - 2026-11-03
+
+_Finished: 2026-11-03_
+
+### Changed
+
+- **M3 milestone closed** — Postgres/Valkey, reference vars, Garage, buckets/UI (#23–#26); gate `./scripts/verify-m3-smoke.sh`
+- **M4 milestone closed** — events, metrics, team/2FA/search, cleanup, password reset + SMTP (#27–#34); gate `./scripts/verify-m4-smoke.sh`
+- **Project docs** — `roadmap.md`, `sprints.md`, `setup.md`, issue #34 spec (SMTP AC)
+
 ## [0.0.19] - 2026-11-03
 
 _Finished: 2026-11-03_

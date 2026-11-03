@@ -51,6 +51,18 @@ After M2 backend/UI changes on `development`:
 
 Optional env for builds: `DOCKYARD_BUILD_TIMEOUT` (default `20m`), `DOCKYARD_MIN_FREE_DISK_PERCENT` (default `10`), `DOCKYARD_BUILDX_BUILDER` (default `dy-buildkit`), `DOCKYARD_PUBLIC_URL` for GitHub App callbacks/webhooks.
 
+## M3 slice (Postgres, Valkey, Garage, refs)
+
+```bash
+./scripts/verify-m3-smoke.sh
+```
+
+## M4 slice (events, metrics, team, search, cleanup)
+
+```bash
+./scripts/verify-m4-smoke.sh
+```
+
 ## M5 slice (doctor, admin CLI, CI)
 
 ```bash
