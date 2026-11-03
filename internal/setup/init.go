@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/Joeydekruis/dockyrd/internal/config"
@@ -140,24 +139,4 @@ func IsComplete(ctx context.Context, q *sqlc.Queries) (bool, error) {
 		return false, err
 	}
 	return count > 0, nil
-}
-
-// PrintInitBanner writes the post-install message to stdout.
-func PrintInitBanner(token string, expiresAt time.Time, listen string) {
-	if token == "" {
-		fmt.Println("Dockyard is initialized (setup token unchanged).")
-		fmt.Println("  Lost it?  dockyard setup-token")
-		return
-	}
-	fmt.Println("✓ Dockyard initialized.")
-	fmt.Printf("\n  Setup URL:  http://127.0.0.1%s/setup?token=%s\n", trimListen(listen), token)
-	fmt.Printf("  Token valid until %s UTC (single use).\n", expiresAt.Format(time.RFC3339))
-	fmt.Println("  Lost it?  dockyard setup-token")
-}
-
-func trimListen(listen string) string {
-	if listen == "" {
-		return ":8000"
-	}
-	return listen
 }

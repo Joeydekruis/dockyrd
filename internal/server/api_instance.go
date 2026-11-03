@@ -100,6 +100,7 @@ func (d apiDeps) handlePatchInstanceSettings(w http.ResponseWriter, r *http.Requ
 		writeJSONError(w, http.StatusInternalServerError, "database error")
 		return
 	}
+	d.syncEdgeProxy(ctx)
 	if body.SMTP != nil {
 		pub := instance.SMTPPublic{
 			Host:     strings.TrimSpace(body.SMTP.Host),

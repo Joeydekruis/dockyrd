@@ -28,6 +28,21 @@ func TestPlatformHostnameShape(t *testing.T) {
 	}
 }
 
+func TestRenderContainsPanelRoute(t *testing.T) {
+	raw, err := Render(RenderInput{
+		ACMEEmail:     "ops@example.com",
+		PanelHost:     "dockyrd.example.com",
+		PanelUpstream: "host.docker.internal:8000",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := string(raw)
+	if !strings.Contains(s, "dockyrd.example.com") || !strings.Contains(s, "host.docker.internal:8000") {
+		t.Fatalf("missing panel route in %s", s)
+	}
+}
+
 func TestRenderContainsRoute(t *testing.T) {
 	raw, err := Render(RenderInput{
 		ACMEEmail: "ops@example.com",

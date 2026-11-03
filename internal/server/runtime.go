@@ -14,6 +14,7 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/events"
 	"github.com/Joeydekruis/dockyrd/internal/jobs"
 	"github.com/Joeydekruis/dockyrd/internal/metrics"
+	"github.com/Joeydekruis/dockyrd/internal/proxy"
 	"github.com/Joeydekruis/dockyrd/internal/reconcile"
 )
 
@@ -42,6 +43,11 @@ func startBackground(ctx context.Context, cfg config.Config, q *sqlc.Queries, hu
 		}
 		if err := dockerCli.EnsureBuildkit(ctx); err != nil && log != nil {
 			log.Warn("ensure dy-buildkit", "err", err)
+		}
+		if err := dockerCli.EnsureProxy(ctx, cfg); err != nil && log != nil {
+			log.Warn("ensure dy-proxy", "err", err)
+		} else if err := proxy.SyncFromDB(ctx, q, cfg); err != nil && log != nil {
+			log.Warn("proxy sync", "err", err)
 		}
 	}
 

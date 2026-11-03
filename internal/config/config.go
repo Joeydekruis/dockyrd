@@ -1,6 +1,7 @@
 package config
 
 import (
+	"net"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -90,7 +91,34 @@ func (c Config) SecretKeyPath() string {
 
 // CaddyAdminSocket is the host path to dy-proxy admin unix socket.
 func (c Config) CaddyAdminSocket() string {
-	return filepath.Join(c.DataDir, "caddy", "admin.sock")
+	return filepath.Join(c.CaddyDir(), "admin.sock")
+}
+
+// CaddyDir holds admin socket, TLS data, access logs, and bootstrap config for dy-proxy.
+func (c Config) CaddyDir() string {
+	return filepath.Join(c.DataDir, "caddy")
+}
+
+// ListenPort returns the TCP port from Listen (default 8000).
+func (c Config) ListenPort() string {
+	listen := strings.TrimSpace(c.Listen)
+	if listen == "" {
+		return "8000"
+	}
+	_, port, err := net.SplitHostPort(listen)
+	if err != nil {
+		if strings.HasPrefix(listen, ":") {
+			p := strings.TrimPrefix(listen, ":")
+			if p != "" {
+				return p
+			}
+		}
+		return "8000"
+	}
+	if port == "" {
+		return "8000"
+	}
+	return port
 }
 
 // BuildsDir is the root for ephemeral clone/build workspaces.

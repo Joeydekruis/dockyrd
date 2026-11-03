@@ -6,6 +6,8 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"net/url"
+	"strings"
 
 	"github.com/Joeydekruis/dockyrd/internal/config"
 	"github.com/Joeydekruis/dockyrd/internal/crypto"
@@ -207,4 +209,24 @@ func trimSlash(s string) string {
 		s = s[:len(s)-1]
 	}
 	return s
+}
+
+// PanelHostname returns the host part of Public URL for HTTPS routing (no port).
+func PanelHostname(publicURL string) string {
+	u := strings.TrimSpace(publicURL)
+	if u == "" {
+		return ""
+	}
+	if !strings.Contains(u, "://") {
+		u = "https://" + u
+	}
+	parsed, err := url.Parse(u)
+	if err != nil {
+		return ""
+	}
+	host := strings.ToLower(strings.TrimSpace(parsed.Hostname()))
+	if host == "" || host == "localhost" || host == "127.0.0.1" {
+		return ""
+	}
+	return host
 }

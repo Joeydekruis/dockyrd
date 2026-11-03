@@ -19,11 +19,13 @@ type StaticRoute struct {
 
 // RenderInput controls global Caddy options.
 type RenderInput struct {
-	ACMEEmail    string
-	AccessLog    string
-	AppRoutes    []AppRoute
-	StaticRoutes []StaticRoute
-	AdminListen  string
+	ACMEEmail     string
+	PanelHost     string
+	PanelUpstream string
+	AppRoutes     []AppRoute
+	StaticRoutes  []StaticRoute
+	AdminListen   string
+	AccessLog     string
 }
 
 // Render builds the full Caddy JSON document (briefing bijlage B).
@@ -32,13 +34,24 @@ func Render(in RenderInput) ([]byte, error) {
 		in.AdminListen = "unix//run/caddy/admin.sock"
 	}
 	if in.AccessLog == "" {
-		in.AccessLog = "/var/log/caddy/access.log"
+		in.AccessLog = "/var/lib/dockyard/caddy/access.log"
 	}
 	if in.ACMEEmail == "" {
 		in.ACMEEmail = "ops@localhost"
 	}
 
-	routes := make([]any, 0, len(in.AppRoutes)+len(in.StaticRoutes))
+	routes := make([]any, 0, len(in.AppRoutes)+len(in.StaticRoutes)+1)
+
+	if in.PanelHost != "" && in.PanelUpstream != "" {
+		routes = append(routes, map[string]any{
+			"match": []any{map[string]any{"host": []string{in.PanelHost}}},
+			"handle": []any{map[string]any{
+				"handler": "reverse_proxy",
+				"upstreams": []any{map[string]any{"dial": in.PanelUpstream}},
+			}},
+			"terminal": true,
+		})
+	}
 
 	sortedApps := append([]AppRoute(nil), in.AppRoutes...)
 	sort.Slice(sortedApps, func(i, j int) bool {

@@ -177,8 +177,11 @@ export function InstanceSettingsPage() {
       >
         <h2 className="text-lg font-medium">Panel &amp; SMTP</h2>
         <p className="text-sm text-[var(--muted-foreground)]">
-          Public URL is used in password-reset and invite emails. SMTP password
-          is stored encrypted on the server.
+          Public URL is the HTTPS address of this panel (via Caddy) and is used
+          in password-reset and invite emails. Set an ACME email for Let&apos;s
+          Encrypt certificates. DNS must point at this server; open ports 80 and
+          443 on the firewall. SMTP passwords are stored encrypted on the
+          server.
         </p>
         {saveMsg ? (
           <p className="text-sm text-green-700" role="status">

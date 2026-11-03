@@ -3,11 +3,13 @@ package proxy
 import (
 	"context"
 	"strconv"
+	"strings"
 
 	"github.com/Joeydekruis/dockyrd/internal/appconfig"
 	"github.com/Joeydekruis/dockyrd/internal/config"
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
 	"github.com/Joeydekruis/dockyrd/internal/docker"
+	"github.com/Joeydekruis/dockyrd/internal/instance"
 	"github.com/Joeydekruis/dockyrd/internal/staticsite"
 )
 
@@ -43,14 +45,36 @@ func SyncFromDB(ctx context.Context, q *sqlc.Queries, cfg config.Config) error {
 		})
 	}
 
+	panel, err := instance.LoadPanel(ctx, q)
+	if err != nil {
+		return err
+	}
+	acmeEmail := strings.TrimSpace(panel.AcmeEmail)
+	if acmeEmail == "" {
+		acmeEmail = "ops@localhost"
+	}
+	panelHost := instance.PanelHostname(panel.PublicURL)
+	panelUpstream := ""
+	if panelHost != "" {
+		panelUpstream = "host.docker.internal:" + cfg.ListenPort()
+	}
+
 	body, err := Render(RenderInput{
-		ACMEEmail:    "ops@dockyard.local",
-		AppRoutes:    appRoutes,
-		StaticRoutes: staticRoutes,
-		AdminListen:  "unix/" + cfg.CaddyAdminSocket(),
+		ACMEEmail:     acmeEmail,
+		PanelHost:     panelHost,
+		PanelUpstream: panelUpstream,
+		AppRoutes:     appRoutes,
+		StaticRoutes:  staticRoutes,
+		AdminListen:   adminListenPath(cfg.CaddyAdminSocket()),
 	})
 	if err != nil {
 		return err
 	}
 	return Load(ctx, cfg.CaddyAdminSocket(), body)
+}
+
+func adminListenPath(socketPath string) string {
+	socketPath = strings.TrimSpace(socketPath)
+	socketPath = strings.TrimPrefix(socketPath, "/")
+	return "unix//" + socketPath
 }

@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.25] - 2026-11-04
+
+_Finished: 2026-11-04_
+
+### Added
+
+- **`dy-proxy` (Caddy)** — system container on 80/443; panel HTTPS when **Public URL** + **ACME email** are set in Instance settings (proxies to panel on `:8000`)
+- **Setup banner** — shows server IPv4 in setup URL when detectable; otherwise token + manual URL hint
+
+### Changed
+
+- **Instance settings** — copy clarifies Public URL enables panel HTTPS via Caddy
+- **Proxy sync** — loads panel hostname from instance settings; ACME email from settings
+
 ## [0.0.24] - 2026-11-03
 
 _Finished: 2026-11-03_
