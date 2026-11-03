@@ -75,6 +75,8 @@ go run ./cmd/dockyard doctor
 
 Use the matrix in **`.cursor/skills/push-to-main/SKILL.md`** before merging to `main`.
 
+M5 exit checklist: [`m5-exit.md`](m5-exit.md).
+
 ## MCP / env
 
 Document secrets here as they appear (GitHub App, test tokens). Never commit values — use env files listed in `.gitignore`.
