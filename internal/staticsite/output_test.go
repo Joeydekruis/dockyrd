@@ -16,3 +16,14 @@ func TestDetectOutputDir(t *testing.T) {
 		t.Fatalf("got %q err=%v", got, err)
 	}
 }
+
+func TestDetectOutputDir_plainHTMLDot(t *testing.T) {
+	dir := t.TempDir()
+	if err := os.WriteFile(filepath.Join(dir, "index.html"), []byte("<!doctype html>"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	got, err := DetectOutputDir(dir, ".")
+	if err != nil || got != dir {
+		t.Fatalf("got %q err=%v", got, err)
+	}
+}

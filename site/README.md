@@ -15,7 +15,7 @@ Requires `web/node_modules/geist` for self-hosted fonts (`pnpm --dir web install
 
 | Setting | Value |
 |---------|--------|
-| Output directory | `.` (repo root is `site/` when using “build from subdirectory” or copy `site/` contents to publish root) |
+| Output directory | `.` (requires `index.html` in that folder — Plain HTML preset) |
 | Build command | `make site` (from monorepo root; set working directory accordingly) |
 | Domain | `dockyrd.io` (and `www` redirect if desired) |
 
