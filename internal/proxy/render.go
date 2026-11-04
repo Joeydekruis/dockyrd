@@ -85,6 +85,10 @@ func Render(in RenderInput) ([]byte, error) {
 	}
 
 	doc := map[string]any{
+		"storage": map[string]any{
+			"module": "file_system",
+			"root":   "/var/lib/dockyard/caddy/certificates",
+		},
 		"admin": map[string]any{"listen": in.AdminListen},
 		"logging": map[string]any{
 			"logs": map[string]any{
@@ -111,10 +115,6 @@ func Render(in RenderInput) ([]byte, error) {
 				},
 			},
 			"tls": map[string]any{
-				"storage": map[string]any{
-					"module": "file_system",
-					"root":   "/var/lib/dockyard/caddy/certificates",
-				},
 				"automation": map[string]any{
 					"policies": []any{
 						map[string]any{

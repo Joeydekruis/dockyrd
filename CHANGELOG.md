@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.27] - 2026-11-04
+
+_Finished: 2026-11-04_
+
+### Fixed
+
+- **Caddy JSON** — move cert `storage` to root config (fixes `proxy sync` 400: unknown field `storage` under `apps.tls`); panel HTTPS on 80/443 loads again
+
 ## [0.0.26] - 2026-11-04
 
 _Finished: 2026-11-04_
