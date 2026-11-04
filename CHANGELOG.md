@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.38] - 2026-11-04
+
+_Finished: 2026-11-04_
+
+### Added
+
+- **Static site settings** — read-only Settings tab with **Edit** actions and modals (display name, source, build, auto-deploy, SPA fallback); `SettingsDetailBlock` UI primitive (`web/components/dockyard/static-site-settings-tab.tsx`)
+- **Static site PATCH API** — `PATCH /api/v1/services/{id}` accepts `name` and merged `config` for `static_site` services (`UpdateServiceName`, `internal/server/api_services.go`)
+- **In-app notifications** — inbox table, dispatch on auth events, `GET|PATCH /api/v1/inbox`, header bell, `/notifications` page (`internal/inbox/`, `web/components/dockyard/notifications-*`)
+- **Server email settings** — `/settings/server/email` SMTP form and outbound **email log** (`00003_email_log` migration, `api_email_log.go`)
+
+### Changed
+
+- **Instance general settings** — public URL/TLS only on `/settings/server/general`; SMTP moved to dedicated email route
+- **Static site builds** — safer build working directory handling (`internal/staticsite/build.go`, `workdir_test.go`)
+
 ## [0.0.37] - 2026-11-04
 
 _Finished: 2026-11-04_

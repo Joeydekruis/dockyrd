@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AddEnvVariableModal } from "@/components/dockyard/add-env-variable-modal";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { StaticSiteSettingsTab } from "@/components/dockyard/static-site-settings-tab";
 import { Button } from "@/components/dockyard/ui/button";
 import { CommitChip } from "@/components/dockyard/ui/commit-chip";
 import { DnsRecordBlock } from "@/components/dockyard/ui/dns-record-block";
@@ -13,7 +14,6 @@ import { EnvVarRow } from "@/components/dockyard/ui/env-var-row";
 import { Field } from "@/components/dockyard/ui/field";
 import { KeyValueRow } from "@/components/dockyard/ui/key-value-row";
 import { StatusBadge } from "@/components/dockyard/ui/status-badge";
-import { Switch } from "@/components/dockyard/ui/switch";
 import { Tabs } from "@/components/dockyard/ui/tabs";
 import {
   createDeployment,
@@ -39,7 +39,6 @@ import {
   formatDurationSec,
   parseStaticSiteConfig,
   primaryDomainHost,
-  splitBuildCmd,
   visitSiteHref,
 } from "@/lib/static-site-display";
 import { useRouteParam } from "@/lib/use-route-param";
@@ -190,7 +189,6 @@ export function StaticSiteDetailPage() {
   const primaryHost = row ? primaryDomainHost(row.domains) : undefined;
   const visitHref = visitSiteHref(primaryHost);
   const latest = row?.deployments[0];
-  const buildParts = cfg ? splitBuildCmd(cfg.buildCmd ?? "") : null;
 
   async function onDeployNow() {
     if (!row) return;
@@ -707,90 +705,13 @@ export function StaticSiteDetailPage() {
             </div>
           ) : null}
 
-          {tab === "settings" ? (
-            <div className="space-y-6">
-              {[
-                {
-                  title: "General",
-                  fields: [{ label: "Name", value: row.service.name }],
-                },
-                {
-                  title: "Source",
-                  fields: [
-                    { label: "Repository", value: cfg?.source?.repo ?? "—" },
-                    { label: "Branch", value: cfg?.source?.branch ?? "main" },
-                  ],
-                },
-                {
-                  title: "Build settings",
-                  fields: [
-                    {
-                      label: "Install command",
-                      value: buildParts?.install ?? "—",
-                    },
-                    { label: "Build command", value: buildParts?.build ?? "—" },
-                    {
-                      label: "Output directory",
-                      value: cfg?.outputDir ?? "dist",
-                    },
-                  ],
-                },
-              ].map((block) => (
-                <section
-                  key={block.title}
-                  className={cardClassName()}
-                  style={{
-                    borderColor: "var(--border)",
-                    background: "var(--surface)",
-                  }}
-                >
-                  <h2 className="text-lg font-semibold tracking-tight">
-                    {block.title}
-                  </h2>
-                  <div className="mt-4 space-y-4">
-                    {block.fields.map((f) => (
-                      <Field
-                        key={f.label}
-                        label={f.label}
-                        value={f.value}
-                        readOnly
-                      />
-                    ))}
-                  </div>
-                </section>
-              ))}
-              <section
-                className={cardClassName()}
-                style={{
-                  borderColor: "var(--border)",
-                  background: "var(--surface)",
-                }}
-              >
-                <h2 className="text-lg font-semibold tracking-tight">
-                  Deploys
-                </h2>
-                <div className="mt-4 space-y-4">
-                  <Switch
-                    label="Auto-deploy"
-                    checked={cfg?.autoDeploy ?? false}
-                    onChange={() => {}}
-                    disabled
-                  />
-                  <p
-                    className="text-[13px]"
-                    style={{ color: "var(--muted-text)" }}
-                  >
-                    Deploy on every push to {cfg?.source?.branch ?? "main"}.
-                  </p>
-                  <Switch
-                    label="Single-page app fallback"
-                    checked={cfg?.spaFallback ?? false}
-                    onChange={() => {}}
-                    disabled
-                  />
-                </div>
-              </section>
-            </div>
+          {tab === "settings" && cfg ? (
+            <StaticSiteSettingsTab
+              service={row.service}
+              cfg={cfg}
+              onUpdated={refresh}
+              onError={setError}
+            />
           ) : null}
 
           <AddEnvVariableModal

@@ -10,11 +10,12 @@ import (
 
 // Config is services.config for kind=static_site.
 type Config struct {
-	Source     appconfig.Source `json:"source"`
-	AutoDeploy bool             `json:"autoDeploy"`
-	BuildCmd   string           `json:"buildCmd"`
-	OutputDir  string           `json:"outputDir"`
-	NodeImage  string           `json:"nodeImage"`
+	Source      appconfig.Source `json:"source"`
+	AutoDeploy  bool             `json:"autoDeploy"`
+	BuildCmd    string           `json:"buildCmd"`
+	OutputDir   string           `json:"outputDir"`
+	NodeImage   string           `json:"nodeImage"`
+	SpaFallback bool             `json:"spaFallback"`
 }
 
 // Parse decodes static site service config.

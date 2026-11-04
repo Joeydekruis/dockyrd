@@ -11,6 +11,7 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/deploy"
 	"github.com/Joeydekruis/dockyrd/internal/docker"
 	"github.com/Joeydekruis/dockyrd/internal/eventlog"
+	"github.com/Joeydekruis/dockyrd/internal/inbox"
 	"github.com/Joeydekruis/dockyrd/internal/events"
 	"github.com/Joeydekruis/dockyrd/internal/jobs"
 	"github.com/Joeydekruis/dockyrd/internal/metrics"
@@ -32,7 +33,8 @@ func startBackground(ctx context.Context, cfg config.Config, q *sqlc.Queries, hu
 	}
 
 	eventLog := &eventlog.Logger{Q: q, Hub: hub}
-	deployRT := &deploy.Runtime{Cfg: cfg, Q: q, Docker: dockerCli, Log: log, Events: eventLog}
+	inboxDispatch := &inbox.Dispatcher{Cfg: cfg, Q: q, Hub: hub, Log: log}
+	deployRT := &deploy.Runtime{Cfg: cfg, Q: q, Docker: dockerCli, Log: log, Events: eventLog, Inbox: inboxDispatch}
 	worker := &jobs.Worker{Q: q, Deploy: deployRT, Docker: dockerCli, Log: log}
 	rec := &reconcile.Loop{Cfg: cfg, Q: q, Docker: dockerCli, Log: log}
 

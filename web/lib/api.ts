@@ -262,9 +262,20 @@ export function createService(input: {
 }
 
 export function moveServiceToProject(serviceId: string, projectId: string) {
+  return patchService(serviceId, { project_id: projectId });
+}
+
+export function patchService(
+  serviceId: string,
+  input: {
+    project_id?: string;
+    name?: string;
+    config?: Record<string, unknown>;
+  },
+) {
   return apiFetch<Service>(`/api/v1/services/${serviceId}`, {
     method: "PATCH",
-    json: { project_id: projectId },
+    json: input,
   });
 }
 
@@ -764,6 +775,29 @@ export function testSMTP(to: string) {
   });
 }
 
+export type EmailLogEntry = {
+  id: string;
+  kind: string;
+  from: string;
+  to: string;
+  subject: string;
+  status: "sent" | "failed";
+  response: string;
+  detail?: Record<string, unknown>;
+  created_at: number;
+  created_at_iso: string;
+};
+
+export function listEmailLog(limit = 100) {
+  return apiFetch<{ entries: EmailLogEntry[] }>(
+    `/api/v1/settings/email/log?limit=${limit}`,
+  );
+}
+
+export function getEmailLog(id: string) {
+  return apiFetch<EmailLogEntry>(`/api/v1/settings/email/log/${id}`);
+}
+
 export function postServerCleanup(targets: string[]) {
   return apiFetch<{ reclaimed: Record<string, number> }>(
     "/api/v1/server/cleanup",
@@ -804,4 +838,58 @@ export type ApplicationRow = {
 
 export function listApplications() {
   return apiFetch<{ applications: ApplicationRow[] }>("/api/v1/applications");
+}
+
+export type InboxNotification = {
+  id: string;
+  category: "deploys" | "usage" | "system";
+  level: "error" | "warning" | "success" | "info";
+  title: string;
+  body: string;
+  source_label: string;
+  cta_label?: string;
+  cta_href?: string;
+  read_at?: number;
+  deployment_id?: string;
+  service_id?: string;
+  project_id?: string;
+  created_at: number;
+};
+
+export type InboxSummary = {
+  unread: number;
+  total: number;
+};
+
+export function getInboxSummary() {
+  return apiFetch<InboxSummary>("/api/v1/inbox/summary");
+}
+
+export function listInboxNotifications(params?: {
+  category?: string;
+  unread?: boolean;
+  limit?: number;
+  before?: number;
+}) {
+  const q = new URLSearchParams();
+  if (params?.category) q.set("category", params.category);
+  if (params?.unread) q.set("unread", "1");
+  if (params?.limit) q.set("limit", String(params.limit));
+  if (params?.before) q.set("before", String(params.before));
+  const suffix = q.toString() ? `?${q.toString()}` : "";
+  return apiFetch<{ notifications: InboxNotification[] }>(
+    `/api/v1/inbox/notifications${suffix}`,
+  );
+}
+
+export function markInboxNotificationRead(id: string) {
+  return apiFetch<void>(`/api/v1/inbox/notifications/${id}/read`, {
+    method: "POST",
+  });
+}
+
+export function markAllInboxNotificationsRead() {
+  return apiFetch<void>("/api/v1/inbox/notifications/read-all", {
+    method: "POST",
+  });
 }

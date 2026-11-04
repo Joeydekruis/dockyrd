@@ -51,6 +51,18 @@ type Domain struct {
 	CertExpiresAt sql.NullInt64
 }
 
+type EmailLog struct {
+	ID           string
+	Kind         string
+	FromAddress  sql.NullString
+	ToAddress    string
+	Subject      sql.NullString
+	Status       string
+	ResponseText sql.NullString
+	DetailLog    sql.NullString
+	CreatedAt    int64
+}
+
 type Environment struct {
 	ID        string
 	ProjectID string
@@ -81,6 +93,25 @@ type GitSource struct {
 	ClientSecretEnc  []byte
 	Slug             sql.NullString
 	CreatedAt        sql.NullInt64
+}
+
+type InboxNotification struct {
+	ID             string
+	UserID         string
+	Category       string
+	Level          string
+	Title          string
+	Body           string
+	SourceLabel    string
+	CtaLabel       sql.NullString
+	CtaHref        sql.NullString
+	EmailTokenHash []byte
+	EmailSentAt    sql.NullInt64
+	ReadAt         sql.NullInt64
+	DeploymentID   sql.NullString
+	ServiceID      sql.NullString
+	ProjectID      sql.NullString
+	CreatedAt      int64
 }
 
 type Invite struct {

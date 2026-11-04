@@ -11,6 +11,7 @@ import {
   KeyRound,
   Layers,
   LayoutDashboard,
+  Mail,
   Plug,
   RefreshCw,
   Settings,
@@ -97,6 +98,7 @@ export const serverSettingsSidebarNav: SettingsNavItem[] = [
     icon: SlidersHorizontal,
   },
   { label: "Team", href: "/settings/server/team", icon: Users },
+  { label: "Email", href: "/settings/server/email", icon: Mail },
   {
     label: "Git providers",
     href: "/settings/server/integrations",

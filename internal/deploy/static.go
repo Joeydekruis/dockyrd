@@ -123,6 +123,9 @@ func (rt *Runtime) RunStaticSiteDeployment(ctx context.Context, deploymentID str
 	if err := proxy.SyncFromDB(ctx, rt.Q, rt.Cfg); err != nil && rt.Log != nil {
 		rt.Log.Warn("proxy sync after static deploy", "err", err)
 	}
+	if rt.Inbox != nil {
+		rt.Inbox.NotifyDeployLive(ctx, dep.ServiceID, deploymentID)
+	}
 	return nil
 }
 

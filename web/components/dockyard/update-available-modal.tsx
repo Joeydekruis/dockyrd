@@ -80,10 +80,8 @@ export function UpdateAvailableNotifier() {
           }
           description="Review release notes and install from Settings → Updates."
           action={
-            <>
-              <Button href="/settings/server/updates" variant="outline">
-                Update
-              </Button>
+            <div className="flex flex-wrap gap-2">
+              <Button href="/settings/server/updates">Update</Button>
               <Button
                 type="button"
                 variant="outline"
@@ -91,7 +89,7 @@ export function UpdateAvailableNotifier() {
               >
                 Release notes
               </Button>
-            </>
+            </div>
           }
         />
       </div>

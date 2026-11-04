@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { AppHeader } from "@/components/dockyard/app-header";
 import {
@@ -11,7 +11,7 @@ import { Sidebar } from "@/components/dockyard/sidebar";
 import { TopBar } from "@/components/dockyard/top-bar";
 import { UpdateAvailableNotifier } from "@/components/dockyard/update-available-modal";
 import { getMe, type MeResponse } from "@/lib/api";
-import { isAccountSettingsPath } from "@/lib/nav";
+import { isAccountSettingsPath, isSettingsPath } from "@/lib/nav";
 import { UserLocaleProvider } from "@/lib/user-locale-context";
 
 type DashboardShellProps = {
@@ -26,6 +26,7 @@ export function DashboardShell({
   children,
 }: DashboardShellProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const [ready, setReady] = useState(false);
   const [user, setUser] = useState<MeResponse | null>(null);
   const palette = useCommandPalette();
@@ -90,7 +91,13 @@ export function DashboardShell({
           </div>
           <div className="flex-1 overflow-y-auto px-8 py-6">
             <div className="max-w-6xl mx-auto">
-              <UpdateAvailableNotifier />
+              {isSettingsPath(pathname) ? (
+                <div className="settings-page-body">
+                  <UpdateAvailableNotifier />
+                </div>
+              ) : (
+                <UpdateAvailableNotifier />
+              )}
               {children}
             </div>
           </div>

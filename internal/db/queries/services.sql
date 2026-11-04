@@ -125,6 +125,11 @@ UPDATE services
 SET config = ?, updated_at = ?
 WHERE id = ?;
 
+-- name: UpdateServiceName :exec
+UPDATE services
+SET name = ?, updated_at = ?
+WHERE id = ?;
+
 -- name: ServiceSlugExistsInEnvironment :one
 SELECT id
 FROM services

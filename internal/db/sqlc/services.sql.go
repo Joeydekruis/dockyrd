@@ -477,3 +477,20 @@ func (q *Queries) UpdateServiceEnvironment(ctx context.Context, arg UpdateServic
 	_, err := q.db.ExecContext(ctx, updateServiceEnvironment, arg.EnvironmentID, arg.UpdatedAt, arg.ID)
 	return err
 }
+
+const updateServiceName = `-- name: UpdateServiceName :exec
+UPDATE services
+SET name = ?, updated_at = ?
+WHERE id = ?
+`
+
+type UpdateServiceNameParams struct {
+	Name      string
+	UpdatedAt sql.NullInt64
+	ID        string
+}
+
+func (q *Queries) UpdateServiceName(ctx context.Context, arg UpdateServiceNameParams) error {
+	_, err := q.db.ExecContext(ctx, updateServiceName, arg.Name, arg.UpdatedAt, arg.ID)
+	return err
+}

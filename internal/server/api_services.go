@@ -14,6 +14,7 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
 	"github.com/Joeydekruis/dockyrd/internal/dbkind"
 	"github.com/Joeydekruis/dockyrd/internal/slug"
+	"github.com/Joeydekruis/dockyrd/internal/staticsite"
 )
 
 type serviceResponse struct {
@@ -37,7 +38,9 @@ type createServiceRequest struct {
 }
 
 type patchServiceRequest struct {
-	ProjectID string `json:"project_id"`
+	ProjectID string          `json:"project_id"`
+	Name      string          `json:"name"`
+	Config    json.RawMessage `json:"config"`
 }
 
 func registerServiceRoutes(mux *http.ServeMux, deps apiDeps) {
@@ -218,8 +221,12 @@ func (d apiDeps) handlePatchService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	body.ProjectID = strings.TrimSpace(body.ProjectID)
-	if body.ProjectID == "" {
-		writeJSONError(w, http.StatusBadRequest, "project_id required")
+	body.Name = strings.TrimSpace(body.Name)
+	hasProject := body.ProjectID != ""
+	hasName := body.Name != ""
+	hasConfig := len(body.Config) > 0 && string(body.Config) != "null"
+	if !hasProject && !hasName && !hasConfig {
+		writeJSONError(w, http.StatusBadRequest, "no fields to update")
 		return
 	}
 	ctx := r.Context()
@@ -232,6 +239,55 @@ func (d apiDeps) handlePatchService(w http.ResponseWriter, r *http.Request) {
 		writeJSONError(w, http.StatusInternalServerError, "database error")
 		return
 	}
+
+	if hasName || hasConfig {
+		if row.Kind != "static_site" {
+			writeJSONError(w, http.StatusBadRequest, "name and config updates apply to static_site only")
+			return
+		}
+		now := time.Now().Unix()
+		cfgJSON := serviceConfigJSON(row.Config)
+		if hasConfig {
+			merged, err := mergeServiceConfig(cfgJSON, body.Config)
+			if err != nil {
+				writeJSONError(w, http.StatusBadRequest, "invalid config")
+				return
+			}
+			if _, err := staticsite.Parse(merged); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
+				return
+			}
+			if err := d.q.UpdateServiceConfig(ctx, sqlc.UpdateServiceConfigParams{
+				Config:    merged,
+				UpdatedAt: sql.NullInt64{Int64: now, Valid: true},
+				ID:        id,
+			}); err != nil {
+				writeJSONError(w, http.StatusInternalServerError, "update error")
+				return
+			}
+		}
+		if hasName {
+			if err := d.q.UpdateServiceName(ctx, sqlc.UpdateServiceNameParams{
+				Name:      body.Name,
+				UpdatedAt: sql.NullInt64{Int64: now, Valid: true},
+				ID:        id,
+			}); err != nil {
+				writeJSONError(w, http.StatusInternalServerError, "update error")
+				return
+			}
+		}
+	}
+
+	if !hasProject {
+		updated, err := d.q.GetServiceByID(ctx, id)
+		if err != nil {
+			writeJSONError(w, http.StatusInternalServerError, "database error")
+			return
+		}
+		writeJSON(w, http.StatusOK, serviceFromRow(updated))
+		return
+	}
+
 	env, err := d.q.GetEnvironmentByProjectAndName(ctx, sqlc.GetEnvironmentByProjectAndNameParams{
 		ProjectID: body.ProjectID,
 		Name:      "production",
@@ -245,7 +301,12 @@ func (d apiDeps) handlePatchService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if env.ID == row.EnvironmentID {
-		writeJSON(w, http.StatusOK, serviceFromRow(row))
+		updated, err := d.q.GetServiceByID(ctx, id)
+		if err != nil {
+			writeJSONError(w, http.StatusInternalServerError, "database error")
+			return
+		}
+		writeJSON(w, http.StatusOK, serviceFromRow(updated))
 		return
 	}
 	if _, err := d.q.ServiceSlugExistsInEnvironment(ctx, sqlc.ServiceSlugExistsInEnvironmentParams{
@@ -273,6 +334,24 @@ func (d apiDeps) handlePatchService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, serviceFromRow(updated))
+}
+
+func mergeServiceConfig(existing, patch json.RawMessage) (json.RawMessage, error) {
+	var base map[string]json.RawMessage
+	if err := json.Unmarshal(existing, &base); err != nil {
+		return nil, err
+	}
+	if base == nil {
+		base = map[string]json.RawMessage{}
+	}
+	var overlay map[string]json.RawMessage
+	if err := json.Unmarshal(patch, &overlay); err != nil {
+		return nil, err
+	}
+	for k, v := range overlay {
+		base[k] = v
+	}
+	return json.Marshal(base)
 }
 
 func serviceFromRow(row sqlc.Service) serviceResponse {

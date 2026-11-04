@@ -22,17 +22,19 @@ const toggles: {
   {
     key: "deployments",
     label: "Deployments",
-    description: "Build and deploy success or failure on projects you follow.",
+    description:
+      "In-app alerts for every deploy; failed builds also send email when SMTP is configured.",
   },
   {
     key: "security_alerts",
     label: "Security alerts",
-    description: "New sign-ins, session revokes, and permission changes.",
+    description:
+      "In-app alerts for sign-ins and permission changes (email for critical items later).",
   },
   {
     key: "product_updates",
     label: "Product updates",
-    description: "Dockyard release notes and maintenance windows.",
+    description: "In-app only — release notes and maintenance (no email).",
   },
 ];
 

@@ -40,9 +40,9 @@ func Build(ctx context.Context, dockerBin string, in BuildInput) (outputDir stri
 	if err := build.CloneShallow(ctx, in.CloneURL, in.Branch, srcDir); err != nil {
 		return "", err
 	}
-	workDir := srcDir
-	if root := strings.TrimSpace(in.RootDir); root != "" && root != "." {
-		workDir = filepath.Join(srcDir, root)
+	workDir, err := resolveStaticWorkDir(srcDir, in.RootDir, in.Branch)
+	if err != nil {
+		return "", err
 	}
 	buildCmd := DefaultBuildCmd(workDir, in.BuildCmd)
 	if err := os.MkdirAll(filepath.Dir(logPath), 0o750); err != nil {
@@ -68,4 +68,33 @@ func Build(ctx context.Context, dockerBin string, in BuildInput) (outputDir stri
 		return "", fmt.Errorf("static build: %w", err)
 	}
 	return DetectOutputDir(workDir, in.OutputDir)
+}
+
+// resolveStaticWorkDir picks the build/output directory inside a fresh clone.
+func resolveStaticWorkDir(cloneRoot, rootDir, branch string) (string, error) {
+	root := strings.TrimSpace(rootDir)
+	if root == "" || root == "." || root == "/" {
+		return cloneRoot, nil
+	}
+	root = strings.Trim(root, "/\\")
+	root = filepath.Clean(root)
+	if root == ".." || strings.HasPrefix(root, ".."+string(filepath.Separator)) {
+		return "", fmt.Errorf("invalid root directory %q", rootDir)
+	}
+	workDir := filepath.Join(cloneRoot, root)
+	info, err := os.Stat(workDir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return "", fmt.Errorf(
+				"root directory %q not found in cloned repo (branch %q). Verify repo, branch, and that the folder is pushed to GitHub",
+				root,
+				strings.TrimSpace(branch),
+			)
+		}
+		return "", fmt.Errorf("root directory %q: %w", root, err)
+	}
+	if !info.IsDir() {
+		return "", fmt.Errorf("root directory %q is not a directory", root)
+	}
+	return workDir, nil
 }

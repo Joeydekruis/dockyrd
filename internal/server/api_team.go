@@ -12,7 +12,6 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/audit"
 	"github.com/Joeydekruis/dockyrd/internal/auth"
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
-	"github.com/Joeydekruis/dockyrd/internal/mail"
 )
 
 func registerTeamRoutes(mux *http.ServeMux, deps apiDeps) {
@@ -205,8 +204,9 @@ func (d apiDeps) handleCreateInvite(w http.ResponseWriter, r *http.Request) {
 		if base != "" {
 			link = base + link
 		}
+		subject := "Dockyard team invite"
 		text := "You have been invited to join this Dockyard panel.\n\nAccept the invite:\n" + link + "\n"
-		if err := mail.SendPlain(smtpCfg, body.Email, "Dockyard team invite", text); err == nil {
+		if err := d.sendPlainWithLog(ctx, emailKindTeamInvite, smtpCfg, body.Email, subject, text); err == nil {
 			emailSent = true
 		}
 	}

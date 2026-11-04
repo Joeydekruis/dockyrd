@@ -16,7 +16,7 @@ Storybook is a **render catalog** of the same React components the panel ships. 
 |-------|------|-----------|
 | **Primitives** (buttons, badges, rows, modals, search palette, auth fields, empty state, …) | `web/components/dockyard/ui/*` | Import **only** from `@/components/dockyard/ui/…` or `@/components/dockyard/ui` barrel |
 | **Composites** (sidebar, header, command palette, dashboard shell, auth layout) | `web/components/dockyard/*` | May import composites; composites **must compose** `ui/*` — no duplicated button/input markup |
-| **Stories** | `web/stories/dockyrd/*` | No inline “story-only” component implementations for design tokens |
+| **Stories** | `web/stories/dockyrd/*`, `web/stories/design/**` | Board overviews under `Design/1–4`; **per-component Playground + Controls** under **`Design/Components/*`** |
 
 Run: `pnpm --dir web storybook` (port 6006). See `docs/project/setup.md`.
 

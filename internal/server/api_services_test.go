@@ -109,3 +109,102 @@ func TestCreatePostgresService(t *testing.T) {
 		t.Fatalf("vars: %+v", connResp.Variables)
 	}
 }
+
+func TestPatchStaticSiteService(t *testing.T) {
+	dir := t.TempDir()
+	cfg := config.Config{
+		DataDir:   filepath.Join(dir, "data"),
+		ConfigDir: filepath.Join(dir, "etc"),
+	}
+	initRes, err := setup.Init(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	conn, q, err := db.Open(cfg.DatabasePath())
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = conn.Close() })
+
+	mux := http.NewServeMux()
+	deps := apiDeps{cfg: cfg, q: q}
+	registerAPIRoutes(mux, deps)
+
+	setupBody, _ := json.Marshal(map[string]string{
+		"token": initRes.Token, "name": "Joey", "email": "o@example.com", "password": "longpassword12",
+	})
+	recSetup := httptest.NewRecorder()
+	reqSetup := httptest.NewRequest(http.MethodPost, "/api/v1/setup", bytes.NewReader(setupBody))
+	mux.ServeHTTP(recSetup, reqSetup)
+	if recSetup.Code != http.StatusOK {
+		t.Fatalf("setup: %d %s", recSetup.Code, recSetup.Body.String())
+	}
+	cookies := recSetup.Result().Cookies()
+
+	projBody, _ := json.Marshal(map[string]string{"name": "Web"})
+	recProj := httptest.NewRecorder()
+	reqProj := httptest.NewRequest(http.MethodPost, "/api/v1/projects", bytes.NewReader(projBody))
+	for _, c := range cookies {
+		reqProj.AddCookie(c)
+	}
+	mux.ServeHTTP(recProj, reqProj)
+	var proj projectResponse
+	_ = json.NewDecoder(recProj.Body).Decode(&proj)
+
+	svcBody, _ := json.Marshal(map[string]any{
+		"project_id": proj.ID,
+		"kind":       "static_site",
+		"name":       "Marketing",
+		"config": map[string]any{
+			"source":     map[string]any{"type": "github", "repo": "acme/site", "branch": "main"},
+			"autoDeploy": true,
+			"buildCmd":   "npm ci && npm run build",
+			"outputDir":  "dist",
+		},
+	})
+	recSvc := httptest.NewRecorder()
+	reqSvc := httptest.NewRequest(http.MethodPost, "/api/v1/services", bytes.NewReader(svcBody))
+	for _, c := range cookies {
+		reqSvc.AddCookie(c)
+	}
+	mux.ServeHTTP(recSvc, reqSvc)
+	if recSvc.Code != http.StatusCreated {
+		t.Fatalf("create service: %d %s", recSvc.Code, recSvc.Body.String())
+	}
+	var svc serviceResponse
+	if err := json.NewDecoder(recSvc.Body).Decode(&svc); err != nil {
+		t.Fatal(err)
+	}
+
+	patchBody, _ := json.Marshal(map[string]any{
+		"name": "Marketing site",
+		"config": map[string]any{
+			"autoDeploy": false,
+		},
+	})
+	recPatch := httptest.NewRecorder()
+	reqPatch := httptest.NewRequest(http.MethodPatch, "/api/v1/services/"+svc.ID, bytes.NewReader(patchBody))
+	for _, c := range cookies {
+		reqPatch.AddCookie(c)
+	}
+	mux.ServeHTTP(recPatch, reqPatch)
+	if recPatch.Code != http.StatusOK {
+		t.Fatalf("patch: %d %s", recPatch.Code, recPatch.Body.String())
+	}
+	var patched serviceResponse
+	if err := json.NewDecoder(recPatch.Body).Decode(&patched); err != nil {
+		t.Fatal(err)
+	}
+	if patched.Name != "Marketing site" {
+		t.Fatalf("name: %q", patched.Name)
+	}
+	var cfgOut struct {
+		AutoDeploy bool `json:"autoDeploy"`
+	}
+	if err := json.Unmarshal(patched.Config, &cfgOut); err != nil {
+		t.Fatal(err)
+	}
+	if cfgOut.AutoDeploy {
+		t.Fatal("expected autoDeploy false after patch")
+	}
+}

@@ -5,10 +5,10 @@ Password reset and team invites can send email when SMTP is configured.
 ## Configure in the dashboard
 
 1. Sign in as an **admin**.
-2. Open **Settings → Instance**.
-3. Set **Public URL** to the HTTPS origin users open in the browser (used in email links).
+2. Open **Server settings → Email** (`/settings/server/email`).
+3. Set **Public URL** on **Server settings → General** to the HTTPS origin users open in the browser (used in email links).
 4. Fill in **SMTP** (host, port, username, password, From address) and save.
-5. Use **Test SMTP** to verify delivery.
+5. Use **Test SMTP** to verify delivery. Attempts appear in **Email log** on the same page.
 
 Passwords are encrypted with the same master key as other secrets (`secret.key` under your config directory).
 

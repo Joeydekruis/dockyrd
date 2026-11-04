@@ -56,6 +56,7 @@ export {
 } from "./server-containers-table";
 export { ServerHealthCard } from "./server-health-card";
 export { ServiceCard } from "./service-card";
+export { SettingsDetailBlock } from "./settings-detail-block";
 export { SessionRow } from "./session-row";
 export { Skeleton } from "./skeleton";
 export { Snackbar, SnackbarViewport } from "./snackbar";

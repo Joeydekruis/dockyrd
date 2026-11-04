@@ -15,6 +15,7 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
 	"github.com/Joeydekruis/dockyrd/internal/docker"
 	"github.com/Joeydekruis/dockyrd/internal/eventlog"
+	"github.com/Joeydekruis/dockyrd/internal/inbox"
 	"github.com/Joeydekruis/dockyrd/internal/github"
 	"github.com/Joeydekruis/dockyrd/internal/proxy"
 	"github.com/Joeydekruis/dockyrd/internal/refs"
@@ -29,6 +30,7 @@ type Runtime struct {
 	Docker *docker.Client
 	Log    *slog.Logger
 	Events *eventlog.Logger
+	Inbox  *inbox.Dispatcher
 }
 
 // RunDeployment executes deploy for app or static_site services.
@@ -218,6 +220,9 @@ func (rt *Runtime) runAppDeployment(ctx context.Context, deploymentID string, de
 		rt.Log.Warn("proxy sync after deploy", "err", err)
 	}
 	rt.recordDeployEvent(ctx, dep.ServiceID, deploymentID, "info", "Deploy live", "")
+	if rt.Inbox != nil {
+		rt.Inbox.NotifyDeployLive(ctx, dep.ServiceID, deploymentID)
+	}
 	if needsBuild && rt.Docker != nil {
 		slug := ctxRow.ServiceSlug
 		go func() {
@@ -333,6 +338,9 @@ func (rt *Runtime) fail(ctx context.Context, deploymentID string, err error) err
 	})
 	if dep.ServiceID != "" {
 		rt.recordDeployEvent(ctx, dep.ServiceID, deploymentID, "error", "Deploy failed", msg)
+		if rt.Inbox != nil {
+			rt.Inbox.NotifyDeployFailed(ctx, dep.ServiceID, deploymentID, msg)
+		}
 	}
 	return err
 }

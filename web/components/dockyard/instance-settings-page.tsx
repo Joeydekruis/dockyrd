@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import { SettingsPageBody } from "@/components/dockyard/settings-page-body";
@@ -8,7 +9,6 @@ import { SnackbarViewport } from "@/components/dockyard/ui/snackbar";
 import {
   getInstanceSettings,
   patchInstanceSettings,
-  testSMTP,
 } from "@/lib/api";
 
 type SnackbarState = {
@@ -27,17 +27,7 @@ export function InstanceSettingsPage() {
     acme_email: string;
     wildcard_domain: string;
     require_2fa_all: boolean;
-    smtp: {
-      host: string;
-      port: number;
-      username: string;
-      from: string;
-      use_tls: boolean;
-      configured: boolean;
-    };
   } | null>(null);
-  const [smtpPassword, setSmtpPassword] = useState("");
-  const [testTo, setTestTo] = useState("");
   const [snackbar, setSnackbar] = useState<SnackbarState>(null);
 
   const dismissSnackbar = useCallback(() => setSnackbar(null), []);
@@ -90,39 +80,6 @@ export function InstanceSettingsPage() {
     }
   }
 
-  async function onSaveSMTP(e: React.FormEvent) {
-    e.preventDefault();
-    if (!instance) return;
-    setSnackbar(null);
-    try {
-      const updated = await patchInstanceSettings({
-        smtp: {
-          host: instance.smtp.host,
-          port: instance.smtp.port || 587,
-          username: instance.smtp.username,
-          from: instance.smtp.from,
-          use_tls: instance.smtp.use_tls,
-          password: smtpPassword || undefined,
-        },
-      });
-      setInstance(updated);
-      setSmtpPassword("");
-      showSnackbar("SMTP settings saved.", "success");
-    } catch (e) {
-      showSnackbar(e instanceof Error ? e.message : "Could not save", "warn");
-    }
-  }
-
-  async function onTestSMTP() {
-    setSnackbar(null);
-    try {
-      await testSMTP(testTo.trim());
-      showSnackbar("Test email sent.", "success");
-    } catch (e) {
-      showSnackbar(e instanceof Error ? e.message : "SMTP test failed", "warn");
-    }
-  }
-
   return (
     <DashboardShell title="General" breadcrumb="Server settings">
       <SettingsPageBody>
@@ -130,7 +87,11 @@ export function InstanceSettingsPage() {
           <h2 className="text-lg font-medium">Public URL &amp; TLS</h2>
           <p className="text-sm text-[var(--muted-foreground)]">
             HTTPS address of this Dockyrd dashboard (via Caddy). Used in
-            password-reset and invite links. Set an ACME email for Let&apos;s
+            password-reset and invite links. Configure outbound email under{" "}
+            <Link href="/settings/server/email" className="underline">
+              Email
+            </Link>
+            . Set an ACME email for Let&apos;s
             Encrypt certificates. DNS must point at this server; open ports 80
             and 443 on the firewall.
           </p>
@@ -204,143 +165,6 @@ export function InstanceSettingsPage() {
               Could not load instance settings (admin only).
             </p>
           )}
-        </section>
-
-        <section aria-label="SMTP" className={settingsCardClass}>
-          <h2 className="text-lg font-medium">SMTP</h2>
-          <p className="text-sm text-[var(--muted-foreground)]">
-            Outbound email for invites, password resets, and notifications.
-            Passwords are stored encrypted on the server.
-          </p>
-          {instance ? (
-            <>
-              <form onSubmit={(e) => void onSaveSMTP(e)} className="space-y-3">
-                <label className="block text-sm">
-                  <span className="text-[var(--muted-foreground)]">
-                    SMTP host
-                  </span>
-                  <input
-                    className="field-input mt-1 w-full"
-                    value={instance.smtp.host}
-                    placeholder="smtp.example.com"
-                    onChange={(e) =>
-                      setInstance({
-                        ...instance,
-                        smtp: { ...instance.smtp, host: e.target.value },
-                      })
-                    }
-                  />
-                </label>
-                <div className="grid grid-cols-2 gap-3">
-                  <label className="block text-sm">
-                    <span className="text-[var(--muted-foreground)]">Port</span>
-                    <input
-                      className="field-input mt-1 w-full"
-                      type="number"
-                      value={instance.smtp.port || 587}
-                      onChange={(e) =>
-                        setInstance({
-                          ...instance,
-                          smtp: {
-                            ...instance.smtp,
-                            port: Number(e.target.value) || 587,
-                          },
-                        })
-                      }
-                    />
-                  </label>
-                  <label className="flex items-end gap-2 pb-2 text-sm">
-                    <input
-                      type="checkbox"
-                      checked={instance.smtp.use_tls}
-                      onChange={(e) =>
-                        setInstance({
-                          ...instance,
-                          smtp: {
-                            ...instance.smtp,
-                            use_tls: e.target.checked,
-                          },
-                        })
-                      }
-                    />
-                    TLS (port 465)
-                  </label>
-                </div>
-                <label className="block text-sm">
-                  <span className="text-[var(--muted-foreground)]">
-                    Username
-                  </span>
-                  <input
-                    className="field-input mt-1 w-full"
-                    value={instance.smtp.username}
-                    placeholder="smtp-user"
-                    onChange={(e) =>
-                      setInstance({
-                        ...instance,
-                        smtp: { ...instance.smtp, username: e.target.value },
-                      })
-                    }
-                  />
-                </label>
-                <label className="block text-sm">
-                  <span className="text-[var(--muted-foreground)]">
-                    Password{" "}
-                    {instance.smtp.configured ? "(leave blank to keep)" : ""}
-                  </span>
-                  <input
-                    className="field-input mt-1 w-full"
-                    type="password"
-                    autoComplete="new-password"
-                    placeholder={
-                      instance.smtp.configured ? "••••••••" : "SMTP password"
-                    }
-                    value={smtpPassword}
-                    onChange={(e) => setSmtpPassword(e.target.value)}
-                  />
-                </label>
-                <label className="block text-sm">
-                  <span className="text-[var(--muted-foreground)]">From</span>
-                  <input
-                    className="field-input mt-1 w-full"
-                    value={instance.smtp.from}
-                    onChange={(e) =>
-                      setInstance({
-                        ...instance,
-                        smtp: { ...instance.smtp, from: e.target.value },
-                      })
-                    }
-                    placeholder="Dockyard <noreply@example.com>"
-                  />
-                </label>
-                <Button type="submit">Save SMTP settings</Button>
-              </form>
-              {instance.smtp.configured ? (
-                <div className="flex flex-wrap items-end gap-2 border-t border-[var(--border)] pt-4">
-                  <label className="block flex-1 text-sm">
-                    <span className="text-[var(--muted-foreground)]">
-                      Send test email to
-                    </span>
-                    <input
-                      className="field-input mt-1 w-full"
-                      type="email"
-                      placeholder="you@company.com"
-                      value={testTo}
-                      onChange={(e) => setTestTo(e.target.value)}
-                    />
-                  </label>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => void onTestSMTP()}
-                  >
-                    Test SMTP
-                  </Button>
-                </div>
-              ) : null}
-            </>
-          ) : loading ? (
-            <p className="text-sm text-[var(--muted-foreground)]">Loading…</p>
-          ) : null}
         </section>
 
         {error ? (
