@@ -9,10 +9,7 @@ import { ResourceListSection } from "@/components/dockyard/ui/resource-list-sect
 import { ResourceRow } from "@/components/dockyard/ui/resource-row";
 import { StatCard } from "@/components/dockyard/ui/stat-card";
 import { type ApplicationRow, listApplications } from "@/lib/api";
-import {
-  filterByQuery,
-  serviceStatusDisplay,
-} from "@/lib/service-display";
+import { filterByQuery, serviceStatusDisplay } from "@/lib/service-display";
 
 export function ApplicationsPage() {
   const [rows, setRows] = useState<ApplicationRow[]>([]);
@@ -70,7 +67,10 @@ export function ApplicationsPage() {
         </p>
       ) : null}
 
-      <section aria-label="Summary" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section
+        aria-label="Summary"
+        className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+      >
         <StatCard label="Total" value={loading ? "—" : rows.length} />
         <StatCard
           label="Running"
@@ -106,7 +106,10 @@ export function ApplicationsPage() {
           onFilterChange={setQuery}
         >
           {filtered.length === 0 ? (
-            <p className="py-6 text-center text-sm" style={{ color: "var(--muted-text)" }}>
+            <p
+              className="py-6 text-center text-sm"
+              style={{ color: "var(--muted-text)" }}
+            >
               No applications match your filter.
             </p>
           ) : (

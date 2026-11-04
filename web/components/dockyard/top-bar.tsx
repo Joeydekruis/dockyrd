@@ -6,7 +6,7 @@ type TopBarProps = {
   className?: string;
 };
 
-/** Fixed announcement strip in the main column (not over the sidebar). */
+/** Fixed announcement strip spanning the full app width (above sidebar and header). */
 export function TopBar({ className = "" }: TopBarProps) {
   return (
     <div

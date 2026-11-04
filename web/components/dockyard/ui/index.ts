@@ -49,7 +49,7 @@ export { ServerHealthCard } from "./server-health-card";
 export { ServiceCard } from "./service-card";
 export { SessionRow } from "./session-row";
 export { Skeleton } from "./skeleton";
-export { Snackbar } from "./snackbar";
+export { Snackbar, SnackbarViewport } from "./snackbar";
 export { Spinner } from "./spinner";
 export {
   SplitButton,

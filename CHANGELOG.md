@@ -6,6 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.31] - 2026-11-04
+
+_Finished: 2026-11-04_
+
+### Added
+
+- **Settings → Integrations (GitHub)** — connect wizard (`ConnectGitHubWizard`), disconnect with confirm, enriched status (public URL, account hints); **`DELETE /api/v1/github/connection`**; manifest POST accepts `app_name` / `public_url` (`internal/github/status_enrich.go`, `urls.go`)
+- **Search palette** — grouped results, keyboard navigation, and Storybook coverage updates (`web/components/dockyard/ui/search-palette.tsx`)
+- **`SnackbarViewport`** — fixed-bottom save/test confirmations on General settings; Storybook **Viewport** story
+- **Auth** — server reset hint when SMTP is off (`auth-server-reset-hint.tsx`); **`DockyrdMark`** logo mark; **`openExternalUrl`** helper
+
+### Changed
+
+- **Settings → General** — **Public URL & TLS** and **SMTP** as separate cards with per-section save; inline green status text replaced by snackbar
+- **Forgot password & auth layout** — design-aligned split layout and copy
+- **Command palette / dashboard shell** — announcement banner placement and palette wiring
+- **Global styles** — auth surface tokens and layout utilities in `globals.css`
+
 ## [0.0.30] - 2026-11-04
 
 _Finished: 2026-11-04_

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Button } from "@/components/dockyard/ui/button";
-import { Snackbar } from "@/components/dockyard/ui/snackbar";
+import { Snackbar, SnackbarViewport } from "@/components/dockyard/ui/snackbar";
 
 const tones = ["info", "warn", "success"] as const;
 
@@ -40,4 +40,18 @@ export const WithAction: Story = {
     message: "Deploy failed — view logs",
     action: <Button variant="link">View logs</Button>,
   },
+};
+
+export const Viewport: Story = {
+  parameters: { controls: { disable: true } },
+  render: () => (
+    <div className="relative min-h-[200px]">
+      <SnackbarViewport
+        open
+        tone="success"
+        message="Settings saved."
+        onDismiss={() => undefined}
+      />
+    </div>
+  ),
 };

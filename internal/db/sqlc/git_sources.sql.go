@@ -10,6 +10,16 @@ import (
 	"database/sql"
 )
 
+const deleteGitSource = `-- name: DeleteGitSource :exec
+DELETE FROM git_sources
+WHERE id = ?
+`
+
+func (q *Queries) DeleteGitSource(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, deleteGitSource, id)
+	return err
+}
+
 const getGitSource = `-- name: GetGitSource :one
 SELECT
   id,

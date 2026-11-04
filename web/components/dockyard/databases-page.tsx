@@ -3,6 +3,7 @@
 import { Database } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { AddCard } from "@/components/dockyard/ui/add-card";
 import { Button } from "@/components/dockyard/ui/button";
 import { Chip } from "@/components/dockyard/ui/chip";
 import { EmptyState } from "@/components/dockyard/ui/empty-state";
@@ -11,7 +12,6 @@ import { ResourceListSection } from "@/components/dockyard/ui/resource-list-sect
 import { ResourceRow } from "@/components/dockyard/ui/resource-row";
 import { SelectField } from "@/components/dockyard/ui/select-field";
 import { StatCard } from "@/components/dockyard/ui/stat-card";
-import { AddCard } from "@/components/dockyard/ui/add-card";
 import {
   createService,
   type DatabaseRow,
@@ -123,7 +123,10 @@ export function DatabasesPage() {
         </p>
       ) : null}
 
-      <section aria-label="Summary" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section
+        aria-label="Summary"
+        className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+      >
         <StatCard label="Total" value={loading ? "—" : rows.length} />
         <StatCard label="Postgres" value={loading ? "—" : postgresCount} />
         <StatCard label="Redis" value={loading ? "—" : redisCount} />
@@ -221,14 +224,20 @@ export function DatabasesPage() {
               <form
                 onSubmit={onCreate}
                 className="grid gap-3 rounded-[20px] border p-4 md:grid-cols-2"
-                style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+                style={{
+                  borderColor: "var(--border)",
+                  background: "var(--surface)",
+                }}
               >
                 <SelectField
                   label="Project"
                   placeholder="Select…"
                   value={projectId}
                   onChange={setProjectId}
-                  options={projects.map((p) => ({ value: p.id, label: p.name }))}
+                  options={projects.map((p) => ({
+                    value: p.id,
+                    label: p.name,
+                  }))}
                 />
                 <SelectField
                   label="Engine"
@@ -274,7 +283,10 @@ export function DatabasesPage() {
           }
         >
           {filtered.length === 0 ? (
-            <p className="py-6 text-center text-sm" style={{ color: "var(--muted-text)" }}>
+            <p
+              className="py-6 text-center text-sm"
+              style={{ color: "var(--muted-text)" }}
+            >
               No databases match your filter.
             </p>
           ) : (
@@ -296,7 +308,9 @@ export function DatabasesPage() {
                   icon={Database}
                   trailing={
                     <div className="flex flex-wrap items-center gap-2">
-                      <Chip>{databaseEngineLabel(row.kind)} {version}</Chip>
+                      <Chip>
+                        {databaseEngineLabel(row.kind)} {version}
+                      </Chip>
                       <button
                         type="button"
                         className="rounded-lg border px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide"

@@ -59,3 +59,27 @@ export function Snackbar({
     </div>
   );
 }
+
+type SnackbarViewportProps = {
+  open: boolean;
+  message: React.ReactNode;
+  tone?: SnackbarProps["tone"];
+  onDismiss: () => void;
+};
+
+/** Fixed bottom snackbar for save confirmations (see Design/Components/Snackbar). */
+export function SnackbarViewport({
+  open,
+  message,
+  tone = "info",
+  onDismiss,
+}: SnackbarViewportProps) {
+  if (!open) return null;
+  return (
+    <div className="pointer-events-none fixed inset-x-0 bottom-6 z-50 flex justify-center px-4">
+      <div className="pointer-events-auto w-full max-w-md">
+        <Snackbar message={message} tone={tone} onDismiss={onDismiss} />
+      </div>
+    </div>
+  );
+}

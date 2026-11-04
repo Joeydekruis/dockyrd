@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { SearchPalette } from "@/components/dockyard/ui/search-palette";
 import { globalSearch, type SearchResult } from "@/lib/api";
@@ -11,14 +12,17 @@ type CommandPaletteProps = {
 };
 
 export function CommandPalette({ open, onClose }: CommandPaletteProps) {
+  const router = useRouter();
   const [query, setQuery] = useState("");
   const [remote, setRemote] = useState<SearchResult[] | null>(null);
+  const [activeIndex, setActiveIndex] = useState(0);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!open) {
       setQuery("");
       setRemote(null);
+      setActiveIndex(0);
       return;
     }
     searchInputRef.current?.focus();
@@ -27,7 +31,10 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        e.preventDefault();
+        onClose();
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -71,6 +78,26 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
       .map((p) => ({ kind: "page", label: p.label, href: p.href }));
   }, [query, remote]);
 
+  function openResult(href: string) {
+    onClose();
+    router.push(href);
+  }
+
+  function onPaletteKeyDown(e: React.KeyboardEvent) {
+    if (filtered.length === 0) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setActiveIndex((i) => Math.min(i + 1, filtered.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setActiveIndex((i) => Math.max(i - 1, 0));
+    } else if (e.key === "Enter") {
+      e.preventDefault();
+      const target = filtered[activeIndex];
+      if (target) openResult(target.href);
+    }
+  }
+
   if (!open) return null;
 
   return (
@@ -85,14 +112,20 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
         role="dialog"
         aria-modal="true"
         aria-label="Search"
-        className="relative z-10 w-full max-w-xl"
+        className="relative z-10 w-full max-w-[740px]"
+        onKeyDown={onPaletteKeyDown}
       >
         <SearchPalette
           ref={searchInputRef}
           query={query}
-          onQueryChange={setQuery}
+          onQueryChange={(value) => {
+            setQuery(value);
+            setActiveIndex(0);
+          }}
           results={filtered}
-          onSelect={() => onClose()}
+          activeIndex={activeIndex}
+          onSelect={openResult}
+          onClose={onClose}
         />
       </div>
     </div>

@@ -78,7 +78,7 @@ export const settingsInstanceNav: SettingsNavItem[] = [
   },
   { label: "Team", href: "/settings/team", icon: Users },
   {
-    label: "Integrations",
+    label: "Git providers",
     href: "/settings/integrations",
     icon: Plug,
   },
@@ -96,4 +96,6 @@ export const palettePages = [
   ...projectNav,
   ...serverNav,
   settingsNav,
+  ...settingsPersonalNav,
+  ...settingsInstanceNav,
 ];

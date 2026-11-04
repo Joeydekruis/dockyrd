@@ -65,8 +65,8 @@ export function DashboardShell({
 
   return (
     <div className="min-h-dvh" style={{ background: "var(--page-bg)" }}>
+      <TopBar className="fixed top-0 right-0 left-0 z-50" />
       <Sidebar />
-      <TopBar className="fixed top-0 right-0 left-[232px] z-30" />
       <div
         className="flex min-h-dvh flex-col pl-[232px]"
         style={{ paddingTop: "var(--dockyard-announcement-height, 44px)" }}
@@ -86,8 +86,10 @@ export function DashboardShell({
           />
         </div>
         <div className="flex-1 overflow-y-auto px-8 py-6">
-          <UpdateAvailableNotifier />
-          {children}
+          <div className="max-w-6xl mx-auto">
+            <UpdateAvailableNotifier />
+            {children}
+          </div>
         </div>
       </div>
       <CommandPalette open={palette.open} onClose={palette.close} />

@@ -144,19 +144,22 @@ export const CommandPalette: StoryObj = {
     const results = [
       { kind: "page" as const, label: "Applications", href: "/applications" },
       {
-        kind: "resource" as const,
+        kind: "project" as const,
         label: "marketing",
-        href: "/applications/marketing",
+        href: "/projects/marketing",
+        meta: "Static site · Client X",
       },
     ].filter((row) => row.label.toLowerCase().includes(query.toLowerCase()));
     return (
       <CatalogCanvas>
         <Section title="Command palette">
-          <div className="mx-auto max-w-xl">
+          <div className="mx-auto max-w-[740px]">
             <SearchPalette
               query={query}
               onQueryChange={setQuery}
               results={results}
+              activeIndex={1}
+              onClose={() => undefined}
             />
           </div>
         </Section>

@@ -3,8 +3,8 @@
 import { HardDrive } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
-import { Button } from "@/components/dockyard/ui/button";
 import { AddCard } from "@/components/dockyard/ui/add-card";
+import { Button } from "@/components/dockyard/ui/button";
 import { Chip } from "@/components/dockyard/ui/chip";
 import { EmptyState } from "@/components/dockyard/ui/empty-state";
 import { PageHeader } from "@/components/dockyard/ui/page-header";
@@ -62,9 +62,7 @@ export function ObjectStoragePage() {
         b.name,
         b.slug,
         b.project_name,
-        String(
-          (b.config as { bucket_name?: string }).bucket_name ?? b.slug,
-        ),
+        String((b.config as { bucket_name?: string }).bucket_name ?? b.slug),
       ]),
     [buckets, query],
   );
@@ -159,15 +157,20 @@ export function ObjectStoragePage() {
         </p>
       ) : null}
 
-      <section aria-label="Summary" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section
+        aria-label="Summary"
+        className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+      >
         <StatCard label="Buckets" value={loading ? "—" : buckets.length} />
         <StatCard label="Projects" value={loading ? "—" : projectCount} />
         <StatCard
           label="Garage"
-          value={loading ? "—" : status?.installed ? "Installed" : "Not installed"}
+          value={
+            loading ? "—" : status?.installed ? "Installed" : "Not installed"
+          }
           hint={
             status?.installed
-              ? status.version ?? "Self-hosted S3"
+              ? (status.version ?? "Self-hosted S3")
               : "Install to create buckets"
           }
         />
@@ -197,11 +200,17 @@ export function ObjectStoragePage() {
             />
             <article
               className="rounded-[20px] border p-5 opacity-60"
-              style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+              style={{
+                borderColor: "var(--border)",
+                background: "var(--surface)",
+              }}
             >
               <Chip>Not in MVP</Chip>
               <p className="mt-3 font-semibold">MinIO</p>
-              <p className="mt-2 text-[13px]" style={{ color: "var(--muted-text)" }}>
+              <p
+                className="mt-2 text-[13px]"
+                style={{ color: "var(--muted-text)" }}
+              >
                 Alternative S3 server — not offered in the first release.
               </p>
             </article>
@@ -257,7 +266,10 @@ export function ObjectStoragePage() {
           }
         >
           {filtered.length === 0 ? (
-            <p className="py-6 text-center text-sm" style={{ color: "var(--muted-text)" }}>
+            <p
+              className="py-6 text-center text-sm"
+              style={{ color: "var(--muted-text)" }}
+            >
               No buckets match your filter.
             </p>
           ) : (

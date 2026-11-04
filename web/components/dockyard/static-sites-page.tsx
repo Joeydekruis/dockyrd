@@ -3,8 +3,8 @@
 import { Globe } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
-import { Button } from "@/components/dockyard/ui/button";
 import { AddCard } from "@/components/dockyard/ui/add-card";
+import { Button } from "@/components/dockyard/ui/button";
 import { EmptyState } from "@/components/dockyard/ui/empty-state";
 import { PageHeader } from "@/components/dockyard/ui/page-header";
 import { ResourceListSection } from "@/components/dockyard/ui/resource-list-section";
@@ -23,10 +23,7 @@ import {
   promoteDeployment,
   type Service,
 } from "@/lib/api";
-import {
-  filterByQuery,
-  serviceStatusDisplay,
-} from "@/lib/service-display";
+import { filterByQuery, serviceStatusDisplay } from "@/lib/service-display";
 
 type StaticRow = {
   project: Project;
@@ -221,7 +218,10 @@ export function StaticSitesPage() {
         </p>
       ) : null}
 
-      <section aria-label="Summary" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section
+        aria-label="Summary"
+        className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+      >
         <StatCard label="Total" value={loading ? "—" : rows.length} />
         <StatCard label="Live" value={loading ? "—" : live} />
         <StatCard label="Projects" value={loading ? "—" : projectCount} />
@@ -273,7 +273,10 @@ export function StaticSitesPage() {
           }
         >
           {filtered.length === 0 ? (
-            <p className="py-6 text-center text-sm" style={{ color: "var(--muted-text)" }}>
+            <p
+              className="py-6 text-center text-sm"
+              style={{ color: "var(--muted-text)" }}
+            >
               No static sites match your filter.
             </p>
           ) : (

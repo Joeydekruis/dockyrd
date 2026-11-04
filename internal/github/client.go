@@ -132,6 +132,47 @@ func (c AppCredentials) InstallationAccessToken(ctx context.Context) (string, er
 	return out.Token, nil
 }
 
+// InstallationAccount is the GitHub user or org that installed the app.
+type InstallationAccount struct {
+	Login string `json:"login"`
+	Type  string `json:"type"`
+}
+
+// InstallationAccount loads the account for the configured installation.
+func (c AppCredentials) InstallationAccount(ctx context.Context) (InstallationAccount, error) {
+	if c.InstallationID == 0 {
+		return InstallationAccount{}, fmt.Errorf("github app installation missing")
+	}
+	jwtStr, err := c.appJWT()
+	if err != nil {
+		return InstallationAccount{}, err
+	}
+	url := fmt.Sprintf("%s/app/installations/%d", githubAPI, c.InstallationID)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+	if err != nil {
+		return InstallationAccount{}, err
+	}
+	req.Header.Set("Authorization", "Bearer "+jwtStr)
+	req.Header.Set("Accept", "application/vnd.github+json")
+	req.Header.Set("X-GitHub-Api-Version", "2022-11-28")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return InstallationAccount{}, err
+	}
+	defer resp.Body.Close()
+	body, _ := io.ReadAll(resp.Body)
+	if resp.StatusCode >= 300 {
+		return InstallationAccount{}, fmt.Errorf("installation %d: %s", resp.StatusCode, string(body))
+	}
+	var out struct {
+		Account InstallationAccount `json:"account"`
+	}
+	if err := json.Unmarshal(body, &out); err != nil {
+		return InstallationAccount{}, err
+	}
+	return out.Account, nil
+}
+
 // RepoSummary is a GitHub repository visible to the installation.
 type RepoSummary struct {
 	FullName string `json:"full_name"`

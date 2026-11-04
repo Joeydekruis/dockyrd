@@ -5,10 +5,16 @@ import {
   type SearchResultRow,
 } from "@/components/dockyard/ui/search-palette";
 
-const results: SearchResultRow[] = [
-  { kind: "project", label: "api-gateway", href: "#" },
-  { kind: "service", label: "web", href: "#" },
-  { kind: "page", label: "Settings", href: "#" },
+const demoResults: SearchResultRow[] = [
+  { kind: "page", label: "Dashboard", href: "/" },
+  { kind: "page", label: "Applications", href: "/applications" },
+  { kind: "page", label: "Databases", href: "/databases" },
+  {
+    kind: "project",
+    label: "marketing",
+    href: "/projects/marketing",
+    meta: "Static site · Client X",
+  },
 ];
 
 const meta = {
@@ -21,30 +27,48 @@ const meta = {
   args: {
     query: "",
     onQueryChange: () => {},
-    results,
+    results: demoResults,
+    activeIndex: 1,
+    onClose: () => {},
   },
 } satisfies Meta<typeof SearchPalette>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Playground: Story = {
+export const WithResults: Story = {
   args: {
-    query: "api",
-    onQueryChange: () => {},
-    results,
+    query: "",
+    activeIndex: 1,
   },
+};
+
+export const EmptyQuery: Story = {
+  args: {
+    query: "zzz",
+    results: [],
+    activeIndex: 0,
+  },
+};
+
+export const Playground: Story = {
   render: () => {
-    const [query, setQuery] = useState("api");
-    const filtered = results.filter((r) =>
+    const [query, setQuery] = useState("");
+    const [activeIndex, setActiveIndex] = useState(0);
+    const filtered = demoResults.filter((r) =>
       r.label.toLowerCase().includes(query.toLowerCase()),
     );
     return (
       <div className="p-8">
         <SearchPalette
           query={query}
-          onQueryChange={setQuery}
+          onQueryChange={(v) => {
+            setQuery(v);
+            setActiveIndex(0);
+          }}
           results={filtered}
+          activeIndex={Math.min(activeIndex, Math.max(filtered.length - 1, 0))}
+          onClose={() => undefined}
         />
       </div>
     );

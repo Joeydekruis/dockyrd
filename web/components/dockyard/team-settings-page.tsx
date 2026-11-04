@@ -113,8 +113,8 @@ export function TeamSettingsPage() {
                 </p>
               ) : (
                 <p className="mb-2 text-sm text-[var(--muted-foreground)]">
-                  SMTP not configured — copy the link below (or set SMTP under
-                  Instance settings).
+                  SMTP not configured — copy the link below (or configure SMTP
+                  under Settings → General).
                 </p>
               )}
               <p className="text-sm text-[var(--muted-foreground)]">

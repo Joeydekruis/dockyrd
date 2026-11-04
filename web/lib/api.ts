@@ -313,16 +313,31 @@ export type GitHubStatus = {
   linked: boolean;
   slug?: string;
   installation_id?: number;
+  installed_on?: string;
+  repository_count?: number;
+  webhook_active?: boolean;
+  public_url?: string;
+  install_url?: string;
+  manage_url?: string;
+  app_configured?: boolean;
+  installation_ready?: boolean;
 };
 
 export function getGitHubStatus() {
   return apiFetch<GitHubStatus>("/api/v1/github/status");
 }
 
-export function startGitHubAppLink() {
+export function disconnectGitHub() {
+  return apiFetch<void>("/api/v1/github/connection", { method: "DELETE" });
+}
+
+export function startGitHubAppLink(opts?: {
+  app_name?: string;
+  public_url?: string;
+}) {
   return apiFetch<{ url: string; state: string }>(
     "/api/v1/github/app/manifest",
-    { method: "POST", json: {} },
+    { method: "POST", json: opts ?? {} },
   );
 }
 

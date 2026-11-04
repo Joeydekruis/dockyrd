@@ -126,7 +126,7 @@ export function Sidebar() {
 
   return (
     <aside
-      className="fixed inset-y-0 left-0 z-40 flex w-[232px] shrink-0 flex-col overflow-y-auto border-r px-4 py-6"
+      className="fixed bottom-0 left-0 z-40 flex w-[232px] shrink-0 flex-col overflow-y-auto border-r px-4 py-6 top-[var(--dockyard-announcement-height,44px)]"
       style={{ background: "var(--page-bg)", borderColor: "var(--border)" }}
     >
       <Link href="/" className="mb-8 inline-block" aria-label="Dockyrd home">

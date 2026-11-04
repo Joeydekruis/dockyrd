@@ -41,3 +41,7 @@ ON CONFLICT(id) DO UPDATE SET
 UPDATE git_sources
 SET installation_id = ?
 WHERE id = ?;
+
+-- name: DeleteGitSource :exec
+DELETE FROM git_sources
+WHERE id = ?;

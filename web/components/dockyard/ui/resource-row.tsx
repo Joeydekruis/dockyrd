@@ -69,7 +69,10 @@ export function ResourceRow({
           </p>
         ) : null}
         {subMeta ? (
-          <p className="mt-1 text-[13px]" style={{ color: "var(--muted-text)" }}>
+          <p
+            className="mt-1 text-[13px]"
+            style={{ color: "var(--muted-text)" }}
+          >
             {subMeta}
           </p>
         ) : null}

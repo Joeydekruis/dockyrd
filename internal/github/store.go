@@ -16,6 +16,11 @@ import (
 
 const defaultGitSourceID = "default"
 
+// DefaultGitSourceID is the sqlite row key for the GitHub App integration.
+func DefaultGitSourceID() string {
+	return defaultGitSourceID
+}
+
 // ConversionResult is returned by GitHub after manifest conversion.
 type ConversionResult struct {
 	ID          int64  `json:"id"`
@@ -81,9 +86,17 @@ func WebhookSecretPlain(ctx context.Context, q *sqlc.Queries, keyPath string) (s
 
 // StatusResponse describes whether GitHub App is linked.
 type StatusResponse struct {
-	Linked         bool   `json:"linked"`
-	Slug           string `json:"slug,omitempty"`
-	InstallationID int64  `json:"installation_id,omitempty"`
+	Linked            bool   `json:"linked"`
+	Slug              string `json:"slug,omitempty"`
+	InstallationID    int64  `json:"installation_id,omitempty"`
+	InstalledOn       string `json:"installed_on,omitempty"`
+	RepositoryCount   int    `json:"repository_count,omitempty"`
+	WebhookActive     bool   `json:"webhook_active"`
+	PublicURL         string `json:"public_url,omitempty"`
+	InstallURL        string `json:"install_url,omitempty"`
+	ManageURL         string `json:"manage_url,omitempty"`
+	AppConfigured     bool   `json:"app_configured"`
+	InstallationReady bool   `json:"installation_ready"`
 }
 
 // LoadStatus reads git_sources for the dashboard.

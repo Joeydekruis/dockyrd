@@ -10,7 +10,7 @@ export function Kbd({ children }: KbdProps) {
       className="inline-flex min-h-6 items-center rounded-md border px-1.5 font-mono text-[11px] uppercase tracking-wide"
       style={{
         borderColor: "var(--input-border)",
-        background: "var(--hover-row)",
+        background: "var(--page-bg)",
         color: "var(--secondary-text)",
       }}
     >

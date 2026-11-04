@@ -10,11 +10,13 @@ import (
 
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
 	"github.com/Joeydekruis/dockyrd/internal/github"
+	"github.com/Joeydekruis/dockyrd/internal/instance"
 	"github.com/Joeydekruis/dockyrd/internal/jobs"
 )
 
 func registerGitHubRoutes(mux *http.ServeMux, deps apiDeps) {
 	mux.HandleFunc("GET /api/v1/github/status", deps.handleGitHubStatus)
+	mux.HandleFunc("DELETE /api/v1/github/connection", deps.handleGitHubDisconnect)
 	mux.HandleFunc("POST /api/v1/github/app/manifest", deps.handleGitHubManifest)
 	mux.HandleFunc("GET /api/v1/github/app/callback", deps.handleGitHubCallback)
 	mux.HandleFunc("GET /api/v1/github/repos", deps.handleGitHubRepos)
@@ -35,15 +37,43 @@ func (d apiDeps) handleGitHubStatus(w http.ResponseWriter, r *http.Request) {
 		writeJSONError(w, http.StatusInternalServerError, "database error")
 		return
 	}
+	base := d.githubPublicBaseURL(r)
+	st, _ = github.EnrichStatus(r.Context(), d.q, d.cfg.SecretKeyPath(), base, st)
 	writeJSON(w, http.StatusOK, st)
+}
+
+func (d apiDeps) handleGitHubDisconnect(w http.ResponseWriter, r *http.Request) {
+	if _, ok := d.requireUser(w, r); !ok {
+		return
+	}
+	if d.q == nil {
+		writeJSONError(w, http.StatusServiceUnavailable, "database not ready")
+		return
+	}
+	if err := d.q.DeleteGitSource(r.Context(), github.DefaultGitSourceID()); err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "disconnect failed")
+		return
+	}
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (d apiDeps) handleGitHubManifest(w http.ResponseWriter, r *http.Request) {
 	if _, ok := d.requireUser(w, r); !ok {
 		return
 	}
-	base := publicBaseURL(r)
-	url, err := github.CreateManifestURL(github.ManifestParams{PublicBaseURL: base})
+	var body struct {
+		AppName   string `json:"app_name"`
+		PublicURL string `json:"public_url"`
+	}
+	_ = json.NewDecoder(r.Body).Decode(&body)
+	base := strings.TrimRight(strings.TrimSpace(body.PublicURL), "/")
+	if base == "" {
+		base = d.githubPublicBaseURL(r)
+	}
+	url, err := github.CreateManifestURL(github.ManifestParams{
+		PublicBaseURL: base,
+		AppName:       body.AppName,
+	})
 	if err != nil {
 		writeJSONError(w, http.StatusBadRequest, err.Error())
 		return
@@ -99,7 +129,7 @@ func (d apiDeps) handleGitHubCallback(w http.ResponseWriter, r *http.Request) {
 	if installID > 0 {
 		_ = github.SaveInstallationID(r.Context(), d.q, installID)
 	}
-	http.Redirect(w, r, "/settings/integrations?github=linked", http.StatusFound)
+	http.Redirect(w, r, "/settings/integrations?github=app-created", http.StatusFound)
 }
 
 func (d apiDeps) handleGitHubRepos(w http.ResponseWriter, r *http.Request) {
@@ -226,4 +256,16 @@ func publicBaseURL(r *http.Request) string {
 		scheme = strings.TrimSpace(fwd)
 	}
 	return scheme + "://" + r.Host
+}
+
+func (d apiDeps) githubPublicBaseURL(r *http.Request) string {
+	if d.q != nil {
+		panel, err := instance.LoadPanel(r.Context(), d.q)
+		if err == nil {
+			if v := instance.PublicBaseURL(d.cfg, panel); v != "" {
+				return v
+			}
+		}
+	}
+	return publicBaseURL(r)
 }

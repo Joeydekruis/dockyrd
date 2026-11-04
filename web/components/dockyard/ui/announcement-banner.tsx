@@ -5,7 +5,7 @@ export function AnnouncementBanner() {
   return (
     <section
       aria-label="Announcement"
-      className="flex min-h-11 items-center gap-4 border-b px-6 py-2 text-sm"
+      className="flex h-full min-h-11 w-full items-center gap-4 border-b px-6 py-2 text-sm"
       style={{
         background: "var(--banner-blue)",
         borderColor: "var(--border)",
