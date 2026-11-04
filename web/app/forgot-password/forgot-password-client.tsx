@@ -60,6 +60,8 @@ export function ForgotPasswordClient() {
           <input
             required
             type="email"
+            autoComplete="email"
+            placeholder="you@company.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="field-input"

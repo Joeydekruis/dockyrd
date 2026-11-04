@@ -50,6 +50,7 @@ export function SetupClient() {
             required
             value={token}
             onChange={(e) => setToken(e.target.value)}
+            placeholder="Paste token from installer"
             className="field-input"
           />
         </Field>
@@ -58,6 +59,7 @@ export function SetupClient() {
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
+            placeholder="Your name"
             className="field-input"
           />
         </Field>
@@ -66,6 +68,7 @@ export function SetupClient() {
             required
             type="email"
             autoComplete="email"
+            placeholder="you@company.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="field-input"
@@ -77,6 +80,7 @@ export function SetupClient() {
             type="password"
             minLength={12}
             autoComplete="new-password"
+            placeholder="Choose a strong password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="field-input"

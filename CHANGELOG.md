@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.28] - 2026-11-04
+
+_Finished: 2026-11-04_
+
+### Added
+
+- **Dashboard UI shell** — TopBar announcement, fixed sidebar/header (232px), settings sidebar variant with icons, scroll-hide top bar, wider white search trigger, command palette dismiss on backdrop click
+- **Design system (`web/components/dockyard/ui/`)** — shared Button, status badges, stat tiles, resource rows, modals, snackbar, search palette, auth fields, empty state; **Storybook 10** catalog (`pnpm --dir web storybook`) with single-source rule `.cursor/rules/storybook-ui-source.mdc`
+- **Self-update API** — `GET /api/v1/updates`, `POST /api/v1/updates/apply`; Settings → Updates page and update-available banner in dashboard
+- **Auth** — `GET /api/v1/auth/me` returns `mfa_required` for pending 2FA sessions; `probeAuthState()` in web client
+
+### Changed
+
+- **Sign-in / auth pages** — design-aligned split layout, placeholders, password-manager-friendly forms (FormData, separate MFA step, `autocomplete` attributes); settings inputs placeholders
+- **Sign-in errors** — surface API error text from login failures
+
+### Fixed
+
+- **2FA login UX** — resume MFA step after refresh when session cookie exists but MFA not completed
+
 ## [0.0.27] - 2026-11-04
 
 _Finished: 2026-11-04_

@@ -1,5 +1,9 @@
 "use client";
 
+import { Breadcrumbs } from "@/components/dockyard/ui/breadcrumbs";
+import { Button } from "@/components/dockyard/ui/button";
+import { SearchTrigger } from "@/components/dockyard/ui/search-trigger";
+
 type AppHeaderProps = {
   title: string;
   breadcrumb?: string;
@@ -13,44 +17,15 @@ export function AppHeader({
 }: AppHeaderProps) {
   return (
     <header
-      className="flex items-center justify-between gap-4 border-b px-8 py-4"
-      style={{ borderColor: "var(--border)" }}
+      className="flex min-h-16 items-center justify-between gap-4 border-b px-8 py-3"
+      style={{ borderColor: "var(--border)", background: "var(--page-bg)" }}
     >
-      <nav
-        aria-label="Breadcrumb"
-        className="text-sm"
-        style={{ color: "var(--muted-text)" }}
-      >
-        <span>{breadcrumb}</span>
-        <span className="mx-2" aria-hidden>
-          /
-        </span>
-        <span style={{ color: "var(--ink-navy)" }}>{title}</span>
-      </nav>
+      <Breadcrumbs items={[{ label: breadcrumb }, { label: title }]} />
       <div className="flex items-center gap-3">
-        <button
-          type="button"
-          onClick={onOpenSearch}
-          className="flex min-h-11 items-center gap-2 rounded-[10px] border px-3 text-sm"
-          style={{
-            borderColor: "var(--input-border)",
-            color: "var(--muted-text)",
-          }}
-          aria-label="Search pages, resources and actions"
-        >
-          <span>Search…</span>
-          <kbd className="font-mono text-[11px]">⌘K</kbd>
-        </button>
-        <a
-          href="https://github.com/Joeydekruis/dockyrd"
-          className="inline-flex min-h-11 items-center rounded-[10px] border px-4 font-mono text-xs uppercase tracking-wide"
-          style={{
-            borderColor: "var(--secondary-button-border)",
-            color: "var(--ink-navy)",
-          }}
-        >
+        <SearchTrigger onClick={onOpenSearch} />
+        <Button href="https://github.com/Joeydekruis/dockyrd" variant="outline">
           Docs
-        </a>
+        </Button>
       </div>
     </header>
   );

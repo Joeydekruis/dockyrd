@@ -38,6 +38,8 @@ pnpm --dir web install
 pnpm --dir web lint
 pnpm --dir web exec tsc --noEmit   # or package "typecheck" script
 pnpm --dir web build
+pnpm --dir web storybook           # component catalog on :6006
+pnpm --dir web build-storybook     # static catalog → web/storybook-static
 ./scripts/check-no-radix.sh        # when script exists
 ```
 

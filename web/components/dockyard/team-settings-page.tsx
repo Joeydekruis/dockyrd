@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import {
@@ -67,22 +66,6 @@ export function TeamSettingsPage() {
 
   return (
     <DashboardShell title="Team" breadcrumb="Settings">
-      <nav className="mb-6 flex flex-wrap gap-4 text-sm">
-        <Link
-          href="/settings/profile"
-          className="text-[var(--muted-foreground)] underline"
-        >
-          Profile & security
-        </Link>
-        <Link
-          href="/settings/instance"
-          className="text-[var(--muted-foreground)] underline"
-        >
-          Instance settings
-        </Link>
-        <span className="font-medium text-[var(--foreground)]">Team</span>
-      </nav>
-
       {error ? (
         <p className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-700">
           {error}
@@ -100,9 +83,10 @@ export function TeamSettingsPage() {
             <input
               type="email"
               required
+              placeholder="colleague@company.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2"
+              className="field-input"
             />
           </label>
           <label className="flex flex-col gap-1 text-sm">

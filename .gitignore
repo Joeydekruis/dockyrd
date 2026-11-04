@@ -5,3 +5,6 @@ bin/
 /dockyard
 *.test
 web/tsconfig.tsbuildinfo
+
+*storybook.log
+storybook-static

@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { SearchPalette } from "@/components/dockyard/ui/search-palette";
 import { globalSearch, type SearchResult } from "@/lib/api";
 import { palettePages } from "@/lib/nav";
 
@@ -74,46 +74,26 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/20 px-4 pt-[12vh] backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-start justify-center px-4 pt-[12vh]">
+      <button
+        type="button"
+        className="absolute inset-0 border-0 bg-black/20 backdrop-blur-sm"
+        aria-label="Close search"
+        onClick={onClose}
+      />
       <div
         role="dialog"
         aria-modal="true"
         aria-label="Search"
-        className="w-full max-w-xl overflow-hidden rounded-[20px] border shadow-lg"
-        style={{ background: "var(--surface)", borderColor: "var(--border)" }}
+        className="relative z-10 w-full max-w-xl"
       >
-        <input
+        <SearchPalette
           ref={searchInputRef}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search pages and projects…"
-          className="w-full border-b px-4 py-3 text-sm outline-none"
-          style={{ borderColor: "var(--border)" }}
+          query={query}
+          onQueryChange={setQuery}
+          results={filtered}
+          onSelect={() => onClose()}
         />
-        <ul className="max-h-80 overflow-auto p-2">
-          {filtered.map((page) => (
-            <li key={`${page.kind}-${page.href}`}>
-              <Link
-                href={page.href}
-                onClick={onClose}
-                className="flex items-center justify-between rounded-lg px-3 py-2 text-sm hover:bg-[var(--hover-row)]"
-              >
-                <span>{page.label}</span>
-                <span className="text-xs capitalize text-[var(--muted-foreground)]">
-                  {page.kind}
-                </span>
-              </Link>
-            </li>
-          ))}
-          {filtered.length === 0 ? (
-            <li
-              className="px-3 py-6 text-center text-sm"
-              style={{ color: "var(--muted-text)" }}
-            >
-              No matches
-            </li>
-          ) : null}
-        </ul>
       </div>
     </div>
   );

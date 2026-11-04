@@ -16,7 +16,7 @@ Existing artboards are the default contract. Do not invent alternate information
 
 ## Implementation rules
 
-- Reuse **`web/components/dockyard/*`** before one-off page markup; extend the library when a pattern repeats.
+- Reuse **`web/components/dockyard/ui/*`** primitives (Storybook catalog) and **`web/components/dockyard/*`** composites before one-off page markup; extend `ui/` when a pattern repeats. See [storybook-ui-source](storybook-ui-source.mdc) — **stories and product import the same components**.
 - Match **tokens** (colors, radii, Geist/Geist Mono roles) from design-index — implement as CSS variables in `globals.css`.
 - **Accessibility:** real `<button>` / `<a>`, `aria-current="page"`, icon-only controls with `aria-label`, touch targets ≥ 44px where design specifies.
 - **English UI copy** in the product (design language).

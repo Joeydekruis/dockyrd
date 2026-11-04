@@ -34,9 +34,31 @@ export type MeResponse = {
   totp_enabled?: boolean;
 };
 
+export type AuthProbeState =
+  | { status: "authenticated"; user: MeResponse }
+  | { status: "mfa_pending" }
+  | { status: "anonymous" };
+
 export type SetupStatusResponse = {
   complete: boolean;
 };
+
+export async function probeAuthState(): Promise<AuthProbeState> {
+  const res = await fetch(`${apiBase}/api/v1/auth/me`, {
+    credentials: "same-origin",
+  });
+  if (res.ok) {
+    const user = (await res.json()) as MeResponse;
+    return { status: "authenticated", user };
+  }
+  const body = (await res.json().catch(() => ({}))) as {
+    mfa_required?: boolean;
+  };
+  if (body.mfa_required) {
+    return { status: "mfa_pending" };
+  }
+  return { status: "anonymous" };
+}
 
 export function getMe() {
   return apiFetch<MeResponse>("/api/v1/auth/me");
@@ -466,6 +488,30 @@ export type ServerInfo = {
 
 export function getServerInfo() {
   return apiFetch<ServerInfo>("/api/v1/server");
+}
+
+export type UpdatesStatus = {
+  version: string;
+  update_available: boolean;
+  latest_tag?: string;
+  release_notes?: string;
+  check_ok: boolean;
+  check_error?: string;
+  apply_supported: boolean;
+  apply_unsupported_reason?: string;
+};
+
+export function getUpdatesStatus() {
+  return apiFetch<UpdatesStatus>("/api/v1/updates");
+}
+
+export function applyDockyardUpdate() {
+  return apiFetch<{
+    ok: boolean;
+    installed_tag?: string;
+    message: string;
+    restarting: boolean;
+  }>("/api/v1/updates/apply", { method: "POST" });
 }
 
 export type PublicSettings = {

@@ -78,7 +78,8 @@ Feature feedback files: `docs/project/feedback/<n>/<type>-i<iter>.md`. Generator
 ## UI implementation
 
 - Match [`docs/design-index.json`](docs/design-index.json) (nav, tokens, shared blocks).
-- Build from [`web/components/dockyard/`](web/components/dockyard/) per briefing §9.3 when code exists.
+- **Primitives:** [`web/components/dockyard/ui/`](web/components/dockyard/ui/) — same modules as Storybook (`pnpm --dir web storybook`); rule [`.cursor/rules/storybook-ui-source.mdc`](.cursor/rules/storybook-ui-source.mdc).
+- Build composites in [`web/components/dockyard/`](web/components/dockyard/) per briefing §9.3 when code exists.
 - New/changed screens: [`.cursor/rules/dockyard-design-contract.mdc`](.cursor/rules/dockyard-design-contract.mdc), [`.cursor/rules/web/design-quality.mdc`](.cursor/rules/web/design-quality.mdc).
 - Static export routing: [`docs/project/patterns/static-export-routing.md`](docs/project/patterns/static-export-routing.md).
 

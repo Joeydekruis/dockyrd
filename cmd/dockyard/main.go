@@ -122,7 +122,8 @@ func runUpdate(cfg config.Config, args []string) error {
 	ctx := context.Background()
 	opts := updater.Options{Repo: os.Getenv("DOCKYARD_GITHUB_REPO")}
 	if len(args) == 0 {
-		return updater.Apply(ctx, cfg, version, opts)
+		_, err := updater.Apply(ctx, cfg, version, opts)
+		return err
 	}
 	for _, a := range args {
 		switch a {
@@ -153,5 +154,6 @@ func runUpdate(cfg config.Config, args []string) error {
 			return fmt.Errorf("unknown flag %q", a)
 		}
 	}
-	return updater.Apply(ctx, cfg, version, opts)
+	_, err := updater.Apply(ctx, cfg, version, opts)
+	return err
 }

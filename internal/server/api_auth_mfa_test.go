@@ -99,6 +99,11 @@ func TestLoginMFAFlow(t *testing.T) {
 	if recMeBlocked.Code != http.StatusUnauthorized {
 		t.Fatalf("me before mfa should 401, got %d", recMeBlocked.Code)
 	}
+	var meBlocked map[string]any
+	_ = json.NewDecoder(recMeBlocked.Body).Decode(&meBlocked)
+	if meBlocked["mfa_required"] != true {
+		t.Fatalf("me before mfa should set mfa_required, got %#v", meBlocked)
+	}
 
 	code2, _ := totp.GenerateCode(pending.Secret, time.Now().UTC())
 	mfaBody, _ := json.Marshal(map[string]string{"code": code2})

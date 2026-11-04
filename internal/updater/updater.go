@@ -24,6 +24,12 @@ type Options struct {
 	TargetVersion string // empty = latest from GitHub
 	DryRun        bool
 	BinaryPath    string
+	Quiet         bool // suppress progress lines (API apply)
+}
+
+// ApplyResult is returned after a successful install.
+type ApplyResult struct {
+	InstalledTag string
 }
 
 // CheckResult is returned by Check.
@@ -43,54 +49,58 @@ func Check(ctx context.Context, current string, opts Options) (CheckResult, erro
 }
 
 // Apply downloads and installs a release (Linux only; see apply_linux.go).
-func Apply(ctx context.Context, cfg config.Config, current string, opts Options) error {
+func Apply(ctx context.Context, cfg config.Config, current string, opts Options) (ApplyResult, error) {
 	check, err := Check(ctx, current, opts)
 	if err != nil {
-		return err
+		return ApplyResult{}, err
 	}
 	rel := check.Latest
 	if opts.TargetVersion != "" {
 		if CompareVersions(current, opts.TargetVersion) >= 0 {
-			return fmt.Errorf("already at or past %s", opts.TargetVersion)
+			return ApplyResult{}, fmt.Errorf("already at or past %s", opts.TargetVersion)
 		}
 		if CompareVersions(rel.Tag, opts.TargetVersion) != 0 && normalizeTag(opts.TargetVersion) != rel.Tag {
-			return fmt.Errorf("latest release is %s, not %s (pin not implemented)", rel.Tag, opts.TargetVersion)
+			return ApplyResult{}, fmt.Errorf("latest release is %s, not %s (pin not implemented)", rel.Tag, opts.TargetVersion)
 		}
 	} else if !check.Newer {
-		return fmt.Errorf("already up to date (%s)", current)
+		return ApplyResult{}, fmt.Errorf("already up to date (%s)", current)
 	}
 
 	if opts.DryRun || os.Getenv("DOCKYARD_UPDATE_DRY_RUN") == "1" {
-		fmt.Printf("dry-run: would install %s from %s\n", rel.Tag, rel.AssetName)
-		return nil
+		if !opts.Quiet {
+			fmt.Printf("dry-run: would install %s from %s\n", rel.Tag, rel.AssetName)
+		}
+		return ApplyResult{InstalledTag: rel.Tag}, nil
 	}
 
 	tmpDir, err := os.MkdirTemp("", "dockyard-update-*")
 	if err != nil {
-		return err
+		return ApplyResult{}, err
 	}
 	defer os.RemoveAll(tmpDir)
 
 	archivePath := filepath.Join(tmpDir, rel.AssetName)
 	if err := downloadFile(ctx, rel.AssetURL, archivePath); err != nil {
-		return err
+		return ApplyResult{}, err
 	}
 	if rel.ChecksumURL != "" {
 		if err := verifyChecksums(ctx, rel.ChecksumURL, rel.AssetName, archivePath); err != nil {
-			return err
+			return ApplyResult{}, err
 		}
 	}
 	binPath, err := extractDockyardBinary(archivePath, tmpDir)
 	if err != nil {
-		return err
+		return ApplyResult{}, err
 	}
 
 	backupPath := db.PreUpdateBackupPath(cfg.DataDir, time.Now())
 	if _, err := os.Stat(cfg.DatabasePath()); err == nil {
 		if err := db.VacuumIntoBackup(cfg.DatabasePath(), backupPath); err != nil {
-			return fmt.Errorf("pre-update backup: %w", err)
+			return ApplyResult{}, fmt.Errorf("pre-update backup: %w", err)
 		}
-		fmt.Fprintf(os.Stderr, "Database backed up to %s\n", backupPath)
+		if !opts.Quiet {
+			fmt.Fprintf(os.Stderr, "Database backed up to %s\n", backupPath)
+		}
 	}
 
 	dest := opts.BinaryPath
@@ -101,11 +111,13 @@ func Apply(ctx context.Context, cfg config.Config, current string, opts Options)
 		dest = "/usr/local/bin/dockyard"
 	}
 	if err := installBinary(binPath, dest); err != nil {
-		return err
+		return ApplyResult{}, err
 	}
-	fmt.Printf("Installed %s to %s\n", rel.Tag, dest)
-	fmt.Println("Restart the dockyard service: systemctl restart dockyard")
-	return nil
+	if !opts.Quiet {
+		fmt.Printf("Installed %s to %s\n", rel.Tag, dest)
+		fmt.Println("Restart the dockyard service: systemctl restart dockyard")
+	}
+	return ApplyResult{InstalledTag: rel.Tag}, nil
 }
 
 func downloadFile(ctx context.Context, url, dest string) error {

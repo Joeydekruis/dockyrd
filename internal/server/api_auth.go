@@ -77,6 +77,7 @@ func registerAPIRoutes(mux *http.ServeMux, deps apiDeps) {
 	registerApplicationRoutes(mux, deps)
 	registerPasswordResetRoutes(mux, deps)
 	registerInstanceSettingsRoutes(mux, deps)
+	registerUpdatesRoutes(mux, deps)
 }
 
 func (d apiDeps) handleLogin(w http.ResponseWriter, r *http.Request) {
@@ -138,6 +139,20 @@ func (d apiDeps) handleLogout(w http.ResponseWriter, r *http.Request) {
 func (d apiDeps) handleMe(w http.ResponseWriter, r *http.Request) {
 	user, err := d.userFromRequest(r)
 	if err != nil {
+		if d.q != nil {
+			if sess, serr := d.sessionFromRequest(r); serr == nil {
+				if time.Now().Unix() <= sess.ExpiresAt {
+					u, uerr := d.q.GetUserByID(r.Context(), sess.UserID)
+					if uerr == nil && totpEnabled(u.TotpEnabledAt) && sess.MfaPassed == 0 {
+						writeJSON(w, http.StatusUnauthorized, map[string]any{
+							"error":        "mfa required",
+							"mfa_required": true,
+						})
+						return
+					}
+				}
+			}
+		}
 		writeJSONError(w, http.StatusUnauthorized, "not signed in")
 		return
 	}
@@ -148,6 +163,17 @@ func (d apiDeps) handleMe(w http.ResponseWriter, r *http.Request) {
 		Role:        user.Role,
 		TOTPEnabled: totpEnabled(user.TotpEnabledAt),
 	})
+}
+
+func (d apiDeps) sessionFromRequest(r *http.Request) (sqlc.GetSessionRow, error) {
+	if d.q == nil {
+		return sqlc.GetSessionRow{}, errors.New("no db")
+	}
+	c, err := r.Cookie(sessionCookie)
+	if err != nil {
+		return sqlc.GetSessionRow{}, err
+	}
+	return d.q.GetSession(r.Context(), auth.HashSessionToken(c.Value))
 }
 
 func (d apiDeps) handleSetup(w http.ResponseWriter, r *http.Request) {

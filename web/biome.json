@@ -1,7 +1,13 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.6.4/schema.json",
   "files": {
-    "includes": ["**", "!!**/.next", "!!**/out", "!!**/node_modules"]
+    "includes": [
+      "**",
+      "!!**/.next",
+      "!!**/out",
+      "!!**/node_modules",
+      "!!**/storybook-static"
+    ]
   },
   "formatter": {
     "indentStyle": "space",

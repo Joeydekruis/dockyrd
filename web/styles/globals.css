@@ -15,11 +15,20 @@
   --muted-text: #5a6577;
   --accent-blue: #3b93f5;
   --brand-soft: #e3f0ff;
+  --banner-blue: #8ebeff;
   --link-blue: #0b57c9;
   --secondary-button-border: #cbd0d8;
+  --primary-button: #0b1f3a;
+  --primary-button-hover: #1a3358;
   --hover-row: #f6f5f2;
   --danger: #b3261e;
   --status-ok-dot: #1a7f4b;
+  --background: var(--page-bg);
+  --foreground: var(--ink-navy);
+  --primary: var(--primary-button);
+  --primary-foreground: #ffffff;
+  --muted-foreground: var(--muted-text);
+  --ring: var(--accent-blue);
   --hero-gradient:
     radial-gradient(
       circle at 85% 15%,
@@ -46,6 +55,11 @@
   background: var(--surface);
 }
 
+.field-input::placeholder {
+  color: var(--muted-text);
+  opacity: 1;
+}
+
 body {
   margin: 0;
   min-height: 100dvh;
@@ -53,4 +67,148 @@ body {
   color: var(--ink-navy);
   font-size: 14px;
   line-height: 1.45;
+}
+
+.btn-primary {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: none;
+  padding: 0 16px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #fff;
+  background: var(--primary-button);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.btn-primary:hover {
+  background: var(--primary-button-hover);
+}
+
+.btn-primary:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.btn-outline {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1.5px solid var(--secondary-button-border);
+  padding: 0 16px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--ink-navy);
+  background: transparent;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.btn-outline:hover {
+  background: var(--hover-row);
+}
+
+.btn-outline:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.dockyard-nav-link {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  gap: 10px;
+  border-radius: 10px;
+  padding: 0 12px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  color: var(--secondary-text);
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.dockyard-nav-link:hover {
+  background: var(--hover-row);
+  color: var(--ink-navy);
+}
+
+.dockyard-nav-link[aria-current="page"] {
+  background: var(--brand-soft);
+  color: var(--ink-navy);
+}
+
+.dockyard-nav-link:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.dockyard-icon-btn {
+  display: inline-flex;
+  min-height: 44px;
+  min-width: 44px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.dockyard-icon-btn:hover {
+  background: rgba(11, 31, 58, 0.08);
+}
+
+.dockyard-icon-btn:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.dockyard-search-trigger {
+  display: flex;
+  min-height: 44px;
+  width: min(280px, 40vw);
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-radius: 10px;
+  border: 1px solid var(--input-border);
+  padding: 0 12px;
+  font-size: 14px;
+  color: var(--muted-text);
+  background: var(--surface);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.dockyard-search-trigger:hover {
+  border-color: var(--secondary-button-border);
+  background: var(--surface);
+}
+
+.dockyard-search-trigger:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
 }

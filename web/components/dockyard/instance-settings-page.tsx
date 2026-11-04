@@ -1,13 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import {
   getGitHubStatus,
   getInstanceSettings,
-  getServerInfo,
   patchInstanceSettings,
   startGitHubAppLink,
   testSMTP,
@@ -23,11 +21,6 @@ export function InstanceSettingsPage() {
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [serverInfo, setServerInfo] = useState<{
-    version: string;
-    update_available: boolean;
-    latest_tag?: string;
-  } | null>(null);
   const [instance, setInstance] = useState<{
     public_url: string;
     acme_email: string;
@@ -49,13 +42,11 @@ export function InstanceSettingsPage() {
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      const [st, info, inst] = await Promise.all([
+      const [st, inst] = await Promise.all([
         getGitHubStatus(),
-        getServerInfo().catch(() => null),
         getInstanceSettings().catch(() => null),
       ]);
       setStatus(st);
-      setServerInfo(info);
       setInstance(inst);
       setError(null);
     } catch (e) {
@@ -116,61 +107,7 @@ export function InstanceSettingsPage() {
   }
 
   return (
-    <DashboardShell title="Instance settings">
-      <div className="mb-4 text-sm">
-        <Link
-          href="/settings/team"
-          className="text-[var(--muted-foreground)] underline"
-        >
-          Team
-        </Link>
-        {" · "}
-        <Link
-          href="/settings/profile"
-          className="text-[var(--muted-foreground)] underline"
-        >
-          Profile & security
-        </Link>
-      </div>
-      <section
-        aria-label="Dockyard version"
-        className="mb-6 max-w-xl space-y-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6"
-      >
-        <h2 className="text-lg font-medium">Updates</h2>
-        {serverInfo ? (
-          <>
-            <p className="text-sm text-[var(--muted-foreground)]">
-              Running version{" "}
-              <span className="font-mono text-[var(--foreground)]">
-                {serverInfo.version}
-              </span>
-            </p>
-            {serverInfo.update_available ? (
-              <p className="text-sm">
-                Update available:{" "}
-                <span className="font-mono">{serverInfo.latest_tag}</span>. On
-                the server run{" "}
-                <code className="rounded bg-[var(--muted)]/40 px-1">
-                  sudo dockyard update
-                </code>
-                .
-              </p>
-            ) : (
-              <p className="text-sm text-[var(--muted-foreground)]">
-                Up to date (or update check unavailable).
-              </p>
-            )}
-          </>
-        ) : loading ? (
-          <p className="text-sm text-[var(--muted-foreground)]">
-            Loading version…
-          </p>
-        ) : (
-          <p className="text-sm text-[var(--muted-foreground)]">
-            Could not load version info.
-          </p>
-        )}
-      </section>
+    <DashboardShell title="General" breadcrumb="Settings">
       <section
         aria-label="Panel URL and email"
         className="mb-6 max-w-xl space-y-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6"
@@ -207,6 +144,7 @@ export function InstanceSettingsPage() {
                 className="field-input mt-1 w-full"
                 type="email"
                 value={instance.acme_email}
+                placeholder="admin@example.com"
                 onChange={(e) =>
                   setInstance({ ...instance, acme_email: e.target.value })
                 }
@@ -244,6 +182,7 @@ export function InstanceSettingsPage() {
               <input
                 className="field-input mt-1 w-full"
                 value={instance.smtp.host}
+                placeholder="smtp.example.com"
                 onChange={(e) =>
                   setInstance({
                     ...instance,
@@ -289,6 +228,7 @@ export function InstanceSettingsPage() {
               <input
                 className="field-input mt-1 w-full"
                 value={instance.smtp.username}
+                placeholder="smtp-user"
                 onChange={(e) =>
                   setInstance({
                     ...instance,
@@ -306,6 +246,9 @@ export function InstanceSettingsPage() {
                 className="field-input mt-1 w-full"
                 type="password"
                 autoComplete="new-password"
+                placeholder={
+                  instance.smtp.configured ? "••••••••" : "SMTP password"
+                }
                 value={smtpPassword}
                 onChange={(e) => setSmtpPassword(e.target.value)}
               />
@@ -347,6 +290,7 @@ export function InstanceSettingsPage() {
               <input
                 className="field-input mt-1 w-full"
                 type="email"
+                placeholder="you@company.com"
                 value={testTo}
                 onChange={(e) => setTestTo(e.target.value)}
               />

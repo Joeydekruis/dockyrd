@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getServerInfo, type ServerInfo } from "@/lib/api";
 
@@ -35,31 +36,26 @@ export function UpdateAvailableModal({ open, onClose, info }: Props) {
             {info.release_notes}
           </div>
         ) : null}
-        <ol className="mt-4 list-decimal space-y-2 pl-5 text-sm text-[var(--muted-foreground)]">
-          <li>
-            SSH to the server (updates run on the host, not in the browser).
-          </li>
-          <li>
-            Run{" "}
-            <code className="rounded bg-[var(--muted)]/40 px-1">
-              sudo dockyard update
-            </code>
-            .
-          </li>
-          <li>
-            Restart:{" "}
-            <code className="rounded bg-[var(--muted)]/40 px-1">
-              sudo systemctl restart dockyard
-            </code>
-          </li>
-        </ol>
-        <button
-          type="button"
-          onClick={onClose}
-          className="mt-6 rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-foreground)]"
-        >
-          Close
-        </button>
+        <p className="mt-4 text-sm text-[var(--muted-foreground)]">
+          Open Settings → Updates to review release notes and install from the
+          dashboard.
+        </p>
+        <div className="mt-6 flex flex-wrap gap-2">
+          <Link
+            href="/settings/updates"
+            className="rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-foreground)]"
+            onClick={onClose}
+          >
+            Go to Updates
+          </Link>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm"
+          >
+            Close
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -85,13 +81,21 @@ export function UpdateAvailableNotifier() {
           Update <span className="font-mono">{info.latest_tag}</span> is
           available.
         </span>
-        <button
-          type="button"
-          className="rounded-md border border-current px-3 py-1 text-xs font-medium"
-          onClick={() => setOpen(true)}
-        >
-          View release
-        </button>
+        <div className="flex gap-2">
+          <Link
+            href="/settings/updates"
+            className="rounded-md border border-current px-3 py-1 text-xs font-medium"
+          >
+            Update
+          </Link>
+          <button
+            type="button"
+            className="rounded-md border border-current px-3 py-1 text-xs font-medium"
+            onClick={() => setOpen(true)}
+          >
+            Release notes
+          </button>
+        </div>
       </div>
       <UpdateAvailableModal
         open={open}

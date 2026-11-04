@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import {
@@ -83,24 +82,6 @@ export function ProfileSettingsPage() {
 
   return (
     <DashboardShell title="Profile & security" breadcrumb="Settings">
-      <nav className="mb-6 flex flex-wrap gap-4 text-sm">
-        <span className="font-medium text-[var(--foreground)]">
-          Profile & security
-        </span>
-        <Link
-          href="/settings/team"
-          className="text-[var(--muted-foreground)] underline"
-        >
-          Team
-        </Link>
-        <Link
-          href="/settings/instance"
-          className="text-[var(--muted-foreground)] underline"
-        >
-          Instance settings
-        </Link>
-      </nav>
-
       {!loading && !totpEnabled ? (
         <p
           className="mb-4 rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm"
@@ -142,9 +123,10 @@ export function ProfileSettingsPage() {
               <input
                 value={confirmCode}
                 onChange={(e) => setConfirmCode(e.target.value)}
-                className="rounded-md border border-[var(--border)] px-3 py-2"
+                className="field-input"
                 inputMode="numeric"
                 autoComplete="one-time-code"
+                placeholder="000000"
               />
             </label>
             <button

@@ -63,6 +63,7 @@ export function AcceptInviteClient() {
           </span>
           <input
             required
+            placeholder="Your full name"
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="field-input"
@@ -79,6 +80,8 @@ export function AcceptInviteClient() {
             required
             type="password"
             minLength={12}
+            autoComplete="new-password"
+            placeholder="Choose a strong password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="field-input"

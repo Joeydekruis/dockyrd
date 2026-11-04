@@ -1,0 +1,30 @@
+import { Meta, Title, Subtitle, Description } from "@storybook/addon-docs/blocks";
+
+<Meta title="Dockyrd/Introduction" />
+
+<Title>Dockyrd design system</Title>
+
+<Subtitle>Component catalog (not full pages)</Subtitle>
+
+<Description>
+  Stories mirror **`docs/design-index.json`** tokens and briefing §9.3 primitives.
+  Each story imports **`web/components/dockyard/ui/*`** (or composites that compose `ui/`) — the same modules the panel uses. See **`.cursor/rules/storybook-ui-source.mdc`**. Run with{" "}
+  **`pnpm --dir web storybook`** on port 6006.
+</Description>
+
+## Coverage map
+
+| Design block | Story |
+| --- | --- |
+| Primary / outline buttons | `Dockyrd/Button` |
+| Status pills | `Dockyrd/StatusBadge` |
+| Stat tile | `Dockyrd/StatCard` |
+| List row | `Dockyrd/ResourceRow` |
+| Chips / commit SHA | `Dockyrd/Chips` |
+| Breadcrumbs + page header | `Dockyrd/Page chrome` |
+| Sidebar nav item | `Dockyrd/Nav menu` |
+| Search dialog, modal, snackbar, tabs, time range | `Dockyrd/Overlays` |
+| Announcement, search trigger, empty state | `Dockyrd/UiPrimitives` |
+| Top bar, header, sidebar (composites) | `Dockyrd/Shell pieces` |
+
+**Single source:** primitives in `web/components/dockyard/ui/`; composites in `web/components/dockyard/` compose `ui/` only. Rule: `.cursor/rules/storybook-ui-source.mdc`.

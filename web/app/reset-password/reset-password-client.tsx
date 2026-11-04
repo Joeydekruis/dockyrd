@@ -43,6 +43,8 @@ export function ResetPasswordClient() {
             required
             type="password"
             minLength={12}
+            autoComplete="new-password"
+            placeholder="At least 12 characters"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="field-input"

@@ -1,13 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AppHeader } from "@/components/dockyard/app-header";
 import {
   CommandPalette,
   useCommandPalette,
 } from "@/components/dockyard/command-palette";
 import { Sidebar } from "@/components/dockyard/sidebar";
+import { TopBar } from "@/components/dockyard/top-bar";
 import { UpdateAvailableNotifier } from "@/components/dockyard/update-available-modal";
 import { getMe } from "@/lib/api";
 
@@ -25,6 +26,14 @@ export function DashboardShell({
   const router = useRouter();
   const [ready, setReady] = useState(false);
   const palette = useCommandPalette();
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [topBarVisible, setTopBarVisible] = useState(true);
+
+  const onScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setTopBarVisible(el.scrollTop <= 8);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -61,15 +70,25 @@ export function DashboardShell({
   }
 
   return (
-    <div className="flex min-h-dvh">
+    <div className="min-h-dvh" style={{ background: "var(--page-bg)" }}>
       <Sidebar />
-      <div className="flex min-w-0 flex-1 flex-col">
-        <AppHeader
-          title={title}
-          breadcrumb={breadcrumb}
-          onOpenSearch={() => palette.setOpen(true)}
-        />
-        <div className="flex-1 px-8 py-6">
+      <div className="flex min-h-dvh flex-col pl-[232px]">
+        <div
+          className="sticky top-0 z-30 shrink-0"
+          style={{ background: "var(--page-bg)" }}
+        >
+          <TopBar visible={topBarVisible} />
+          <AppHeader
+            title={title}
+            breadcrumb={breadcrumb}
+            onOpenSearch={() => palette.setOpen(true)}
+          />
+        </div>
+        <div
+          ref={scrollRef}
+          onScroll={onScroll}
+          className="flex-1 overflow-y-auto px-8 py-6"
+        >
           <UpdateAvailableNotifier />
           {children}
         </div>
