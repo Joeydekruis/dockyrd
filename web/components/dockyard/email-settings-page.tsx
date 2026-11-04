@@ -70,47 +70,47 @@ function EmailLogDetailModal({
     >
       {entry ? (
         <dl className="mt-4 space-y-3 text-sm">
-        <div>
-          <dt className="text-[var(--muted-foreground)]">Type</dt>
-          <dd className="font-medium">{emailKindLabel(entry.kind)}</dd>
-        </div>
-        <div>
-          <dt className="text-[var(--muted-foreground)]">To</dt>
-          <dd className="font-medium">{entry.to}</dd>
-        </div>
-        <div>
-          <dt className="text-[var(--muted-foreground)]">From</dt>
-          <dd>{entry.from || "—"}</dd>
-        </div>
-        <div>
-          <dt className="text-[var(--muted-foreground)]">Subject</dt>
-          <dd>{entry.subject || "—"}</dd>
-        </div>
-        <div>
-          <dt className="text-[var(--muted-foreground)]">Status</dt>
-          <dd>
-            <StatusBadge
-              label={entry.status === "sent" ? "Sent" : "Failed"}
-              variant={entry.status === "sent" ? "ok" : "err"}
-            />
-          </dd>
-        </div>
-        <div>
-          <dt className="text-[var(--muted-foreground)]">Response</dt>
-          <dd className="whitespace-pre-wrap break-words font-mono text-xs">
-            {entry.response || "—"}
-          </dd>
-        </div>
-        {detailJson ? (
           <div>
-            <dt className="text-[var(--muted-foreground)]">Log</dt>
+            <dt className="text-[var(--muted-foreground)]">Type</dt>
+            <dd className="font-medium">{emailKindLabel(entry.kind)}</dd>
+          </div>
+          <div>
+            <dt className="text-[var(--muted-foreground)]">To</dt>
+            <dd className="font-medium">{entry.to}</dd>
+          </div>
+          <div>
+            <dt className="text-[var(--muted-foreground)]">From</dt>
+            <dd>{entry.from || "—"}</dd>
+          </div>
+          <div>
+            <dt className="text-[var(--muted-foreground)]">Subject</dt>
+            <dd>{entry.subject || "—"}</dd>
+          </div>
+          <div>
+            <dt className="text-[var(--muted-foreground)]">Status</dt>
             <dd>
-              <pre className="mt-1 max-h-48 overflow-auto rounded-lg border border-[var(--border)] bg-[var(--background)] p-3 font-mono text-xs">
-                {detailJson}
-              </pre>
+              <StatusBadge
+                label={entry.status === "sent" ? "Sent" : "Failed"}
+                variant={entry.status === "sent" ? "ok" : "err"}
+              />
             </dd>
           </div>
-        ) : null}
+          <div>
+            <dt className="text-[var(--muted-foreground)]">Response</dt>
+            <dd className="whitespace-pre-wrap break-words font-mono text-xs">
+              {entry.response || "—"}
+            </dd>
+          </div>
+          {detailJson ? (
+            <div>
+              <dt className="text-[var(--muted-foreground)]">Log</dt>
+              <dd>
+                <pre className="mt-1 max-h-48 overflow-auto rounded-lg border border-[var(--border)] bg-[var(--background)] p-3 font-mono text-xs">
+                  {detailJson}
+                </pre>
+              </dd>
+            </div>
+          ) : null}
         </dl>
       ) : null}
     </Modal>
@@ -365,7 +365,11 @@ export function EmailSettingsPage() {
         <section aria-label="Email log" className={settingsCardClass}>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h2 className="text-lg font-medium">Email log</h2>
-            <Button type="button" variant="outline" onClick={() => void refreshLog()}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => void refreshLog()}
+            >
               Refresh
             </Button>
           </div>

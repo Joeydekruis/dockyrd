@@ -6,10 +6,7 @@ import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import { SettingsPageBody } from "@/components/dockyard/settings-page-body";
 import { Button } from "@/components/dockyard/ui/button";
 import { SnackbarViewport } from "@/components/dockyard/ui/snackbar";
-import {
-  getInstanceSettings,
-  patchInstanceSettings,
-} from "@/lib/api";
+import { getInstanceSettings, patchInstanceSettings } from "@/lib/api";
 
 type SnackbarState = {
   message: string;
@@ -91,9 +88,8 @@ export function InstanceSettingsPage() {
             <Link href="/settings/server/email" className="underline">
               Email
             </Link>
-            . Set an ACME email for Let&apos;s
-            Encrypt certificates. DNS must point at this server; open ports 80
-            and 443 on the firewall.
+            . Set an ACME email for Let&apos;s Encrypt certificates. DNS must
+            point at this server; open ports 80 and 443 on the firewall.
           </p>
           {instance ? (
             <form

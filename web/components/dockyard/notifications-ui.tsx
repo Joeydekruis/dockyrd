@@ -122,12 +122,7 @@ export function NotificationRow({
   );
 }
 
-export type InboxFilter =
-  | "all"
-  | "unread"
-  | "deploys"
-  | "usage"
-  | "system";
+export type InboxFilter = "all" | "unread" | "deploys" | "usage" | "system";
 
 type NotificationFilterPillsProps = {
   value: InboxFilter;

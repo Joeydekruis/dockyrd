@@ -4,17 +4,17 @@ import { Bell } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
+  type InboxFilter,
   NotificationFilterPills,
   NotificationRow,
   NotificationsPanelHeader,
-  type InboxFilter,
 } from "@/components/dockyard/notifications-ui";
 import {
   getInboxSummary,
+  type InboxNotification,
   listInboxNotifications,
   markAllInboxNotificationsRead,
   markInboxNotificationRead,
-  type InboxNotification,
 } from "@/lib/api";
 
 type NotificationsBellProps = {
@@ -115,9 +115,7 @@ export function NotificationsBell({ className }: NotificationsBellProps) {
         type="button"
         className={`btn-outline relative flex size-10 items-center justify-center rounded-full p-0 ${className ?? ""}`}
         aria-label={
-          unread > 0
-            ? `Notifications, ${unread} unread`
-            : "Notifications"
+          unread > 0 ? `Notifications, ${unread} unread` : "Notifications"
         }
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
@@ -159,7 +157,10 @@ export function NotificationsBell({ className }: NotificationsBellProps) {
               onMarkAllRead={() => void handleMarkAllRead()}
               markAllDisabled={unread === 0}
             />
-            <div className="border-b px-5 py-3" style={{ borderColor: "var(--border)" }}>
+            <div
+              className="border-b px-5 py-3"
+              style={{ borderColor: "var(--border)" }}
+            >
               <NotificationFilterPills
                 value={filter}
                 unreadCount={unread}

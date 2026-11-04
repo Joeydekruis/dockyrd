@@ -5,17 +5,17 @@ import { useCallback, useEffect, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import {
   groupNotificationsByDay,
+  type InboxFilter,
   NotificationFilterPills,
   NotificationRow,
-  type InboxFilter,
 } from "@/components/dockyard/notifications-ui";
 import { Button } from "@/components/dockyard/ui/button";
 import {
   getInboxSummary,
+  type InboxNotification,
   listInboxNotifications,
   markAllInboxNotificationsRead,
   markInboxNotificationRead,
-  type InboxNotification,
 } from "@/lib/api";
 
 export function NotificationsPage() {
