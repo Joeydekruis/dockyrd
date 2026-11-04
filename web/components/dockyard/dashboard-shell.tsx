@@ -7,12 +7,12 @@ import {
   CommandPalette,
   useCommandPalette,
 } from "@/components/dockyard/command-palette";
+import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import { Sidebar } from "@/components/dockyard/sidebar";
 import { TopBar } from "@/components/dockyard/top-bar";
 import { UpdateAvailableNotifier } from "@/components/dockyard/update-available-modal";
 import { getMe, type MeResponse } from "@/lib/api";
 import { isAccountSettingsPath, isSettingsPath } from "@/lib/nav";
-import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import { UserLocaleProvider } from "@/lib/user-locale-context";
 
 type DashboardShellProps = {

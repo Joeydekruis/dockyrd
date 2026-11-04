@@ -1,5 +1,7 @@
 import { DockyrdCubeIcon } from "@/components/dockyard/dockyrd-cube-icon";
 
+const LOADER_CUBE_SLOTS = ["a", "b", "c", "d", "e"] as const;
+
 type DockyrdPageLoadingProps = {
   label?: string;
   /** Full viewport centering vs in-page placeholder. */
@@ -17,9 +19,9 @@ export function DockyrdPageLoading({
   const loader = (
     <>
       <div className="dockyrd-loader" aria-hidden>
-        {Array.from({ length: 5 }, (_, index) => (
+        {LOADER_CUBE_SLOTS.map((slot) => (
           <DockyrdCubeIcon
-            key={index}
+            key={slot}
             size={cubeSize}
             className="dockyrd-loader-cube"
           />

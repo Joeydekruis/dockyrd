@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
-import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import { DatabaseConnectionCards } from "@/components/dockyard/database-connection-cards";
 import { DatabaseDetailSettings } from "@/components/dockyard/database-detail-settings";
 import { DatabaseQueryPanel } from "@/components/dockyard/database-query-panel";
+import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import { ServiceLogsPanel } from "@/components/dockyard/service-logs-panel";
 import { Button } from "@/components/dockyard/ui/button";
 import { Chip } from "@/components/dockyard/ui/chip";

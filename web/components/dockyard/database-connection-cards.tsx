@@ -209,8 +209,8 @@ export function DatabaseConnectionCards({
           From other services on the same project network.
         </p>
         {loading ? (
-        <DockyrdPageLoading className="py-2" cubeSize={28} />
-      ) : (
+          <DockyrdPageLoading className="py-2" cubeSize={28} />
+        ) : (
           <div className="mt-4">
             <ConnectionFields
               variables={internalVars}

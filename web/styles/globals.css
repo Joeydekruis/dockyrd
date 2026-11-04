@@ -1051,7 +1051,7 @@ button.btn-text:disabled {
 
   .dockyrd-logo .dockyrd-mark,
   .dockyrd-logo .dockyrd-wave {
-    transition: none !important;
+    transition: none;
   }
 
   .dockyrd-logo:hover .dockyrd-mark,
@@ -1102,17 +1102,8 @@ button.btn-text:disabled {
   transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.dockyrd-logo:hover .dockyrd-mark {
-  transform: rotate(-5deg) translateY(-1px);
-}
-
 .dockyrd-logo .dockyrd-wave {
   transition: transform 0.9s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.dockyrd-logo:hover .dockyrd-wave {
-  transform: translateX(48px);
-  transition: transform 1.8s cubic-bezier(0.22, 0.7, 0.2, 1);
 }
 
 .dockyrd-logo-static .dockyrd-mark,
@@ -1121,6 +1112,15 @@ button.btn-text:disabled {
 .dockyrd-logo-static:hover .dockyrd-wave {
   transform: none;
   transition: none;
+}
+
+.dockyrd-logo:hover .dockyrd-mark {
+  transform: rotate(-5deg) translateY(-1px);
+}
+
+.dockyrd-logo:hover .dockyrd-wave {
+  transform: translateX(48px);
+  transition: transform 1.8s cubic-bezier(0.22, 0.7, 0.2, 1);
 }
 
 /* Branded page loader · five cubes bob in sequence. */

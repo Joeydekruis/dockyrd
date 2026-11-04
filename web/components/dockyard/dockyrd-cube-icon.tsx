@@ -67,18 +67,10 @@ export function DockyrdCubeIcon({
         <g mask={`url(#${maskId})`} strokeWidth={3} strokeLinejoin="round">
           {dobber ? (
             <g clipPath={`url(#${clipId})`}>
-              <path
-                d={SIDE_DOBBER_D}
-                fill="#8EBEFF"
-                stroke="#8EBEFF"
-              />
+              <path d={SIDE_DOBBER_D} fill="#8EBEFF" stroke="#8EBEFF" />
             </g>
           ) : (
-            <path
-              d={SIDE_STATIC_D}
-              fill="#8EBEFF"
-              stroke="#8EBEFF"
-            />
+            <path d={SIDE_STATIC_D} fill="#8EBEFF" stroke="#8EBEFF" />
           )}
           <path d={TOP_D} fill="#CFE3FF" stroke="#CFE3FF" />
         </g>
