@@ -70,6 +70,8 @@ func (rt *Runtime) RunStaticSiteDeployment(ctx context.Context, deploymentID str
 		CloneURL:     cloneURL,
 		Branch:       branch,
 		RootDir:      cfg.Source.RootDir,
+		InstallCmd:   cfg.InstallCmd,
+		BuildScript:  cfg.BuildScript,
 		BuildCmd:     cfg.BuildCmd,
 		NodeImage:    cfg.NodeImage,
 		WorkDir:      rt.Cfg.BuildsDir(),

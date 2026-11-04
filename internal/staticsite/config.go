@@ -10,12 +10,17 @@ import (
 
 // Config is services.config for kind=static_site.
 type Config struct {
-	Source      appconfig.Source `json:"source"`
-	AutoDeploy  bool             `json:"autoDeploy"`
-	BuildCmd    string           `json:"buildCmd"`
-	OutputDir   string           `json:"outputDir"`
-	NodeImage   string           `json:"nodeImage"`
-	SpaFallback bool             `json:"spaFallback"`
+	Source       appconfig.Source `json:"source"`
+	AutoDeploy   bool             `json:"autoDeploy"`
+	BuildEnabled *bool            `json:"buildEnabled"`
+	InstallCmd   string           `json:"installCmd"`
+	BuildScript  string           `json:"buildScript"`
+	BuildCmd     string           `json:"buildCmd"`
+	OutputDir    string           `json:"outputDir"`
+	NodeImage    string           `json:"nodeImage"`
+	IndexFile    string           `json:"indexFile"`
+	ErrorFile    string           `json:"errorFile"`
+	SpaFallback  bool             `json:"spaFallback"`
 }
 
 // Parse decodes static site service config.
@@ -29,9 +34,6 @@ func Parse(raw json.RawMessage) (Config, error) {
 	}
 	if cfg.NodeImage == "" {
 		cfg.NodeImage = "node:22-alpine"
-	}
-	if cfg.BuildCmd == "" {
-		cfg.BuildCmd = "npm ci && npm run build"
 	}
 	t := strings.ToLower(strings.TrimSpace(cfg.Source.Type))
 	if t != "git" && t != "github" {

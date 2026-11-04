@@ -126,10 +126,21 @@ func dynamicExportPlaceholder(rel, segment string) string {
 		return ""
 	}
 	rest := strings.TrimPrefix(rel, prefix)
+	rest = strings.TrimSuffix(rest, "/")
 	if rest == "" {
 		return ""
 	}
 	parts := strings.Split(rest, "/")
+	if len(parts) == 0 || parts[0] == "_" {
+		return ""
+	}
+	filtered := parts[:0]
+	for _, p := range parts {
+		if p != "" {
+			filtered = append(filtered, p)
+		}
+	}
+	parts = filtered
 	if len(parts) == 0 || parts[0] == "_" {
 		return ""
 	}
@@ -161,6 +172,7 @@ func mountUI(mux *http.ServeMux, root fs.FS) {
 			return
 		}
 		rel := strings.TrimPrefix(r.URL.Path, "/")
+		rel = strings.TrimSuffix(rel, "/")
 		if rel == "" {
 			rel = "index.html"
 		}

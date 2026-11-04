@@ -13,8 +13,11 @@ type AppRoute struct {
 
 // StaticRoute serves files from a host filesystem root (static sites).
 type StaticRoute struct {
-	Hostname string
-	Root     string
+	Hostname    string
+	Root        string
+	IndexNames  []string
+	ErrorPage   string
+	SpaFallback bool
 }
 
 // RenderInput controls global Caddy options.
@@ -74,12 +77,10 @@ func Render(in RenderInput) ([]byte, error) {
 		return sortedStatic[i].Hostname < sortedStatic[j].Hostname
 	})
 	for _, r := range sortedStatic {
+		handles := staticFileHandles(r)
 		routes = append(routes, map[string]any{
 			"match": []any{map[string]any{"host": []string{r.Hostname}}},
-			"handle": []any{map[string]any{
-				"handler": "file_server",
-				"root":    r.Root,
-			}},
+			"handle": handles,
 			"terminal": true,
 		})
 	}

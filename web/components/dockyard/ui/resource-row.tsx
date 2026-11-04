@@ -22,16 +22,11 @@ type ResourceRowProps = {
   trailing?: ReactNode;
 };
 
-function RowName({ name, href }: { name: string; href?: string }) {
-  const className = "font-semibold hover:underline";
+function RowName({ name, navigable }: { name: string; navigable: boolean }) {
+  const className = navigable
+    ? "font-semibold"
+    : "font-semibold hover:underline";
   const style = { color: "var(--ink-navy)" };
-  if (href && href !== "#") {
-    return (
-      <Link href={href} className={className} style={style}>
-        {name}
-      </Link>
-    );
-  }
   return (
     <span className={className} style={style}>
       {name}
@@ -67,7 +62,7 @@ function UrlCell({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="truncate text-[13px] font-medium hover:underline"
+      className="relative z-[2] truncate text-[13px] font-medium hover:underline pointer-events-auto"
       style={{ color: "var(--link-blue)" }}
     >
       {url}
@@ -93,13 +88,26 @@ export function ResourceRow({
 }: ResourceRowProps) {
   const showDeployMeta = Boolean(sha);
   const showUrl = Boolean(url || internalOnly);
+  const navigable = Boolean(href && href !== "#");
+  const cellClass = navigable
+    ? "relative z-[1] pointer-events-none"
+    : undefined;
 
   return (
     <div
-      className="resource-row grid grid-cols-1 items-center gap-4 border-t py-4 first:border-t-0 md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)_auto_auto_minmax(0,1fr)]"
+      className={`resource-row relative -mx-6 grid grid-cols-1 items-center gap-4 border-t px-6 py-4 first:border-t-0 md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)_auto_auto_minmax(0,1fr)]${navigable ? " transition-colors hover:bg-[var(--hover-row)]" : ""}`}
       style={{ borderColor: "var(--border)" }}
     >
-      <div className="flex min-w-0 items-center gap-4 md:col-span-1">
+      {navigable ? (
+        <Link
+          href={href}
+          className="absolute inset-0 z-0"
+          aria-label={`View ${name}`}
+        />
+      ) : null}
+      <div
+        className={`flex min-w-0 items-center gap-4 md:col-span-1 ${cellClass ?? ""}`}
+      >
         <div
           className="flex size-10 shrink-0 items-center justify-center rounded-xl"
           style={{ background: "var(--brand-soft)", color: "var(--link-blue)" }}
@@ -107,7 +115,7 @@ export function ResourceRow({
           <Icon strokeWidth={1.8} className="size-5" aria-hidden />
         </div>
         <div className="min-w-0 flex-1">
-          <RowName name={name} href={href} />
+          <RowName name={name} navigable={navigable} />
           {meta ? (
             <p
               className="mt-0.5 font-mono text-[13px]"
@@ -128,27 +136,27 @@ export function ResourceRow({
       </div>
 
       {showUrl ? (
-        <div className="min-w-0 md:text-center">
+        <div className={`min-w-0 md:text-center ${cellClass ?? ""}`}>
           <UrlCell url={url} urlHref={urlHref} internalOnly={internalOnly} />
         </div>
       ) : subMeta ? (
         <div
-          className="min-w-0 text-[13px] md:text-center"
+          className={`min-w-0 text-[13px] md:text-center ${cellClass ?? ""}`}
           style={{ color: "var(--muted-text)" }}
         >
           {subMeta}
         </div>
       ) : (
-        <div className="hidden md:block" aria-hidden />
+        <div className={`hidden md:block ${cellClass ?? ""}`} aria-hidden />
       )}
 
-      <div className="flex flex-wrap items-center gap-2">
+      <div className={`flex flex-wrap items-center gap-2 ${cellClass ?? ""}`}>
         <StatusBadge label={statusLabel} variant={statusVariant} />
         {trailing}
       </div>
 
       {showDeployMeta ? (
-        <div className="justify-self-end">
+        <div className={`justify-self-end ${cellClass ?? ""}`}>
           <CommitChip
             sha={sha ?? ""}
             message={commitMessage}
@@ -156,7 +164,7 @@ export function ResourceRow({
           />
         </div>
       ) : (
-        <div className="hidden md:block" aria-hidden />
+        <div className={`hidden md:block ${cellClass ?? ""}`} aria-hidden />
       )}
     </div>
   );

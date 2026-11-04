@@ -22,6 +22,7 @@ import {
   resourceStatusDisplay,
 } from "@/lib/resource-dashboard";
 import { databaseEngineLabel, filterByQuery } from "@/lib/service-display";
+import { serviceDetailHref } from "@/lib/service-routes";
 
 function databaseConnectionMeta(kind: string): string {
   if (kind === "postgres") return "postgres · internal:5432";
@@ -53,8 +54,8 @@ export function DatabasesPage() {
   const [provisionContext, setProvisionContext] =
     useState<ResourceProvisionContext | null>(null);
 
-  const refresh = useCallback(async () => {
-    setLoading(true);
+  const refresh = useCallback(async (opts?: { silent?: boolean }) => {
+    if (!opts?.silent) setLoading(true);
     try {
       const { databases } = await listDatabases();
       setRows(databases);
@@ -65,6 +66,10 @@ export function DatabasesPage() {
       setLoading(false);
     }
   }, []);
+
+  const onProvisionFinished = useCallback(() => {
+    void refresh({ silent: true });
+  }, [refresh]);
 
   useEffect(() => {
     void refresh();
@@ -84,7 +89,8 @@ export function DatabasesPage() {
   const postgresCount = rows.filter((r) => r.kind === "postgres").length;
   const redisCount = rows.filter((r) => r.kind === "redis").length;
   const projectCount = new Set(rows.map((r) => r.project_id)).size;
-  const dash = loading ? "—" : undefined;
+  const dash = loading && rows.length === 0 ? "—" : undefined;
+  const showInitialLoading = loading && rows.length === 0;
 
   return (
     <DashboardShell title="Databases" breadcrumb="Projects">
@@ -116,7 +122,9 @@ export function DatabasesPage() {
         <StatCard
           label="Total"
           value={dash ?? rows.length}
-          hint={loading ? undefined : `across ${projectCount} projects`}
+          hint={
+            showInitialLoading ? undefined : `across ${projectCount} projects`
+          }
         />
         <StatCard
           label="Postgres"
@@ -127,7 +135,7 @@ export function DatabasesPage() {
         <StatCard label="Backups" value={dash ?? "—"} hint="last run —" />
       </section>
 
-      {loading ? (
+      {showInitialLoading ? (
         <p className="mt-10 text-sm" style={{ color: "var(--muted-text)" }}>
           Loading…
         </p>
@@ -185,7 +193,7 @@ export function DatabasesPage() {
                 <ResourceRow
                   key={row.id}
                   name={row.name}
-                  href={`/projects/${row.project_slug}`}
+                  href={serviceDetailHref(row.kind, row.slug)}
                   meta={projectPathLabel(row.project_name)}
                   subMeta={databaseConnectionMeta(row.kind)}
                   statusLabel={status.label}
@@ -221,7 +229,7 @@ export function DatabasesPage() {
         open={provisionOpen}
         context={provisionContext}
         onClose={() => setProvisionOpen(false)}
-        onFinished={() => void refresh()}
+        onFinished={onProvisionFinished}
       />
     </DashboardShell>
   );

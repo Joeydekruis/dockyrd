@@ -9,6 +9,30 @@ import (
 	"github.com/Joeydekruis/dockyrd/web"
 )
 
+func TestMountUI_staticSiteDetailTrailingSlash(t *testing.T) {
+	root, err := web.Assets()
+	if err != nil {
+		t.Fatalf("Assets: %v", err)
+	}
+	mux := http.NewServeMux()
+	mountUI(mux, root)
+
+	for _, path := range []string{
+		"/static-sites/dockyrd/",
+		"/static-sites/dockyrd/?tab=settings",
+		"/static-sites/dockyrd/deployments/abc/",
+	} {
+		t.Run(path, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodGet, path, nil)
+			rec := httptest.NewRecorder()
+			mux.ServeHTTP(rec, req)
+			if rec.Code != http.StatusOK {
+				t.Fatalf("GET %s status=%d want 200", path, rec.Code)
+			}
+		})
+	}
+}
+
 func TestMountUI_projectDetailPlaceholder(t *testing.T) {
 	root, err := web.Assets()
 	if err != nil {
@@ -38,9 +62,15 @@ func TestDynamicExportPlaceholder(t *testing.T) {
 		{"projects", "projects/acme", "projects/_/index.html"},
 		{"projects", "projects/acme/index.txt", "projects/_/index.txt"},
 		{"static-sites", "static-sites/marketing", "static-sites/_/index.html"},
+		{"static-sites", "static-sites/marketing/", "static-sites/_/index.html"},
 		{
 			"static-sites",
 			"static-sites/marketing/deployments/abc",
+			"static-sites/_/deployments/_/index.html",
+		},
+		{
+			"static-sites",
+			"static-sites/marketing/deployments/abc/",
 			"static-sites/_/deployments/_/index.html",
 		},
 		{"projects", "projects", ""},

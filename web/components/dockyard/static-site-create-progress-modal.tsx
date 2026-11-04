@@ -47,6 +47,8 @@ export function StaticSiteCreateProgressModal({
   const [deployment, setDeployment] = useState<Deployment | null>(null);
   const [log, setLog] = useState("");
   const finishedRef = useRef(false);
+  const onFinishedRef = useRef(onFinished);
+  onFinishedRef.current = onFinished;
 
   useEffect(() => {
     if (!open || !context) {
@@ -71,7 +73,7 @@ export function StaticSiteCreateProgressModal({
         if (!cancelled) setLog(logText);
         if (dep?.status === "live" && !finishedRef.current) {
           finishedRef.current = true;
-          onFinished();
+          onFinishedRef.current();
         }
       } catch {
         /* keep polling */
@@ -84,7 +86,7 @@ export function StaticSiteCreateProgressModal({
       cancelled = true;
       window.clearInterval(id);
     };
-  }, [open, context, onFinished]);
+  }, [open, context]);
 
   const steps = useMemo(
     () =>

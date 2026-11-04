@@ -9,16 +9,73 @@ export type StaticSiteConfig = {
     rootDir?: string;
   };
   autoDeploy?: boolean;
+  buildEnabled?: boolean;
+  installCmd?: string;
+  buildScript?: string;
   buildCmd?: string;
   outputDir?: string;
   nodeImage?: string;
+  indexFile?: string;
+  errorFile?: string;
   customDomain?: string;
   autoHttps?: boolean;
   spaFallback?: boolean;
 };
 
+function coalesceCmd(value: unknown): string {
+  if (value === undefined || value === null) return "";
+  if (typeof value === "boolean") return "";
+  const s = String(value).trim();
+  if (s === "false" || s === "true") return "";
+  return s;
+}
+
+/** Normalize API config blobs (fixes legacy `"false"` / boolean noise). */
+export function normalizeStaticSiteConfig(
+  raw: Record<string, unknown>,
+): StaticSiteConfig {
+  const source =
+    raw.source && typeof raw.source === "object"
+      ? (raw.source as StaticSiteConfig["source"])
+      : undefined;
+  return {
+    ...raw,
+    source,
+    buildEnabled:
+      typeof raw.buildEnabled === "boolean" ? raw.buildEnabled : undefined,
+    installCmd: coalesceCmd(raw.installCmd),
+    buildScript: coalesceCmd(raw.buildScript),
+    buildCmd: coalesceCmd(raw.buildCmd),
+    outputDir: typeof raw.outputDir === "string" ? raw.outputDir : undefined,
+    nodeImage: typeof raw.nodeImage === "string" ? raw.nodeImage : undefined,
+    indexFile:
+      typeof raw.indexFile === "string" ? raw.indexFile.trim() : undefined,
+    errorFile:
+      typeof raw.errorFile === "string" ? raw.errorFile.trim() : undefined,
+    spaFallback:
+      typeof raw.spaFallback === "boolean" ? raw.spaFallback : undefined,
+    autoDeploy:
+      typeof raw.autoDeploy === "boolean" ? raw.autoDeploy : undefined,
+  };
+}
+
 export function parseStaticSiteConfig(service: Service): StaticSiteConfig {
-  return (service.config ?? {}) as StaticSiteConfig;
+  return normalizeStaticSiteConfig(
+    (service.config ?? {}) as Record<string, unknown>,
+  );
+}
+
+export function isBuildEnabled(cfg: StaticSiteConfig): boolean {
+  if (cfg.buildEnabled === false) return false;
+  if (cfg.buildEnabled === true) return true;
+  const parts = staticSiteBuildParts(cfg);
+  return parts.install !== "" || parts.build !== "";
+}
+
+export function nodeMajorFromImage(nodeImage?: string): string {
+  const tag = (nodeImage ?? "node:22-alpine").split(":").pop() ?? "22-alpine";
+  const major = tag.replace(/\D.*$/, "") || "22";
+  return major;
 }
 
 export function primaryDomainHost(
@@ -85,15 +142,56 @@ export function formatDeploymentWhen(unixSec?: number): string {
   });
 }
 
-export function splitBuildCmd(buildCmd: string): {
+export function splitBuildCmd(buildCmd: string | undefined): {
   install: string;
   build: string;
 } {
-  const parts = buildCmd.split("&&").map((p) => p.trim());
-  if (parts.length >= 2) {
-    return { install: parts[0], build: parts.slice(1).join(" && ") };
+  const raw = typeof buildCmd === "string" ? buildCmd.trim() : "";
+  if (!raw || raw === "false") {
+    return { install: "", build: "" };
   }
-  return { install: "npm ci", build: buildCmd.trim() || "npm run build" };
+  const parts = raw.split("&&").map((p) => p.trim());
+  if (parts.length >= 2) {
+    return {
+      install: parts[0] === "false" ? "" : parts[0],
+      build:
+        parts.slice(1).join(" && ") === "false"
+          ? ""
+          : parts.slice(1).join(" && "),
+    };
+  }
+  const single = raw === "false" ? "" : raw;
+  return { install: "", build: single };
+}
+
+/** Read install/build for display from config (explicit fields first). */
+export function staticSiteBuildParts(cfg: StaticSiteConfig): {
+  install: string;
+  build: string;
+} {
+  const hasExplicit =
+    cfg.installCmd !== undefined || cfg.buildScript !== undefined;
+  if (hasExplicit) {
+    return {
+      install: coalesceCmd(cfg.installCmd),
+      build: coalesceCmd(cfg.buildScript),
+    };
+  }
+  return splitBuildCmd(cfg.buildCmd);
+}
+
+export function joinBuildCmd(install: string, build: string): string {
+  const i = install.trim();
+  const b = build.trim();
+  if (!i && !b) return "";
+  if (!i) return b;
+  if (!b) return i;
+  return `${i} && ${b}`;
+}
+
+export function formatBuildPart(value: string): string {
+  const v = value.trim();
+  return v === "" ? "—" : v;
 }
 
 export function domainStatusDisplay(domain: ServiceDomain): {

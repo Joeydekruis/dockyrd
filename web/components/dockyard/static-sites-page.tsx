@@ -66,8 +66,8 @@ export function StaticSitesPage() {
     useState<StaticSiteCreateResult | null>(null);
   const [progressOpen, setProgressOpen] = useState(false);
 
-  const refresh = useCallback(async () => {
-    setLoading(true);
+  const refresh = useCallback(async (opts?: { silent?: boolean }) => {
+    if (!opts?.silent) setLoading(true);
     try {
       const { projects: ps } = await listProjects();
       const collected: StaticRow[] = [];
@@ -86,6 +86,10 @@ export function StaticSitesPage() {
       setLoading(false);
     }
   }, []);
+
+  const onProgressFinished = useCallback(() => {
+    void refresh({ silent: true });
+  }, [refresh]);
 
   useEffect(() => {
     void refresh();
@@ -108,7 +112,8 @@ export function StaticSitesPage() {
     ({ service }) => service.desired_state === "running",
   ).length;
   const projectCount = new Set(rows.map((r) => r.project.id)).size;
-  const dash = loading ? "—" : undefined;
+  const dash = loading && rows.length === 0 ? "—" : undefined;
+  const showInitialLoading = loading && rows.length === 0;
 
   return (
     <DashboardShell title="Static sites" breadcrumb="Projects">
@@ -140,7 +145,9 @@ export function StaticSitesPage() {
         <StatCard
           label="Total"
           value={dash ?? rows.length}
-          hint={loading ? undefined : `across ${projectCount} projects`}
+          hint={
+            showInitialLoading ? undefined : `across ${projectCount} projects`
+          }
         />
         <StatCard
           label="Live"
@@ -151,7 +158,7 @@ export function StaticSitesPage() {
         <StatCard label="Bandwidth" value={dash ?? "—"} hint="last 24 hours" />
       </section>
 
-      {loading ? (
+      {showInitialLoading ? (
         <p className="mt-10 text-sm" style={{ color: "var(--muted-text)" }}>
           Loading…
         </p>
@@ -245,7 +252,7 @@ export function StaticSitesPage() {
           setProgressOpen(false);
           setCreateOpen(true);
         }}
-        onFinished={() => void refresh()}
+        onFinished={onProgressFinished}
       />
     </DashboardShell>
   );

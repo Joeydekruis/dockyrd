@@ -57,7 +57,15 @@ export {
 export { ServerHealthCard } from "./server-health-card";
 export { ServiceCard } from "./service-card";
 export { SessionRow } from "./session-row";
-export { SettingsDetailBlock } from "./settings-detail-block";
+export {
+  SettingsBranchPill,
+  SettingsCopyPill,
+  SettingsDetailBlock,
+  SettingsEnabledStatus,
+  SettingsGroupHeading,
+  SettingsMetaField,
+  SettingsMetaGrid,
+} from "./settings-detail-block";
 export { Skeleton } from "./skeleton";
 export { Snackbar, SnackbarViewport } from "./snackbar";
 export { Spinner } from "./spinner";

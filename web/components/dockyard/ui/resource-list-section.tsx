@@ -27,7 +27,10 @@ export function ResourceListSection({
         className="overflow-hidden rounded-[20px] border"
         style={{ background: "var(--surface)", borderColor: "var(--border)" }}
       >
-        <div className="flex flex-wrap items-end justify-between gap-4 border-b px-6 py-5">
+        <div
+          className="flex flex-wrap items-end justify-between gap-4 border-b px-6 py-5"
+          style={{ borderColor: "var(--border)" }}
+        >
           <h2
             id="resource-list-heading"
             className="text-xl font-semibold tracking-[-0.03em]"

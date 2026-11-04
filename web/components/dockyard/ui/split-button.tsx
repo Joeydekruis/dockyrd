@@ -34,6 +34,8 @@ type SplitButtonProps = {
   /** Storybook / design board (open menu) */
   defaultMenuOpen?: boolean;
   menuWidth?: number;
+  /** When true, clicking the main segment toggles the menu (same as the chevron). */
+  primaryOpensMenu?: boolean;
   children: React.ReactNode;
 } & Omit<ComponentPropsWithoutRef<"button">, "children">;
 
@@ -45,10 +47,12 @@ export function SplitButton({
   onMenuClick,
   defaultMenuOpen = false,
   menuWidth = 260,
+  primaryOpensMenu = false,
   children,
   className = "",
   type = "button",
   disabled,
+  onClick: primaryOnClick,
   ...primaryProps
 }: SplitButtonProps) {
   const [menuOpen, setMenuOpen] = useState(defaultMenuOpen);
@@ -95,6 +99,12 @@ export function SplitButton({
           type={type}
           disabled={disabled}
           className={`${btnClass} split-button-main`}
+          onClick={(e) => {
+            primaryOnClick?.(e);
+            if (primaryOpensMenu && hasMenu && !disabled) {
+              setMenuOpen((v) => !v);
+            }
+          }}
           {...primaryProps}
         >
           {IconLeft ? (

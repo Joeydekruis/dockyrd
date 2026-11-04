@@ -153,7 +153,7 @@ type CreateStaticSiteWizardProps = {
   open: boolean;
   onClose: () => void;
   onCreated: (result: StaticSiteCreateResult) => void;
-  /** When set, pre-selects project on the name step (e.g. project detail Add resource). */
+  /** When set, pre-selects project on the name step. */
   defaultProjectId?: string;
 };
 
@@ -372,7 +372,12 @@ export function CreateStaticSiteWizard({
         />
       ) : null}
       {step === 2 ? (
-        <StepNameProject projects={projects} draft={draft} onChange={patch} />
+        <StepNameProject
+          projects={projects}
+          draft={draft}
+          onChange={patch}
+          lockProject={Boolean(defaultProjectId)}
+        />
       ) : null}
       {step === 3 ? (
         <StepBuild
@@ -481,15 +486,19 @@ function StepNameProject({
   projects,
   draft,
   onChange,
+  lockProject = false,
 }: {
   projects: Project[];
   draft: Draft;
   onChange: (p: Partial<Draft>) => void;
+  lockProject?: boolean;
 }) {
   return (
     <>
       <StepHeading title="Name & project" hint="Where this site shows up." />
-      <div className="grid gap-4 md:grid-cols-3">
+      <div
+        className={`grid gap-4 ${lockProject ? "md:grid-cols-2" : "md:grid-cols-3"}`}
+      >
         <Field
           label="Site name"
           value={draft.siteName}
@@ -497,13 +506,15 @@ function StepNameProject({
           placeholder="marketing"
           hint="Used in the default URL and across Dockyard."
         />
-        <SelectField
-          label="Project"
-          placeholder="Select project"
-          value={draft.projectId}
-          onChange={(v) => onChange({ projectId: v })}
-          options={projects.map((p) => ({ value: p.id, label: p.name }))}
-        />
+        {lockProject ? null : (
+          <SelectField
+            label="Project"
+            placeholder="Select project"
+            value={draft.projectId}
+            onChange={(v) => onChange({ projectId: v })}
+            options={projects.map((p) => ({ value: p.id, label: p.name }))}
+          />
+        )}
         <SelectField
           label="Environment"
           value={draft.environment}

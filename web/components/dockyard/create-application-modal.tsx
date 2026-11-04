@@ -12,12 +12,15 @@ type CreateApplicationModalProps = {
   open: boolean;
   onClose: () => void;
   onCreated: (context: ResourceProvisionContext) => void;
+  /** Pre-select project; hides the project picker when set. */
+  defaultProjectId?: string;
 };
 
 export function CreateApplicationModal({
   open,
   onClose,
   onCreated,
+  defaultProjectId,
 }: CreateApplicationModalProps) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [projectId, setProjectId] = useState("");
@@ -29,9 +32,9 @@ export function CreateApplicationModal({
     if (!open) return;
     setError(null);
     setName("");
-    setProjectId("");
+    setProjectId(defaultProjectId ?? "");
     void listProjects().then(({ projects: ps }) => setProjects(ps));
-  }, [open]);
+  }, [open, defaultProjectId]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -98,13 +101,15 @@ export function CreateApplicationModal({
             {error}
           </p>
         ) : null}
-        <SelectField
-          label="Project"
-          placeholder="Select project"
-          value={projectId}
-          onChange={setProjectId}
-          options={projects.map((p) => ({ value: p.id, label: p.name }))}
-        />
+        {defaultProjectId ? null : (
+          <SelectField
+            label="Project"
+            placeholder="Select project"
+            value={projectId}
+            onChange={setProjectId}
+            options={projects.map((p) => ({ value: p.id, label: p.name }))}
+          />
+        )}
         <Field
           label="Application name"
           value={name}

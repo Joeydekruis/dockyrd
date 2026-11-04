@@ -21,6 +21,7 @@ import {
   summarizeApplicationStats,
 } from "@/lib/resource-dashboard";
 import { filterByQuery } from "@/lib/service-display";
+import { serviceDetailHref } from "@/lib/service-routes";
 
 export function ApplicationsPage() {
   const [rows, setRows] = useState<ApplicationRow[]>([]);
@@ -32,8 +33,8 @@ export function ApplicationsPage() {
   const [provisionContext, setProvisionContext] =
     useState<ResourceProvisionContext | null>(null);
 
-  const refresh = useCallback(async () => {
-    setLoading(true);
+  const refresh = useCallback(async (opts?: { silent?: boolean }) => {
+    if (!opts?.silent) setLoading(true);
     try {
       const { applications } = await listApplications();
       setRows(applications);
@@ -44,6 +45,10 @@ export function ApplicationsPage() {
       setLoading(false);
     }
   }, []);
+
+  const onProvisionFinished = useCallback(() => {
+    void refresh({ silent: true });
+  }, [refresh]);
 
   useEffect(() => {
     void refresh();
@@ -61,7 +66,8 @@ export function ApplicationsPage() {
   );
 
   const stats = summarizeApplicationStats(rows);
-  const dash = loading ? "—" : undefined;
+  const dash = loading && rows.length === 0 ? "—" : undefined;
+  const showInitialLoading = loading && rows.length === 0;
 
   return (
     <DashboardShell title="Applications" breadcrumb="Projects">
@@ -93,7 +99,11 @@ export function ApplicationsPage() {
         <StatCard
           label="Total"
           value={dash ?? stats.total}
-          hint={loading ? undefined : `across ${stats.projectCount} projects`}
+          hint={
+            showInitialLoading
+              ? undefined
+              : `across ${stats.projectCount} projects`
+          }
         />
         <StatCard
           label="Healthy"
@@ -108,11 +118,11 @@ export function ApplicationsPage() {
         <StatCard
           label="Needs attention"
           value={dash ?? stats.needsAttention}
-          hint={loading ? undefined : stats.attentionHint}
+          hint={showInitialLoading ? undefined : stats.attentionHint}
         />
       </section>
 
-      {loading ? (
+      {showInitialLoading ? (
         <p className="mt-10 text-sm" style={{ color: "var(--muted-text)" }}>
           Loading…
         </p>
@@ -162,7 +172,7 @@ export function ApplicationsPage() {
                 <ResourceRow
                   key={app.id}
                   name={app.name}
-                  href={`/projects/${app.project_slug}`}
+                  href={serviceDetailHref("app", app.slug)}
                   meta={projectPathLabel(app.project_name)}
                   internalOnly
                   statusLabel={status.label}
@@ -188,7 +198,7 @@ export function ApplicationsPage() {
         open={provisionOpen}
         context={provisionContext}
         onClose={() => setProvisionOpen(false)}
-        onFinished={() => void refresh()}
+        onFinished={onProvisionFinished}
       />
     </DashboardShell>
   );

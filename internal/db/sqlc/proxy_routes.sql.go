@@ -109,6 +109,7 @@ const listLiveStaticProxyRoutes = `-- name: ListLiveStaticProxyRoutes :many
 SELECT
   d.hostname,
   s.slug AS service_slug,
+  s.config AS service_config,
   dep.release_path
 FROM domains d
 JOIN services s ON s.id = d.service_id
@@ -117,9 +118,10 @@ WHERE s.kind = 'static_site' AND dep.status = 'live' AND dep.release_path IS NOT
 `
 
 type ListLiveStaticProxyRoutesRow struct {
-	Hostname    string
-	ServiceSlug string
-	ReleasePath sql.NullString
+	Hostname      string
+	ServiceSlug   string
+	ServiceConfig interface{}
+	ReleasePath   sql.NullString
 }
 
 func (q *Queries) ListLiveStaticProxyRoutes(ctx context.Context) ([]ListLiveStaticProxyRoutesRow, error) {
@@ -131,7 +133,12 @@ func (q *Queries) ListLiveStaticProxyRoutes(ctx context.Context) ([]ListLiveStat
 	var items []ListLiveStaticProxyRoutesRow
 	for rows.Next() {
 		var i ListLiveStaticProxyRoutesRow
-		if err := rows.Scan(&i.Hostname, &i.ServiceSlug, &i.ReleasePath); err != nil {
+		if err := rows.Scan(
+			&i.Hostname,
+			&i.ServiceSlug,
+			&i.ServiceConfig,
+			&i.ReleasePath,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)

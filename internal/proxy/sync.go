@@ -39,9 +39,19 @@ func SyncFromDB(ctx context.Context, q *sqlc.Queries, cfg config.Config) error {
 	staticRoutes := make([]StaticRoute, 0, len(staticRows))
 	for _, row := range staticRows {
 		root := staticsite.CurrentRoot(cfg.SitesDir(), row.ServiceSlug)
+		var siteCfg staticsite.Config
+		raw := appconfig.RawConfig(row.ServiceConfig)
+		if len(raw) > 0 {
+			if parsed, err := staticsite.Parse(raw); err == nil {
+				siteCfg = parsed
+			}
+		}
 		staticRoutes = append(staticRoutes, StaticRoute{
-			Hostname: row.Hostname,
-			Root:     root,
+			Hostname:    row.Hostname,
+			Root:        root,
+			IndexNames:  staticsite.IndexFileNames(siteCfg),
+			ErrorPage:   strings.TrimSpace(siteCfg.ErrorFile),
+			SpaFallback: siteCfg.SpaFallback,
 		})
 	}
 

@@ -16,6 +16,8 @@ type BuildInput struct {
 	CloneURL     string
 	Branch       string
 	RootDir      string
+	InstallCmd   string
+	BuildScript  string
 	BuildCmd     string
 	NodeImage    string
 	WorkDir      string
@@ -44,7 +46,14 @@ func Build(ctx context.Context, dockerBin string, in BuildInput) (outputDir stri
 	if err != nil {
 		return "", err
 	}
-	buildCmd := DefaultBuildCmd(workDir, in.BuildCmd)
+	shellCmd := ResolveBuildCommand(Config{
+		InstallCmd:  in.InstallCmd,
+		BuildScript: in.BuildScript,
+		BuildCmd:    in.BuildCmd,
+	}, workDir)
+	if strings.TrimSpace(shellCmd) == "" {
+		return DetectOutputDir(workDir, in.OutputDir)
+	}
 	if err := os.MkdirAll(filepath.Dir(logPath), 0o750); err != nil {
 		return "", err
 	}
@@ -59,7 +68,7 @@ func Build(ctx context.Context, dockerBin string, in BuildInput) (outputDir stri
 		"-v", workDir + ":/src",
 		"-w", "/src",
 		in.NodeImage,
-		"sh", "-lc", buildCmd,
+		"sh", "-lc", shellCmd,
 	}
 	cmd := exec.CommandContext(ctx, dockerBin, args...)
 	cmd.Stdout = logFile

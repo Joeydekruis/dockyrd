@@ -12,12 +12,14 @@ type CreateDatabaseModalProps = {
   open: boolean;
   onClose: () => void;
   onCreated: (context: ResourceProvisionContext) => void;
+  defaultProjectId?: string;
 };
 
 export function CreateDatabaseModal({
   open,
   onClose,
   onCreated,
+  defaultProjectId,
 }: CreateDatabaseModalProps) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [projectId, setProjectId] = useState("");
@@ -30,10 +32,10 @@ export function CreateDatabaseModal({
     if (!open) return;
     setError(null);
     setName("");
-    setProjectId("");
+    setProjectId(defaultProjectId ?? "");
     setKind("postgres");
     void listProjects().then(({ projects: ps }) => setProjects(ps));
-  }, [open]);
+  }, [open, defaultProjectId]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -99,13 +101,15 @@ export function CreateDatabaseModal({
             {error}
           </p>
         ) : null}
-        <SelectField
-          label="Project"
-          placeholder="Select project"
-          value={projectId}
-          onChange={setProjectId}
-          options={projects.map((p) => ({ value: p.id, label: p.name }))}
-        />
+        {defaultProjectId ? null : (
+          <SelectField
+            label="Project"
+            placeholder="Select project"
+            value={projectId}
+            onChange={setProjectId}
+            options={projects.map((p) => ({ value: p.id, label: p.name }))}
+          />
+        )}
         <SelectField
           label="Engine"
           value={kind}

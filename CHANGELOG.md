@@ -6,6 +6,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.39] - 2026-11-04
+
+_Finished: 2026-11-04_
+
+### Added
+
+- **Static site build settings (Sevalla-style)** — section headings with icons, read-only meta grid, **Update** actions; build modal with **Build site before publishing**, root/publish dirs, Node LTS, **index file** / **error file** (`web/components/dockyard/static-site-settings-tab.tsx`, `settings-detail-block.tsx`)
+- **`buildEnabled` config** — skip Docker build when off; empty install/build commands persist without defaulting to `npm ci` (`internal/staticsite/buildcmd.go`, `ResolveBuildCommand`)
+- **Static site index in Caddy** — `indexFile` → `file_server.index_names` via service config on live static routes (`proxy_routes.sql`, `internal/proxy/sync.go`)
+- **Resource provisioning helpers** — shared create/reveal flows for databases, buckets, and apps (`web/lib/resource-provisioning.ts`)
+
+### Changed
+
+- **Static site settings display** — normalize corrupt `"false"` / boolean command fields; split `installCmd` / `buildScript` in API config (`web/lib/static-site-display.ts`)
+- **Database detail** — connection credentials panel and logs shell aligned with design patterns (`database-detail-page.tsx`, `service-connection-panel.tsx`)
+- **Project resources** — provisioning modals and list rows use shared helpers; application/database/bucket create flows updated
+
+### Fixed
+
+- **Static deploy** — no longer runs shell command `false` after bad config; publish-without-build path when build is disabled
+
 ## [0.0.38] - 2026-11-04
 
 _Finished: 2026-11-04_

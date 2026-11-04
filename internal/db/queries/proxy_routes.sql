@@ -31,6 +31,7 @@ WHERE s.kind = 'app' AND dep.status = 'live';
 SELECT
   d.hostname,
   s.slug AS service_slug,
+  s.config AS service_config,
   dep.release_path
 FROM domains d
 JOIN services s ON s.id = d.service_id

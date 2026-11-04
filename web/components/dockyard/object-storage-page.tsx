@@ -40,8 +40,8 @@ export function ObjectStoragePage() {
   const [provisionContext, setProvisionContext] =
     useState<ResourceProvisionContext | null>(null);
 
-  const refresh = useCallback(async () => {
-    setLoading(true);
+  const refresh = useCallback(async (opts?: { silent?: boolean }) => {
+    if (!opts?.silent) setLoading(true);
     try {
       const [st, { projects: ps }] = await Promise.all([
         getStorageStatus(),
@@ -56,6 +56,10 @@ export function ObjectStoragePage() {
       setLoading(false);
     }
   }, []);
+
+  const onProvisionFinished = useCallback(() => {
+    void refresh({ silent: true });
+  }, [refresh]);
 
   useEffect(() => {
     void refresh();
@@ -74,9 +78,11 @@ export function ObjectStoragePage() {
     [buckets, query],
   );
 
-  const dash = loading ? "—" : undefined;
+  const dash = loading && buckets.length === 0 && !status ? "—" : undefined;
   const bucketCount = buckets.length;
-  const showGarageSetup = !loading && bucketCount === 0 && !status?.installed;
+  const showInitialLoading = loading && !status;
+  const showGarageSetup =
+    !showInitialLoading && bucketCount === 0 && !status?.installed;
 
   async function onInstall() {
     try {
@@ -126,7 +132,9 @@ export function ObjectStoragePage() {
         <StatCard
           label="Buckets"
           value={dash ?? bucketCount}
-          hint={bucketCount === 0 && !loading ? "none yet" : undefined}
+          hint={
+            bucketCount === 0 && !showInitialLoading ? "none yet" : undefined
+          }
         />
         <StatCard
           label="Storage used"
@@ -136,12 +144,14 @@ export function ObjectStoragePage() {
         <StatCard
           label="Objects"
           value={dash ?? 0}
-          hint={bucketCount === 0 && !loading ? "no data" : undefined}
+          hint={
+            bucketCount === 0 && !showInitialLoading ? "no data" : undefined
+          }
         />
         <StatCard label="Requests" value={dash ?? "—"} hint="last 24 hours" />
       </section>
 
-      {loading ? (
+      {showInitialLoading ? (
         <p className="mt-10 text-sm" style={{ color: "var(--muted-text)" }}>
           Loading…
         </p>
@@ -243,7 +253,7 @@ export function ObjectStoragePage() {
         open={provisionOpen}
         context={provisionContext}
         onClose={() => setProvisionOpen(false)}
-        onFinished={() => void refresh()}
+        onFinished={onProvisionFinished}
       />
     </DashboardShell>
   );

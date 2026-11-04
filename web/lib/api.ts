@@ -265,6 +265,10 @@ export function moveServiceToProject(serviceId: string, projectId: string) {
   return patchService(serviceId, { project_id: projectId });
 }
 
+export function getService(serviceId: string) {
+  return apiFetch<Service>(`/api/v1/services/${serviceId}`);
+}
+
 export function patchService(
   serviceId: string,
   input: {
@@ -300,6 +304,19 @@ export function getServiceConnection(serviceId: string, reveal = false) {
   return apiFetch<{ variables: Record<string, string> }>(
     `/api/v1/services/${serviceId}/connection${q}`,
   );
+}
+
+export async function fetchServiceLogs(serviceId: string, tail = "200") {
+  const params = new URLSearchParams({ tail });
+  const res = await fetch(
+    `/api/v1/services/${serviceId}/logs?${params.toString()}`,
+    { credentials: "same-origin" },
+  );
+  if (!res.ok) {
+    const err = (await res.json().catch(() => ({}))) as { error?: string };
+    throw new Error(err.error ?? res.statusText);
+  }
+  return res.text();
 }
 
 export type StorageStatus = {

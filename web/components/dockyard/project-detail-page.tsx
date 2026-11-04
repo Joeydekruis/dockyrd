@@ -4,6 +4,10 @@ import { Plus } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AddProjectResourceModal } from "@/components/dockyard/add-project-resource-modal";
+import { CreateApplicationModal } from "@/components/dockyard/create-application-modal";
+import { CreateBucketModal } from "@/components/dockyard/create-bucket-modal";
+import { CreateDatabaseModal } from "@/components/dockyard/create-database-modal";
+import { CreateStaticSiteWizard } from "@/components/dockyard/create-static-site-wizard";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import { ProjectHardwareUsageSection } from "@/components/dockyard/project-hardware-usage-section";
 import {
@@ -11,11 +15,19 @@ import {
   ProjectResourceTable,
 } from "@/components/dockyard/project-resource-table";
 import {
+  type ResourceProvisionContext,
+  ResourceProvisioningModal,
+} from "@/components/dockyard/resource-provisioning-modal";
+import {
   StaticSiteCreateProgressModal,
   type StaticSiteCreateResult,
 } from "@/components/dockyard/static-site-create-progress-modal";
 import { Button } from "@/components/dockyard/ui/button";
 import { PageHeader } from "@/components/dockyard/ui/page-header";
+import {
+  SplitButton,
+  type SplitButtonMenuItem,
+} from "@/components/dockyard/ui/split-button";
 import { Tabs } from "@/components/dockyard/ui/tabs";
 import type { TimeRange } from "@/components/dockyard/ui/time-range-toggle";
 import { formatBytes } from "@/lib/analytics-stats";
@@ -29,6 +41,10 @@ import {
   type Project,
   type Service,
 } from "@/lib/api";
+import {
+  PROJECT_RESOURCE_KINDS,
+  type ProjectResourceKind,
+} from "@/lib/project-resource-catalog";
 import { useRouteParam } from "@/lib/use-route-param";
 
 const PROJECT_TABS = [
@@ -50,61 +66,124 @@ export function ProjectDetailPage() {
   const [hardwareRange, setHardwareRange] = useState<TimeRange>("24h");
   const [tab, setTab] = useState("resources");
   const [addOpen, setAddOpen] = useState(false);
-  const [progressOpen, setProgressOpen] = useState(false);
-  const [progressContext, setProgressContext] =
+  const [createAppOpen, setCreateAppOpen] = useState(false);
+  const [createDbOpen, setCreateDbOpen] = useState(false);
+  const [createBucketOpen, setCreateBucketOpen] = useState(false);
+  const [staticWizardOpen, setStaticWizardOpen] = useState(false);
+  const [provisionOpen, setProvisionOpen] = useState(false);
+  const [provisionContext, setProvisionContext] =
+    useState<ResourceProvisionContext | null>(null);
+  const [staticProgressOpen, setStaticProgressOpen] = useState(false);
+  const [staticProgressContext, setStaticProgressContext] =
     useState<StaticSiteCreateResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const refresh = useCallback(async () => {
-    if (!slug) {
-      setLoading(false);
-      return;
+  const openCreateKind = useCallback((kind: ProjectResourceKind) => {
+    switch (kind) {
+      case "app":
+        setCreateAppOpen(true);
+        break;
+      case "postgres":
+        setCreateDbOpen(true);
+        break;
+      case "bucket":
+        setCreateBucketOpen(true);
+        break;
+      case "static_site":
+        setStaticWizardOpen(true);
+        break;
     }
-    setLoading(true);
-    try {
-      const { projects } = await listProjects();
-      const p = projects.find((x) => x.slug === slug) ?? null;
-      setProject(p);
-      if (!p) {
-        setServices([]);
-        setError(null);
+  }, []);
+
+  const createMenuItems: SplitButtonMenuItem[] = useMemo(
+    () =>
+      PROJECT_RESOURCE_KINDS.map((item) => ({
+        id: item.id,
+        label: item.label,
+        icon: item.icon,
+        onSelect: () => openCreateKind(item.id),
+      })),
+    [openCreateKind],
+  );
+
+  const projectResourceActions = (
+    <div className="flex flex-wrap items-center justify-end gap-2">
+      <Button
+        type="button"
+        variant="secondary"
+        onClick={() => setAddOpen(true)}
+      >
+        Add existing resource
+      </Button>
+      <SplitButton
+        variant="primary"
+        iconLeft={Plus}
+        menuLabel="Choose resource type"
+        menuItems={createMenuItems}
+        primaryOpensMenu
+      >
+        Create resource
+      </SplitButton>
+    </div>
+  );
+
+  const refresh = useCallback(
+    async (opts?: { silent?: boolean }) => {
+      if (!slug) {
+        setLoading(false);
         return;
       }
-      const { services: svc } = await listServices(p.id);
-      setServices(svc);
-      const depMap: Record<string, Deployment[]> = {};
-      await Promise.all(
-        svc.map(async (s) => {
-          const { deployments: d } = await listDeployments(s.id);
-          depMap[s.id] = d.slice(0, 5);
-        }),
-      );
-      setDeployments(depMap);
+      if (!opts?.silent) setLoading(true);
       try {
-        const [{ metrics }, info] = await Promise.all([
-          getServerContainerMetrics("24h"),
-          getServerInfo(),
-        ]);
-        setServerHostname(info.hostname);
-        const byId: Record<string, { cpu: number; mem: number }> = {};
-        for (const m of metrics) {
-          byId[m.service_id] = {
-            cpu: m.cpu_percent,
-            mem: m.memory_bytes,
-          };
+        const { projects } = await listProjects();
+        const p = projects.find((x) => x.slug === slug) ?? null;
+        setProject(p);
+        if (!p) {
+          setServices([]);
+          setError(null);
+          return;
         }
-        setMetricsByService(byId);
-      } catch {
-        setMetricsByService({});
+        const { services: svc } = await listServices(p.id);
+        setServices(svc);
+        const depMap: Record<string, Deployment[]> = {};
+        await Promise.all(
+          svc.map(async (s) => {
+            const { deployments: d } = await listDeployments(s.id);
+            depMap[s.id] = d.slice(0, 5);
+          }),
+        );
+        setDeployments(depMap);
+        try {
+          const [{ metrics }, info] = await Promise.all([
+            getServerContainerMetrics("24h"),
+            getServerInfo(),
+          ]);
+          setServerHostname(info.hostname);
+          const byId: Record<string, { cpu: number; mem: number }> = {};
+          for (const m of metrics) {
+            byId[m.service_id] = {
+              cpu: m.cpu_percent,
+              mem: m.memory_bytes,
+            };
+          }
+          setMetricsByService(byId);
+        } catch {
+          setMetricsByService({});
+        }
+        setError(null);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Failed to load project");
+      } finally {
+        setLoading(false);
       }
-      setError(null);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load project");
-    } finally {
-      setLoading(false);
-    }
-  }, [slug]);
+    },
+    [slug],
+  );
+
+  const onProvisionFinished = useCallback(() => {
+    void refresh({ silent: true });
+  }, [refresh]);
 
   useEffect(() => {
     void refresh();
@@ -124,6 +203,7 @@ export function ProjectDetailPage() {
   const inProduction = services.filter(
     (s) => s.desired_state === "running",
   ).length;
+  const showInitialLoading = loading && !project;
 
   const hardwareTotals = useMemo(() => {
     let cpu = 0;
@@ -162,7 +242,7 @@ export function ProjectDetailPage() {
         </p>
       ) : null}
 
-      {loading ? (
+      {showInitialLoading ? (
         <p className="text-sm" style={{ color: "var(--muted-text)" }}>
           Loading…
         </p>
@@ -176,15 +256,7 @@ export function ProjectDetailPage() {
             eyebrow="Project"
             title={project.name}
             subtitle={`${inProduction} resource${inProduction === 1 ? "" : "s"} in production`}
-            action={
-              <Button
-                type="button"
-                iconLeft={Plus}
-                onClick={() => setAddOpen(true)}
-              >
-                Add resource
-              </Button>
-            }
+            action={projectResourceActions}
           />
 
           <Tabs tabs={PROJECT_TABS} activeId={tab} onChange={setTab} />
@@ -234,14 +306,9 @@ export function ProjectDetailPage() {
                       Add an app, database, static site, or bucket to this
                       project.
                     </p>
-                    <Button
-                      type="button"
-                      className="mt-6"
-                      iconLeft={Plus}
-                      onClick={() => setAddOpen(true)}
-                    >
-                      Add resource
-                    </Button>
+                    <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+                      {projectResourceActions}
+                    </div>
                   </div>
                 ) : (
                   <ProjectResourceTable rows={resourceRows} />
@@ -266,18 +333,62 @@ export function ProjectDetailPage() {
         project={project}
         onClose={() => setAddOpen(false)}
         onChanged={() => void refresh()}
-        onStaticSiteCreated={(result) => {
-          setProgressContext(result);
-          setProgressOpen(true);
+      />
+
+      <CreateApplicationModal
+        open={createAppOpen}
+        defaultProjectId={project?.id}
+        onClose={() => setCreateAppOpen(false)}
+        onCreated={(ctx) => {
+          setProvisionContext(ctx);
+          setProvisionOpen(true);
         }}
       />
 
+      <CreateDatabaseModal
+        open={createDbOpen}
+        defaultProjectId={project?.id}
+        onClose={() => setCreateDbOpen(false)}
+        onCreated={(ctx) => {
+          setProvisionContext(ctx);
+          setProvisionOpen(true);
+        }}
+      />
+
+      <CreateBucketModal
+        open={createBucketOpen}
+        defaultProjectId={project?.id}
+        onClose={() => setCreateBucketOpen(false)}
+        onCreated={(ctx) => {
+          setProvisionContext(ctx);
+          setProvisionOpen(true);
+        }}
+      />
+
+      <CreateStaticSiteWizard
+        open={staticWizardOpen}
+        defaultProjectId={project?.id}
+        onClose={() => setStaticWizardOpen(false)}
+        onCreated={(result) => {
+          setStaticWizardOpen(false);
+          setStaticProgressContext(result);
+          setStaticProgressOpen(true);
+        }}
+      />
+
+      <ResourceProvisioningModal
+        open={provisionOpen}
+        context={provisionContext}
+        onClose={() => setProvisionOpen(false)}
+        onFinished={onProvisionFinished}
+      />
+
       <StaticSiteCreateProgressModal
-        open={progressOpen}
-        context={progressContext}
-        onClose={() => setProgressOpen(false)}
-        onEditSettings={() => setProgressOpen(false)}
-        onFinished={() => void refresh()}
+        open={staticProgressOpen}
+        context={staticProgressContext}
+        onClose={() => setStaticProgressOpen(false)}
+        onEditSettings={() => setStaticProgressOpen(false)}
+        onFinished={onProvisionFinished}
       />
     </DashboardShell>
   );

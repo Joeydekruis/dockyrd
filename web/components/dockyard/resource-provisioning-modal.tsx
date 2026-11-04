@@ -5,7 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/dockyard/ui/button";
 import { Chip } from "@/components/dockyard/ui/chip";
 import { Spinner } from "@/components/dockyard/ui/spinner";
-import { listDatabases } from "@/lib/api";
+import { getServerContainers, getService } from "@/lib/api";
+import { resolveDatabaseProvisionStep } from "@/lib/resource-provisioning";
 
 export type ResourceProvisionContext = {
   kind: "database" | "application" | "bucket";
@@ -37,9 +38,14 @@ export function ResourceProvisioningModal({
   const [done, setDone] = useState(false);
   const [failed, setFailed] = useState(false);
   const finishedRef = useRef(false);
+  const onFinishedRef = useRef(onFinished);
+  onFinishedRef.current = onFinished;
+
+  const serviceId = context?.serviceId;
+  const provisionKind = context?.kind;
 
   useEffect(() => {
-    if (!open || !context) {
+    if (!open || !serviceId || !provisionKind) {
       setActiveStep(0);
       setDone(false);
       setFailed(false);
@@ -48,21 +54,25 @@ export function ResourceProvisioningModal({
     }
 
     let cancelled = false;
-    const steps = STEPS[context.kind];
+    const steps = STEPS[provisionKind];
+    const id = serviceId;
     setActiveStep(0);
     setDone(false);
     setFailed(false);
     finishedRef.current = false;
+
+    let pollAttempts = 0;
 
     const markDone = () => {
       if (finishedRef.current || cancelled) return;
       finishedRef.current = true;
       setDone(true);
       setActiveStep(steps.length);
-      onFinished();
+      onFinishedRef.current();
     };
 
     const stepTimer = window.setInterval(() => {
+      if (provisionKind === "database") return;
       setActiveStep((s) => {
         if (s >= steps.length - 1) return s;
         return s + 1;
@@ -70,25 +80,49 @@ export function ResourceProvisioningModal({
     }, 1400);
 
     const finishTimer = window.setTimeout(() => {
-      if (context.kind !== "database") markDone();
+      if (provisionKind !== "database") markDone();
     }, 4500);
 
     async function pollDatabase() {
-      if (context?.kind !== "database") return;
+      if (provisionKind !== "database" || cancelled) return;
+      pollAttempts += 1;
       try {
-        const { databases } = await listDatabases();
-        const row = databases.find((d) => d.id === context.serviceId);
-        if (row?.desired_state === "running") markDone();
-        if (row?.desired_state === "failed") setFailed(true);
+        const [service, containerPayload] = await Promise.all([
+          getService(id),
+          getServerContainers().catch(() => ({ containers: [] })),
+        ]);
+        if (cancelled) return;
+
+        const step = resolveDatabaseProvisionStep({
+          service,
+          containers: containerPayload.containers,
+          serviceId: id,
+          pollAttempts,
+        });
+
+        if (step === -1) {
+          setFailed(true);
+          return;
+        }
+
+        setActiveStep((prev) => Math.max(prev, step));
+        if (step >= 2) markDone();
       } catch {
-        /* retry on next tick */
+        /* service not visible yet — retry */
       }
     }
 
     void pollDatabase();
     const pollTimer =
-      context.kind === "database"
+      provisionKind === "database"
         ? window.setInterval(pollDatabase, 2000)
+        : undefined;
+
+    const maxWaitTimer =
+      provisionKind === "database"
+        ? window.setTimeout(() => {
+            if (!finishedRef.current && !cancelled) markDone();
+          }, 120_000)
         : undefined;
 
     return () => {
@@ -96,8 +130,9 @@ export function ResourceProvisioningModal({
       window.clearInterval(stepTimer);
       window.clearTimeout(finishTimer);
       if (pollTimer) window.clearInterval(pollTimer);
+      if (maxWaitTimer) window.clearTimeout(maxWaitTimer);
     };
-  }, [open, context, onFinished]);
+  }, [open, serviceId, provisionKind]);
 
   if (!open || !context) return null;
 
@@ -122,7 +157,11 @@ export function ResourceProvisioningModal({
           <div>
             <Chip>{failed ? "Failed" : done ? "Ready" : "Creating"}</Chip>
             <h2 className="mt-3 text-xl font-semibold tracking-tight">
-              {context.name} is being created
+              {done
+                ? `${context.name} is ready`
+                : failed
+                  ? `${context.name} could not be created`
+                  : `${context.name} is being created`}
             </h2>
             <p className="mt-2 text-sm" style={{ color: "var(--muted-text)" }}>
               {context.label}
