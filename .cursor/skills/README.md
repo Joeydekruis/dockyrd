@@ -15,6 +15,7 @@ On-demand playbooks. Rules stay short; agents invoke skills for depth.
 | [architecture-decision-records](architecture-decision-records/SKILL.md) | ADR drafts and capture |
 | [git-workflow](git-workflow/SKILL.md) | Always `development`; GitHub issue commits when handoff applies |
 | [push-to-main](push-to-main/SKILL.md) | Full build gate, then merge `development` → `main` (human-requested) |
+| [release-ship](release-ship/SKILL.md) | Tag `v*`, wait for GoReleaser, verify linux amd64+arm64 assets |
 | [issue-tracking](issue-tracking/SKILL.md) | GitHub Issues = backlog; Direct = chat fixes |
 | [documentation-lookup](documentation-lookup/SKILL.md) | Context7 library docs |
 | [mcp-server-patterns](mcp-server-patterns/SKILL.md) | Building MCP servers |

@@ -18,7 +18,7 @@ Bias toward **efficient + good**: ship correct work on the shortest path. Bias t
 | Product decisions that **block** Feature work | Process: track, size, harness, reviewers, whether design is needed, GitHub issue updates for features |
 | ADR acceptance | **Auto-continue** plan → [design if needed] → generate → review → fix; Direct: implement now |
 | Stop-early hard FAIL / round-3 triage | Choosing Feature vs Direct; minimal reviewer set |
-| Ask to ship `main` (triggers push-to-main) | **GitHub issue:** test → commit + push → evidence comment when handoff applies |
+| Ask to ship `main` or **cut a GitHub release** (triggers push-to-main + [release-ship](release-ship.mdc)) | **GitHub issue:** test → commit + push → evidence comment when handoff applies |
 | Close issues after verifying handoff | Sprint pickup - all issues, per-task ship |
 
 - **Commits in Cursor:** only when Joey explicitly asks, unless finishing a GitHub issue handoff requires push (see `docs/project/project.md`).

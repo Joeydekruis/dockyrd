@@ -43,5 +43,6 @@ Feature issue close: update `CHANGELOG.md` + patch bump per [changelog](changelo
 
 - Work, commit, and push on **`development` only**
 - Merge to **`main`** only via [push-to-main](../skills/push-to-main/SKILL.md)
+- GitHub **binary release** (tag + GoReleaser): [release-ship](release-ship.mdc) after merge — verify **both** linux tarballs before calling update “ready”
 
 **Feature track ≠ feature branch.** Harness uses GitHub issues; git stays on `development`.

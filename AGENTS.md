@@ -30,7 +30,7 @@ This is **not** a WordPress theme, Studio, or Atelier project. Ignore rules from
 ## Git
 
 - **Only branch:** `development` for day-to-day work. Never create `feature/*` or `fix/*`.
-- **`main`:** merge only when Joey asks — use skill [`.cursor/skills/push-to-main/SKILL.md`](.cursor/skills/push-to-main/SKILL.md).
+- **`main`:** merge only when Joey asks — use skill [`.cursor/skills/push-to-main/SKILL.md`](.cursor/skills/push-to-main/SKILL.md). **GitHub binary release:** tag + GoReleaser — [`.cursor/rules/release-ship.mdc`](.cursor/rules/release-ship.mdc) / skill `release-ship`.
 - **Commits in Cursor:** only when Joey explicitly asks, except when finishing a GitHub issue handoff requires push (see [`docs/project/project.md`](docs/project/project.md)).
 
 ## Work tracks

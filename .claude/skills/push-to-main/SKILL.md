@@ -67,9 +67,19 @@ git checkout development
 
 Never `--force` to `main`.
 
-## 5. Report
+## 6. GitHub release (only when Joey asked for release / tag / ship binaries)
 
-Return: merge commit SHA (if any), `main` / `development` tips, version from root `package.json` or binary `-version`, which gates ran + pass/fail.
+After section 5, follow [release-ship](../../../.cursor/rules/release-ship.mdc) (skill [release-ship](../../../.cursor/skills/release-ship/SKILL.md)):
+
+1. Push tag **`v$(node -p "require('./package.json').version")`** to `origin` (triggers GoReleaser).
+2. **Wait** for `.github/workflows/release.yml` **success**.
+3. **Verify** both `dockyard_{version}_linux_amd64.tar.gz` and `dockyard_{version}_linux_arm64.tar.gz` (+ `checksums.txt`) on the GitHub Release.
+
+Do **not** tell Joey the release is ready for self-update until step 3 passes.
+
+## 7. Report (merge + optional release)
+
+Return: merge commit SHA (if any), `main` / `development` tips, version from root `package.json` or binary `-version`, which gates ran + pass/fail. If a release was cut: tag, Release workflow status, and asset checklist (amd64 + arm64 tarballs).
 
 ## Anti-patterns
 
@@ -77,3 +87,4 @@ Return: merge commit SHA (if any), `main` / `development` tips, version from roo
 - Force-pushing `main`
 - Staying on `main` to continue feature work
 - Skipping changelog/version close on `development` before the ship
+- Cutting a GitHub tag or telling users to self-update before [release-ship](../../../.cursor/rules/release-ship.mdc) workflow success and asset verification

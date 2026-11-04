@@ -12,7 +12,7 @@ description: >-
 
 - **Only `development`** for implementation. Never `feature/*` / `fix/*`.
 - Before edits: `git rev-parse --abbrev-ref HEAD` → must be `development`.
-- **`main`:** only via [push-to-main](../../../.cursor/skills/push-to-main/SKILL.md) when Joey asks.
+- **`main`:** merge only via [push-to-main](../../../.cursor/skills/push-to-main/SKILL.md) when Joey asks; **release tag** via [release-ship](../../../.cursor/rules/release-ship.mdc).
 
 ## Commits
 
