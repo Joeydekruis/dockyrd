@@ -8,7 +8,7 @@ import {
   TriangleAlert,
   X,
 } from "lucide-react";
-import { useEffect, useState, type ReactNode } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 
 export type SnackbarTone = "info" | "success" | "warning" | "error" | "warn";
 
@@ -109,9 +109,7 @@ export function Snackbar({
           <Icon strokeWidth={2.2} className="size-3.5 text-white" />
         </span>
         <div className="snackbar-toast-content min-w-0 flex-1">
-          {heading ? (
-            <p className="snackbar-toast-title">{heading}</p>
-          ) : null}
+          {heading ? <p className="snackbar-toast-title">{heading}</p> : null}
           {description ? (
             <p className="snackbar-toast-description">{description}</p>
           ) : null}

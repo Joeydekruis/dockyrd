@@ -14,8 +14,8 @@ import {
   enableTotp,
   getAuthSecurity,
   getMe,
-  setupTotp,
   type MeResponse,
+  setupTotp,
 } from "@/lib/api";
 
 export function AccountPasswordSettingsPage() {
@@ -99,7 +99,9 @@ export function AccountPasswordSettingsPage() {
       setError(null);
       setPasswordSaved(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not change password");
+      setError(
+        err instanceof Error ? err.message : "Could not change password",
+      );
     } finally {
       setChangingPassword(false);
     }

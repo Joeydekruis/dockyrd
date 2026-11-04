@@ -36,11 +36,7 @@ export function SettingsErrorBanner({ message }: { message: string | null }) {
   );
 }
 
-export function Owner2FARequiredBanner({
-  show,
-}: {
-  show: boolean;
-}) {
+export function Owner2FARequiredBanner({ show }: { show: boolean }) {
   if (!show) return null;
   return (
     <p

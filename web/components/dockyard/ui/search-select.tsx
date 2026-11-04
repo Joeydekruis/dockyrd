@@ -122,7 +122,7 @@ export const SearchSelect = forwardRef<HTMLButtonElement, SearchSelectProps>(
           ? 0
           : Math.min(i, filteredOptions.length - 1),
       );
-    }, [filteredOptions.length, searchQuery]);
+    }, [filteredOptions.length]);
 
     const onTriggerKeyDown = (e: React.KeyboardEvent) => {
       if (disabled) return;
@@ -243,7 +243,6 @@ export const SearchSelect = forwardRef<HTMLButtonElement, SearchSelectProps>(
                 ref={searchRef}
                 id={searchId}
                 type="search"
-                role="searchbox"
                 aria-controls={listId}
                 aria-label={searchPlaceholder}
                 placeholder={searchPlaceholder}

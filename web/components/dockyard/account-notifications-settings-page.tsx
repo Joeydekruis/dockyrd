@@ -10,8 +10,8 @@ import { SettingsPageBody } from "@/components/dockyard/settings-page-body";
 import { Button } from "@/components/dockyard/ui/button";
 import {
   getNotificationPrefs,
-  patchNotificationPrefs,
   type NotificationPrefs,
+  patchNotificationPrefs,
 } from "@/lib/api";
 
 const toggles: {

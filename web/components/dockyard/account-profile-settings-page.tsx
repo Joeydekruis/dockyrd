@@ -1,15 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import {
   Owner2FARequiredBanner,
   SettingsErrorBanner,
   SettingsSection,
 } from "@/components/dockyard/account-settings-shared";
+import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import { SettingsPageBody } from "@/components/dockyard/settings-page-body";
 import { Button } from "@/components/dockyard/ui/button";
-import { getMe, patchAccount, type MeResponse } from "@/lib/api";
+import { getMe, type MeResponse, patchAccount } from "@/lib/api";
 
 export function AccountProfileSettingsPage() {
   const [user, setUser] = useState<MeResponse | null>(null);
@@ -38,7 +38,10 @@ export function AccountProfileSettingsPage() {
     setSaving(true);
     setSaved(false);
     try {
-      const updated = await patchAccount({ name: name.trim(), email: email.trim() });
+      const updated = await patchAccount({
+        name: name.trim(),
+        email: email.trim(),
+      });
       setUser(updated);
       setError(null);
       setSaved(true);
@@ -49,8 +52,7 @@ export function AccountProfileSettingsPage() {
     }
   }
 
-  const needs2FA =
-    user?.role === "owner" && user.totp_enabled === false;
+  const needs2FA = user?.role === "owner" && user.totp_enabled === false;
 
   return (
     <DashboardShell title="Profile" breadcrumb="Account settings">
