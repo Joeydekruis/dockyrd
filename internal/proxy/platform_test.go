@@ -62,3 +62,24 @@ func TestRenderContainsRoute(t *testing.T) {
 		t.Fatal("expected reverse_proxy handler")
 	}
 }
+
+func TestRenderStaticFileServerRoot(t *testing.T) {
+	raw, err := Render(RenderInput{
+		ACMEEmail: "ops@example.com",
+		StaticRoutes: []StaticRoute{{
+			Hostname:   "marketing.example.com",
+			Root:       "/srv/sites/marketing/current",
+			IndexNames: []string{"index.html"},
+		}},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := string(raw)
+	if !strings.Contains(s, "/srv/sites/marketing/current") {
+		t.Fatalf("expected container sites root in %s", s)
+	}
+	if !strings.Contains(s, "file_server") {
+		t.Fatal("expected file_server handler")
+	}
+}

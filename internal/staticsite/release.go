@@ -69,9 +69,17 @@ func ActivateRelease(sitesRoot, serviceSlug, deploymentID string) (releasePath s
 	return releasePath, nil
 }
 
-// CurrentRoot returns the path Caddy should serve (symlink current).
+// CaddyMountSitesRoot is the bind mount target inside dy-proxy (see docker.EnsureProxy).
+const CaddyMountSitesRoot = "/srv/sites"
+
+// CurrentRoot returns the host path to the current release symlink (publish, doctor).
 func CurrentRoot(sitesRoot, serviceSlug string) string {
 	return PathsForService(sitesRoot, serviceSlug).CurrentLink
+}
+
+// CaddyFileServerRoot is the file_server root path as seen inside dy-proxy.
+func CaddyFileServerRoot(serviceSlug string) string {
+	return filepath.Join(CaddyMountSitesRoot, serviceSlug, "current")
 }
 
 func copyTree(src, dst string) error {

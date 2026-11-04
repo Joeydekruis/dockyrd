@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.41] - 2026-11-04
+
+_Finished: 2026-11-04_
+
+### Fixed
+
+- **Static site 404 at edge** — Caddy `file_server` root now uses **`/srv/sites/{slug}/current`** (dy-proxy mount) instead of the host `DataDir` path (`internal/proxy/sync.go`, `staticsite.CaddyFileServerRoot`)
+
 ## [0.0.40] - 2026-11-04
 
 _Finished: 2026-11-04_
