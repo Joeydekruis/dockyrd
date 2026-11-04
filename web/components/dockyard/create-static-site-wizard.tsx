@@ -24,6 +24,7 @@ import {
   listGitHubRepos,
   listProjects,
   type Project,
+  putServiceVariables,
 } from "@/lib/api";
 
 const STEPS: WizardStepDef[] = [
@@ -152,12 +153,15 @@ type CreateStaticSiteWizardProps = {
   open: boolean;
   onClose: () => void;
   onCreated: (result: StaticSiteCreateResult) => void;
+  /** When set, pre-selects project on the name step (e.g. project detail Add resource). */
+  defaultProjectId?: string;
 };
 
 export function CreateStaticSiteWizard({
   open,
   onClose,
   onCreated,
+  defaultProjectId,
 }: CreateStaticSiteWizardProps) {
   const [step, setStep] = useState(1);
   const [busy, setBusy] = useState(false);
@@ -215,8 +219,11 @@ export function CreateStaticSiteWizard({
     if (!open) return;
     setStep(1);
     setError(null);
+    if (defaultProjectId) {
+      setDraft((d) => ({ ...d, projectId: defaultProjectId }));
+    }
     void loadMeta();
-  }, [open, loadMeta]);
+  }, [open, loadMeta, defaultProjectId]);
 
   const defaultUrl = useMemo(
     () => defaultDeployUrl(draft.siteName || "marketing", instance),
@@ -293,8 +300,23 @@ export function CreateStaticSiteWizard({
           buildCmd: combineBuildCmd(draft.installCmd, draft.buildCmd),
           outputDir: draft.outputDir.trim(),
           nodeImage,
+          customDomain: draft.customDomain.trim(),
+          autoHttps: draft.autoHttps,
+          spaFallback: draft.spaFallback,
         },
       });
+      const envPayload = draft.envVars
+        .map((r) => ({
+          key: r.key.trim(),
+          value: r.value,
+          is_secret: false,
+          at_build: true,
+          at_runtime: false,
+        }))
+        .filter((v) => v.key.length > 0);
+      if (envPayload.length > 0) {
+        await putServiceVariables(service.id, envPayload);
+      }
       const deployment = await createDeployment(service.id);
       const url =
         draft.customDomain.trim() ||

@@ -38,6 +38,11 @@ func TestDynamicExportPlaceholder(t *testing.T) {
 		{"projects", "projects/acme", "projects/_/index.html"},
 		{"projects", "projects/acme/index.txt", "projects/_/index.txt"},
 		{"static-sites", "static-sites/marketing", "static-sites/_/index.html"},
+		{
+			"static-sites",
+			"static-sites/marketing/deployments/abc",
+			"static-sites/_/deployments/_/index.html",
+		},
 		{"projects", "projects", ""},
 		{"projects", "projects/_", ""},
 	}

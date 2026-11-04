@@ -17,6 +17,20 @@ export function useRouteParam(name: string, indexFromEnd = 0): string {
     if (name === "slug" && parts[0] === "static-sites" && parts[1]) {
       return parts[1] === "_" ? "" : parts[1];
     }
+    if (name === "slug" && parts[1]) {
+      const roots = ["applications", "databases", "object-storage"];
+      if (roots.includes(parts[0])) {
+        return parts[1] === "_" ? "" : parts[1];
+      }
+    }
+    if (
+      name === "deploymentId" &&
+      parts[0] === "static-sites" &&
+      parts[2] === "deployments" &&
+      parts[3]
+    ) {
+      return parts[3] === "_" ? "" : parts[3];
+    }
     const idx = parts.length - 1 - indexFromEnd;
     if (idx < 0) {
       return "";

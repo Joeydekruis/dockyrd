@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.37] - 2026-11-04
+
+_Finished: 2026-11-04_
+
+### Added
+
+- **Project detail** — design-aligned header, Resources / Project settings tabs, resource table (status, endpoint, CPU, memory, last deploy), hardware usage block, **Add resource** modal (type toggles, searchable pick from other projects, create new)
+- **Move resource API** — `PATCH /api/v1/services/{id}` with `project_id` to attach an existing service to a project (`internal/server/api_services.go`, sqlc)
+- **Static site detail** — tabbed overview (deployments, environment, domains, settings) and deployment detail route `/static-sites/{slug}/deployments/{id}`
+- **Resource detail routes** — `/applications/{slug}`, `/databases/{slug}`, `/object-storage/{slug}` with SPA fallback for `databases/` and `object-storage/`
+- **Add env variable modal** — single and bulk paste for service environment variables
+
+### Changed
+
+- **Project detail navigation** — resource names link to type-specific detail pages (`web/lib/service-routes.ts`)
+- **Create static site wizard** — optional `defaultProjectId` when opened from project Add resource
+
 ## [0.0.36] - 2026-11-04
 
 _Finished: 2026-11-04_

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -83,12 +84,12 @@ func (d apiDeps) handleCreateDomain(w http.ResponseWriter, r *http.Request) {
 		writeJSONError(w, http.StatusInternalServerError, "database error")
 		return
 	}
-	if svc.Kind != "app" {
-		writeJSONError(w, http.StatusBadRequest, "domains only supported for app services")
+	if svc.Kind != "app" && svc.Kind != "static_site" {
+		writeJSONError(w, http.StatusBadRequest, "domains only supported for app and static site services")
 		return
 	}
 
-	hostname := strings.TrimSpace(body.Hostname)
+	hostname := normalizeHostname(body.Hostname)
 	isPlatform := body.Platform || hostname == ""
 	if isPlatform {
 		publicIP := d.cfg.PublicIPv4
@@ -102,34 +103,12 @@ func (d apiDeps) handleCreateDomain(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	now := time.Now().Unix()
-	domainID := ulid.Make().String()
-	isPrimary := int64(0)
-	if body.Primary {
-		isPrimary = 1
-	}
-	platformFlag := int64(0)
-	if isPlatform {
-		platformFlag = 1
-	}
-	if err := d.q.CreateDomain(ctx, sqlc.CreateDomainParams{
-		ID:            domainID,
-		ServiceID:     serviceID,
-		Hostname:      hostname,
-		IsPlatform:    platformFlag,
-		IsPrimary:     isPrimary,
-		DnsStatus:     sql.NullString{String: "pending", Valid: true},
-		DnsCheckedAt:  sql.NullInt64{Int64: now, Valid: true},
-		CertStatus:    sql.NullString{String: "pending", Valid: true},
-	}); err != nil {
+	row, err := d.insertDomain(ctx, serviceID, hostname, isPlatform, body.Primary)
+	if err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "create domain error")
 		return
 	}
-	row, err := d.q.GetDomainByID(ctx, domainID)
-	if err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "database error")
-		return
-	}
+	d.syncEdgeProxy(ctx)
 	writeJSON(w, http.StatusCreated, domainFromRow(row))
 }
 
@@ -137,11 +116,98 @@ func (d apiDeps) handleDeleteDomain(w http.ResponseWriter, r *http.Request) {
 	if _, ok := d.requireUser(w, r); !ok {
 		return
 	}
-	if err := d.q.DeleteDomain(r.Context(), r.PathValue("id")); err != nil {
+	ctx := r.Context()
+	if err := d.q.DeleteDomain(ctx, r.PathValue("id")); err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "delete error")
 		return
 	}
+	d.syncEdgeProxy(ctx)
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func normalizeHostname(raw string) string {
+	h := strings.TrimSpace(raw)
+	h = strings.TrimPrefix(h, "https://")
+	h = strings.TrimPrefix(h, "http://")
+	h = strings.TrimSuffix(h, "/")
+	if i := strings.Index(h, "/"); i >= 0 {
+		h = h[:i]
+	}
+	return strings.ToLower(h)
+}
+
+func (d apiDeps) insertDomain(
+	ctx context.Context,
+	serviceID, hostname string,
+	isPlatform, isPrimary bool,
+) (sqlc.Domain, error) {
+	now := time.Now().Unix()
+	domainID := ulid.Make().String()
+	isPrimaryFlag := int64(0)
+	if isPrimary {
+		isPrimaryFlag = 1
+	}
+	platformFlag := int64(0)
+	if isPlatform {
+		platformFlag = 1
+	}
+	dnsStatus := "pending"
+	certStatus := "pending"
+	if isPlatform {
+		dnsStatus = "active"
+		certStatus = "active"
+	}
+	if err := d.q.CreateDomain(ctx, sqlc.CreateDomainParams{
+		ID:           domainID,
+		ServiceID:    serviceID,
+		Hostname:     hostname,
+		IsPlatform:   platformFlag,
+		IsPrimary:    isPrimaryFlag,
+		DnsStatus:    sql.NullString{String: dnsStatus, Valid: true},
+		DnsCheckedAt: sql.NullInt64{Int64: now, Valid: true},
+		CertStatus:   sql.NullString{String: certStatus, Valid: true},
+	}); err != nil {
+		return sqlc.Domain{}, err
+	}
+	return d.q.GetDomainByID(ctx, domainID)
+}
+
+func (d apiDeps) provisionServiceDomains(ctx context.Context, svc sqlc.Service, cfg json.RawMessage) {
+	custom := strings.TrimSpace(staticSiteCustomDomain(cfg))
+	platformPrimary := custom == ""
+	if _, err := d.insertPlatformDomain(ctx, svc.ID, svc.Slug, platformPrimary); err != nil {
+		return
+	}
+	if custom != "" {
+		custom = normalizeHostname(custom)
+		if custom != "" {
+			_, _ = d.insertDomain(ctx, svc.ID, custom, false, true)
+		}
+	}
+	d.syncEdgeProxy(ctx)
+}
+
+func staticSiteCustomDomain(cfg json.RawMessage) string {
+	if len(cfg) == 0 {
+		return ""
+	}
+	var partial struct {
+		CustomDomain string `json:"customDomain"`
+	}
+	_ = json.Unmarshal(cfg, &partial)
+	return partial.CustomDomain
+}
+
+func (d apiDeps) insertPlatformDomain(ctx context.Context, serviceID, serviceSlug string, isPrimary bool) (sqlc.Domain, error) {
+	publicIP := d.cfg.PublicIPv4
+	if publicIP == "" {
+		publicIP = "127.0.0.1"
+	}
+	hostname, err := proxy.PlatformHostname(serviceSlug, publicIP)
+	if err != nil {
+		return sqlc.Domain{}, err
+	}
+	return d.insertDomain(ctx, serviceID, hostname, true, isPrimary)
 }
 
 func domainFromRow(row sqlc.Domain) domainResponse {

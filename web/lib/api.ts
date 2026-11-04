@@ -261,6 +261,13 @@ export function createService(input: {
   });
 }
 
+export function moveServiceToProject(serviceId: string, projectId: string) {
+  return apiFetch<Service>(`/api/v1/services/${serviceId}`, {
+    method: "PATCH",
+    json: { project_id: projectId },
+  });
+}
+
 export type DatabaseRow = {
   id: string;
   kind: string;
@@ -377,6 +384,68 @@ export function promoteDeployment(deploymentId: string) {
   return apiFetch<Deployment>(`/api/v1/deployments/${deploymentId}/promote`, {
     method: "POST",
     json: {},
+  });
+}
+
+export type ServiceDomain = {
+  id: string;
+  service_id: string;
+  hostname: string;
+  is_platform: boolean;
+  is_primary: boolean;
+  redirect_to?: string;
+  dns_status?: string;
+  cert_status?: string;
+};
+
+export function listServiceDomains(serviceId: string) {
+  return apiFetch<{ domains: ServiceDomain[] }>(
+    `/api/v1/services/${serviceId}/domains`,
+  );
+}
+
+export function createServiceDomain(
+  serviceId: string,
+  input: { hostname?: string; platform?: boolean; primary?: boolean },
+) {
+  return apiFetch<ServiceDomain>(`/api/v1/services/${serviceId}/domains`, {
+    method: "POST",
+    json: input,
+  });
+}
+
+export function deleteServiceDomain(domainId: string) {
+  return apiFetch<void>(`/api/v1/domains/${domainId}`, { method: "DELETE" });
+}
+
+export type ServiceVariable = {
+  key: string;
+  is_secret: boolean;
+  at_build: boolean;
+  at_runtime: boolean;
+  value?: string;
+};
+
+export function listServiceVariables(serviceId: string, reveal = false) {
+  const q = reveal ? "?reveal=1" : "";
+  return apiFetch<{ variables: ServiceVariable[] }>(
+    `/api/v1/services/${serviceId}/variables${q}`,
+  );
+}
+
+export function putServiceVariables(
+  serviceId: string,
+  variables: {
+    key: string;
+    value: string;
+    is_secret?: boolean;
+    at_build?: boolean;
+    at_runtime?: boolean;
+  }[],
+) {
+  return apiFetch<void>(`/api/v1/services/${serviceId}/variables`, {
+    method: "PUT",
+    json: { variables },
   });
 }
 

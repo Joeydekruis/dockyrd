@@ -36,10 +36,15 @@ type createServiceRequest struct {
 	Config      json.RawMessage `json:"config"`
 }
 
+type patchServiceRequest struct {
+	ProjectID string `json:"project_id"`
+}
+
 func registerServiceRoutes(mux *http.ServeMux, deps apiDeps) {
 	mux.HandleFunc("GET /api/v1/services", deps.handleListServices)
 	mux.HandleFunc("POST /api/v1/services", deps.handleCreateService)
 	mux.HandleFunc("GET /api/v1/services/{id}", deps.handleGetService)
+	mux.HandleFunc("PATCH /api/v1/services/{id}", deps.handlePatchService)
 }
 
 func (d apiDeps) handleListServices(w http.ResponseWriter, r *http.Request) {
@@ -179,6 +184,9 @@ func (d apiDeps) handleCreateService(w http.ResponseWriter, r *http.Request) {
 		writeJSONError(w, http.StatusInternalServerError, "database error")
 		return
 	}
+	if body.Kind == "static_site" {
+		d.provisionServiceDomains(ctx, row, cfg)
+	}
 	writeJSON(w, http.StatusCreated, serviceFromRow(row))
 }
 
@@ -197,6 +205,74 @@ func (d apiDeps) handleGetService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, serviceFromRow(row))
+}
+
+func (d apiDeps) handlePatchService(w http.ResponseWriter, r *http.Request) {
+	if _, ok := d.requireUser(w, r); !ok {
+		return
+	}
+	id := r.PathValue("id")
+	var body patchServiceRequest
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		writeJSONError(w, http.StatusBadRequest, "invalid json")
+		return
+	}
+	body.ProjectID = strings.TrimSpace(body.ProjectID)
+	if body.ProjectID == "" {
+		writeJSONError(w, http.StatusBadRequest, "project_id required")
+		return
+	}
+	ctx := r.Context()
+	row, err := d.q.GetServiceByID(ctx, id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeJSONError(w, http.StatusNotFound, "service not found")
+			return
+		}
+		writeJSONError(w, http.StatusInternalServerError, "database error")
+		return
+	}
+	env, err := d.q.GetEnvironmentByProjectAndName(ctx, sqlc.GetEnvironmentByProjectAndNameParams{
+		ProjectID: body.ProjectID,
+		Name:      "production",
+	})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeJSONError(w, http.StatusNotFound, "environment not found")
+			return
+		}
+		writeJSONError(w, http.StatusInternalServerError, "database error")
+		return
+	}
+	if env.ID == row.EnvironmentID {
+		writeJSON(w, http.StatusOK, serviceFromRow(row))
+		return
+	}
+	if _, err := d.q.ServiceSlugExistsInEnvironment(ctx, sqlc.ServiceSlugExistsInEnvironmentParams{
+		EnvironmentID: env.ID,
+		Slug:          row.Slug,
+	}); err == nil {
+		writeJSONError(w, http.StatusConflict, "slug already used in target project")
+		return
+	} else if !errors.Is(err, sql.ErrNoRows) {
+		writeJSONError(w, http.StatusInternalServerError, "database error")
+		return
+	}
+	now := time.Now().Unix()
+	if err := d.q.UpdateServiceEnvironment(ctx, sqlc.UpdateServiceEnvironmentParams{
+		EnvironmentID: env.ID,
+		UpdatedAt:     sql.NullInt64{Int64: now, Valid: true},
+		ID:            id,
+	}); err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "update error")
+		return
+	}
+	updated, err := d.q.GetServiceByID(ctx, id)
+	if err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "database error")
+		return
+	}
+	writeJSON(w, http.StatusOK, serviceFromRow(updated))
 }
 
 func serviceFromRow(row sqlc.Service) serviceResponse {

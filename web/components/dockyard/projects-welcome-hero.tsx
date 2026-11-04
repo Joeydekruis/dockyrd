@@ -60,7 +60,7 @@ export function ProjectsWelcomeHero({
       style={{ background: "var(--hero-gradient)" }}
     >
       <div className="flex flex-col gap-8 lg:flex-row lg:items-stretch lg:justify-between">
-        <div className="max-w-xl">
+        <div className="max-w-xl flex flex-col gap-4 justify-center">
           <p className="auth-brand-badge">Self-hosted · Open source</p>
           <h1 className="auth-brand-headline mt-4 text-white">
             Deploy to your own servers. Without the mess.

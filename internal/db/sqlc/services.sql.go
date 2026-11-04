@@ -408,6 +408,25 @@ func (q *Queries) ListServicesByProject(ctx context.Context, projectID string) (
 	return items, nil
 }
 
+const serviceSlugExistsInEnvironment = `-- name: ServiceSlugExistsInEnvironment :one
+SELECT id
+FROM services
+WHERE environment_id = ? AND slug = ?
+LIMIT 1
+`
+
+type ServiceSlugExistsInEnvironmentParams struct {
+	EnvironmentID string
+	Slug          string
+}
+
+func (q *Queries) ServiceSlugExistsInEnvironment(ctx context.Context, arg ServiceSlugExistsInEnvironmentParams) (string, error) {
+	row := q.db.QueryRowContext(ctx, serviceSlugExistsInEnvironment, arg.EnvironmentID, arg.Slug)
+	var id string
+	err := row.Scan(&id)
+	return id, err
+}
+
 const setServiceLiveDeployment = `-- name: SetServiceLiveDeployment :exec
 UPDATE services
 SET live_deployment_id = ?, updated_at = ?
@@ -439,5 +458,22 @@ type UpdateServiceConfigParams struct {
 
 func (q *Queries) UpdateServiceConfig(ctx context.Context, arg UpdateServiceConfigParams) error {
 	_, err := q.db.ExecContext(ctx, updateServiceConfig, arg.Config, arg.UpdatedAt, arg.ID)
+	return err
+}
+
+const updateServiceEnvironment = `-- name: UpdateServiceEnvironment :exec
+UPDATE services
+SET environment_id = ?, updated_at = ?
+WHERE id = ?
+`
+
+type UpdateServiceEnvironmentParams struct {
+	EnvironmentID string
+	UpdatedAt     sql.NullInt64
+	ID            string
+}
+
+func (q *Queries) UpdateServiceEnvironment(ctx context.Context, arg UpdateServiceEnvironmentParams) error {
+	_, err := q.db.ExecContext(ctx, updateServiceEnvironment, arg.EnvironmentID, arg.UpdatedAt, arg.ID)
 	return err
 }

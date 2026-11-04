@@ -124,3 +124,14 @@ LIMIT 1;
 UPDATE services
 SET config = ?, updated_at = ?
 WHERE id = ?;
+
+-- name: ServiceSlugExistsInEnvironment :one
+SELECT id
+FROM services
+WHERE environment_id = ? AND slug = ?
+LIMIT 1;
+
+-- name: UpdateServiceEnvironment :exec
+UPDATE services
+SET environment_id = ?, updated_at = ?
+WHERE id = ?;

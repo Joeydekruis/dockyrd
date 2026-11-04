@@ -89,7 +89,7 @@ func handleHealth(w http.ResponseWriter, _ *http.Request) {
 }
 
 func spaExportFallback(rel string) string {
-	for _, segment := range []string{"projects", "static-sites", "applications"} {
+	for _, segment := range []string{"projects", "static-sites", "applications", "databases", "object-storage"} {
 		if alt := dynamicExportPlaceholder(rel, segment); alt != "" {
 			return alt
 		}
@@ -131,7 +131,19 @@ func dynamicExportPlaceholder(rel, segment string) string {
 	if len(parts) == 0 || parts[0] == "_" {
 		return ""
 	}
+	staticSegments := map[string]struct{}{
+		"deployments": {},
+	}
 	parts[0] = "_"
+	for i := 1; i < len(parts); i++ {
+		if _, ok := staticSegments[parts[i]]; ok {
+			continue
+		}
+		if strings.Contains(parts[i], ".") {
+			continue
+		}
+		parts[i] = "_"
+	}
 	mapped := prefix + strings.Join(parts, "/")
 	last := parts[len(parts)-1]
 	if last != "index.html" && last != "index.txt" && !strings.Contains(last, ".") {
