@@ -8,3 +8,7 @@ web/tsconfig.tsbuildinfo
 
 *storybook.log
 storybook-static
+
+# Claude Code (local-only)
+.claude/settings.local.json
+CLAUDE.local.md
