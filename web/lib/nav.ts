@@ -100,6 +100,11 @@ export const serverSettingsSidebarNav: SettingsNavItem[] = [
   { label: "Team", href: "/settings/server/team", icon: Users },
   { label: "Email", href: "/settings/server/email", icon: Mail },
   {
+    label: "Backups",
+    href: "/settings/server/backups",
+    icon: HardDrive,
+  },
+  {
     label: "Git providers",
     href: "/settings/server/integrations",
     icon: Plug,

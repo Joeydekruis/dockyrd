@@ -97,6 +97,8 @@ func spaExportFallback(rel string) string {
 	switch {
 	case strings.HasPrefix(rel, "settings/server/email"):
 		return "settings/server/email/index.html"
+	case strings.HasPrefix(rel, "settings/server/backups"):
+		return "settings/server/backups/index.html"
 	case strings.HasPrefix(rel, "settings/server/"):
 		return "settings/server/general/index.html"
 	case strings.HasPrefix(rel, "settings/account/"):

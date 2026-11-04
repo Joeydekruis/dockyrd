@@ -4,18 +4,17 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AddEnvVariableModal } from "@/components/dockyard/add-env-variable-modal";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { ServiceDomainsTab } from "@/components/dockyard/service-domains-tab";
 import { ServiceLogsPanel } from "@/components/dockyard/service-logs-panel";
 import { Button } from "@/components/dockyard/ui/button";
 import { CommitChip } from "@/components/dockyard/ui/commit-chip";
 import { EmptyState } from "@/components/dockyard/ui/empty-state";
 import { EnvVarRow } from "@/components/dockyard/ui/env-var-row";
-import { Field } from "@/components/dockyard/ui/field";
 import { KeyValueRow } from "@/components/dockyard/ui/key-value-row";
 import { StatusBadge } from "@/components/dockyard/ui/status-badge";
 import { Tabs } from "@/components/dockyard/ui/tabs";
 import {
   createDeployment,
-  createServiceDomain,
   type Deployment,
   listDeployments,
   listProjects,
@@ -42,7 +41,6 @@ import {
 import {
   deploymentDurationSec,
   deploymentStatusDisplay,
-  domainStatusDisplay,
   formatDeploymentWhen,
   formatDurationSec,
 } from "@/lib/static-site-display";
@@ -127,8 +125,6 @@ export function ApplicationDetailPage() {
   const [tab, setTab] = useState<TabId>("overview");
   const [revealedSecrets, setRevealedSecrets] = useState(false);
   const [addVarOpen, setAddVarOpen] = useState(false);
-  const [newDomain, setNewDomain] = useState("");
-  const [domainBusy, setDomainBusy] = useState(false);
   const [deployBusy, setDeployBusy] = useState(false);
 
   const refresh = useCallback(async () => {
@@ -240,27 +236,6 @@ export function ApplicationDetailPage() {
       })),
     );
     await refresh();
-  }
-
-  async function onAddDomain(e: React.FormEvent) {
-    e.preventDefault();
-    if (!row) return;
-    const host = newDomain.trim();
-    if (!host) return;
-    setDomainBusy(true);
-    setError(null);
-    try {
-      await createServiceDomain(row.service.id, {
-        hostname: host,
-        primary: true,
-      });
-      setNewDomain("");
-      await refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not add domain");
-    } finally {
-      setDomainBusy(false);
-    }
   }
 
   const title = row?.service.name ?? "Application";
@@ -518,67 +493,16 @@ export function ApplicationDetailPage() {
             </section>
           ) : null}
 
-          {tab === "domains" ? (
-            <div className="space-y-6">
-              <section
-                className={RESOURCE_DETAIL_CARD}
-                style={resourceDetailCardStyle()}
-              >
-                <h2 className="text-lg font-semibold tracking-tight">
-                  Domains
-                </h2>
-                {row.domains.length === 0 ? (
-                  <p
-                    className="mt-4 text-sm"
-                    style={{ color: "var(--muted-text)" }}
-                  >
-                    No domains yet. Add a hostname to expose this app through
-                    Caddy.
-                  </p>
-                ) : (
-                  row.domains.map((d) => {
-                    const st = domainStatusDisplay(d);
-                    return (
-                      <div
-                        key={d.id}
-                        className="mt-4 border-t pt-4 first:mt-0 first:border-t-0 first:pt-0"
-                        style={{ borderColor: "var(--border)" }}
-                      >
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="font-mono text-sm">
-                            {d.hostname}
-                          </span>
-                          {d.is_primary ? (
-                            <span
-                              className="font-mono text-[11px] uppercase tracking-widest"
-                              style={{ color: "var(--muted-text)" }}
-                            >
-                              Primary
-                            </span>
-                          ) : null}
-                          <StatusBadge label={st.label} variant={st.variant} />
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-                <form
-                  className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-end"
-                  onSubmit={(e) => void onAddDomain(e)}
-                >
-                  <Field
-                    label="Custom domain"
-                    value={newDomain}
-                    onChange={(e) => setNewDomain(e.target.value)}
-                    placeholder="app.example.com"
-                    className="flex-1"
-                  />
-                  <Button type="submit" disabled={domainBusy}>
-                    Add domain
-                  </Button>
-                </form>
-              </section>
-            </div>
+          {tab === "domains" && row ? (
+            <ServiceDomainsTab
+              serviceId={row.service.id}
+              domains={row.domains}
+              onRefresh={refresh}
+              onError={setError}
+              layout="app"
+              cardClassName={RESOURCE_DETAIL_CARD}
+              cardStyle={resourceDetailCardStyle()}
+            />
           ) : null}
 
           {tab === "settings" ? (

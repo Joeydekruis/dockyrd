@@ -40,6 +40,11 @@ func SyncFromDB(ctx context.Context, q *sqlc.Queries, cfg config.Config) error {
 	for _, row := range staticRows {
 		_ = staticsite.EnsureRelativeCurrentLink(cfg.SitesDir(), row.ServiceSlug)
 		root := staticsite.CaddyFileServerRoot(row.ServiceSlug)
+		if row.ReleasePath.Valid {
+			if mapped, ok := staticsite.HostReleaseToCaddyRoot(cfg.SitesDir(), row.ReleasePath.String); ok {
+				root = mapped
+			}
+		}
 		var siteCfg staticsite.Config
 		raw := appconfig.RawConfig(row.ServiceConfig)
 		if len(raw) > 0 {
@@ -77,6 +82,7 @@ func SyncFromDB(ctx context.Context, q *sqlc.Queries, cfg config.Config) error {
 		AppRoutes:     appRoutes,
 		StaticRoutes:  staticRoutes,
 		AdminListen:   adminListenPath(cfg.CaddyAdminSocket()),
+		AccessLog:     cfg.CaddyAccessLogPath(),
 	})
 	if err != nil {
 		return err

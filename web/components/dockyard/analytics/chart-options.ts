@@ -201,6 +201,33 @@ export function sparklineOption(
   };
 }
 
+export function stackedBarOption(input: {
+  labels: string[];
+  series: { name: string; values: number[] }[];
+}): EChartsOption {
+  const palette = [c.primary, c.cache, c.alert, "#b3261e"];
+  return {
+    animation: false,
+    grid: { ...baseGrid, bottom: 40 },
+    tooltip: { trigger: "axis" },
+    legend: { bottom: 0, textStyle: { color: c.axis, fontSize: 11 } },
+    xAxis: {
+      type: "category",
+      data: input.labels,
+      ...baseAxis,
+      splitLine: { show: false },
+    },
+    yAxis: { type: "value", ...baseAxis },
+    series: input.series.map((s, i) => ({
+      name: s.name,
+      type: "bar",
+      stack: "status",
+      data: s.values,
+      itemStyle: { color: palette[i] ?? c.mutedBar },
+    })),
+  };
+}
+
 export function horizontalStackOption(
   segments: {
     name: string;

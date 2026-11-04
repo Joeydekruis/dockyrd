@@ -1,7 +1,6 @@
 "use client";
 
 import type { EChartsOption } from "echarts";
-import Link from "next/link";
 import {
   areaLineOption,
   dualAreaOption,
@@ -705,7 +704,7 @@ export function EventsAndOpsSection({
           />
         </div>
         <ul
-          className="divide-y rounded-[20px] border"
+          className="divide-y divide-[var(--border)] rounded-[20px] border"
           style={{ borderColor: "var(--border)", background: "var(--surface)" }}
         >
           {events.length === 0 ? (
@@ -768,13 +767,13 @@ export function EventsAndOpsSection({
                 <li key={ev.id} className="text-sm">
                   <p>{ev.title}</p>
                   {ev.action_href ? (
-                    <Link
+                    <Button
                       href={ev.action_href}
-                      className="text-[13px] underline"
-                      style={{ color: "var(--link-blue)" }}
+                      variant="link"
+                      className="mt-1 text-[13px]"
                     >
                       Open service →
-                    </Link>
+                    </Button>
                   ) : null}
                 </li>
               ))
@@ -813,7 +812,7 @@ export function EventsAndOpsSection({
                   type="button"
                   disabled={cleanupBusy}
                   className="mt-4"
-                  variant="secondary"
+                  variant="outline"
                   onClick={onCleanup}
                 >
                   {cleanupBusy ? "Cleaning…" : "Review and clean up"}

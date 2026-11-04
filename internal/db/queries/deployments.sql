@@ -41,6 +41,8 @@ SELECT
   image_ref,
   release_path,
   commit_sha,
+  commit_message,
+  commit_author,
   branch,
   build_log_path,
   error,

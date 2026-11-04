@@ -102,6 +102,8 @@ SELECT
   image_ref,
   release_path,
   commit_sha,
+  commit_message,
+  commit_author,
   branch,
   build_log_path,
   error,
@@ -114,20 +116,22 @@ ORDER BY queued_at DESC
 `
 
 type ListDeploymentsForServiceRow struct {
-	ID           string
-	ServiceID    string
-	Status       string
-	Trigger      string
-	TriggeredBy  sql.NullString
-	ImageRef     sql.NullString
-	ReleasePath  sql.NullString
-	CommitSha    sql.NullString
-	Branch       sql.NullString
-	BuildLogPath sql.NullString
-	Error        sql.NullString
-	QueuedAt     sql.NullInt64
-	StartedAt    sql.NullInt64
-	FinishedAt   sql.NullInt64
+	ID            string
+	ServiceID     string
+	Status        string
+	Trigger       string
+	TriggeredBy   sql.NullString
+	ImageRef      sql.NullString
+	ReleasePath   sql.NullString
+	CommitSha     sql.NullString
+	CommitMessage sql.NullString
+	CommitAuthor  sql.NullString
+	Branch        sql.NullString
+	BuildLogPath  sql.NullString
+	Error         sql.NullString
+	QueuedAt      sql.NullInt64
+	StartedAt     sql.NullInt64
+	FinishedAt    sql.NullInt64
 }
 
 func (q *Queries) ListDeploymentsForService(ctx context.Context, serviceID string) ([]ListDeploymentsForServiceRow, error) {
@@ -148,6 +152,8 @@ func (q *Queries) ListDeploymentsForService(ctx context.Context, serviceID strin
 			&i.ImageRef,
 			&i.ReleasePath,
 			&i.CommitSha,
+			&i.CommitMessage,
+			&i.CommitAuthor,
 			&i.Branch,
 			&i.BuildLogPath,
 			&i.Error,

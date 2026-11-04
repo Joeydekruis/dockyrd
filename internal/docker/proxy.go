@@ -39,7 +39,7 @@ func (c *Client) EnsureProxy(ctx context.Context, cfg config.Config) error {
 	if err := os.MkdirAll(filepath.Join(caddyDir, "certificates"), 0o750); err != nil {
 		return err
 	}
-	if err := os.MkdirAll(cfg.SitesDir(), 0o750); err != nil {
+	if err := os.MkdirAll(cfg.SitesDir(), 0o755); err != nil {
 		return err
 	}
 	bootstrapPath := filepath.Join(caddyDir, "bootstrap.json")

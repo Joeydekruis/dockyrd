@@ -10,6 +10,15 @@ import (
 	"database/sql"
 )
 
+const clearPrimaryForService = `-- name: ClearPrimaryForService :exec
+UPDATE domains SET is_primary = 0 WHERE service_id = ?
+`
+
+func (q *Queries) ClearPrimaryForService(ctx context.Context, serviceID string) error {
+	_, err := q.db.ExecContext(ctx, clearPrimaryForService, serviceID)
+	return err
+}
+
 const createDomain = `-- name: CreateDomain :exec
 INSERT INTO domains (
   id,
@@ -187,4 +196,29 @@ func (q *Queries) ListDomainsForService(ctx context.Context, serviceID string) (
 		return nil, err
 	}
 	return items, nil
+}
+
+const setDomainPrimary = `-- name: SetDomainPrimary :exec
+UPDATE domains SET is_primary = 1 WHERE id = ?
+`
+
+func (q *Queries) SetDomainPrimary(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, setDomainPrimary, id)
+	return err
+}
+
+const setDomainPrimaryForService = `-- name: SetDomainPrimaryForService :exec
+UPDATE domains
+SET is_primary = CASE WHEN id = ? THEN 1 ELSE 0 END
+WHERE service_id = ?
+`
+
+type SetDomainPrimaryForServiceParams struct {
+	ID        string
+	ServiceID string
+}
+
+func (q *Queries) SetDomainPrimaryForService(ctx context.Context, arg SetDomainPrimaryForServiceParams) error {
+	_, err := q.db.ExecContext(ctx, setDomainPrimaryForService, arg.ID, arg.ServiceID)
+	return err
 }

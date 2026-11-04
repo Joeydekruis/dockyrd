@@ -36,6 +36,7 @@ func registerDomainRoutes(mux *http.ServeMux, deps apiDeps) {
 	mux.HandleFunc("GET /api/v1/services/{id}/domains", deps.handleListDomains)
 	mux.HandleFunc("POST /api/v1/services/{id}/domains", deps.handleCreateDomain)
 	mux.HandleFunc("DELETE /api/v1/domains/{id}", deps.handleDeleteDomain)
+	mux.HandleFunc("PATCH /api/v1/domains/{id}", deps.handlePatchDomain)
 }
 
 func (d apiDeps) handleListDomains(w http.ResponseWriter, r *http.Request) {
@@ -117,12 +118,76 @@ func (d apiDeps) handleDeleteDomain(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ctx := r.Context()
-	if err := d.q.DeleteDomain(ctx, r.PathValue("id")); err != nil {
+	id := r.PathValue("id")
+	dom, err := d.q.GetDomainByID(ctx, id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeJSONError(w, http.StatusNotFound, "domain not found")
+			return
+		}
+		writeJSONError(w, http.StatusInternalServerError, "database error")
+		return
+	}
+	wasPrimary := dom.IsPrimary != 0
+	serviceID := dom.ServiceID
+	if err := d.q.DeleteDomain(ctx, id); err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "delete error")
 		return
 	}
+	if wasPrimary {
+		rows, err := d.q.ListDomainsForService(ctx, serviceID)
+		if err == nil && len(rows) > 0 {
+			pick := rows[0].ID
+			for _, row := range rows {
+				if row.IsPlatform != 0 {
+					pick = row.ID
+					break
+				}
+			}
+			_ = d.q.ClearPrimaryForService(ctx, serviceID)
+			_ = d.q.SetDomainPrimary(ctx, pick)
+		}
+	}
 	d.syncEdgeProxy(ctx)
 	w.WriteHeader(http.StatusNoContent)
+}
+
+func (d apiDeps) handlePatchDomain(w http.ResponseWriter, r *http.Request) {
+	if _, ok := d.requireUser(w, r); !ok {
+		return
+	}
+	var body struct {
+		Primary *bool `json:"primary"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.Primary == nil || !*body.Primary {
+		writeJSONError(w, http.StatusBadRequest, "only {\"primary\": true} is supported")
+		return
+	}
+	ctx := r.Context()
+	id := r.PathValue("id")
+	dom, err := d.q.GetDomainByID(ctx, id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeJSONError(w, http.StatusNotFound, "domain not found")
+			return
+		}
+		writeJSONError(w, http.StatusInternalServerError, "database error")
+		return
+	}
+	if err := d.q.SetDomainPrimaryForService(ctx, sqlc.SetDomainPrimaryForServiceParams{
+		ID:        id,
+		ServiceID: dom.ServiceID,
+	}); err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "update error")
+		return
+	}
+	d.syncEdgeProxy(ctx)
+	row, err := d.q.GetDomainByID(ctx, id)
+	if err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "database error")
+		return
+	}
+	writeJSON(w, http.StatusOK, domainFromRow(row))
 }
 
 func normalizeHostname(raw string) string {

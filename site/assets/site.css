@@ -21,7 +21,8 @@
   --header-h:64px;
 }
 *{box-sizing:border-box}
-html{scroll-padding-top:calc(var(--header-h) + 24px)}
+html,body{margin:0}
+html{scroll-padding-top:calc(var(--header-h) + 24px);background:var(--canvas)}
 body{background:var(--canvas);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
 a{color:var(--link);text-decoration:none}
 a:hover{text-decoration:underline}

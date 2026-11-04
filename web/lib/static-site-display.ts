@@ -107,6 +107,57 @@ export function deploymentStatusDisplay(status: string): {
   };
 }
 
+/** Static site list/detail: live deployments read as “Deployed”. */
+export function staticSiteDeploymentStatusDisplay(status: string): {
+  label: string;
+  variant: StatusVariant;
+} {
+  const s = status.trim().toLowerCase();
+  if (s === "live") return { label: "Deployed", variant: "ok" };
+  return deploymentStatusDisplay(status);
+}
+
+export function deploymentTriggerLabel(trigger: string): string {
+  const t = trigger.trim().toLowerCase();
+  if (t === "github_push" || t === "github") return "Automatic on commit";
+  if (t === "manual") return "Manual";
+  if (t === "redeploy") return "Redeploy";
+  if (!t) return "—";
+  return trigger.replace(/_/g, " ");
+}
+
+export function deploymentSourceTitle(d: Deployment): string {
+  const msg = d.commit_message?.trim();
+  if (msg) {
+    const first = msg.split("\n")[0]?.trim();
+    if (first) return first;
+  }
+  if (d.branch?.trim()) return `Deploy ${d.branch.trim()}`;
+  return deploymentTriggerLabel(d.trigger);
+}
+
+export function deploymentAuthorLabel(d: Deployment): string {
+  const author = d.commit_author?.trim();
+  return author || "—";
+}
+
+export function deploymentCommitShaShort(d: Deployment): string {
+  const sha = d.commit_sha?.trim();
+  if (!sha) return "—";
+  return sha.slice(0, 7);
+}
+
+export function formatDeploymentStartedAt(unixSec?: number): string {
+  if (!unixSec) return "—";
+  return new Date(unixSec * 1000).toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 export function deploymentDurationSec(d: Deployment): number | undefined {
   const start = d.started_at ?? d.queued_at;
   const end = d.finished_at;
@@ -194,15 +245,7 @@ export function formatBuildPart(value: string): string {
   return v === "" ? "—" : v;
 }
 
-export function domainStatusDisplay(domain: ServiceDomain): {
-  label: string;
-  variant: StatusVariant;
-} {
-  const dns = (domain.dns_status ?? "").toLowerCase();
-  if (dns === "active") return { label: "Active", variant: "ok" };
-  if (dns === "pending") return { label: "Pending DNS", variant: "warn" };
-  return { label: domain.dns_status ?? "Unknown", variant: "idle" };
-}
+export { domainStatusDisplay } from "@/lib/domain-dns";
 
 export function visitSiteHref(hostname?: string): string | undefined {
   if (!hostname) return undefined;

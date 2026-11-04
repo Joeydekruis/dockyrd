@@ -1,23 +1,24 @@
 "use client";
 
 import { ExternalLink } from "lucide-react";
-import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AddEnvVariableModal } from "@/components/dockyard/add-env-variable-modal";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { ServiceDomainsTab } from "@/components/dockyard/service-domains-tab";
+import {
+  ServiceAccessLogsPanel,
+  ServiceTrafficAnalyticsPanel,
+} from "@/components/dockyard/service-traffic-panel";
 import { StaticSiteSettingsTab } from "@/components/dockyard/static-site-settings-tab";
 import { Button } from "@/components/dockyard/ui/button";
-import { CommitChip } from "@/components/dockyard/ui/commit-chip";
-import { DnsRecordBlock } from "@/components/dockyard/ui/dns-record-block";
 import { EmptyState } from "@/components/dockyard/ui/empty-state";
 import { EnvVarRow } from "@/components/dockyard/ui/env-var-row";
-import { Field } from "@/components/dockyard/ui/field";
 import { KeyValueRow } from "@/components/dockyard/ui/key-value-row";
+import { StaticSiteDeploymentTable } from "@/components/dockyard/ui/static-site-deployment-table";
 import { StatusBadge } from "@/components/dockyard/ui/status-badge";
 import { Tabs } from "@/components/dockyard/ui/tabs";
 import {
   createDeployment,
-  createServiceDomain,
   type Deployment,
   listDeployments,
   listProjects,
@@ -32,11 +33,7 @@ import {
 } from "@/lib/api";
 import { formatTimeAgo, resourceStatusDisplay } from "@/lib/resource-dashboard";
 import {
-  deploymentDurationSec,
-  deploymentStatusDisplay,
-  domainStatusDisplay,
-  formatDeploymentWhen,
-  formatDurationSec,
+  deploymentCommitShaShort,
   parseStaticSiteConfig,
   primaryDomainHost,
   visitSiteHref,
@@ -67,47 +64,6 @@ function cardClassName() {
   return "rounded-[20px] border px-6 py-5";
 }
 
-function DeploymentListItem({
-  deployment,
-  siteSlug,
-}: {
-  deployment: Deployment;
-  siteSlug: string;
-}) {
-  const st = deploymentStatusDisplay(deployment.status);
-  const dur = deploymentDurationSec(deployment);
-  const when = formatDeploymentWhen(
-    deployment.finished_at ?? deployment.started_at ?? deployment.queued_at,
-  );
-  const meta = `${deployment.trigger}${dur !== undefined ? ` · ${formatDurationSec(dur)}` : ""}`;
-
-  return (
-    <Link
-      href={`/static-sites/${siteSlug}/deployments/${deployment.id}`}
-      className="flex flex-wrap items-center gap-3 border-t py-4 first:border-t-0 hover:bg-[var(--hover-row)]"
-      style={{ borderColor: "var(--border)" }}
-    >
-      <StatusBadge label={st.label} variant={st.variant} />
-      <CommitChip
-        sha={deployment.commit_sha ?? "pending"}
-        message={deployment.branch ?? deployment.trigger}
-      />
-      <span
-        className="min-w-0 flex-1 truncate text-[13px]"
-        style={{ color: "var(--muted-text)" }}
-      >
-        {meta}
-      </span>
-      <span
-        className="shrink-0 font-mono text-[12px] tabular-nums"
-        style={{ color: "var(--muted-text)" }}
-      >
-        {when}
-      </span>
-    </Link>
-  );
-}
-
 export function StaticSiteDetailPage() {
   const slug = useRouteParam("slug");
   const [row, setRow] = useState<SiteRow | null>(null);
@@ -116,8 +72,6 @@ export function StaticSiteDetailPage() {
   const [tab, setTab] = useState<TabId>("overview");
   const [revealedSecrets, setRevealedSecrets] = useState(false);
   const [addVarOpen, setAddVarOpen] = useState(false);
-  const [newDomain, setNewDomain] = useState("");
-  const [domainBusy, setDomainBusy] = useState(false);
   const [deployBusy, setDeployBusy] = useState(false);
 
   const refresh = useCallback(async () => {
@@ -238,45 +192,6 @@ export function StaticSiteDetailPage() {
       })),
     );
     await refresh();
-  }
-
-  async function onAddDomain(e: React.FormEvent) {
-    e.preventDefault();
-    if (!row) return;
-    const host = newDomain.trim();
-    if (!host) return;
-    setDomainBusy(true);
-    setError(null);
-    try {
-      await createServiceDomain(row.service.id, {
-        hostname: host,
-        primary: true,
-      });
-      setNewDomain("");
-      await refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not add domain");
-    } finally {
-      setDomainBusy(false);
-    }
-  }
-
-  async function ensurePlatformDomain() {
-    if (!row) return;
-    setDomainBusy(true);
-    try {
-      await createServiceDomain(row.service.id, {
-        platform: true,
-        primary: !primaryHost,
-      });
-      await refresh();
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Could not add platform domain",
-      );
-    } finally {
-      setDomainBusy(false);
-    }
   }
 
   const title = row?.service.name ?? "Static site";
@@ -400,8 +315,8 @@ export function StaticSiteDetailPage() {
                   <KeyValueRow
                     label="Last deploy"
                     value={
-                      latest?.commit_sha
-                        ? `${latest.commit_sha.slice(0, 7)} · ${formatTimeAgo(latest.finished_at ?? latest.started_at) ?? "—"}`
+                      latest
+                        ? `${deploymentCommitShaShort(latest)} · ${formatTimeAgo(latest.finished_at ?? latest.started_at) ?? "—"}`
                         : "—"
                     }
                   />
@@ -439,13 +354,13 @@ export function StaticSiteDetailPage() {
                   </Button>
                 </div>
                 <div className="mt-2">
-                  {row.deployments.slice(0, 5).map((d) => (
-                    <DeploymentListItem
-                      key={d.id}
-                      deployment={d}
-                      siteSlug={row.service.slug}
-                    />
-                  ))}
+                  <StaticSiteDeploymentTable
+                    deployments={row.deployments.slice(0, 5)}
+                    siteSlug={row.service.slug}
+                    sourceRepo={cfg?.source?.repo}
+                    defaultBranch={cfg?.source?.branch ?? "main"}
+                    compact
+                  />
                   {row.deployments.length === 0 ? (
                     <p
                       className="py-6 text-sm"
@@ -480,13 +395,12 @@ export function StaticSiteDetailPage() {
                 </Button>
               </div>
               <div className="mt-2">
-                {row.deployments.map((d) => (
-                  <DeploymentListItem
-                    key={d.id}
-                    deployment={d}
-                    siteSlug={row.service.slug}
-                  />
-                ))}
+                <StaticSiteDeploymentTable
+                  deployments={row.deployments}
+                  siteSlug={row.service.slug}
+                  sourceRepo={cfg?.source?.repo}
+                  defaultBranch={cfg?.source?.branch ?? "main"}
+                />
                 {row.deployments.length === 0 ? (
                   <div className="py-8 text-center">
                     <EmptyState
@@ -507,15 +421,12 @@ export function StaticSiteDetailPage() {
             </section>
           ) : null}
 
-          {tab === "logs" || tab === "analytics" ? (
-            <EmptyState
-              title={tab === "logs" ? "Access logs" : "Analytics"}
-              description={
-                tab === "logs"
-                  ? "HTTP access logs for static sites will appear here once Caddy log streaming is wired to the panel."
-                  : "Per-site traffic charts will appear here in a future release."
-              }
-            />
+          {tab === "logs" ? (
+            <ServiceAccessLogsPanel serviceId={row.service.id} />
+          ) : null}
+
+          {tab === "analytics" ? (
+            <ServiceTrafficAnalyticsPanel serviceId={row.service.id} />
           ) : null}
 
           {tab === "environment" ? (
@@ -574,135 +485,15 @@ export function StaticSiteDetailPage() {
             </section>
           ) : null}
 
-          {tab === "domains" ? (
-            <div className="space-y-6">
-              <section
-                className={cardClassName()}
-                style={{
-                  borderColor: "var(--border)",
-                  background: "var(--surface)",
-                }}
-              >
-                <h2 className="text-lg font-semibold tracking-tight">
-                  Platform domain
-                </h2>
-                {row.domains
-                  .filter((d) => d.is_platform)
-                  .map((d) => {
-                    const st = domainStatusDisplay(d);
-                    return (
-                      <div
-                        key={d.id}
-                        className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-4"
-                        style={{ borderColor: "var(--border)" }}
-                      >
-                        <span className="font-mono text-sm">{d.hostname}</span>
-                        <StatusBadge label={st.label} variant={st.variant} />
-                      </div>
-                    );
-                  })}
-                {row.domains.every((d) => !d.is_platform) ? (
-                  <div className="mt-4">
-                    <p
-                      className="text-sm"
-                      style={{ color: "var(--muted-text)" }}
-                    >
-                      No platform domain on file — HTTPS routing may not work
-                      until one is added.
-                    </p>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="mt-3"
-                      disabled={domainBusy}
-                      onClick={() => void ensurePlatformDomain()}
-                    >
-                      Add platform domain
-                    </Button>
-                  </div>
-                ) : null}
-              </section>
-              <section
-                className={cardClassName()}
-                style={{
-                  borderColor: "var(--border)",
-                  background: "var(--surface)",
-                }}
-              >
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <h2 className="text-lg font-semibold tracking-tight">
-                    Custom domains
-                  </h2>
-                </div>
-                {row.domains
-                  .filter((d) => !d.is_platform)
-                  .map((d) => {
-                    const st = domainStatusDisplay(d);
-                    return (
-                      <div
-                        key={d.id}
-                        className="mt-4 border-t pt-4"
-                        style={{ borderColor: "var(--border)" }}
-                      >
-                        <div className="flex flex-wrap items-center gap-3">
-                          <span className="font-mono text-sm">
-                            {d.hostname}
-                          </span>
-                          {d.is_primary ? (
-                            <span
-                              className="font-mono text-[11px] uppercase tracking-widest"
-                              style={{ color: "var(--muted-text)" }}
-                            >
-                              Primary
-                            </span>
-                          ) : null}
-                          <StatusBadge label={st.label} variant={st.variant} />
-                          {d.cert_status === "active" ? (
-                            <span
-                              className="text-[13px]"
-                              style={{ color: "var(--muted-text)" }}
-                            >
-                              HTTPS · Let&apos;s Encrypt
-                            </span>
-                          ) : null}
-                        </div>
-                        {st.label === "Pending DNS" ? (
-                          <div className="mt-3 space-y-2">
-                            <DnsRecordBlock
-                              type="A"
-                              name="@"
-                              value="Your server public IPv4"
-                            />
-                            <p
-                              className="text-[13px]"
-                              style={{ color: "var(--muted-text)" }}
-                            >
-                              Point DNS at this server, then reload this page.
-                              Certificates issue automatically once HTTP-01 can
-                              reach Caddy on ports 80 and 443.
-                            </p>
-                          </div>
-                        ) : null}
-                      </div>
-                    );
-                  })}
-                <form
-                  className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-end"
-                  onSubmit={(e) => void onAddDomain(e)}
-                >
-                  <Field
-                    label="Custom domain"
-                    value={newDomain}
-                    onChange={(e) => setNewDomain(e.target.value)}
-                    placeholder="clientx.nl"
-                    className="flex-1"
-                  />
-                  <Button type="submit" disabled={domainBusy}>
-                    Add domain
-                  </Button>
-                </form>
-              </section>
-            </div>
+          {tab === "domains" && row ? (
+            <ServiceDomainsTab
+              serviceId={row.service.id}
+              domains={row.domains}
+              onRefresh={refresh}
+              onError={setError}
+              layout="static"
+              cardClassName={cardClassName()}
+            />
           ) : null}
 
           {tab === "settings" && cfg ? (

@@ -19,6 +19,47 @@ type AuditLog struct {
 	CreatedAt  sql.NullInt64
 }
 
+type BackupTarget struct {
+	ID           string
+	ServerID     string
+	Provider     string
+	Endpoint     string
+	Bucket       string
+	Prefix       string
+	Region       string
+	AccessKeyEnc []byte
+	SecretKeyEnc []byte
+	CreatedAt    sql.NullInt64
+	UpdatedAt    sql.NullInt64
+}
+
+type DatabaseBackupPolicy struct {
+	ID            string
+	ServiceID     string
+	Enabled       int64
+	IntervalKind  string
+	RetentionDays int64
+	LocalEnabled  int64
+	RemoteEnabled int64
+	LastRunAt     sql.NullInt64
+	NextRunAt     sql.NullInt64
+	CreatedAt     sql.NullInt64
+	UpdatedAt     sql.NullInt64
+}
+
+type DatabaseBackupRun struct {
+	ID          string
+	ServiceID   string
+	PolicyID    sql.NullString
+	Status      string
+	Destination string
+	ObjectKey   string
+	SizeBytes   int64
+	StartedAt   sql.NullInt64
+	FinishedAt  sql.NullInt64
+	Error       string
+}
+
 type Deployment struct {
 	ID            string
 	ServiceID     string

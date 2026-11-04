@@ -140,3 +140,7 @@ LIMIT 1;
 UPDATE services
 SET environment_id = ?, updated_at = ?
 WHERE id = ?;
+
+-- name: DeleteService :exec
+DELETE FROM services
+WHERE id = ?;

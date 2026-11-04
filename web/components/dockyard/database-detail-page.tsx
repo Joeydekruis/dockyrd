@@ -3,14 +3,19 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { DatabaseDetailSettings } from "@/components/dockyard/database-detail-settings";
 import { ServiceConnectionPanel } from "@/components/dockyard/service-connection-panel";
 import { ServiceLogsPanel } from "@/components/dockyard/service-logs-panel";
+import { Button } from "@/components/dockyard/ui/button";
 import { Chip } from "@/components/dockyard/ui/chip";
 import { KeyValueRow } from "@/components/dockyard/ui/key-value-row";
-import { SettingsDetailBlock } from "@/components/dockyard/ui/settings-detail-block";
 import { StatusBadge } from "@/components/dockyard/ui/status-badge";
 import { Tabs } from "@/components/dockyard/ui/tabs";
-import { type DatabaseRow, listDatabases } from "@/lib/api";
+import {
+  type DatabaseRow,
+  listDatabases,
+  restartDatabaseService,
+} from "@/lib/api";
 import {
   projectPathLabel,
   resourceStatusDisplay,
@@ -62,6 +67,8 @@ export function DatabaseDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<TabId>("overview");
+  const [restartBusy, setRestartBusy] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     if (!slug) {
@@ -109,6 +116,20 @@ export function DatabaseDetailPage() {
 
   const title = row?.name ?? "Database";
 
+  async function onRestart() {
+    if (!row) return;
+    setRestartBusy(true);
+    setActionError(null);
+    try {
+      await restartDatabaseService(row.id);
+      await refresh();
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : "Restart failed");
+    } finally {
+      setRestartBusy(false);
+    }
+  }
+
   return (
     <DashboardShell title={title} breadcrumb="Databases">
       {loading ? (
@@ -152,7 +173,20 @@ export function DatabaseDetailPage() {
                 <span className="font-mono">{internalEndpoint(row)}</span>
               </p>
             </div>
+            <Button
+              type="button"
+              variant="outline"
+              disabled={restartBusy || row.desired_state !== "running"}
+              onClick={() => void onRestart()}
+            >
+              {restartBusy ? "Restarting…" : "Restart"}
+            </Button>
           </header>
+          {actionError ? (
+            <p className="text-sm text-red-600" role="alert">
+              {actionError}
+            </p>
+          ) : null}
 
           <Tabs
             activeId={tab}
@@ -217,45 +251,7 @@ export function DatabaseDetailPage() {
 
           {tab === "logs" ? <ServiceLogsPanel serviceId={row.id} /> : null}
 
-          {tab === "settings" ? (
-            <section
-              className={RESOURCE_DETAIL_CARD}
-              style={resourceDetailCardStyle()}
-              aria-label="Settings"
-            >
-              <h2 className="text-lg font-semibold tracking-tight">Settings</h2>
-              <SettingsDetailBlock
-                title="Engine"
-                description="Major version upgrades require dump and restore — not available in the panel yet."
-                rows={[
-                  {
-                    label: "Type",
-                    value: databaseEngineLabel(row.kind),
-                  },
-                  {
-                    label: "Version",
-                    value: engineVersionChip(row),
-                  },
-                  {
-                    label: "Memory",
-                    value: memoryLimitLabel(row.config, row.kind),
-                  },
-                ]}
-                actionDisabled
-              />
-              <SettingsDetailBlock
-                title="Backups"
-                description="Scheduled backups and restore will ship in a later release."
-                rows={[
-                  {
-                    label: "Schedule",
-                    value: "Not configured",
-                  },
-                ]}
-                actionDisabled
-              />
-            </section>
-          ) : null}
+          {tab === "settings" ? <DatabaseDetailSettings row={row} /> : null}
         </div>
       )}
     </DashboardShell>

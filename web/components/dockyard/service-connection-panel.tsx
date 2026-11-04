@@ -1,8 +1,7 @@
 "use client";
 
-import { Copy } from "lucide-react";
-import { useEffect, useState } from "react";
-import { Button } from "@/components/dockyard/ui/button";
+import { Copy, Eye, EyeOff } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { IconButton } from "@/components/dockyard/ui/icon-button";
 import { KeyValueRow } from "@/components/dockyard/ui/key-value-row";
 import { getServiceConnection } from "@/lib/api";
@@ -11,17 +10,59 @@ import {
   resourceDetailCardStyle,
 } from "@/lib/resource-detail-page";
 
-function CopyableMono({ value }: { value: string }) {
+const MASK = "••••••••";
+
+function isSecretVariableKey(key: string): boolean {
+  const upper = key.toUpperCase();
   return (
-    <span className="inline-flex max-w-full items-center gap-2">
-      <span className="break-all font-mono text-sm">{value}</span>
-      <IconButton
-        icon={Copy}
-        label="Copy"
-        onClick={() => {
-          void navigator.clipboard.writeText(value);
-        }}
-      />
+    upper.includes("PASSWORD") || key === "DATABASE_URL" || key === "REDIS_URL"
+  );
+}
+
+function ConnectionValue({
+  name,
+  maskedValue,
+  plainSecrets,
+  revealed,
+  onReveal,
+  onHide,
+}: {
+  name: string;
+  maskedValue: string;
+  plainSecrets: Record<string, string> | null;
+  revealed: boolean;
+  onReveal: () => void;
+  onHide: () => void;
+}) {
+  const secret = isSecretVariableKey(name);
+  const plain = plainSecrets?.[name];
+  const display = secret && !revealed ? MASK : (plain ?? maskedValue);
+  const copyValue = secret ? (plain ?? "") : maskedValue;
+
+  return (
+    <span className="inline-flex max-w-full flex-wrap items-center gap-1 sm:gap-2">
+      <span className="break-all font-mono text-sm">{display}</span>
+      <span className="inline-flex shrink-0 items-center gap-0.5">
+        {secret ? (
+          <IconButton
+            icon={revealed ? EyeOff : Eye}
+            label={revealed ? `Hide ${name}` : `Reveal ${name}`}
+            onClick={() => {
+              if (revealed) onHide();
+              else onReveal();
+            }}
+          />
+        ) : null}
+        <IconButton
+          icon={Copy}
+          label={`Copy ${name}`}
+          disabled={secret && !plain}
+          onClick={() => {
+            if (secret && !plain) return;
+            void navigator.clipboard.writeText(copyValue);
+          }}
+        />
+      </span>
     </span>
   );
 }
@@ -35,18 +76,27 @@ type ServiceConnectionPanelProps = {
 export function ServiceConnectionPanel({
   serviceId,
   title = "Connection",
-  description = "Use these values from other services on the same project network. Reveal to copy secrets.",
+  description = "Use these values from other services on the same project network. Reveal a secret to copy it.",
 }: ServiceConnectionPanelProps) {
-  const [revealed, setRevealed] = useState(false);
   const [variables, setVariables] = useState<Record<string, string>>({});
+  const [plainSecrets, setPlainSecrets] = useState<Record<
+    string,
+    string
+  > | null>(null);
+  const [revealedKeys, setRevealedKeys] = useState<Set<string>>(
+    () => new Set(),
+  );
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [revealing, setRevealing] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
     setError(null);
-    void getServiceConnection(serviceId, revealed)
+    setPlainSecrets(null);
+    setRevealedKeys(new Set());
+    void getServiceConnection(serviceId, false)
       .then(({ variables: vars }) => {
         if (!cancelled) setVariables(vars);
       })
@@ -63,7 +113,36 @@ export function ServiceConnectionPanel({
     return () => {
       cancelled = true;
     };
-  }, [serviceId, revealed]);
+  }, [serviceId]);
+
+  const revealKey = useCallback(
+    async (key: string) => {
+      if (plainSecrets?.[key]) {
+        setRevealedKeys((prev) => new Set(prev).add(key));
+        return;
+      }
+      setRevealing(true);
+      setError(null);
+      try {
+        const { variables: vars } = await getServiceConnection(serviceId, true);
+        setPlainSecrets(vars);
+        setRevealedKeys((prev) => new Set(prev).add(key));
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Failed to reveal secret");
+      } finally {
+        setRevealing(false);
+      }
+    },
+    [plainSecrets, serviceId],
+  );
+
+  function hideKey(key: string) {
+    setRevealedKeys((prev) => {
+      const next = new Set(prev);
+      next.delete(key);
+      return next;
+    });
+  }
 
   const keys = Object.keys(variables).sort();
 
@@ -73,20 +152,11 @@ export function ServiceConnectionPanel({
       style={resourceDetailCardStyle()}
       aria-label={title}
     >
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
-          <p className="mt-1 text-sm" style={{ color: "var(--muted-text)" }}>
-            {description}
-          </p>
-        </div>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => setRevealed((v) => !v)}
-        >
-          {revealed ? "Hide secrets" : "Reveal secrets"}
-        </Button>
+      <div>
+        <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
+        <p className="mt-1 text-sm" style={{ color: "var(--muted-text)" }}>
+          {description}
+        </p>
       </div>
       {error ? (
         <p className="mt-4 text-sm text-red-600" role="alert">
@@ -102,9 +172,23 @@ export function ServiceConnectionPanel({
             <KeyValueRow
               key={key}
               label={key}
-              value={<CopyableMono value={variables[key] ?? ""} />}
+              value={
+                <ConnectionValue
+                  name={key}
+                  maskedValue={variables[key] ?? ""}
+                  plainSecrets={plainSecrets}
+                  revealed={revealedKeys.has(key)}
+                  onReveal={() => void revealKey(key)}
+                  onHide={() => hideKey(key)}
+                />
+              }
             />
           ))}
+          {revealing ? (
+            <p className="text-xs" style={{ color: "var(--muted-text)" }}>
+              Loading secret…
+            </p>
+          ) : null}
           {keys.length === 0 ? (
             <p className="text-sm" style={{ color: "var(--muted-text)" }}>
               No connection variables for this service.

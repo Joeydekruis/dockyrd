@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.43] - 2026-11-04
+
+_Finished: 2026-11-04_
+
+### Added
+
+- **Static site access logs** — `GET /api/v1/services/{id}/logs?stream=access` tails Caddy JSON access logs filtered by service domains; Logs tab on static sites shows HTTP access lines with refresh (`internal/accesslog`, `web/components/dockyard/service-traffic-panel.tsx`).
+- **Static site traffic analytics** — `GET /api/v1/services/{id}/analytics?range=` aggregates requests, bandwidth, status codes, and latency from access logs; Analytics tab charts on static site detail (`internal/server/api_logs.go`).
+- **Domains UX (Sevalla-style)** — platform/custom domain tables, Verification status, Show DNS records modal with copyable A record and server `public_ipv4`, add-domain modal, ⋮ menu (make primary, delete), `PATCH /api/v1/domains/{id}` for primary (`web/components/dockyard/service-domains-tab.tsx`, `internal/server/api_domains.go`).
+- **Server backup target settings** — S3-compatible backup target API and Instance → Backups UI (foundation for database backups).
+
+### Changed
+
+- **Static site edge routing** — prefer direct `release_path` in Caddy when set; site directory modes `0o755` for proxy readability (`internal/staticsite/release.go`, `internal/docker/proxy.go`).
+- **Service lifecycle API** — start/stop/restart handlers for supported service kinds (`internal/server/api_service_lifecycle.go`).
+
+### Fixed
+
+- **Domain delete** — repromote primary platform domain when primary custom domain is removed; proxy resync after domain mutations.
+
 ## [0.0.42] - 2026-11-04
 
 _Finished: 2026-11-04_

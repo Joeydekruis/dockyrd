@@ -19,7 +19,8 @@ type serverInfoResponse struct {
 	Version         string              `json:"version"`
 	UptimeSec       int64               `json:"uptime_sec"`
 	Hostname        string              `json:"hostname,omitempty"`
-	CPUCount        int                 `json:"cpu_count,omitempty"`
+	PublicIPv4      string              `json:"public_ipv4,omitempty"`
+	CPUCount        int             `json:"cpu_count,omitempty"`
 	SwapUsed        int64               `json:"swap_used,omitempty"`
 	SwapTotal       int64               `json:"swap_total,omitempty"`
 	Cores           []coreUsageResponse `json:"cores,omitempty"`
@@ -34,9 +35,10 @@ func (d apiDeps) handleServerInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	resp := serverInfoResponse{
-		Version:   BuildVersion(),
-		UptimeSec: time.Now().Unix() - ProcessStartedAt(),
-		CPUCount:  runtime.NumCPU(),
+		Version:    BuildVersion(),
+		UptimeSec:  time.Now().Unix() - ProcessStartedAt(),
+		CPUCount:   runtime.NumCPU(),
+		PublicIPv4: d.cfg.PublicIPv4,
 	}
 	if host, err := os.Hostname(); err == nil && host != "" {
 		resp.Hostname = host

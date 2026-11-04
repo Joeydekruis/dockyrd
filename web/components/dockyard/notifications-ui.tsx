@@ -214,7 +214,10 @@ export function NotificationsPanelHeader({
   markAllDisabled?: boolean;
 }) {
   return (
-    <div className="flex items-start justify-between gap-3 border-b px-5 py-4">
+    <div
+      className="flex items-start justify-between gap-3 border-b px-5 py-4"
+      style={{ borderColor: "var(--border)" }}
+    >
       <h2 className="text-base font-semibold">{title}</h2>
       <div className="flex items-center gap-3">
         {onMarkAllRead ? (

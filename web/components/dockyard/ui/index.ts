@@ -75,6 +75,7 @@ export {
   type SplitButtonVariant,
 } from "./split-button";
 export { StatCard } from "./stat-card";
+export { StaticSiteDeploymentTable } from "./static-site-deployment-table";
 export { StatusBadge, type StatusVariant } from "./status-badge";
 export { Switch } from "./switch";
 export { Tabs } from "./tabs";

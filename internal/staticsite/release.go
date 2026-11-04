@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // ReleasePaths describes on-disk layout for one static site service.
@@ -37,7 +38,7 @@ func PublishRelease(outputDir, sitesRoot, serviceSlug, deploymentID string) (rel
 	if err := copyTree(outputDir, releasePath); err != nil {
 		return "", err
 	}
-	if err := os.MkdirAll(paths.ServiceRoot, 0o750); err != nil {
+	if err := os.MkdirAll(paths.ServiceRoot, 0o755); err != nil {
 		return "", err
 	}
 	if err := linkCurrentRelease(paths.CurrentLink, releasePath); err != nil {
@@ -100,9 +101,23 @@ func CurrentRoot(sitesRoot, serviceSlug string) string {
 	return PathsForService(sitesRoot, serviceSlug).CurrentLink
 }
 
-// CaddyFileServerRoot is the file_server root path as seen inside dy-proxy.
+// CaddyFileServerRoot is the file_server root path as seen inside dy-proxy (via current symlink).
 func CaddyFileServerRoot(serviceSlug string) string {
 	return filepath.Join(CaddyMountSitesRoot, serviceSlug, "current")
+}
+
+// HostReleaseToCaddyRoot maps a host release_path under sitesRoot to dy-proxy /srv/sites/…
+func HostReleaseToCaddyRoot(sitesRoot, hostReleasePath string) (string, bool) {
+	if strings.TrimSpace(hostReleasePath) == "" {
+		return "", false
+	}
+	root := filepath.Clean(sitesRoot)
+	release := filepath.Clean(hostReleasePath)
+	rel, err := filepath.Rel(root, release)
+	if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+		return "", false
+	}
+	return filepath.Join(CaddyMountSitesRoot, rel), true
 }
 
 func copyTree(src, dst string) error {

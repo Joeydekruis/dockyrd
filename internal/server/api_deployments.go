@@ -22,6 +22,8 @@ type deploymentResponse struct {
 	ReleasePath *string `json:"release_path,omitempty"`
 	BuildLogPath *string `json:"build_log_path,omitempty"`
 	CommitSHA    *string `json:"commit_sha,omitempty"`
+	CommitMessage *string `json:"commit_message,omitempty"`
+	CommitAuthor  *string `json:"commit_author,omitempty"`
 	Branch       *string `json:"branch,omitempty"`
 	Error        *string `json:"error,omitempty"`
 	QueuedAt   int64   `json:"queued_at"`
@@ -270,6 +272,8 @@ func deploymentFromRow(row sqlc.ListDeploymentsForServiceRow) deploymentResponse
 		ImageRef:     nullStrPtr(row.ImageRef),
 		ReleasePath:  nullStrPtr(row.ReleasePath),
 		CommitSHA:    nullStrPtr(row.CommitSha),
+		CommitMessage: nullStrPtr(row.CommitMessage),
+		CommitAuthor:  nullStrPtr(row.CommitAuthor),
 		Branch:       nullStrPtr(row.Branch),
 		BuildLogPath: nullStrPtr(row.BuildLogPath),
 		Error:        nullStrPtr(row.Error),
@@ -288,6 +292,8 @@ func deploymentFromFullRow(row sqlc.Deployment) deploymentResponse {
 		ImageRef:     nullStrPtr(row.ImageRef),
 		ReleasePath:  nullStrPtr(row.ReleasePath),
 		CommitSHA:    nullStrPtr(row.CommitSha),
+		CommitMessage: nullStrPtr(row.CommitMessage),
+		CommitAuthor:  nullStrPtr(row.CommitAuthor),
 		Branch:       nullStrPtr(row.Branch),
 		BuildLogPath: nullStrPtr(row.BuildLogPath),
 		Error:        nullStrPtr(row.Error),

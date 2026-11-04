@@ -48,6 +48,17 @@ INSERT INTO domains (
 DELETE FROM domains
 WHERE id = ?;
 
+-- name: ClearPrimaryForService :exec
+UPDATE domains SET is_primary = 0 WHERE service_id = ?;
+
+-- name: SetDomainPrimary :exec
+UPDATE domains SET is_primary = 1 WHERE id = ?;
+
+-- name: SetDomainPrimaryForService :exec
+UPDATE domains
+SET is_primary = CASE WHEN id = ? THEN 1 ELSE 0 END
+WHERE service_id = ?;
+
 -- name: ListAppDomainsWithUpstream :many
 SELECT
   d.hostname,

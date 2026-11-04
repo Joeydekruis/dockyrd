@@ -306,8 +306,85 @@ export function getServiceConnection(serviceId: string, reveal = false) {
   );
 }
 
-export async function fetchServiceLogs(serviceId: string, tail = "200") {
-  const params = new URLSearchParams({ tail });
+export function deleteDatabaseService(
+  serviceId: string,
+  input: { confirm_slug: string; delete_volume?: boolean },
+) {
+  return apiFetch<void>(`/api/v1/services/${serviceId}`, {
+    method: "DELETE",
+    json: {
+      confirm_slug: input.confirm_slug,
+      delete_volume: input.delete_volume ?? true,
+    },
+  });
+}
+
+export function restartDatabaseService(serviceId: string) {
+  return apiFetch<void>(`/api/v1/services/${serviceId}/restart`, {
+    method: "POST",
+  });
+}
+
+export type DatabaseBackupPolicy = {
+  enabled: boolean;
+  interval: "hourly" | "daily" | "weekly";
+  retention_days: number;
+  local_enabled: boolean;
+  remote_enabled: boolean;
+  last_run_at?: number;
+  next_run_at?: number;
+};
+
+export function getDatabaseBackupPolicy(serviceId: string) {
+  return apiFetch<DatabaseBackupPolicy>(
+    `/api/v1/services/${serviceId}/backup-policy`,
+  );
+}
+
+export function patchDatabaseBackupPolicy(
+  serviceId: string,
+  input: Partial<DatabaseBackupPolicy>,
+) {
+  return apiFetch<DatabaseBackupPolicy>(
+    `/api/v1/services/${serviceId}/backup-policy`,
+    { method: "PATCH", json: input },
+  );
+}
+
+export type ServerBackupTarget = {
+  configured: boolean;
+  provider: string;
+  endpoint: string;
+  bucket: string;
+  prefix: string;
+  region: string;
+  has_keys: boolean;
+};
+
+export function getServerBackupTarget() {
+  return apiFetch<ServerBackupTarget>("/api/v1/settings/server/backup-target");
+}
+
+export function patchServerBackupTarget(input: {
+  endpoint?: string;
+  bucket: string;
+  prefix?: string;
+  region?: string;
+  access_key?: string;
+  secret_key?: string;
+}) {
+  return apiFetch<ServerBackupTarget>("/api/v1/settings/server/backup-target", {
+    method: "PATCH",
+    json: input,
+  });
+}
+
+export async function fetchServiceLogs(
+  serviceId: string,
+  tail = "200",
+  stream: "runtime" | "access" = "runtime",
+) {
+  const params = new URLSearchParams({ tail, stream });
   const res = await fetch(
     `/api/v1/services/${serviceId}/logs?${params.toString()}`,
     { credentials: "same-origin" },
@@ -317,6 +394,39 @@ export async function fetchServiceLogs(serviceId: string, tail = "200") {
     throw new Error(err.error ?? res.statusText);
   }
   return res.text();
+}
+
+export type ServiceAnalyticsBucket = {
+  ts: number;
+  requests: number;
+  bytes: number;
+  status_2xx: number;
+  status_3xx: number;
+  status_4xx: number;
+  status_5xx: number;
+  latency_avg_ms: number;
+  latency_p95_ms: number;
+};
+
+export type ServiceAnalytics = {
+  range: string;
+  requests_total: number;
+  bytes_total: number;
+  status_2xx: number;
+  status_3xx: number;
+  status_4xx: number;
+  status_5xx: number;
+  series: ServiceAnalyticsBucket[];
+};
+
+export function getServiceAnalytics(
+  serviceId: string,
+  range: "1h" | "24h" | "7d" | "30d" = "24h",
+) {
+  const q = new URLSearchParams({ range });
+  return apiFetch<ServiceAnalytics>(
+    `/api/v1/services/${serviceId}/analytics?${q}`,
+  );
 }
 
 export type StorageStatus = {
@@ -367,6 +477,8 @@ export type Deployment = {
   image_ref?: string;
   release_path?: string;
   commit_sha?: string;
+  commit_message?: string;
+  commit_author?: string;
   branch?: string;
   build_log_path?: string;
   error?: string;
@@ -444,6 +556,13 @@ export function createServiceDomain(
 
 export function deleteServiceDomain(domainId: string) {
   return apiFetch<void>(`/api/v1/domains/${domainId}`, { method: "DELETE" });
+}
+
+export function patchServiceDomain(domainId: string, body: { primary: true }) {
+  return apiFetch<ServiceDomain>(`/api/v1/domains/${domainId}`, {
+    method: "PATCH",
+    json: body,
+  });
 }
 
 export type ServiceVariable = {
@@ -679,6 +798,7 @@ export type ServerInfo = {
   version: string;
   uptime_sec: number;
   hostname?: string;
+  public_ipv4?: string;
   cpu_count?: number;
   swap_used?: number;
   swap_total?: number;

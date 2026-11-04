@@ -59,12 +59,17 @@ function staticSiteRowStatus(
 }
 
 function deploymentSummary(latest?: Deployment) {
-  if (!latest?.commit_sha) {
+  if (!latest) {
     return { sha: undefined, message: undefined, timeAgo: undefined };
   }
+  const sha = latest.commit_sha?.trim();
+  const message =
+    latest.commit_message?.trim().split("\n")[0]?.trim() ||
+    (latest.branch ? `on ${latest.branch}` : undefined) ||
+    latest.trigger;
   return {
-    sha: latest.commit_sha,
-    message: latest.branch ? `on ${latest.branch}` : latest.trigger,
+    sha: sha || undefined,
+    message,
     timeAgo: formatTimeAgo(latest.finished_at ?? latest.started_at),
   };
 }

@@ -48,6 +48,7 @@ func registerServiceRoutes(mux *http.ServeMux, deps apiDeps) {
 	mux.HandleFunc("POST /api/v1/services", deps.handleCreateService)
 	mux.HandleFunc("GET /api/v1/services/{id}", deps.handleGetService)
 	mux.HandleFunc("PATCH /api/v1/services/{id}", deps.handlePatchService)
+	registerServiceLifecycleRoutes(mux, deps)
 }
 
 func (d apiDeps) handleListServices(w http.ResponseWriter, r *http.Request) {

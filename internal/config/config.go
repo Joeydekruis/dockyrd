@@ -99,6 +99,11 @@ func (c Config) CaddyDir() string {
 	return filepath.Join(c.DataDir, "caddy")
 }
 
+// CaddyAccessLogPath is the host path where dy-proxy writes JSON access logs.
+func (c Config) CaddyAccessLogPath() string {
+	return filepath.Join(c.CaddyDir(), "access.log")
+}
+
 // ListenPort returns the TCP port from Listen (default 8000).
 func (c Config) ListenPort() string {
 	listen := strings.TrimSpace(c.Listen)
