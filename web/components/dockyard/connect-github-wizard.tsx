@@ -8,7 +8,10 @@ import {
   getGitHubStatus,
   startGitHubAppLink,
 } from "@/lib/api";
-import { openExternalUrl, postGitHubManifestLaunch } from "@/lib/open-external-url";
+import {
+  openExternalUrl,
+  postGitHubManifestLaunch,
+} from "@/lib/open-external-url";
 
 const WIZARD_STORAGE_KEY = "dockyrd.githubWizard.v1";
 

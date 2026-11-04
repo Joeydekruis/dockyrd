@@ -3,12 +3,12 @@
 import { GitBranch, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import type { StaticSiteCreateResult } from "@/components/dockyard/static-site-create-progress-modal";
 import { Button } from "@/components/dockyard/ui/button";
 import { Field } from "@/components/dockyard/ui/field";
 import { IconButton } from "@/components/dockyard/ui/icon-button";
 import { SelectField } from "@/components/dockyard/ui/select-field";
 import { Switch } from "@/components/dockyard/ui/switch";
-import type { StaticSiteCreateResult } from "@/components/dockyard/static-site-create-progress-modal";
 import {
   WizardModalShell,
   type WizardStepDef,
@@ -16,12 +16,12 @@ import {
 import {
   createDeployment,
   createService,
+  type GitHubStatus,
   getGitHubStatus,
   getInstanceSettings,
+  type InstanceSettings,
   listGitHubRepos,
   listProjects,
-  type GitHubStatus,
-  type InstanceSettings,
   type Project,
 } from "@/lib/api";
 
@@ -110,7 +110,10 @@ function slugifyName(name: string): string {
     .slice(0, 48);
 }
 
-function defaultDeployUrl(siteName: string, instance: InstanceSettings | null): string {
+function defaultDeployUrl(
+  siteName: string,
+  instance: InstanceSettings | null,
+): string {
   const slug = slugifyName(siteName) || "site";
   const host =
     instance?.wildcard_domain?.trim() ||
@@ -159,9 +162,9 @@ export function CreateStaticSiteWizard({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
-  const [repos, setRepos] = useState<{ full_name: string; default_branch: string }[]>(
-    [],
-  );
+  const [repos, setRepos] = useState<
+    { full_name: string; default_branch: string }[]
+  >([]);
   const [github, setGithub] = useState<GitHubStatus | null>(null);
   const [instance, setInstance] = useState<InstanceSettings | null>(null);
   const [draft, setDraft] = useState<Draft>(() => ({
@@ -231,7 +234,8 @@ export function CreateStaticSiteWizard({
 
   function validateStep(): string | null {
     if (step === 1) {
-      if (!github?.linked) return "Connect GitHub in Settings → Integrations first.";
+      if (!github?.linked)
+        return "Connect GitHub in Settings → Integrations first.";
       if (!draft.repo.trim()) return "Pick a repository.";
       if (!draft.branch.trim()) return "Branch is required.";
     }
@@ -348,17 +352,15 @@ export function CreateStaticSiteWizard({
         <StepNameProject projects={projects} draft={draft} onChange={patch} />
       ) : null}
       {step === 3 ? (
-        <StepBuild draft={draft} onChange={patch} onFramework={applyFramework} />
-      ) : null}
-      {step === 4 ? (
-        <StepEnvironment draft={draft} onChange={patch} />
-      ) : null}
-      {step === 5 ? (
-        <StepDomain
+        <StepBuild
           draft={draft}
-          defaultUrl={defaultUrl}
           onChange={patch}
+          onFramework={applyFramework}
         />
+      ) : null}
+      {step === 4 ? <StepEnvironment draft={draft} onChange={patch} /> : null}
+      {step === 5 ? (
+        <StepDomain draft={draft} defaultUrl={defaultUrl} onChange={patch} />
       ) : null}
     </WizardModalShell>
   );
@@ -629,9 +631,7 @@ function StepEnvironment({
         type="button"
         variant="outline"
         className="mt-4"
-        onClick={() =>
-          onChange({ envVars: [...draft.envVars, newEnvRow()] })
-        }
+        onClick={() => onChange({ envVars: [...draft.envVars, newEnvRow()] })}
       >
         Add variable
       </Button>
@@ -676,7 +676,10 @@ function StepDomain({
             checked={draft.autoHttps}
             onChange={(v) => onChange({ autoHttps: v })}
           />
-          <p className="mt-1 pl-14 text-[13px]" style={{ color: "var(--muted-text)" }}>
+          <p
+            className="mt-1 pl-14 text-[13px]"
+            style={{ color: "var(--muted-text)" }}
+          >
             Free certificate from Let's Encrypt, renewed automatically.
           </p>
         </div>
@@ -686,7 +689,10 @@ function StepDomain({
             checked={draft.deployOnPush}
             onChange={(v) => onChange({ deployOnPush: v })}
           />
-          <p className="mt-1 pl-14 text-[13px]" style={{ color: "var(--muted-text)" }}>
+          <p
+            className="mt-1 pl-14 text-[13px]"
+            style={{ color: "var(--muted-text)" }}
+          >
             Every push to main builds and publishes a new version.
           </p>
         </div>
@@ -696,7 +702,10 @@ function StepDomain({
             checked={draft.spaFallback}
             onChange={(v) => onChange({ spaFallback: v })}
           />
-          <p className="mt-1 pl-14 text-[13px]" style={{ color: "var(--muted-text)" }}>
+          <p
+            className="mt-1 pl-14 text-[13px]"
+            style={{ color: "var(--muted-text)" }}
+          >
             Serve index.html for unknown paths.
           </p>
         </div>

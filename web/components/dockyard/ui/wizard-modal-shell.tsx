@@ -62,7 +62,10 @@ export function WizardModalShell({
         className="relative z-10 flex max-h-[90vh] w-full max-w-[840px] flex-col overflow-hidden rounded-[20px] border shadow-lg"
         style={{ background: "var(--surface)", borderColor: "var(--border)" }}
       >
-        <header className="border-b px-8 pt-7 pb-0" style={{ borderColor: "var(--border)" }}>
+        <header
+          className="border-b px-8 pt-7 pb-0"
+          style={{ borderColor: "var(--border)" }}
+        >
           <div className="flex items-start justify-between gap-4">
             <div>
               <h2
@@ -71,7 +74,10 @@ export function WizardModalShell({
               >
                 {title}
               </h2>
-              <p className="mt-1 text-sm" style={{ color: "var(--muted-text)" }}>
+              <p
+                className="mt-1 text-sm"
+                style={{ color: "var(--muted-text)" }}
+              >
                 {subtitle}
               </p>
             </div>
@@ -112,7 +118,11 @@ export function WizardModalShell({
                       }
                     >
                       {done ? (
-                        <Check className="size-4" strokeWidth={2.5} aria-hidden />
+                        <Check
+                          className="size-4"
+                          strokeWidth={2.5}
+                          aria-hidden
+                        />
                       ) : (
                         n
                       )}
@@ -155,16 +165,30 @@ export function WizardModalShell({
           </p>
           <div className="flex flex-wrap gap-2">
             {step > 1 && onBack ? (
-              <Button type="button" variant="outline" onClick={onBack} disabled={busy}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onBack}
+                disabled={busy}
+              >
                 Back
               </Button>
             ) : (
-              <Button type="button" variant="outline" onClick={onClose} disabled={busy}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                disabled={busy}
+              >
                 {cancelLabel}
               </Button>
             )}
             {onNext ? (
-              <Button type="button" onClick={onNext} disabled={nextDisabled || busy}>
+              <Button
+                type="button"
+                onClick={onNext}
+                disabled={nextDisabled || busy}
+              >
                 {nextLabel}
               </Button>
             ) : null}

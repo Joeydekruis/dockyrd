@@ -3,11 +3,11 @@
 import { Globe, Plus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CreateStaticSiteWizard } from "@/components/dockyard/create-static-site-wizard";
+import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import {
   StaticSiteCreateProgressModal,
   type StaticSiteCreateResult,
 } from "@/components/dockyard/static-site-create-progress-modal";
-import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import { Button } from "@/components/dockyard/ui/button";
 import { PageHeader } from "@/components/dockyard/ui/page-header";
 import { ResourceListAddLink } from "@/components/dockyard/ui/resource-list-add-link";
@@ -117,7 +117,11 @@ export function StaticSitesPage() {
         title="Static sites"
         subtitle="Built from a Git repo and served from your own server."
         action={
-          <Button type="button" iconLeft={Plus} onClick={() => setCreateOpen(true)}>
+          <Button
+            type="button"
+            iconLeft={Plus}
+            onClick={() => setCreateOpen(true)}
+          >
             Create static site
           </Button>
         }

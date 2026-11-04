@@ -3,11 +3,11 @@
 import { Box, Plus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CreateApplicationModal } from "@/components/dockyard/create-application-modal";
-import {
-  ResourceProvisioningModal,
-  type ResourceProvisionContext,
-} from "@/components/dockyard/resource-provisioning-modal";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import {
+  type ResourceProvisionContext,
+  ResourceProvisioningModal,
+} from "@/components/dockyard/resource-provisioning-modal";
 import { Button } from "@/components/dockyard/ui/button";
 import { PageHeader } from "@/components/dockyard/ui/page-header";
 import { ResourceListSection } from "@/components/dockyard/ui/resource-list-section";
@@ -16,7 +16,6 @@ import { StatCard } from "@/components/dockyard/ui/stat-card";
 import { type ApplicationRow, listApplications } from "@/lib/api";
 import {
   formatResourceCount,
-  formatTimeAgo,
   projectPathLabel,
   resourceStatusDisplay,
   summarizeApplicationStats,
@@ -71,7 +70,11 @@ export function ApplicationsPage() {
         title="Applications"
         subtitle="Apps deployed from GitHub, a Dockerfile or an image."
         action={
-          <Button type="button" iconLeft={Plus} onClick={() => setCreateOpen(true)}>
+          <Button
+            type="button"
+            iconLeft={Plus}
+            onClick={() => setCreateOpen(true)}
+          >
             Create application
           </Button>
         }
@@ -90,9 +93,7 @@ export function ApplicationsPage() {
         <StatCard
           label="Total"
           value={dash ?? stats.total}
-          hint={
-            loading ? undefined : `across ${stats.projectCount} projects`
-          }
+          hint={loading ? undefined : `across ${stats.projectCount} projects`}
         />
         <StatCard
           label="Healthy"
@@ -129,7 +130,11 @@ export function ApplicationsPage() {
           >
             Create an app inside a project to see it listed here.
           </p>
-          <Button type="button" className="mt-6" onClick={() => setCreateOpen(true)}>
+          <Button
+            type="button"
+            className="mt-6"
+            onClick={() => setCreateOpen(true)}
+          >
             Create application
           </Button>
         </section>

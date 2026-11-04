@@ -3,11 +3,11 @@
 import { Database, Plus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CreateDatabaseModal } from "@/components/dockyard/create-database-modal";
-import {
-  ResourceProvisioningModal,
-  type ResourceProvisionContext,
-} from "@/components/dockyard/resource-provisioning-modal";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import {
+  type ResourceProvisionContext,
+  ResourceProvisioningModal,
+} from "@/components/dockyard/resource-provisioning-modal";
 import { Button } from "@/components/dockyard/ui/button";
 import { Chip } from "@/components/dockyard/ui/chip";
 import { PageHeader } from "@/components/dockyard/ui/page-header";
@@ -93,7 +93,11 @@ export function DatabasesPage() {
         title="Databases"
         subtitle="Postgres and Redis, with backups you can restore."
         action={
-          <Button type="button" iconLeft={Plus} onClick={() => setCreateOpen(true)}>
+          <Button
+            type="button"
+            iconLeft={Plus}
+            onClick={() => setCreateOpen(true)}
+          >
             Create database
           </Button>
         }

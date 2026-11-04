@@ -1,5 +1,5 @@
-import { Chip } from "@/components/dockyard/ui/chip";
 import { Button } from "@/components/dockyard/ui/button";
+import { Chip } from "@/components/dockyard/ui/chip";
 
 type TemplateCardProps = {
   name: string;
@@ -37,7 +37,10 @@ export function TemplateCard({
         </span>
       ) : null}
       <p className="pr-24 font-semibold">{name}</p>
-      <p className="mt-2 flex-1 text-[13px]" style={{ color: "var(--muted-text)" }}>
+      <p
+        className="mt-2 flex-1 text-[13px]"
+        style={{ color: "var(--muted-text)" }}
+      >
         {description}
       </p>
       {stack ? (
@@ -64,7 +67,11 @@ export function TemplateCard({
 
   if (href && !actionLabel) {
     return (
-      <a href={href} className={`${className} transition-colors hover:bg-[var(--hover-row)]`} style={style}>
+      <a
+        href={href}
+        className={`${className} transition-colors hover:bg-[var(--hover-row)]`}
+        style={style}
+      >
         {body}
       </a>
     );

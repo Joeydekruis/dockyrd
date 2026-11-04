@@ -303,7 +303,9 @@ export function createDeployment(serviceId: string) {
   });
 }
 
-export async function fetchDeploymentLog(deploymentId: string): Promise<string> {
+export async function fetchDeploymentLog(
+  deploymentId: string,
+): Promise<string> {
   const res = await fetch(`/api/v1/deployments/${deploymentId}/log`, {
     credentials: "same-origin",
   });

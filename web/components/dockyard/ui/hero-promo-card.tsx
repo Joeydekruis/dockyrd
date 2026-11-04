@@ -5,7 +5,11 @@ type HeroPromoCardProps = {
 };
 
 /** Gradient promo block (object storage empty state, design artboards). */
-export function HeroPromoCard({ badge, title, description }: HeroPromoCardProps) {
+export function HeroPromoCard({
+  badge,
+  title,
+  description,
+}: HeroPromoCardProps) {
   return (
     <section
       className="flex min-h-[200px] flex-col justify-end rounded-[20px] p-8 text-white"

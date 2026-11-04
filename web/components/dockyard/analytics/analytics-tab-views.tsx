@@ -1,23 +1,24 @@
 "use client";
 
-import Link from "next/link";
 import type { EChartsOption } from "echarts";
-import {
-  AnalyticsChartCard,
-  type AnalyticsTabId,
-  metricLabels,
-  ViewDetailsLink,
-} from "@/components/dockyard/analytics/use-analytics-data";
+import Link from "next/link";
 import {
   areaLineOption,
   dualAreaOption,
   horizontalStackOption,
   sparklineOption,
 } from "@/components/dockyard/analytics/chart-options";
+import {
+  AnalyticsChartCard,
+  type AnalyticsTabId,
+  metricLabels,
+  ViewDetailsLink,
+} from "@/components/dockyard/analytics/use-analytics-data";
 import { Button } from "@/components/dockyard/ui/button";
 import { Chip } from "@/components/dockyard/ui/chip";
 import { EChart } from "@/components/dockyard/ui/echart";
 import { FilterChips } from "@/components/dockyard/ui/filter-chips";
+import { ProgressBar } from "@/components/dockyard/ui/progress-bar";
 import {
   ServerContainersTable,
   type ServerContainersTableRow,
@@ -31,7 +32,6 @@ import {
   diskUsedPercent,
   formatBytes,
   formatBytesPerSec,
-  formatDuration,
   formatUptime,
   memUsedPercent,
   networkRatesFromPoints,
@@ -47,7 +47,6 @@ import type {
   ServerContainer,
   ServerInfo,
 } from "@/lib/api";
-import { ProgressBar } from "@/components/dockyard/ui/progress-bar";
 
 type TabProps = {
   points: HostMetricPoint[];
@@ -75,14 +74,14 @@ function TopContainersTable({
   subtitle,
   rows,
   valueLabel,
-  valueOf,
+  getValue,
   barPercent,
 }: {
   title: string;
   subtitle: string;
   rows: ContainerMetricSnapshot[];
   valueLabel: string;
-  valueOf: (r: ContainerMetricSnapshot) => string;
+  getValue: (r: ContainerMetricSnapshot) => string;
   barPercent: (r: ContainerMetricSnapshot) => number;
 }) {
   const maxBar = Math.max(...rows.map(barPercent), 1);
@@ -103,7 +102,10 @@ function TopContainersTable({
           </thead>
           <tbody>
             {rows.map((row) => (
-              <tr key={row.service_id} className="border-t border-[var(--border)]">
+              <tr
+                key={row.service_id}
+                className="border-t border-[var(--border)]"
+              >
                 <td className="py-2 pr-3 font-mono text-[13px]">
                   {row.name || row.service_id.slice(0, 8)}
                 </td>
@@ -111,7 +113,7 @@ function TopContainersTable({
                 <td className="py-2">
                   <div className="flex items-center gap-2">
                     <span className="w-12 font-mono tabular-nums">
-                      {valueOf(row)}
+                      {getValue(row)}
                     </span>
                     <div className="min-w-[80px] flex-1">
                       <ProgressBar value={(barPercent(row) / maxBar) * 100} />
@@ -143,7 +145,7 @@ export function OverviewTab({
   const memSeries = points.map((p) => memUsedPercent(p));
   const diskSeries = points.map((p) => diskUsedPercent(p));
   const { inbound } = networkRatesFromPoints(points);
-  const netLabels =
+  const _netLabels =
     inbound.length > 0 ? labels.slice(-inbound.length) : labels;
 
   const cards = [
@@ -180,10 +182,7 @@ export function OverviewTab({
     {
       id: "network" as const,
       label: "Network",
-      value:
-        inbound.length > 0
-          ? formatBytesPerSec(inbound.at(-1) ?? 0)
-          : "—",
+      value: inbound.length > 0 ? formatBytesPerSec(inbound.at(-1) ?? 0) : "—",
       hint: `inbound · ${rangeHint(rangeLabel)}`,
       series: inbound.length > 0 ? inbound : [0],
       yMax: Math.max(...inbound, 1),
@@ -211,14 +210,14 @@ export function OverviewTab({
           <p className="mt-2 text-[32px] font-semibold leading-none tabular-nums">
             {card.value}
           </p>
-          <p className="mt-2 text-[13px]" style={{ color: "var(--muted-text)" }}>
+          <p
+            className="mt-2 text-[13px]"
+            style={{ color: "var(--muted-text)" }}
+          >
             {card.hint}
           </p>
           <EChart
-            option={sparklineOption(
-              card.series,
-              card.format ? card.yMax : 100,
-            )}
+            option={sparklineOption(card.series, card.format ? card.yMax : 100)}
             height={48}
             ariaLabel={`${card.label} sparkline`}
           />
@@ -253,9 +252,23 @@ export function CpuTab({
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard label="Now" value={`${now.toFixed(0)}%`} hint={serverInfo?.cpu_count ? `${serverInfo.cpu_count} vCPU` : undefined} />
-        <StatCard label="Average" value={`${average(cpuSeries).toFixed(0)}%`} hint={rangeHint(rangeLabel)} />
-        <StatCard label="Peak" value={`${peak(cpuSeries).toFixed(0)}%`} hint={rangeHint(rangeLabel)} />
+        <StatCard
+          label="Now"
+          value={`${now.toFixed(0)}%`}
+          hint={
+            serverInfo?.cpu_count ? `${serverInfo.cpu_count} vCPU` : undefined
+          }
+        />
+        <StatCard
+          label="Average"
+          value={`${average(cpuSeries).toFixed(0)}%`}
+          hint={rangeHint(rangeLabel)}
+        />
+        <StatCard
+          label="Peak"
+          value={`${peak(cpuSeries).toFixed(0)}%`}
+          hint={rangeHint(rangeLabel)}
+        />
         <StatCard
           label="95th percentile"
           value={`${percentile(cpuSeries, 95).toFixed(0)}%`}
@@ -301,7 +314,7 @@ export function CpuTab({
           subtitle="Share of total CPU right now"
           rows={topByCpu(containerMetrics)}
           valueLabel="CPU"
-          valueOf={(r) => `${(r.cpu_percent * 100).toFixed(1)}%`}
+          getValue={(r) => `${(r.cpu_percent * 100).toFixed(1)}%`}
           barPercent={(r) => r.cpu_percent * 100}
         />
       </div>
@@ -331,17 +344,13 @@ export function MemoryTab({
     seriesName: "Used",
   });
 
-  const free = latest
-    ? Math.max(0, latest.mem_total - latest.mem_used)
-    : 0;
+  const free = latest ? Math.max(0, latest.mem_total - latest.mem_used) : 0;
 
   const containersMem = containerMetrics.reduce(
     (s, m) => s + m.memory_bytes,
     0,
   );
-  const systemMem = latest
-    ? Math.max(0, latest.mem_used - containersMem)
-    : 0;
+  const systemMem = latest ? Math.max(0, latest.mem_used - containersMem) : 0;
 
   const stackOpt = horizontalStackOption([
     { name: "Containers", value: containersMem, color: c.primary },
@@ -351,7 +360,7 @@ export function MemoryTab({
 
   const swapGb =
     serverInfo?.swap_total && serverInfo.swap_total > 0
-      ? serverInfo.swap_used! / (1024 * 1024 * 1024)
+      ? (serverInfo.swap_used ?? 0) / (1024 * 1024 * 1024)
       : 0;
 
   return (
@@ -374,11 +383,7 @@ export function MemoryTab({
         />
         <StatCard
           label="Swap"
-          value={
-            serverInfo?.swap_total
-              ? `${swapGb.toFixed(1)} GB`
-              : "0.0 GB"
-          }
+          value={serverInfo?.swap_total ? `${swapGb.toFixed(1)} GB` : "0.0 GB"}
           hint={
             serverInfo?.swap_total
               ? serverInfo.swap_used
@@ -392,12 +397,17 @@ export function MemoryTab({
         <div className="lg:col-span-2">
           <AnalyticsChartCard
             title="Memory usage"
-            subtitle={totalGb > 0 ? `Out of ${totalGb.toFixed(0)} GB` : undefined}
+            subtitle={
+              totalGb > 0 ? `Out of ${totalGb.toFixed(0)} GB` : undefined
+            }
           >
             <EChart option={chartOpt} height={280} ariaLabel="Memory chart" />
           </AnalyticsChartCard>
         </div>
-        <AnalyticsChartCard title="Where the memory goes" subtitle="Host + containers">
+        <AnalyticsChartCard
+          title="Where the memory goes"
+          subtitle="Host + containers"
+        >
           <EChart option={stackOpt} height={24} ariaLabel="Memory breakdown" />
           <ul className="mt-4 space-y-2 text-sm">
             <li className="flex justify-between">
@@ -422,7 +432,7 @@ export function MemoryTab({
           .sort((a, b) => b.memory_bytes - a.memory_bytes)
           .slice(0, 6)}
         valueLabel="Memory"
-        valueOf={(r) => formatBytes(r.memory_bytes)}
+        getValue={(r) => formatBytes(r.memory_bytes)}
         barPercent={(r) => r.memory_bytes}
       />
     </div>
@@ -447,10 +457,12 @@ export function DiskTab({
     (cleanup?.build_cache_bytes ?? 0) +
     (cleanup?.dangling_images_bytes ?? 0) +
     (cleanup?.old_releases_bytes ?? 0);
+  const firstPoint = points[0];
+  const lastPoint = points.at(-1);
   const growth =
-    points.length >= 2
-      ? (used - (points[0]?.disk_used ?? 0)) /
-        Math.max(1, (points.at(-1)!.ts - points[0]!.ts) / 86400)
+    firstPoint && lastPoint && points.length >= 2
+      ? (used - (firstPoint.disk_used ?? 0)) /
+        Math.max(1, (lastPoint.ts - firstPoint.ts) / 86400)
       : 0;
 
   const chartOpt = areaLineOption({
@@ -493,7 +505,11 @@ export function DiskTab({
               : undefined
           }
         />
-        <StatCard label="Free" value={formatBytes(free)} hint="on data volume" />
+        <StatCard
+          label="Free"
+          value={formatBytes(free)}
+          hint="on data volume"
+        />
         <StatCard
           label="Growth"
           value={growth > 0 ? `+${formatBytes(growth)}/day` : "—"}
@@ -507,12 +523,17 @@ export function DiskTab({
       </div>
       <AnalyticsChartCard
         title="Disk usage"
-        subtitle={total > 0 ? formatBytes(total) + " volume" : "Dockyard data directory"}
+        subtitle={
+          total > 0 ? `${formatBytes(total)} volume` : "Dockyard data directory"
+        }
       >
         <EChart option={chartOpt} height={280} ariaLabel="Disk usage chart" />
       </AnalyticsChartCard>
       <div className="grid gap-6 lg:grid-cols-2">
-        <AnalyticsChartCard title="What is using the disk" subtitle="Best-effort breakdown">
+        <AnalyticsChartCard
+          title="What is using the disk"
+          subtitle="Best-effort breakdown"
+        >
           <EChart option={stackOpt} height={24} ariaLabel="Disk breakdown" />
           <ul className="mt-4 space-y-2 text-sm">
             <li className="flex justify-between">
@@ -560,11 +581,7 @@ export function NetworkTab({ points, rangeLabel, containerMetrics }: TabProps) {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
           label="Inbound now"
-          value={
-            inbound.length
-              ? formatBytesPerSec(inbound.at(-1) ?? 0)
-              : "—"
-          }
+          value={inbound.length ? formatBytesPerSec(inbound.at(-1) ?? 0) : "—"}
           hint={
             inbound.length
               ? `peak ${formatBytesPerSec(peak(inbound))}`
@@ -574,9 +591,7 @@ export function NetworkTab({ points, rangeLabel, containerMetrics }: TabProps) {
         <StatCard
           label="Outbound now"
           value={
-            outbound.length
-              ? formatBytesPerSec(outbound.at(-1) ?? 0)
-              : "—"
+            outbound.length ? formatBytesPerSec(outbound.at(-1) ?? 0) : "—"
           }
           hint={
             outbound.length
@@ -603,8 +618,8 @@ export function NetworkTab({ points, rangeLabel, containerMetrics }: TabProps) {
           <EChart option={chartOpt} height={280} ariaLabel="Network chart" />
         ) : (
           <p className="text-sm" style={{ color: "var(--muted-text)" }}>
-            Network counters appear after a few minutes on Linux hosts. Non-Linux
-            dev builds do not sample network yet.
+            Network counters appear after a few minutes on Linux hosts.
+            Non-Linux dev builds do not sample network yet.
           </p>
         )}
       </AnalyticsChartCard>
@@ -613,7 +628,7 @@ export function NetworkTab({ points, rangeLabel, containerMetrics }: TabProps) {
         subtitle="Cumulative rx+tx from latest sample"
         rows={topByTraffic(containerMetrics)}
         valueLabel="Traffic"
-        valueOf={(r) => formatBytes(r.net_rx + r.net_tx)}
+        getValue={(r) => formatBytes(r.net_rx + r.net_tx)}
         barPercent={(r) => r.net_rx + r.net_tx}
       />
     </div>
@@ -689,7 +704,10 @@ export function EventsAndOpsSection({
           style={{ borderColor: "var(--border)", background: "var(--surface)" }}
         >
           {events.length === 0 ? (
-            <li className="px-5 py-8 text-sm" style={{ color: "var(--muted-text)" }}>
+            <li
+              className="px-5 py-8 text-sm"
+              style={{ color: "var(--muted-text)" }}
+            >
               No events in this filter.
             </li>
           ) : (
@@ -704,7 +722,10 @@ export function EventsAndOpsSection({
                     <span className="text-sm font-medium">{ev.title}</span>
                   </div>
                   {ev.detail ? (
-                    <p className="text-[13px]" style={{ color: "var(--muted-text)" }}>
+                    <p
+                      className="text-[13px]"
+                      style={{ color: "var(--muted-text)" }}
+                    >
                       {ev.detail}
                     </p>
                   ) : null}
@@ -802,7 +823,10 @@ export function EventsAndOpsSection({
         </div>
       </div>
 
-      <ServerContainersTable rows={containerRows} runningCount={containerRows.length} />
+      <ServerContainersTable
+        rows={containerRows}
+        runningCount={containerRows.length}
+      />
     </div>
   );
 }
@@ -833,21 +857,14 @@ export function containerTableRows(
   return containers.map((c) => {
     const uptimeSec = c.created_at ? Math.max(0, now - c.created_at) : 0;
     const statusVariant =
-      c.state === "running"
-        ? c.kind === "system"
-          ? "idle"
-          : "ok"
-        : "warn";
+      c.state === "running" ? (c.kind === "system" ? "idle" : "ok") : "warn";
     return {
       id: c.id,
       name: c.name,
-      projectLabel: c.project_label ?? (c.kind === "system" ? "Dockyard" : c.kind ?? "—"),
-      cpu:
-        c.cpu_percent != null
-          ? `${(c.cpu_percent * 100).toFixed(1)}%`
-          : "—",
-      memory:
-        c.memory_bytes != null ? formatBytes(c.memory_bytes) : "—",
+      projectLabel:
+        c.project_label ?? (c.kind === "system" ? "Dockyard" : (c.kind ?? "—")),
+      cpu: c.cpu_percent != null ? `${(c.cpu_percent * 100).toFixed(1)}%` : "—",
+      memory: c.memory_bytes != null ? formatBytes(c.memory_bytes) : "—",
       uptime: c.created_at ? formatUptime(uptimeSec) : "—",
       statusLabel:
         c.state === "running"

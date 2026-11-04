@@ -6,15 +6,15 @@ import { Button } from "@/components/dockyard/ui/button";
 import { Chip } from "@/components/dockyard/ui/chip";
 import { Spinner } from "@/components/dockyard/ui/spinner";
 import {
+  type Deployment,
   fetchDeploymentLog,
   getDeploymentForService,
-  type Deployment,
 } from "@/lib/api";
 import {
   resolveStaticDeployStep,
+  type StaticDeployStep,
   staticDeploySteps,
   stepVisualState,
-  type StaticDeployStep,
 } from "@/lib/deployment-progress";
 
 export type StaticSiteCreateResult = {
@@ -124,7 +124,10 @@ export function StaticSiteCreateProgressModal({
         className="relative z-10 flex max-h-[90vh] w-full max-w-[920px] flex-col overflow-hidden rounded-[20px] border shadow-lg"
         style={{ background: "var(--surface)", borderColor: "var(--border)" }}
       >
-        <header className="border-b px-8 py-6" style={{ borderColor: "var(--border)" }}>
+        <header
+          className="border-b px-8 py-6"
+          style={{ borderColor: "var(--border)" }}
+        >
           <div className="flex items-start justify-between gap-4">
             <div>
               <h2
@@ -133,7 +136,10 @@ export function StaticSiteCreateProgressModal({
               >
                 Create static site
               </h2>
-              <p className="mt-1 text-sm" style={{ color: "var(--muted-text)" }}>
+              <p
+                className="mt-1 text-sm"
+                style={{ color: "var(--muted-text)" }}
+              >
                 Five short steps, then deploy.
               </p>
             </div>
@@ -154,9 +160,12 @@ export function StaticSiteCreateProgressModal({
             <h3 className="mt-4 text-2xl font-semibold tracking-[-0.03em]">
               {context.siteName} is being created
             </h3>
-            <p className="mt-2 max-w-xl text-sm" style={{ color: "var(--muted-text)" }}>
-              First deploy usually takes about a minute. You can close this window;
-              it keeps running.
+            <p
+              className="mt-2 max-w-xl text-sm"
+              style={{ color: "var(--muted-text)" }}
+            >
+              First deploy usually takes about a minute. You can close this
+              window; it keeps running.
             </p>
             {isFailed && deployment?.error ? (
               <p className="mt-3 text-sm text-red-600" role="alert">
@@ -232,7 +241,10 @@ function DeployStepRow({
       <StepIndicator state={state} />
       <div>
         <p className="font-semibold">{step.title}</p>
-        <p className="mt-0.5 text-[13px]" style={{ color: "var(--muted-text)" }}>
+        <p
+          className="mt-0.5 text-[13px]"
+          style={{ color: "var(--muted-text)" }}
+        >
           {step.detail}
         </p>
       </div>
@@ -240,7 +252,11 @@ function DeployStepRow({
   );
 }
 
-function StepIndicator({ state }: { state: ReturnType<typeof stepVisualState> }) {
+function StepIndicator({
+  state,
+}: {
+  state: ReturnType<typeof stepVisualState>;
+}) {
   if (state === "done") {
     return (
       <span

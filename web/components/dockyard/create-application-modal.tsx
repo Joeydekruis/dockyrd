@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { ResourceProvisionContext } from "@/components/dockyard/resource-provisioning-modal";
 import { Button } from "@/components/dockyard/ui/button";
 import { Field } from "@/components/dockyard/ui/field";
 import { Modal } from "@/components/dockyard/ui/modal";
 import { SelectField } from "@/components/dockyard/ui/select-field";
 import { createService, listProjects, type Project } from "@/lib/api";
-import type { ResourceProvisionContext } from "@/components/dockyard/resource-provisioning-modal";
 
 type CreateApplicationModalProps = {
   open: boolean;
@@ -74,7 +74,12 @@ export function CreateApplicationModal({
       onClose={onClose}
       footer={
         <>
-          <Button type="button" variant="outline" onClick={onClose} disabled={busy}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            disabled={busy}
+          >
             Cancel
           </Button>
           <Button type="submit" form="create-application-form" disabled={busy}>

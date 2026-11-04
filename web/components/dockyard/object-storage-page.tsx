@@ -3,11 +3,11 @@
 import { HardDrive, Plus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CreateBucketModal } from "@/components/dockyard/create-bucket-modal";
-import {
-  ResourceProvisioningModal,
-  type ResourceProvisionContext,
-} from "@/components/dockyard/resource-provisioning-modal";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import {
+  type ResourceProvisionContext,
+  ResourceProvisioningModal,
+} from "@/components/dockyard/resource-provisioning-modal";
 import { Button } from "@/components/dockyard/ui/button";
 import { HeroPromoCard } from "@/components/dockyard/ui/hero-promo-card";
 import { PageHeader } from "@/components/dockyard/ui/page-header";
@@ -152,7 +152,10 @@ export function ObjectStoragePage() {
             title="No buckets yet"
             description="Store uploads, backups and assets on your own disk. Pick a bundled S3 server and Dockyard runs it for you."
           />
-          <section aria-label="Storage servers" className="grid gap-4 md:grid-cols-2">
+          <section
+            aria-label="Storage servers"
+            className="grid gap-4 md:grid-cols-2"
+          >
             <TemplateCard
               name="Garage"
               description="Lightweight, built for small self-hosted clusters. Recommended for Dockyard."

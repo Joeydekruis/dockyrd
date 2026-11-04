@@ -36,7 +36,10 @@ export function ServerContainersTable({
         {runningCount !== undefined ? (
           <span
             className="rounded-md px-2 py-0.5 font-mono text-[11px] uppercase tracking-widest"
-            style={{ background: "var(--hover-row)", color: "var(--muted-text)" }}
+            style={{
+              background: "var(--hover-row)",
+              color: "var(--muted-text)",
+            }}
           >
             {runningCount} running
           </span>
@@ -45,22 +48,17 @@ export function ServerContainersTable({
       <table className="w-full min-w-[720px] border-collapse text-left text-sm">
         <thead>
           <tr style={{ background: "var(--hover-row)" }}>
-            {[
-              "Container",
-              "Project",
-              "CPU",
-              "Memory",
-              "Uptime",
-              "Status",
-            ].map((h) => (
-              <th
-                key={h}
-                className="px-4 py-3 font-mono text-[11px] font-medium uppercase tracking-widest"
-                style={{ color: "var(--muted-text)" }}
-              >
-                {h}
-              </th>
-            ))}
+            {["Container", "Project", "CPU", "Memory", "Uptime", "Status"].map(
+              (h) => (
+                <th
+                  key={h}
+                  className="px-4 py-3 font-mono text-[11px] font-medium uppercase tracking-widest"
+                  style={{ color: "var(--muted-text)" }}
+                >
+                  {h}
+                </th>
+              ),
+            )}
           </tr>
         </thead>
         <tbody>

@@ -1,14 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import type { TimeRange } from "@/components/dockyard/ui/time-range-toggle";
 import {
   ackEvent,
   type CleanupSummary,
+  type ContainerMetricSnapshot,
   type DockyardEvent,
   getMe,
-  type ContainerMetricSnapshot,
-  getServerContainerMetrics,
   getServerCleanup,
+  getServerContainerMetrics,
   getServerContainers,
   getServerInfo,
   getServerMetrics,
@@ -19,14 +20,8 @@ import {
   type ServerInfo,
   type ServerMetricsResponse,
 } from "@/lib/api";
-import type { TimeRange } from "@/components/dockyard/ui/time-range-toggle";
 
-export type AnalyticsTabId =
-  | "overview"
-  | "cpu"
-  | "memory"
-  | "disk"
-  | "network";
+export type AnalyticsTabId = "overview" | "cpu" | "memory" | "disk" | "network";
 
 export type AnalyticsData = {
   range: TimeRange;
@@ -69,54 +64,57 @@ export function useAnalyticsData(): AnalyticsData {
   const [isAdmin, setIsAdmin] = useState(false);
   const [cleanupBusy, setCleanupBusy] = useState(false);
 
-  const refresh = useCallback(async (opts?: { silent?: boolean }) => {
-    const silent = opts?.silent === true;
-    if (!silent) {
-      setLoading(true);
-    }
-    try {
-      const apiRange = metricRangeFromTimeRange(range);
-      const [m, ev, info, cm] = await Promise.all([
-        getServerMetrics(apiRange),
-        listEvents({ limit: 50 }),
-        getServerInfo(),
-        getServerContainerMetrics(apiRange).catch(() => ({
-          range: apiRange,
-          metrics: [],
-        })),
-      ]);
-      setMetrics(m);
-      setServerInfo(info);
-      setContainerMetrics(cm.metrics);
-      setEvents(ev.events);
+  const refresh = useCallback(
+    async (opts?: { silent?: boolean }) => {
+      const silent = opts?.silent === true;
+      if (!silent) {
+        setLoading(true);
+      }
       try {
-        const [{ containers: cs }, sum] = await Promise.all([
-          getServerContainers(),
-          getServerCleanup(),
+        const apiRange = metricRangeFromTimeRange(range);
+        const [m, ev, info, cm] = await Promise.all([
+          getServerMetrics(apiRange),
+          listEvents({ limit: 50 }),
+          getServerInfo(),
+          getServerContainerMetrics(apiRange).catch(() => ({
+            range: apiRange,
+            metrics: [],
+          })),
         ]);
-        setContainers(cs.filter((c) => c.state === "running"));
-        setCleanup(sum);
-      } catch {
-        setContainers([]);
-        setCleanup(null);
+        setMetrics(m);
+        setServerInfo(info);
+        setContainerMetrics(cm.metrics);
+        setEvents(ev.events);
+        try {
+          const [{ containers: cs }, sum] = await Promise.all([
+            getServerContainers(),
+            getServerCleanup(),
+          ]);
+          setContainers(cs.filter((c) => c.state === "running"));
+          setCleanup(sum);
+        } catch {
+          setContainers([]);
+          setCleanup(null);
+        }
+        try {
+          const me = await getMe();
+          setIsAdmin(me.role === "owner" || me.role === "admin");
+        } catch {
+          setIsAdmin(false);
+        }
+        setError(null);
+      } catch (e) {
+        if (!silent) {
+          setError(e instanceof Error ? e.message : "Failed to load analytics");
+        }
+      } finally {
+        if (!silent) {
+          setLoading(false);
+        }
       }
-      try {
-        const me = await getMe();
-        setIsAdmin(me.role === "owner" || me.role === "admin");
-      } catch {
-        setIsAdmin(false);
-      }
-      setError(null);
-    } catch (e) {
-      if (!silent) {
-        setError(e instanceof Error ? e.message : "Failed to load analytics");
-      }
-    } finally {
-      if (!silent) {
-        setLoading(false);
-      }
-    }
-  }, [range]);
+    },
+    [range],
+  );
 
   useEffect(() => {
     void refresh();

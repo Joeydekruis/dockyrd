@@ -163,12 +163,19 @@ export function dualAreaOption(input: {
   };
 }
 
-export function sparklineOption(values: number[], yMax?: number): EChartsOption {
+export function sparklineOption(
+  values: number[],
+  yMax?: number,
+): EChartsOption {
   return {
     animation: false,
     grid: { left: 0, right: 0, top: 4, bottom: 0 },
     xAxis: { type: "category", show: false, data: values.map((_, i) => i) },
-    yAxis: { type: "value", show: false, max: yMax ?? Math.max(100, ...values) },
+    yAxis: {
+      type: "value",
+      show: false,
+      max: yMax ?? Math.max(100, ...values),
+    },
     series: [
       {
         type: "line",
@@ -194,11 +201,13 @@ export function sparklineOption(values: number[], yMax?: number): EChartsOption 
   };
 }
 
-export function horizontalStackOption(segments: {
-  name: string;
-  value: number;
-  color: string;
-}[]): EChartsOption {
+export function horizontalStackOption(
+  segments: {
+    name: string;
+    value: number;
+    color: string;
+  }[],
+): EChartsOption {
   const total = segments.reduce((s, x) => s + x.value, 0) || 1;
   return {
     animation: false,

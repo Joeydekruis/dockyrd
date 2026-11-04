@@ -58,7 +58,8 @@ export function resolveStaticDeployStep(
 
   let step = 0;
   if (status !== "queued") step = 1;
-  if (l.includes("cloning") || l.includes("clone into")) step = Math.max(step, 1);
+  if (l.includes("cloning") || l.includes("clone into"))
+    step = Math.max(step, 1);
   if (l.includes("added") && l.includes("package")) step = Math.max(step, 2);
   if (
     l.includes("npm run build") ||

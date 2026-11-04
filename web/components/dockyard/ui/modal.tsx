@@ -1,5 +1,4 @@
 import { X } from "lucide-react";
-import type { ReactNode } from "react";
 
 type ModalProps = {
   open: boolean;
@@ -46,7 +45,10 @@ export function Modal({
               {title}
             </h2>
             {description ? (
-              <p className="mt-2 text-sm" style={{ color: "var(--muted-text)" }}>
+              <p
+                className="mt-2 text-sm"
+                style={{ color: "var(--muted-text)" }}
+              >
                 {description}
               </p>
             ) : null}

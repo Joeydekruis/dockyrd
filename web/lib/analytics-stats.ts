@@ -56,7 +56,11 @@ export function percentile(values: number[], p: number): number {
   return sorted[idx] ?? 0;
 }
 
-export function formatTimeAxis(ts: number, index: number, total: number): string {
+export function formatTimeAxis(
+  ts: number,
+  index: number,
+  total: number,
+): string {
   if (index === total - 1) return "now";
   const d = new Date(ts * 1000);
   return d.toLocaleTimeString(undefined, {
@@ -78,9 +82,11 @@ export function formatUptime(sec: number): string {
 }
 
 /** Net throughput (bytes/sec) between consecutive host metric points. */
-export function networkRatesFromPoints(
-  points: HostMetricPoint[],
-): { inbound: number[]; outbound: number[]; labels: string[] } {
+export function networkRatesFromPoints(points: HostMetricPoint[]): {
+  inbound: number[];
+  outbound: number[];
+  labels: string[];
+} {
   const inbound: number[] = [];
   const outbound: number[] = [];
   const labels: string[] = [];
@@ -98,7 +104,10 @@ export function networkRatesFromPoints(
   return { inbound, outbound, labels };
 }
 
-export function totalDelta(points: HostMetricPoint[], pick: (p: HostMetricPoint) => number): number {
+export function totalDelta(
+  points: HostMetricPoint[],
+  pick: (p: HostMetricPoint) => number,
+): number {
   if (points.length < 2) return 0;
   const first = points[0];
   const last = points.at(-1);

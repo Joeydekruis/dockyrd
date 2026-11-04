@@ -149,7 +149,11 @@ export function ResourceRow({
 
       {showDeployMeta ? (
         <div className="justify-self-end">
-          <CommitChip sha={sha ?? ""} message={commitMessage} timeAgo={timeAgo} />
+          <CommitChip
+            sha={sha ?? ""}
+            message={commitMessage}
+            timeAgo={timeAgo}
+          />
         </div>
       ) : (
         <div className="hidden md:block" aria-hidden />

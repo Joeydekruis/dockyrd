@@ -1,10 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import {
-  containerTableRows,
   CpuTab,
+  containerTableRows,
   DiskTab,
   EventsAndOpsSection,
   MemoryTab,
@@ -16,6 +15,7 @@ import {
   type AnalyticsTabId,
   useAnalyticsData,
 } from "@/components/dockyard/analytics/use-analytics-data";
+import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import { Chip } from "@/components/dockyard/ui/chip";
 import { PageHeader } from "@/components/dockyard/ui/page-header";
 import { Tabs } from "@/components/dockyard/ui/tabs";
@@ -74,9 +74,7 @@ export function AnalyticsPage() {
       <PageHeader
         title="Analytics"
         subtitle="Monitor your server, from the key numbers to the detailed charts. Refreshes every minute while you stay on this page."
-        action={
-          <TimeRangeToggle value={data.range} onChange={data.setRange} />
-        }
+        action={<TimeRangeToggle value={data.range} onChange={data.setRange} />}
       />
 
       <Tabs
@@ -105,9 +103,7 @@ export function AnalyticsPage() {
           </p>
         ) : null}
 
-        {tab === "overview" ? (
-          <OverviewTab {...tabProps} />
-        ) : null}
+        {tab === "overview" ? <OverviewTab {...tabProps} /> : null}
         {tab === "cpu" ? <CpuTab {...tabProps} /> : null}
         {tab === "memory" ? <MemoryTab {...tabProps} /> : null}
         {tab === "disk" ? (
