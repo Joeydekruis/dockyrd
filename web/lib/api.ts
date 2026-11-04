@@ -98,6 +98,22 @@ export function patchNotificationPrefs(prefs: NotificationPrefs) {
   });
 }
 
+export type UserLocalePrefsApi = {
+  timezone: string;
+  time_format: "24h" | "12h";
+};
+
+export function getLocalePrefs() {
+  return apiFetch<UserLocalePrefsApi>("/api/v1/auth/locale");
+}
+
+export function patchLocalePrefs(prefs: UserLocalePrefsApi) {
+  return apiFetch<UserLocalePrefsApi>("/api/v1/auth/locale", {
+    method: "PATCH",
+    json: prefs,
+  });
+}
+
 export function getSetupStatus() {
   return apiFetch<SetupStatusResponse>("/api/v1/setup/status");
 }

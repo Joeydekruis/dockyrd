@@ -211,7 +211,7 @@ export function StaticSitesPage() {
                 <ResourceRow
                   key={service.id}
                   name={service.name}
-                  href={`/projects/${project.slug}`}
+                  href={`/static-sites/${service.slug}`}
                   meta={projectPathLabel(project.name)}
                   url={publicHost}
                   internalOnly={!publicHost}

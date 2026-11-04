@@ -10,7 +10,12 @@ import {
   useRef,
   useState,
 } from "react";
+import { createPortal } from "react-dom";
 import type { SelectOption } from "@/components/dockyard/ui/select";
+import {
+  isSelectMenuOutsideClick,
+  useSelectMenuPosition,
+} from "@/components/dockyard/ui/use-select-menu-position";
 
 export type SearchSelectOption = SelectOption;
 
@@ -72,6 +77,7 @@ export const SearchSelect = forwardRef<HTMLButtonElement, SearchSelectProps>(
     const rootRef = useRef<HTMLDivElement>(null);
     const searchRef = useRef<HTMLInputElement>(null);
     const [open, setOpen] = useState(defaultOpen);
+    const { menuRef, menuStyle } = useSelectMenuPosition(open, rootRef);
     const [uncontrolled, setUncontrolled] = useState(defaultValue);
     const [activeIndex, setActiveIndex] = useState(0);
     const [searchQuery, setSearchQuery] = useState("");
@@ -99,14 +105,14 @@ export const SearchSelect = forwardRef<HTMLButtonElement, SearchSelectProps>(
     useEffect(() => {
       if (!open) return;
       const onDoc = (e: MouseEvent) => {
-        if (!rootRef.current?.contains(e.target as Node)) {
+        if (isSelectMenuOutsideClick(e.target as Node, rootRef, menuRef)) {
           setOpen(false);
           setSearchQuery("");
         }
       };
       document.addEventListener("mousedown", onDoc);
       return () => document.removeEventListener("mousedown", onDoc);
-    }, [open]);
+    }, [open, menuRef]);
 
     useEffect(() => {
       if (!open) return;
@@ -230,71 +236,82 @@ export const SearchSelect = forwardRef<HTMLButtonElement, SearchSelectProps>(
             aria-hidden
           />
         </button>
-        {open ? (
-          <div id={listId} role="listbox" className="select-menu">
-            <div className="select-menu-search-wrap">
-              <Search
-                strokeWidth={2}
-                className="size-4 shrink-0"
-                style={{ color: "var(--muted-text)" }}
-                aria-hidden
-              />
-              <input
-                ref={searchRef}
-                id={searchId}
-                type="search"
-                aria-controls={listId}
-                aria-label={searchPlaceholder}
-                placeholder={searchPlaceholder}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={onSearchKeyDown}
-                className="select-menu-search"
-                autoComplete="off"
-              />
-            </div>
-            {filteredOptions.length === 0 ? (
-              <p
-                className="select-menu-empty"
-                style={{ color: "var(--muted-text)" }}
+        {open && typeof document !== "undefined"
+          ? createPortal(
+              <div
+                ref={menuRef}
+                id={listId}
+                role="listbox"
+                className="select-menu"
+                style={menuStyle}
               >
-                {emptyMessage}
-              </p>
-            ) : (
-              filteredOptions.map((option, index) => {
-                const isSelected = option.value === selectedValue;
-                const isActive = index === activeIndex;
-                return (
-                  <div key={option.value} role="none">
-                    <button
-                      type="button"
-                      id={`${listId}-opt-${index}`}
-                      role="option"
-                      aria-selected={isSelected}
-                      tabIndex={-1}
-                      className="select-option"
-                      data-active={isActive ? "true" : undefined}
-                      onMouseEnter={() => setActiveIndex(index)}
-                      onClick={() => setValue(option.value)}
-                    >
-                      <span className="min-w-0 truncate">{option.label}</span>
-                      {isSelected ? (
-                        <Check
-                          strokeWidth={2}
-                          className="size-4 shrink-0"
-                          style={{ color: "var(--ink-navy)" }}
-                          aria-hidden
-                        />
-                      ) : (
-                        <span className="size-4 shrink-0" aria-hidden />
-                      )}
-                    </button>
-                  </div>
-                );
-              })
-            )}
-          </div>
-        ) : null}
+                <div className="select-menu-search-wrap">
+                  <Search
+                    strokeWidth={2}
+                    className="size-4 shrink-0"
+                    style={{ color: "var(--muted-text)" }}
+                    aria-hidden
+                  />
+                  <input
+                    ref={searchRef}
+                    id={searchId}
+                    type="search"
+                    aria-controls={listId}
+                    aria-label={searchPlaceholder}
+                    placeholder={searchPlaceholder}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={onSearchKeyDown}
+                    className="select-menu-search"
+                    autoComplete="off"
+                  />
+                </div>
+                {filteredOptions.length === 0 ? (
+                  <p
+                    className="select-menu-empty"
+                    style={{ color: "var(--muted-text)" }}
+                  >
+                    {emptyMessage}
+                  </p>
+                ) : (
+                  filteredOptions.map((option, index) => {
+                    const isSelected = option.value === selectedValue;
+                    const isActive = index === activeIndex;
+                    return (
+                      <div key={option.value} role="none">
+                        <button
+                          type="button"
+                          id={`${listId}-opt-${index}`}
+                          role="option"
+                          aria-selected={isSelected}
+                          tabIndex={-1}
+                          className="select-option"
+                          data-active={isActive ? "true" : undefined}
+                          onMouseEnter={() => setActiveIndex(index)}
+                          onClick={() => setValue(option.value)}
+                        >
+                          <span className="min-w-0 truncate">
+                            {option.label}
+                          </span>
+                          {isSelected ? (
+                            <Check
+                              strokeWidth={2}
+                              className="size-4 shrink-0"
+                              style={{ color: "var(--ink-navy)" }}
+                              aria-hidden
+                            />
+                          ) : (
+                            <span className="size-4 shrink-0" aria-hidden />
+                          )}
+                        </button>
+                      </div>
+                    );
+                  })
+                )}
+              </div>,
+              document.body,
+            )
+          : null}
       </div>
     );
   },

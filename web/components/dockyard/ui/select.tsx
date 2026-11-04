@@ -9,6 +9,11 @@ import {
   useRef,
   useState,
 } from "react";
+import { createPortal } from "react-dom";
+import {
+  isSelectMenuOutsideClick,
+  useSelectMenuPosition,
+} from "@/components/dockyard/ui/use-select-menu-position";
 
 export type SelectOption = {
   value: string;
@@ -55,6 +60,7 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(
     const listId = useId();
     const rootRef = useRef<HTMLDivElement>(null);
     const [open, setOpen] = useState(defaultOpen);
+    const { menuRef, menuStyle } = useSelectMenuPosition(open, rootRef);
     const [uncontrolled, setUncontrolled] = useState(defaultValue);
     const [activeIndex, setActiveIndex] = useState(0);
 
@@ -75,11 +81,13 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(
     useEffect(() => {
       if (!open) return;
       const onDoc = (e: MouseEvent) => {
-        if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
+        if (isSelectMenuOutsideClick(e.target as Node, rootRef, menuRef)) {
+          setOpen(false);
+        }
       };
       document.addEventListener("mousedown", onDoc);
       return () => document.removeEventListener("mousedown", onDoc);
-    }, [open]);
+    }, [open, menuRef]);
 
     useEffect(() => {
       if (!open) return;
@@ -174,41 +182,50 @@ export const Select = forwardRef<HTMLButtonElement, SelectProps>(
             aria-hidden
           />
         </button>
-        {open ? (
-          <div id={listId} role="listbox" className="select-menu">
-            {options.map((option, index) => {
-              const isSelected = option.value === selectedValue;
-              const isActive = index === activeIndex;
-              return (
-                <div key={option.value} role="none">
-                  <button
-                    type="button"
-                    id={`${listId}-opt-${index}`}
-                    role="option"
-                    aria-selected={isSelected}
-                    tabIndex={-1}
-                    className="select-option"
-                    data-active={isActive ? "true" : undefined}
-                    onMouseEnter={() => setActiveIndex(index)}
-                    onClick={() => setValue(option.value)}
-                  >
-                    <span>{option.label}</span>
-                    {isSelected ? (
-                      <Check
-                        strokeWidth={2}
-                        className="size-4 shrink-0"
-                        style={{ color: "var(--ink-navy)" }}
-                        aria-hidden
-                      />
-                    ) : (
-                      <span className="size-4 shrink-0" aria-hidden />
-                    )}
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        ) : null}
+        {open && typeof document !== "undefined"
+          ? createPortal(
+              <div
+                ref={menuRef}
+                id={listId}
+                role="listbox"
+                className="select-menu"
+                style={menuStyle}
+              >
+                {options.map((option, index) => {
+                  const isSelected = option.value === selectedValue;
+                  const isActive = index === activeIndex;
+                  return (
+                    <div key={option.value} role="none">
+                      <button
+                        type="button"
+                        id={`${listId}-opt-${index}`}
+                        role="option"
+                        aria-selected={isSelected}
+                        tabIndex={-1}
+                        className="select-option"
+                        data-active={isActive ? "true" : undefined}
+                        onMouseEnter={() => setActiveIndex(index)}
+                        onClick={() => setValue(option.value)}
+                      >
+                        <span>{option.label}</span>
+                        {isSelected ? (
+                          <Check
+                            strokeWidth={2}
+                            className="size-4 shrink-0"
+                            style={{ color: "var(--ink-navy)" }}
+                            aria-hidden
+                          />
+                        ) : (
+                          <span className="size-4 shrink-0" aria-hidden />
+                        )}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>,
+              document.body,
+            )
+          : null}
       </div>
     );
   },

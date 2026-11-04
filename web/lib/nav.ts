@@ -4,6 +4,7 @@ import {
   BarChart3,
   Bell,
   Box,
+  Clock,
   Database,
   Globe,
   HardDrive,
@@ -76,6 +77,11 @@ export const accountSettingsNav: SettingsNavItem[] = [
     label: "Notifications",
     href: "/settings/account/notifications",
     icon: Bell,
+  },
+  {
+    label: "Date & time",
+    href: "/settings/account/regional",
+    icon: Clock,
   },
   {
     label: "Security",

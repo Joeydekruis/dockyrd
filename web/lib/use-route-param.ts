@@ -14,6 +14,9 @@ export function useRouteParam(name: string, indexFromEnd = 0): string {
     if (name === "slug" && parts[0] === "projects" && parts[1]) {
       return parts[1] === "_" ? "" : parts[1];
     }
+    if (name === "slug" && parts[0] === "static-sites" && parts[1]) {
+      return parts[1] === "_" ? "" : parts[1];
+    }
     const idx = parts.length - 1 - indexFromEnd;
     if (idx < 0) {
       return "";

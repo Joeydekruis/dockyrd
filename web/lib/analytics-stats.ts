@@ -1,4 +1,5 @@
 import type { HostMetricPoint } from "@/lib/api";
+import { formatTimeAxisLabel, type UserLocalePrefs } from "@/lib/user-locale";
 
 export function formatBytes(n: number): string {
   if (n <= 0) return "0 B";
@@ -60,13 +61,9 @@ export function formatTimeAxis(
   ts: number,
   index: number,
   total: number,
+  prefs: UserLocalePrefs,
 ): string {
-  if (index === total - 1) return "now";
-  const d = new Date(ts * 1000);
-  return d.toLocaleTimeString(undefined, {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return formatTimeAxisLabel(ts, index, total, prefs);
 }
 
 export function formatDuration(sec: number): string {
@@ -82,7 +79,10 @@ export function formatUptime(sec: number): string {
 }
 
 /** Net throughput (bytes/sec) between consecutive host metric points. */
-export function networkRatesFromPoints(points: HostMetricPoint[]): {
+export function networkRatesFromPoints(
+  points: HostMetricPoint[],
+  prefs: UserLocalePrefs,
+): {
   inbound: number[];
   outbound: number[];
   labels: string[];
@@ -99,7 +99,7 @@ export function networkRatesFromPoints(points: HostMetricPoint[]): {
     const tx = ((cur.net_tx ?? 0) - (prev.net_tx ?? 0)) / dt;
     inbound.push(Math.max(0, rx));
     outbound.push(Math.max(0, tx));
-    labels.push(formatTimeAxis(cur.ts, i, points.length));
+    labels.push(formatTimeAxis(cur.ts, i, points.length, prefs));
   }
   return { inbound, outbound, labels };
 }

@@ -50,6 +50,43 @@ func TestPatchAccountAndNotifications(t *testing.T) {
 	if wP.Code != http.StatusOK {
 		t.Fatalf("patch notifications: %d %s", wP.Code, wP.Body.String())
 	}
+
+	reqL := httptest.NewRequest(http.MethodGet, "/api/v1/auth/locale", nil)
+	reqL.AddCookie(cookie)
+	wL := httptest.NewRecorder()
+	mux.ServeHTTP(wL, reqL)
+	if wL.Code != http.StatusOK {
+		t.Fatalf("get locale: %d", wL.Code)
+	}
+	var defaultLocale localePrefs
+	if err := json.Unmarshal(wL.Body.Bytes(), &defaultLocale); err != nil {
+		t.Fatal(err)
+	}
+	if defaultLocale.Timezone != "UTC" || defaultLocale.TimeFormat != "24h" {
+		t.Fatalf("unexpected default locale: %+v", defaultLocale)
+	}
+
+	patchLocale, _ := json.Marshal(map[string]string{
+		"timezone":    "Europe/Amsterdam",
+		"time_format": "12h",
+	})
+	reqLP := httptest.NewRequest(http.MethodPatch, "/api/v1/auth/locale", bytes.NewReader(patchLocale))
+	reqLP.Header.Set("Content-Type", "application/json")
+	reqLP.AddCookie(cookie)
+	wLP := httptest.NewRecorder()
+	mux.ServeHTTP(wLP, reqLP)
+	if wLP.Code != http.StatusOK {
+		t.Fatalf("patch locale: %d %s", wLP.Code, wLP.Body.String())
+	}
+
+	reqBad := httptest.NewRequest(http.MethodPatch, "/api/v1/auth/locale", bytes.NewReader([]byte(`{"timezone":"Invalid/Zone","time_format":"24h"}`)))
+	reqBad.Header.Set("Content-Type", "application/json")
+	reqBad.AddCookie(cookie)
+	wBad := httptest.NewRecorder()
+	mux.ServeHTTP(wBad, reqBad)
+	if wBad.Code != http.StatusBadRequest {
+		t.Fatalf("expected 400 for bad tz, got %d", wBad.Code)
+	}
 }
 
 func TestPasswordChangeWrongCurrent(t *testing.T) {

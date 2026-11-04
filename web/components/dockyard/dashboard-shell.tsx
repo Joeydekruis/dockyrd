@@ -12,6 +12,7 @@ import { TopBar } from "@/components/dockyard/top-bar";
 import { UpdateAvailableNotifier } from "@/components/dockyard/update-available-modal";
 import { getMe, type MeResponse } from "@/lib/api";
 import { isAccountSettingsPath } from "@/lib/nav";
+import { UserLocaleProvider } from "@/lib/user-locale-context";
 
 type DashboardShellProps = {
   title: string;
@@ -65,35 +66,37 @@ export function DashboardShell({
   }
 
   return (
-    <div className="min-h-dvh" style={{ background: "var(--page-bg)" }}>
-      <TopBar className="fixed top-0 right-0 left-0 z-50" />
-      <Sidebar />
-      <div
-        className="flex min-h-dvh flex-col pl-[232px]"
-        style={{ paddingTop: "var(--dockyard-announcement-height, 44px)" }}
-      >
+    <UserLocaleProvider>
+      <div className="min-h-dvh" style={{ background: "var(--page-bg)" }}>
+        <TopBar className="fixed top-0 right-0 left-0 z-50" />
+        <Sidebar />
         <div
-          className="sticky z-20 shrink-0"
-          style={{
-            top: "var(--dockyard-announcement-height, 44px)",
-            background: "var(--page-bg)",
-          }}
+          className="flex min-h-dvh flex-col pl-[232px]"
+          style={{ paddingTop: "var(--dockyard-announcement-height, 44px)" }}
         >
-          <AppHeader
-            title={title}
-            breadcrumb={breadcrumb}
-            user={user}
-            onOpenSearch={() => palette.setOpen(true)}
-          />
-        </div>
-        <div className="flex-1 overflow-y-auto px-8 py-6">
-          <div className="max-w-6xl mx-auto">
-            <UpdateAvailableNotifier />
-            {children}
+          <div
+            className="sticky z-20 shrink-0"
+            style={{
+              top: "var(--dockyard-announcement-height, 44px)",
+              background: "var(--page-bg)",
+            }}
+          >
+            <AppHeader
+              title={title}
+              breadcrumb={breadcrumb}
+              user={user}
+              onOpenSearch={() => palette.setOpen(true)}
+            />
+          </div>
+          <div className="flex-1 overflow-y-auto px-8 py-6">
+            <div className="max-w-6xl mx-auto">
+              <UpdateAvailableNotifier />
+              {children}
+            </div>
           </div>
         </div>
+        <CommandPalette open={palette.open} onClose={palette.close} />
       </div>
-      <CommandPalette open={palette.open} onClose={palette.close} />
-    </div>
+    </UserLocaleProvider>
   );
 }

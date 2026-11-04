@@ -11,7 +11,6 @@ import {
 import {
   AnalyticsChartCard,
   type AnalyticsTabId,
-  metricLabels,
   ViewDetailsLink,
 } from "@/components/dockyard/analytics/use-analytics-data";
 import { Button } from "@/components/dockyard/ui/button";
@@ -47,6 +46,7 @@ import type {
   ServerContainer,
   ServerInfo,
 } from "@/lib/api";
+import { useUserLocale } from "@/lib/user-locale-context";
 
 type TabProps = {
   points: HostMetricPoint[];
@@ -140,11 +140,12 @@ export function OverviewTab({
   rangeLabel,
   onSelectTab,
 }: TabProps) {
-  const labels = metricLabels(points);
+  const { metricTimeLabels, prefs } = useUserLocale();
+  const labels = metricTimeLabels(points);
   const cpuSeries = points.map((p) => cpuPercentFraction(p.cpu));
   const memSeries = points.map((p) => memUsedPercent(p));
   const diskSeries = points.map((p) => diskUsedPercent(p));
-  const { inbound } = networkRatesFromPoints(points);
+  const { inbound } = networkRatesFromPoints(points, prefs);
   const _netLabels =
     inbound.length > 0 ? labels.slice(-inbound.length) : labels;
 
@@ -235,7 +236,8 @@ export function CpuTab({
   rangeLabel,
   containerMetrics,
 }: TabProps) {
-  const labels = metricLabels(points);
+  const { metricTimeLabels } = useUserLocale();
+  const labels = metricTimeLabels(points);
   const cpuSeries = points.map((p) => cpuPercentFraction(p.cpu));
   const now = latest ? cpuPercentFraction(latest.cpu) : 0;
   const chartOpt = areaLineOption({
@@ -329,7 +331,8 @@ export function MemoryTab({
   serverInfo,
   containerMetrics,
 }: TabProps) {
-  const labels = metricLabels(points);
+  const { metricTimeLabels } = useUserLocale();
+  const labels = metricTimeLabels(points);
   const usedSeries = points.map((p) => p.mem_used / (1024 * 1024 * 1024));
   const nowGb = latest ? latest.mem_used / (1024 * 1024 * 1024) : 0;
   const totalGb = latest?.mem_total
@@ -445,7 +448,8 @@ export function DiskTab({
   rangeLabel,
   cleanup,
 }: TabProps & { cleanup: CleanupSummary | null }) {
-  const labels = metricLabels(points);
+  const { metricTimeLabels } = useUserLocale();
+  const labels = metricTimeLabels(points);
   const usedGb = points.map((p) => p.disk_used / (1024 * 1024 * 1024));
   const totalGb = latest?.disk_total
     ? latest.disk_total / (1024 * 1024 * 1024)
@@ -562,7 +566,8 @@ export function DiskTab({
 }
 
 export function NetworkTab({ points, rangeLabel, containerMetrics }: TabProps) {
-  const { inbound, outbound, labels } = networkRatesFromPoints(points);
+  const { prefs } = useUserLocale();
+  const { inbound, outbound, labels } = networkRatesFromPoints(points, prefs);
   const hasNet = inbound.some((v) => v > 0) || outbound.some((v) => v > 0);
   const chartOpt: EChartsOption = dualAreaOption({
     labels,

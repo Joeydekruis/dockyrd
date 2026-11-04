@@ -29,3 +29,16 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Playground: Story = {};
+
+export const OverviewGrid: Story = {
+  args: {
+    name: "Client X",
+    statusLabel: "Healthy",
+    statusVariant: "ok",
+    environments: ["Production", "Staging"],
+    summaryLine: "3 apps · 1 database · 1 static site",
+    activityLine: "Deployed 12 min ago",
+    repo: undefined,
+    servicesCount: undefined,
+  },
+};

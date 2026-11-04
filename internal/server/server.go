@@ -89,9 +89,12 @@ func handleHealth(w http.ResponseWriter, _ *http.Request) {
 }
 
 func spaExportFallback(rel string) string {
+	for _, segment := range []string{"projects", "static-sites", "applications"} {
+		if alt := dynamicExportPlaceholder(rel, segment); alt != "" {
+			return alt
+		}
+	}
 	switch {
-	case strings.HasPrefix(rel, "projects/"):
-		return "projects/_/index.html"
 	case strings.HasPrefix(rel, "settings/server/"):
 		return "settings/server/general/index.html"
 	case strings.HasPrefix(rel, "settings/account/"):
@@ -113,8 +116,31 @@ func spaExportFallback(rel string) string {
 	}
 }
 
+// dynamicExportPlaceholder maps static-export placeholders (briefing §4.2), e.g.
+// projects/acme → projects/_/index.html and projects/acme/index.txt → projects/_/index.txt.
+func dynamicExportPlaceholder(rel, segment string) string {
+	prefix := segment + "/"
+	if !strings.HasPrefix(rel, prefix) {
+		return ""
+	}
+	rest := strings.TrimPrefix(rel, prefix)
+	if rest == "" {
+		return ""
+	}
+	parts := strings.Split(rest, "/")
+	if len(parts) == 0 || parts[0] == "_" {
+		return ""
+	}
+	parts[0] = "_"
+	mapped := prefix + strings.Join(parts, "/")
+	last := parts[len(parts)-1]
+	if last != "index.html" && last != "index.txt" && !strings.Contains(last, ".") {
+		return mapped + "/index.html"
+	}
+	return mapped
+}
+
 func mountUI(mux *http.ServeMux, root fs.FS) {
-	fileServer := http.FileServer(http.FS(root))
 	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasPrefix(r.URL.Path, "/api/") {
 			http.NotFound(w, r)
@@ -138,14 +164,16 @@ func mountUI(mux *http.ServeMux, root fs.FS) {
 			}
 		}
 		if _, err := fs.Stat(root, rel); err != nil {
-			f, err := root.Open("index.html")
-			if err != nil {
+			if _, err404 := fs.Stat(root, "404.html"); err404 == nil {
+				rel = "404.html"
+				w.WriteHeader(http.StatusNotFound)
+			} else if _, err := fs.Stat(root, "index.html"); err != nil {
 				http.NotFound(w, r)
 				return
+			} else {
+				rel = "index.html"
 			}
-			defer f.Close()
-			r.URL.Path = "/index.html"
 		}
-		fileServer.ServeHTTP(w, r)
+		http.ServeFileFS(w, r, root, rel)
 	}))
 }

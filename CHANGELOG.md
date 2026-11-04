@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.36] - 2026-11-04
+
+_Finished: 2026-11-04_
+
+### Added
+
+- **Static export routing** — Go UI handler maps dynamic dashboard URLs (`/projects/{slug}`, `/static-sites/{slug}`, `/applications/…`) and RSC `index.txt` payloads to `_` placeholders via `http.ServeFileFS`; regression tests in `internal/server/server_ui_test.go`
+- **Static site detail** — `/static-sites/[slug]` route and summary page; list rows link to service slug
+- **Projects overview** — welcome hero, create-project modal, enriched project cards and overview helpers (`web/lib/projects-overview.ts`)
+- **Account regional settings** — `/settings/account/regional` and `GET|PATCH /api/v1/auth/locale` (timezone + 12h/24h); charts and analytics respect user locale via `UserLocaleProvider`
+
+### Fixed
+
+- **Dashboard deep links** — hard refresh and direct URLs such as `/projects/dockyrd` no longer return 404 from the embedded static UI
+- **Select / SearchSelect** — dropdown menus use fixed positioning so options are not clipped in scroll containers
+
+### Changed
+
+- **Unknown UI paths** — serve exported `404.html` with HTTP 404 instead of falling back to the home page
+
 ## [0.0.35] - 2026-11-04
 
 _Finished: 2026-11-04_

@@ -38,6 +38,7 @@ func registerAuthAccountRoutes(mux *http.ServeMux, deps apiDeps) {
 	mux.HandleFunc("POST /api/v1/auth/password/change", deps.handlePasswordChange)
 	mux.HandleFunc("GET /api/v1/auth/notifications", deps.handleGetNotifications)
 	mux.HandleFunc("PATCH /api/v1/auth/notifications", deps.handlePatchNotifications)
+	registerAuthLocaleRoutes(mux, deps)
 }
 
 func (d apiDeps) handlePatchAccount(w http.ResponseWriter, r *http.Request) {

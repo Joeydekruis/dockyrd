@@ -28,6 +28,7 @@ var searchNavPages = []searchHit{
 	{Kind: "page", Label: "Account profile", Href: "/settings/account/profile"},
 	{Kind: "page", Label: "Password & 2FA", Href: "/settings/account/password"},
 	{Kind: "page", Label: "Notifications", Href: "/settings/account/notifications"},
+	{Kind: "page", Label: "Date & time", Href: "/settings/account/regional"},
 	{Kind: "page", Label: "Security sessions", Href: "/settings/account/security"},
 	{Kind: "page", Label: "Server general", Href: "/settings/server/general"},
 	{Kind: "page", Label: "Team", Href: "/settings/server/team"},

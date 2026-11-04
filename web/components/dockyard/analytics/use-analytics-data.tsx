@@ -185,17 +185,6 @@ export function useAnalyticsData(): AnalyticsData {
   };
 }
 
-export function metricLabels(points: { ts: number }[]): string[] {
-  return points.map((p, i, arr) => {
-    if (i === arr.length - 1) return "now";
-    const d = new Date(p.ts * 1000);
-    return d.toLocaleTimeString(undefined, {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  });
-}
-
 export function ViewDetailsLink({
   tab,
   onSelectTab,
