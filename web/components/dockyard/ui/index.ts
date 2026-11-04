@@ -44,6 +44,8 @@ export { ResourceListAddLink } from "./resource-list-add-link";
 export { ResourceListSection } from "./resource-list-section";
 export { ResourceRow } from "./resource-row";
 export { SearchPalette, type SearchResultRow } from "./search-palette";
+export { SearchSelect, type SearchSelectOption } from "./search-select";
+export { SearchSelectField } from "./search-select-field";
 export { SearchTrigger } from "./search-trigger";
 export { Select, type SelectOption } from "./select";
 export { SelectButton } from "./select-button";

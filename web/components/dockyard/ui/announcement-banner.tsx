@@ -1,5 +1,6 @@
 import { ArrowRight } from "lucide-react";
 import { Chip } from "@/components/dockyard/ui/chip";
+import { PUBLIC_SITE_ORIGIN } from "@/lib/public-links";
 
 export function AnnouncementBanner() {
   return (
@@ -20,10 +21,10 @@ export function AnnouncementBanner() {
       </p>
       <div className="flex w-[140px] shrink-0 justify-end">
         <a
-          href="https://github.com/Joeydekruis/dockyrd"
+          href={PUBLIC_SITE_ORIGIN}
           target="_blank"
           rel="noopener noreferrer"
-          aria-label="Learn more about Dockyard on GitHub"
+          aria-label="Learn more about Dockyrd"
           className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-[13px] font-medium no-underline"
           style={{
             background: "rgba(255, 255, 255, 0.35)",

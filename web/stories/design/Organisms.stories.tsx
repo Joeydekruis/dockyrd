@@ -92,8 +92,8 @@ export const Sidebars: StoryObj = {
         <CatalogRow>
           <SidebarPreview pathname="/" label="Main · pathname /" />
           <SidebarPreview
-            pathname="/settings/profile"
-            label="Settings · /settings/profile"
+            pathname="/settings/account/profile"
+            label="Account settings · /settings/account/profile"
           />
         </CatalogRow>
       </Section>

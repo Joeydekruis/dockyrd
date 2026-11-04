@@ -131,7 +131,7 @@ func (d apiDeps) handleGitHubCallback(w http.ResponseWriter, r *http.Request) {
 	if installID > 0 {
 		_ = github.SaveInstallationID(r.Context(), d.q, installID)
 	}
-	http.Redirect(w, r, "/settings/integrations?github=app-created", http.StatusFound)
+	http.Redirect(w, r, "/settings/server/integrations?github=app-created", http.StatusFound)
 }
 
 func (d apiDeps) handleGitHubRepos(w http.ResponseWriter, r *http.Request) {

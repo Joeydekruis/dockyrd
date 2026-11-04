@@ -15,6 +15,7 @@ Commands below match **briefing §5 / §14**. Until the Makefile and workflows l
 |--|--|
 | `make dev` | Local panel + hot reload web |
 | `make build` | `pnpm --dir web build` + embed + `go build` |
+| `make site` | Generate static public site under `site/` from `site/source.html` |
 | `make test` | Unit Go tests |
 | `make lint` | Go + Biome |
 | `make generate` | sqlc, OpenAPI, TS types |

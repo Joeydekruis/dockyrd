@@ -4,18 +4,18 @@ import { Button } from "@/components/dockyard/ui/button";
 
 const tones: AlertTone[] = ["info", "success", "warning", "error"];
 
-/** **Source:** `web/components/dockyard/ui/alert.tsx` */
 const meta = {
   title: "Design/Components/Alert",
   component: Alert,
   tags: ["autodocs"],
   argTypes: {
     tone: { control: "select", options: tones },
-    message: { control: "text" },
   },
   args: {
     tone: "info",
-    message: "Deploy finished successfully.",
+    title: "Build cache enabled",
+    description: "Subsequent builds will reuse layers from the last deploy.",
+    onDismiss: () => {},
   },
 } satisfies Meta<typeof Alert>;
 
@@ -24,13 +24,35 @@ type Story = StoryObj<typeof meta>;
 
 export const Playground: Story = {};
 
+/** Design board: message banners */
 export const AllVariants: Story = {
   parameters: { controls: { disable: true } },
   render: () => (
-    <div className="flex max-w-xl flex-col gap-3 p-6">
-      {tones.map((tone) => (
-        <Alert key={tone} tone={tone} message={`${tone} alert message`} />
-      ))}
+    <div className="flex max-w-xl flex-col gap-4 p-6">
+      <Alert
+        tone="info"
+        title="Build cache enabled"
+        description="Subsequent builds reuse layers from the last deploy."
+        onDismiss={() => undefined}
+      />
+      <Alert
+        tone="success"
+        title="Domain verified"
+        description="TLS certificate issued for your custom hostname."
+        onDismiss={() => undefined}
+      />
+      <Alert
+        tone="warning"
+        title="Disk almost full"
+        description="Less than 10% free on the data volume."
+        onDismiss={() => undefined}
+      />
+      <Alert
+        tone="error"
+        title="Deployment failed"
+        description="Build exited with code 1 — check logs."
+        onDismiss={() => undefined}
+      />
     </div>
   ),
 };
@@ -38,7 +60,8 @@ export const AllVariants: Story = {
 export const WithAction: Story = {
   args: {
     tone: "warning",
-    message: "Certificate expires in 7 days.",
+    title: "Certificate expires in 7 days",
+    description: "Renew before traffic is interrupted.",
     action: <Button variant="outline">Renew</Button>,
   },
 };

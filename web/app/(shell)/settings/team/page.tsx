@@ -1,5 +1,5 @@
-import { TeamSettingsPage } from "@/components/dockyard/team-settings-page";
+import { SettingsLegacyRedirect } from "@/components/dockyard/settings-legacy-redirect";
 
-export default function TeamSettingsRoute() {
-  return <TeamSettingsPage />;
+export default function LegacyTeamSettingsPage() {
+  return <SettingsLegacyRedirect href="/settings/server/team" />;
 }

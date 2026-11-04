@@ -54,6 +54,7 @@ See [lean-loop](lean-loop.mdc), [design-when](design-when.mdc), and [issue-track
 - State assumptions briefly when they matter - then move.
 - If something is unclear **and** blocks correctness, stop, name it, ask once.
 - Skim `docs/project/patterns/` before inventing stack choices - don’t re-derive architecture every task.
+- Product or user-doc changes that affect install, CLI, or onboarding → update **`site/source.html`** + run **`make site`**, and **`docs/user/`** when applicable ([public-site](public-site.mdc)).
 - Prefer a small correct change over a perfect plan.
 
 ## Simplicity first

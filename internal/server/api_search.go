@@ -25,11 +25,14 @@ var searchNavPages = []searchHit{
 	{Kind: "page", Label: "Static sites", Href: "/static-sites"},
 	{Kind: "page", Label: "Object storage", Href: "/object-storage"},
 	{Kind: "page", Label: "Analytics", Href: "/analytics"},
-	{Kind: "page", Label: "Profile & security", Href: "/settings/profile"},
-	{Kind: "page", Label: "Team", Href: "/settings/team"},
-	{Kind: "page", Label: "Updates", Href: "/settings/updates"},
-	{Kind: "page", Label: "Git providers", Href: "/settings/integrations"},
-	{Kind: "page", Label: "Instance settings", Href: "/settings/instance"},
+	{Kind: "page", Label: "Account profile", Href: "/settings/account/profile"},
+	{Kind: "page", Label: "Password & 2FA", Href: "/settings/account/password"},
+	{Kind: "page", Label: "Notifications", Href: "/settings/account/notifications"},
+	{Kind: "page", Label: "Security sessions", Href: "/settings/account/security"},
+	{Kind: "page", Label: "Server general", Href: "/settings/server/general"},
+	{Kind: "page", Label: "Team", Href: "/settings/server/team"},
+	{Kind: "page", Label: "Updates", Href: "/settings/server/updates"},
+	{Kind: "page", Label: "Git providers", Href: "/settings/server/integrations"},
 }
 
 func (d apiDeps) handleSearch(w http.ResponseWriter, r *http.Request) {

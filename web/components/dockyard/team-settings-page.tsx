@@ -68,7 +68,7 @@ export function TeamSettingsPage() {
   }
 
   return (
-    <DashboardShell title="Team" breadcrumb="Settings">
+    <DashboardShell title="Team" breadcrumb="Server settings">
       <SettingsPageBody>
         {error ? (
           <p className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-700">

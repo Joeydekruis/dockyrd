@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://dockyrd.io/</loc></url>
+  <url><loc>https://dockyrd.io/docs/introduction.html</loc></url>
+  <url><loc>https://dockyrd.io/docs/installation.html</loc></url>
+  <url><loc>https://dockyrd.io/docs/quick-start.html</loc></url>
+  <url><loc>https://dockyrd.io/docs/nextjs.html</loc></url>
+  <url><loc>https://dockyrd.io/docs/static-sites.html</loc></url>
+  <url><loc>https://dockyrd.io/docs/databases.html</loc></url>
+  <url><loc>https://dockyrd.io/docs/object-storage.html</loc></url>
+  <url><loc>https://dockyrd.io/docs/domains.html</loc></url>
+  <url><loc>https://dockyrd.io/docs/variables.html</loc></url>
+  <url><loc>https://dockyrd.io/docs/updates.html</loc></url>
+  <url><loc>https://dockyrd.io/docs/cli.html</loc></url>
+  <url><loc>https://dockyrd.io/docs/troubleshooting.html</loc></url>
+  <url><loc>https://dockyrd.io/docs/architecture.html</loc></url>
+  <url><loc>https://dockyrd.io/docs/security.html</loc></url>
+</urlset>

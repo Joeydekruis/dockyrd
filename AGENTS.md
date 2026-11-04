@@ -16,6 +16,7 @@ Instructions for AI coding agents working in this repository.
 **Project index:** [`docs/project/project.md`](docs/project/project.md)  
 **GitHub process:** [`docs/project/github-workflow.md`](docs/project/github-workflow.md)  
 **Verify commands:** [`docs/project/setup.md`](docs/project/setup.md)  
+**Public site (dockyrd.io):** [`site/`](site/) — run `make site` after editing `site/source.html`  
 **Milestones:** [`docs/project/roadmap.md`](docs/project/roadmap.md)
 
 This is **not** a WordPress theme, Studio, or Atelier project. Ignore rules from other Cursor plugins if they conflict (see [`.cursor/rules/dockyard-scope.mdc`](.cursor/rules/dockyard-scope.mdc)).

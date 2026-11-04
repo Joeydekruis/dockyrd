@@ -1,10 +1,5 @@
-import { Suspense } from "react";
-import { IntegrationsSettingsPage } from "@/components/dockyard/integrations-settings-page";
+import { SettingsLegacyRedirect } from "@/components/dockyard/settings-legacy-redirect";
 
-export default function IntegrationsSettingsRoute() {
-  return (
-    <Suspense fallback={null}>
-      <IntegrationsSettingsPage />
-    </Suspense>
-  );
+export default function LegacyIntegrationsSettingsPage() {
+  return <SettingsLegacyRedirect href="/settings/server/integrations" />;
 }

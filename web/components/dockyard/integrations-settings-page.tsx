@@ -69,7 +69,7 @@ export function IntegrationsSettingsPage() {
     if (githubQuery === "app-created") {
       setWizardStep(3);
       setWizardOpen(true);
-      router.replace("/settings/integrations", { scroll: false });
+      router.replace("/settings/server/integrations", { scroll: false });
     }
   }, [githubQuery, router]);
 
@@ -97,7 +97,7 @@ export function IntegrationsSettingsPage() {
   }
 
   return (
-    <DashboardShell title="Git providers" breadcrumb="Settings">
+    <DashboardShell title="Git providers" breadcrumb="Server settings">
       <SettingsPageBody>
         <p className="mb-6 max-w-2xl text-sm text-[var(--muted-foreground)]">
           Connect source control to deploy from GitHub repositories and receive

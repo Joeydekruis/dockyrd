@@ -6,6 +6,29 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.35] - 2026-11-04
+
+_Finished: 2026-11-04_
+
+### Added
+
+- **Account settings** — separate sidenav and routes: Profile (`/settings/account/profile`), Password & 2FA, Notifications, Security (sessions); no server tabs in account area
+- **Server settings** — separate sidenav: General, Team, Git providers, Updates under `/settings/server/*`
+- **Account API** — `PATCH /api/v1/auth/account`, `POST /api/v1/auth/password/change`, `GET|PATCH /api/v1/auth/notifications` (Go + `web/lib/api.ts`)
+- **SearchSelectField** — searchable select primitive + Storybook (`web/components/dockyard/ui/search-select*.tsx`)
+- **Public site** — `site/source.html`, `scripts/build-public-site.mjs`, `docs/user/README.md`; `make site` output
+
+### Changed
+
+- **Navigation** — main sidebar **Server settings** → `/settings/server/general`; account menu **Account settings** / **Server settings**; legacy `/settings/profile` and `/settings/instance` redirect to new paths
+- **GitHub integrations** — callback and manifest setup URL → `/settings/server/integrations`
+- **Alert & Snackbar** — shared UI primitives and design stories aligned with dashboard tokens
+- **Favicon / PWA icons** — updated assets and `site.webmanifest`
+
+### Removed
+
+- Combined **Profile & security** page component (split into account tabs)
+
 ## [0.0.34] - 2026-11-04
 
 _Finished: 2026-11-04_

@@ -92,8 +92,20 @@ func spaExportFallback(rel string) string {
 	switch {
 	case strings.HasPrefix(rel, "projects/"):
 		return "projects/_/index.html"
+	case strings.HasPrefix(rel, "settings/server/"):
+		return "settings/server/general/index.html"
+	case strings.HasPrefix(rel, "settings/account/"):
+		return "settings/account/profile/index.html"
 	case strings.HasPrefix(rel, "settings/instance"):
-		return "settings/instance/index.html"
+		return "settings/server/general/index.html"
+	case strings.HasPrefix(rel, "settings/profile"):
+		return "settings/account/profile/index.html"
+	case strings.HasPrefix(rel, "settings/team"):
+		return "settings/server/team/index.html"
+	case strings.HasPrefix(rel, "settings/integrations"):
+		return "settings/server/integrations/index.html"
+	case strings.HasPrefix(rel, "settings/updates"):
+		return "settings/server/updates/index.html"
 	case strings.HasPrefix(rel, "reset-password"):
 		return "reset-password/index.html"
 	default:

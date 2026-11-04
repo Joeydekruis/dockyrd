@@ -5,14 +5,18 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { DockyrdLogo } from "@/components/dockyard/dockyrd-logo";
 import {
+  accountSettingsBackNav,
+  accountSettingsNav,
+  isAccountSettingsPath,
+  isServerSettingsPath,
+  isSettingsPath,
   mainNav,
   projectNav,
   type SettingsNavItem,
   serverNav,
-  settingsBackNav,
-  settingsInstanceNav,
-  settingsNav,
-  settingsPersonalNav,
+  serverSettingsBackNav,
+  serverSettingsNav,
+  serverSettingsSidebarNav,
 } from "@/lib/nav";
 
 function NavLink({
@@ -54,6 +58,59 @@ function SettingsNavLink({ href, label, icon: Icon }: SettingsNavItem) {
   );
 }
 
+function SettingsSidebarShell({
+  back,
+  groupLabel,
+  items,
+}: {
+  back: { href: string; label: string; icon: LucideIcon };
+  groupLabel: string;
+  items: SettingsNavItem[];
+}) {
+  const BackIcon = back.icon;
+  return (
+    <nav aria-label="Settings" className="flex flex-col gap-1">
+      <Link href={back.href} className="dockyard-nav-link">
+        <BackIcon
+          strokeWidth={1.8}
+          className="size-[18px] shrink-0"
+          aria-hidden
+        />
+        <span>{back.label}</span>
+      </Link>
+      <p
+        className="mb-2 mt-6 font-mono text-[11px] uppercase tracking-widest"
+        style={{ color: "var(--muted-text)" }}
+      >
+        {groupLabel}
+      </p>
+      {items.map((item) => (
+        <SettingsNavLink key={item.href} {...item} />
+      ))}
+    </nav>
+  );
+}
+
+function AccountSettingsSidebar() {
+  return (
+    <SettingsSidebarShell
+      back={accountSettingsBackNav}
+      groupLabel="Account"
+      items={accountSettingsNav}
+    />
+  );
+}
+
+function ServerSettingsSidebar() {
+  return (
+    <SettingsSidebarShell
+      back={serverSettingsBackNav}
+      groupLabel="Server"
+      items={serverSettingsSidebarNav}
+    />
+  );
+}
+
 function MainSidebar() {
   return (
     <>
@@ -80,49 +137,22 @@ function MainSidebar() {
         {serverNav.map((item) => (
           <NavLink key={item.href} {...item} />
         ))}
-        <NavLink {...settingsNav} />
+        <NavLink {...serverSettingsNav} />
       </nav>
     </>
   );
 }
 
-function SettingsSidebar() {
-  const BackIcon = settingsBackNav.icon;
-  return (
-    <nav aria-label="Settings" className="flex flex-col gap-1">
-      <Link href={settingsBackNav.href} className="dockyard-nav-link">
-        <BackIcon
-          strokeWidth={1.8}
-          className="size-[18px] shrink-0"
-          aria-hidden
-        />
-        <span>{settingsBackNav.label}</span>
-      </Link>
-      <p
-        className="mb-2 mt-6 font-mono text-[11px] uppercase tracking-widest"
-        style={{ color: "var(--muted-text)" }}
-      >
-        Personal
-      </p>
-      {settingsPersonalNav.map((item) => (
-        <SettingsNavLink key={item.href} {...item} />
-      ))}
-      <p
-        className="mb-2 mt-6 font-mono text-[11px] uppercase tracking-widest"
-        style={{ color: "var(--muted-text)" }}
-      >
-        Instance
-      </p>
-      {settingsInstanceNav.map((item) => (
-        <SettingsNavLink key={item.href} {...item} />
-      ))}
-    </nav>
-  );
-}
-
 export function Sidebar() {
   const pathname = usePathname();
-  const isSettings = pathname.startsWith("/settings");
+  const inSettings = isSettingsPath(pathname);
+
+  let settingsSidebar: React.ReactNode = null;
+  if (isAccountSettingsPath(pathname)) {
+    settingsSidebar = <AccountSettingsSidebar />;
+  } else if (isServerSettingsPath(pathname)) {
+    settingsSidebar = <ServerSettingsSidebar />;
+  }
 
   return (
     <aside
@@ -132,8 +162,8 @@ export function Sidebar() {
       <Link href="/" className="mb-8 inline-block" aria-label="Dockyrd home">
         <DockyrdLogo />
       </Link>
-      {isSettings ? <SettingsSidebar /> : <MainSidebar />}
-      {!isSettings ? (
+      {inSettings && settingsSidebar ? settingsSidebar : <MainSidebar />}
+      {!inSettings ? (
         <div
           className="mt-auto rounded-[20px] border p-4 text-xs"
           style={{ borderColor: "var(--border)", background: "var(--surface)" }}

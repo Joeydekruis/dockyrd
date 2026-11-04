@@ -10,7 +10,7 @@ const branchOptions = [
 ];
 
 const meta = {
-  title: "Design/Components/Select field",
+  title: "Design/Components/Select",
   component: SelectField,
   tags: ["autodocs"],
   argTypes: {

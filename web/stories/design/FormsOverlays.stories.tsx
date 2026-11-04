@@ -210,22 +210,24 @@ export const MessagesAndToasts: StoryObj = {
   render: () => (
     <CatalogCanvas>
       <Section title="Messages & toasts">
-        <div className="max-w-xl space-y-4">
+        <div className="max-w-xl space-y-6">
           <Alert
             tone="success"
-            message="Deploy finished — marketing is live."
+            title="Domain verified"
+            description="TLS certificate issued for marketing.example.com."
+            onDismiss={() => undefined}
           />
           <Alert
             tone="error"
-            message="Build failed — check logs for Dockerfile line 42."
+            title="Deployment failed"
+            description="Build exited with code 1 — check logs for Dockerfile line 42."
+            onDismiss={() => undefined}
           />
           <Snackbar
-            message={
-              <>
-                Update <span className="font-mono">v0.0.28</span> is available.
-              </>
-            }
-            action={<Button variant="outline">View</Button>}
+            tone="success"
+            title="Settings saved"
+            description="General settings were updated."
+            progress={100}
             onDismiss={() => undefined}
           />
         </div>

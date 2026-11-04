@@ -6,7 +6,7 @@ Self-hosted, open-source deploy platform: one Go binary, Docker workloads, Caddy
 
 ## Install
 
-Full guide: [`docs/user/install.md`](docs/user/install.md).
+Full guide: [dockyrd.io/docs/installation](https://dockyrd.io/docs/installation.html) · [`docs/user/install.md`](docs/user/install.md).
 
 On a Linux VPS (**Ubuntu 24.04** or **Debian 12**, amd64 or arm64):
 

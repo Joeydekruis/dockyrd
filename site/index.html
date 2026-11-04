@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Dockyrd — Self-hosted deploy platform</title>
+<meta name="description" content="Dockyrd is an open source, self-hosted deploy platform. One Go binary, one install command, apps, static sites, databases and object storage on your own server.">
+<link rel="canonical" href="https://dockyrd.io/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Dockyrd">
+<meta property="og:title" content="Dockyrd — Self-hosted deploy platform">
+<meta property="og:description" content="Dockyrd is an open source, self-hosted deploy platform. One Go binary, one install command, apps, static sites, databases and object storage on your own server.">
+<meta property="og:url" content="https://dockyrd.io/">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Dockyrd — Self-hosted deploy platform">
+<meta name="twitter:description" content="Dockyrd is an open source, self-hosted deploy platform. One Go binary, one install command, apps, static sites, databases and object storage on your own server.">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"Dockyrd","applicationCategory":"DeveloperApplication","operatingSystem":"Linux","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"downloadUrl":"https://github.com/Joeydekruis/dockyrd/releases","softwareHelp":"https://dockyrd.io/docs/introduction.html","license":"https://www.apache.org/licenses/LICENSE-2.0"}</script>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <mask id="cubeMask" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64"><rect width="64" height="64" fill="#fff"/><path d="M8 22 L32 36 L56 22 M32 36 V52" fill="none" stroke="#000" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></mask>
+    <symbol id="wordmark" viewBox="0.00 -1.00 505.70 105.53">
+      <g transform="translate(-11.5385 -11.5385) scale(1.9231)"><g mask="url(#cubeMask)" stroke-width="3" stroke-linejoin="round"><path d="M32 8 L56 22 V46 q-6 -7 -12 0 t-12 0 t-12 0 t-12 0 V22 Z" fill="#8EBEFF" stroke="#8EBEFF"/><path d="M32 8 L56 22 L32 36 L8 22 Z" fill="#CFE3FF" stroke="#CFE3FF"/></g></g>
+      <path fill="#0B1F3A" d="M156.2 82.73Q148.2 82.73 141.9 78.930Q135.6 75.13 131.95 68.63Q128.3 62.13 128.3 54.23Q128.3 46.23 132 39.78Q135.7 33.33 142 29.53Q148.3 25.73 156.1 25.73Q162.1 25.73 166.8 27.93Q169.7 29.43 171.8 31.53V5.83H186.8V81.53H172.8V76.33Q170.3 79.13 166.6 80.63Q161.8 82.73 156.2 82.73ZM158 69.23Q162.1 69.23 165.2 67.33Q168.3 65.43 170.05 62.03Q171.8 58.630 171.8 54.23Q171.8 49.83 170.05 46.43Q168.3 43.03 165.2 41.13Q162.1 39.23 158 39.23Q153.9 39.23 150.65 41.18Q147.4 43.13 145.6 46.48Q143.8 49.83 143.8 54.23Q143.8 58.63 145.6 62.03Q147.4 65.43 150.65 67.33Q153.9 69.23 158 69.23Z M219.4 82.73Q211.3 82.73 204.65 79.03Q198 75.33 194.05 68.88Q190.1 62.43 190.1 54.23Q190.1 45.93 194.05 39.53Q198 33.13 204.65 29.43Q211.3 25.73 219.4 25.73Q227.5 25.73 234.1 29.43Q240.7 33.13 244.65 39.53Q248.6 45.93 248.6 54.23Q248.6 62.43 244.65 68.88Q240.7 75.33 234.1 79.03Q227.5 82.73 219.4 82.73ZM219.4 69.23Q223.5 69.23 226.55 67.33Q229.6 65.43 231.35 62.03Q233.1 58.63 233.1 54.23Q233.1 49.83 231.35 46.48Q229.6 43.13 226.55 41.18Q223.5 39.23 219.4 39.23Q215.3 39.23 212.2 41.18Q209.1 43.13 207.35 46.48Q205.6 49.83 205.6 54.23Q205.6 58.63 207.35 62.03Q209.1 65.43 212.2 67.33Q215.3 69.23 219.4 69.23Z M278.7 82.73Q270.5 82.73 263.95 78.98Q257.4 75.23 253.55 68.73Q249.7 62.23 249.7 54.13Q249.7 46.03 253.5 39.58Q257.3 33.13 263.9 29.43Q270.5 25.73 278.7 25.73Q284.8 25.73 290 27.83Q295.2 29.93 298.9 33.68Q302.6 37.43 304.2 42.53L291.2 48.13Q289.8 44.03 286.45 41.63Q283.1 39.23 278.7 39.23Q274.8 39.23 271.75 41.13Q268.7 43.03 266.95 46.43Q265.2 49.83 265.2 54.23Q265.2 58.63 266.95 62.03Q268.7 65.43 271.75 67.33Q274.8 69.23 278.7 69.23Q283.2 69.23 286.5 66.83Q289.8 64.43 291.2 60.33L304.2 66.03Q302.7 70.83 299 74.63Q295.3 78.43 290.1 80.58Q284.9 82.73 278.7 82.73Z M307.5 81.53V5.83H322.5V46.63L341 26.93H359.5L339.7 48.93L359.4 81.53H342.4L328.5 58.23L322.5 64.83V81.53Z M369.1 103.53Q366.7 103.53 364.45 103.13Q362.2 102.73 360.5 101.83V89.53Q361.9 89.93 363.8 90.23Q365.7 90.53 367.3 90.53Q371.7 90.53 373.6 88.48Q375.5 86.43 376.7 83.83L377.7 81.53L356.2 26.93H372.3L385.2 62.03L398.1 26.93H414.2L390.8 86.63Q388.6 92.23 385.4 96.03Q382.2 99.83 378.15 101.68Q374.1 103.53 369.1 103.53Z M415.3 81.53V26.93H429.3V35.03Q431.1 30.63 434.3 28.73Q438.4 26.33 444.1 26.33H447.3V39.33H442.6Q437.1 39.33 433.7 42.68Q430.3 46.03 430.3 52.13V81.53Z M474.1 82.73Q466.1 82.73 459.8 78.93Q453.5 75.13 449.85 68.63Q446.2 62.13 446.2 54.23Q446.2 46.23 449.9 39.78Q453.6 33.33 459.9 29.53Q466.2 25.73 474 25.73Q480 25.73 484.7 27.93Q487.6 29.43 489.7 31.53V5.83H504.7V81.53H490.7V76.33Q488.2 79.13 484.5 80.63Q479.7 82.73 474.1 82.73ZM475.9 69.23Q480 69.23 483.1 67.33Q486.2 65.43 487.95 62.03Q489.7 58.63 489.7 54.23Q489.7 49.83 487.95 46.43Q486.2 43.03 483.1 41.13Q480 39.23 475.9 39.23Q471.8 39.23 468.55 41.18Q465.3 43.13 463.5 46.48Q461.7 49.83 461.7 54.23Q461.7 58.63 463.5 62.03Q465.3 65.43 468.55 67.33Q471.8 69.23 475.9 69.23Z"/>
+    </symbol>
+    <symbol id="i-github" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.58 2 12.23c0 4.52 2.87 8.35 6.84 9.7.5.1.68-.22.68-.49v-1.7c-2.78.62-3.37-1.37-3.37-1.37-.46-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.89 1.57 2.34 1.12 2.91.85.09-.66.35-1.12.63-1.37-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.04 1.03-2.76-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05A9.3 9.3 0 0 1 12 6.98c.85 0 1.71.12 2.51.35 1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.64 1.03 2.76 0 3.94-2.34 4.8-4.57 5.06.36.32.68.94.68 1.9v2.82c0 .27.18.6.69.49A10.2 10.2 0 0 0 22 12.23C22 6.58 17.52 2 12 2z"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></g></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></g></symbol>
+    <symbol id="i-app" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></g></symbol>
+    <symbol id="i-db" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></g></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></g></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></g></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 15l4-5 3 3 5-6"/></g></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.3 3.4-5 6.5-5s5.7 1.7 6.5 5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 15.3c1.7.6 3 2.3 3.5 4.7"/></g></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5 12.5l4.2 4.2L19 7"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.01"/></g></symbol>
+    <symbol id="i-warn" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9.5 17h-19z"/><path d="M12 10v4M12 17v.01"/></g></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/></symbol>
+    <symbol id="i-dash" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="13" y="10" width="8" height="11" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/></g></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  </defs>
+</svg>
+<div class="banner" role="region" aria-label="Announcement">
+  <div class="banner-in">
+    <span class="tag">Open source</span>
+    <span>One lightweight binary on your own server. No lock-in, no mess.</span>
+    <a href="docs/introduction.html">Read the docs →</a>
+  </div>
+</div>
+<header class="topbar">
+  <div class="topbar-in">
+    <button class="menu-btn" type="button" id="menuBtn" aria-label="Open documentation menu" aria-expanded="false" aria-controls="sidebar"><svg width="20" height="20"><use href="#i-menu"/></svg></button>
+    <a class="logo" href="./" aria-label="Dockyrd home"><svg viewBox="0 -1 505.7 105.53" role="img" aria-label="Dockyrd"><use href="#wordmark"/></svg></a>
+    <nav class="topnav" aria-label="Primary">
+      <a href="./" data-nav="home" aria-current="page">Product</a>
+      <a href="docs/introduction.html" data-nav="docs">Docs</a>
+      <a href="docs/cli.html" data-nav="cli">CLI</a>
+      <a href="docs/architecture.html" data-nav="arch">Architecture</a>
+    </nav>
+    <div class="top-right">
+      <button class="search-btn" type="button" id="searchBtn" aria-label="Search documentation">
+        <svg width="16" height="16" aria-hidden="true"><use href="#i-search"/></svg><span>Search docs</span><kbd>⌘K</kbd>
+      </button>
+      <span class="version">v0.0.34</span>
+      <a class="btn btn-outline gh-btn" href="https://github.com/Joeydekruis/dockyrd" target="_blank" rel="noopener noreferrer" aria-label="Star Dockyrd on GitHub">
+        <svg width="16" height="16" aria-hidden="true"><use href="#i-github"/></svg>
+        <span class="gh-label">Star</span>
+        <span class="star-count" data-stars></span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-grid">
+        <span class="chip"><span class="status warn" style="font-size:inherit">v0.0.34</span> in active development</span>
+        <h1>Deploy anything to your own server. <em>Keep it boring.</em></h1>
+        <p class="lede">Dockyrd is a lean, self-hosted alternative to Coolify. One Go binary turns a fresh VPS into a platform for Next.js apps, static sites, Postgres, Redis and S3 storage, with automatic HTTPS and zero-downtime deploys.</p>
+        <div class="install" aria-label="Install command">
+          <code><span class="p">$ </span>curl -fsSL https://raw.githubusercontent.com/Joeydekruis/dockyrd/development/scripts/install.sh | sudo sh</code>
+          <button class="copy" type="button" data-copy="curl -fsSL https://raw.githubusercontent.com/Joeydekruis/dockyrd/development/scripts/install.sh | sudo sh"><svg width="14" height="14" aria-hidden="true"><use href="#i-copy"/></svg><span>Copy</span></button>
+        </div>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="docs/quick-start.html">Deploy your first app</a>
+          <a class="btn btn-outline" href="#" data-gh="repo">
+            <svg width="16" height="16" aria-hidden="true"><use href="#i-github"/></svg>Star on GitHub<span class="star-count" data-stars></span>
+          </a>
+        </div>
+        <div class="hero-meta">
+          <span><svg width="14" height="14" style="color:var(--ok)"><use href="#i-check"/></svg>Apache-2.0</span>
+          <span><svg width="14" height="14" style="color:var(--ok)"><use href="#i-check"/></svg>Ubuntu &amp; Debian · amd64 &amp; arm64</span>
+          <span><svg width="14" height="14" style="color:var(--ok)"><use href="#i-check"/></svg>No telemetry</span>
+        </div>
+      </div>
+
+      <figure class="shot" aria-label="Preview of the Dockyrd dashboard" style="margin-inline:0;margin-bottom:0">
+        <div class="shot-bar" aria-hidden="true"><i></i><i></i><i></i><span class="url">dockyrd.example.com</span></div>
+        <div class="shot-body">
+          <div class="shot-side" aria-hidden="true">
+            <div class="logo-sm"><svg viewBox="0 -1 505.7 105.53"><use href="#wordmark"/></svg></div>
+            <span class="n on"><svg width="16" height="16"><use href="#i-dash"/></svg>Dashboard</span>
+            <span class="n"><svg width="16" height="16"><use href="#i-folder"/></svg>Projects</span>
+            <span class="n"><svg width="16" height="16"><use href="#i-app"/></svg>Applications</span>
+            <span class="n"><svg width="16" height="16"><use href="#i-db"/></svg>Databases</span>
+            <span class="n"><svg width="16" height="16"><use href="#i-globe"/></svg>Static sites</span>
+            <span class="n"><svg width="16" height="16"><use href="#i-box"/></svg>Object storage</span>
+            <span class="lbl">Server</span>
+            <span class="n"><svg width="16" height="16"><use href="#i-chart"/></svg>Analytics</span>
+          </div>
+          <div class="shot-main">
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <span class="eyebrow">Example workspace</span>
+              <h3>Good afternoon</h3>
+            </div>
+            <div class="stats">
+              <div class="stat"><span class="eyebrow">Services</span><b>7</b></div>
+              <div class="stat"><span class="eyebrow">Deploys today</span><b>12</b></div>
+              <div class="stat"><span class="eyebrow">CPU</span><b>18%</b></div>
+              <div class="stat"><span class="eyebrow">Memory</span><b>1.4 GB</b></div>
+            </div>
+            <div class="rows">
+              <div class="r"><span class="tile"><svg width="18" height="18"><use href="#i-app"/></svg></span><span><span class="nm">webshop</span><span class="mt">Next.js · webshop.example.com</span></span><span class="right"><span class="sha">a41f9c2</span><span class="mt">4 min ago</span><span class="status ok">Healthy</span></span></div>
+              <div class="r"><span class="tile"><svg width="18" height="18"><use href="#i-db"/></svg></span><span><span class="nm">db</span><span class="mt">Postgres 17 · internal:5432</span></span><span class="right"><span class="status ok">Healthy</span></span></div>
+              <div class="r"><span class="tile"><svg width="18" height="18"><use href="#i-globe"/></svg></span><span><span class="nm">marketing-site</span><span class="mt">Astro · static</span></span><span class="right"><span class="sha">7be20d1</span><span class="mt">just now</span><span class="status warn">Building</span></span></div>
+              <div class="r"><span class="tile"><svg width="18" height="18"><use href="#i-box"/></svg></span><span><span class="nm">uploads</span><span class="mt">Garage bucket</span></span><span class="right"><span class="status idle">Private</span></span></div>
+            </div>
+          </div>
+        </div>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="h-what">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">What you get</span>
+        <h2 id="h-what">Everything a small team ships, on one server you own.</h2>
+        <p>Dockyrd covers the services most projects actually need, with one consistent screen for each. No feature wall, no plugin store.</p>
+      </div>
+      <div class="features">
+        <article class="feature"><span class="tile"><svg width="20" height="20"><use href="#i-app"/></svg></span><h3>Applications</h3><p>Push to GitHub and Dockyrd builds with Railpack or your Dockerfile, health-checks the new container and only then switches traffic. Failed deploys never replace a working one.</p><div class="tech"><span class="chip">Railpack</span><span class="chip">Dockerfile</span><span class="chip">Image</span></div></article>
+        <article class="feature"><span class="tile"><svg width="20" height="20"><use href="#i-globe"/></svg></span><h3>Static sites</h3><p>Astro, Vite, Hugo or a Next.js export. No container needed: Caddy serves the build output from disk, and a rollback is an atomic symlink switch that takes milliseconds.</p><div class="tech"><span class="chip">Instant rollback</span><span class="chip">SPA fallback</span></div></article>
+        <article class="feature"><span class="tile"><svg width="20" height="20"><use href="#i-db"/></svg></span><h3>Databases</h3><p>Postgres and Redis-compatible Valkey from official images, with generated credentials. Link them to an app with <code style="font-size:.9em">${{db.DATABASE_URL}}</code> and skip the copy-paste.</p><div class="tech"><span class="chip">Postgres 16–18</span><span class="chip">Valkey</span></div></article>
+        <article class="feature"><span class="tile"><svg width="20" height="20"><use href="#i-box"/></svg></span><h3>Object storage</h3><p>Install Garage with one click for an S3-compatible bucket next to your app. Access keys and endpoints are injected as variables, ready for uploads.</p><div class="tech"><span class="chip">S3 API</span><span class="chip">Garage</span></div></article>
+        <article class="feature"><span class="tile"><svg width="20" height="20"><use href="#i-chart"/></svg></span><h3>Logs &amp; analytics</h3><p>Live build and runtime logs, request rates, latency percentiles and status codes per site. Server CPU, memory, disk and network in the same place. No cookies, no IP storage.</p><div class="tech"><span class="chip">p50–p99</span><span class="chip">Events</span></div></article>
+        <article class="feature"><span class="tile"><svg width="20" height="20"><use href="#i-users"/></svg></span><h3>Team access</h3><p>Owner, admin, member and viewer roles from day one. Invites, TOTP two-factor, session management, optional GitHub sign-in and a full audit log.</p><div class="tech"><span class="chip">2FA</span><span class="chip">Audit log</span></div></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="h-reliable">
+    <div class="wrap split">
+      <div>
+        <div class="section-head" style="margin-bottom:28px">
+          <span class="eyebrow">Built to stay up</span>
+          <h2 id="h-reliable">Restarting the panel never touches your traffic.</h2>
+          <p>The control plane and the data plane are separate. Caddy, your apps and your databases keep running while Dockyrd updates, crashes or restarts.</p>
+        </div>
+        <ul class="checks">
+          <li><svg width="18" height="18"><use href="#i-check"/></svg><span><b>Blue/green deploys.</b> The new container must pass its health check before Caddy switches the upstream.</span></li>
+          <li><svg width="18" height="18"><use href="#i-check"/></svg><span><b>Self-healing.</b> A reconciler compares what should run with what does every 30 seconds and repairs drift.</span></li>
+          <li><svg width="18" height="18"><use href="#i-check"/></svg><span><b>Signed updates.</b> Releases are checksummed and cosign-verified, with automatic rollback if the new version fails to start.</span></li>
+          <li><svg width="18" height="18"><use href="#i-check"/></svg><span><b>Volumes are sacred.</b> Nothing automatic ever deletes a volume. Only an explicit, confirmed delete does.</span></li>
+        </ul>
+      </div>
+      <div class="term" role="img" aria-label="Example deploy log showing a health-checked switch">
+<pre><span class="d">12:04:11</span>  <span class="b">deploy</span>  webshop · a41f9c2 · push to main
+<span class="d">12:04:12</span>  clone   depth=1 ok
+<span class="d">12:04:13</span>  build   railpack detected next.js
+<span class="d">12:05:02</span>  build   image dockyrd/webshop:01jc9k
+<span class="d">12:05:03</span>  start   dy-webshop-01jc9k on dy-edge
+<span class="d">12:05:05</span>  health  GET /api/health → 200
+<span class="d">12:05:05</span>  proxy   upstream switched, 0 errors
+<span class="d">12:05:35</span>  stop    dy-webshop-01jb4x (grace 30s)
+<span class="d">12:05:35</span>  <span class="g">live</span>    webshop.example.com</pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="h-compare">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">How it compares</span>
+        <h2 id="h-compare">Less platform, more server for your apps.</h2>
+        <p>Coolify and Dokploy are great projects that proved the model. Dockyrd keeps their mental model and cuts the platform itself down to one process and a proxy.</p>
+      </div>
+      <div class="compare-wrap">
+        <table class="compare">
+          <thead><tr><th scope="col"></th><th scope="col" class="us">Dockyrd</th><th scope="col">Coolify v4</th><th scope="col">Dokploy</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Control plane</th><td class="us">One Go binary + SQLite</td><td>Laravel, Postgres, Redis, soketi</td><td>Next.js, Postgres, Redis</td></tr>
+            <tr><th scope="row">Proxy</th><td class="us">Caddy via admin API</td><td>Traefik (default) or Caddy</td><td>Traefik</td></tr>
+            <tr><th scope="row">Orchestration</th><td class="us">Plain Docker Engine with labels</td><td>Docker over SSH, also to its own host</td><td>Docker Swarm</td></tr>
+            <tr><th scope="row">Builders</th><td class="us">Railpack, Dockerfile, image</td><td>Nixpacks, Dockerfile, Compose</td><td>Nixpacks, Railpack, Dockerfile, buildpacks</td></tr>
+            <tr><th scope="row">Fresh install claim</th><td class="us">One-time setup token</td><td>First visitor creates the admin</td><td>First visitor creates the admin</td></tr>
+            <tr><th scope="row">License</th><td class="us">Apache-2.0</td><td>Apache-2.0</td><td>Apache-2.0</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="h-arch">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Under the hood</span>
+        <h2 id="h-arch">Three moving parts. That is the whole platform.</h2>
+        <p>Every container Dockyrd creates carries labels, so Docker itself is the source of truth for what is running. SQLite holds what should be running.</p>
+      </div>
+      <div class="arch">
+        <div class="arch-flow">Internet · :80 / :443</div>
+        <div class="node edge"><span class="chip">dy-proxy</span><h4>Caddy</h4><p>TLS via ACME, routes to apps, serves static sites from disk, writes JSON access logs for analytics.</p></div>
+        <div class="node"><span class="chip">systemd</span><h4>dockyrd</h4><p>API, scheduler, builds, reconciler, metrics, updater and the embedded dashboard. Talks to the local Docker socket.</p></div>
+        <div class="node"><span class="chip">docker engine</span><h4>Your workloads</h4><p>Apps, Postgres, Valkey and Garage, each project on its own isolated network. BuildKit runs builds with cache.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="h-goals">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Design targets for v0.1</span>
+        <h2 id="h-goals">Small enough for a 1 GB VPS.</h2>
+        <p>These are the budgets every release is measured against before it ships.</p>
+      </div>
+      <div class="goals">
+        <div class="goal"><b>&lt; 60 MB</b><span>Dockyrd memory at idle</span></div>
+        <div class="goal"><b>&lt; 150 MB</b><span>Total platform overhead, proxy included</span></div>
+        <div class="goal"><b>&lt; 3 min</b><span>From fresh VPS to running dashboard</span></div>
+        <div class="goal"><b>60 s</b><span>Maximum time to repair drift</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <section class="cta" aria-labelledby="h-cta">
+      <div>
+        <h2 id="h-cta">Your server. Your apps. One command.</h2>
+        <p>Dockyrd is built in the open. Star the repo to follow along, open an issue, or read the docs and try a preview build on a spare VPS.</p>
+      </div>
+      <div class="btns">
+        <a class="btn btn-primary" href="docs/installation.html">Install Dockyrd</a>
+        <a class="btn btn-outline" href="#" data-gh="repo"><svg width="16" height="16" aria-hidden="true"><use href="#i-star"/></svg>Star<span class="star-count" data-stars></span></a>
+      </div>
+    </section>
+  </div>
+</main>
+
+
+<footer class="site">
+  <div class="in">
+    <a class="logo" href="./" aria-label="Dockyrd home"><svg viewBox="0 -1 505.7 105.53" width="104" height="22" role="img" aria-label="Dockyrd"><use href="#wordmark"/></svg></a>
+    <nav aria-label="Footer">
+      <a href="docs/introduction.html">Docs</a>
+      <a href="docs/installation.html">Install</a>
+      <a href="docs/cli.html">CLI</a>
+      <a href="https://github.com/Joeydekruis/dockyrd" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a href="https://github.com/Joeydekruis/dockyrd/releases" target="_blank" rel="noopener noreferrer">Releases</a>
+      <a href="docs/security.html">Security</a>
+    </nav>
+    <span>Open source under Apache-2.0</span>
+  </div>
+</footer>
+<dialog class="search" id="searchDlg" aria-label="Search documentation">
+  <div class="search-field">
+    <label for="searchInput"><svg width="18" height="18" aria-hidden="true"><use href="#i-search"/></svg><span hidden>Search</span></label>
+    <input id="searchInput" type="search" placeholder="Search the docs" autocomplete="off" spellcheck="false">
+    <kbd>Esc</kbd>
+  </div>
+  <ul class="results" id="results" role="listbox"></ul>
+</dialog>
+<script src="assets/site-config.js"></script>
+<script src="assets/site.js"></script>
+</body></html>

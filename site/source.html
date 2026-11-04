@@ -1,0 +1,1151 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Dockyrd Docs</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Dockyrd is an open source, self-hosted deploy platform. One Go binary, one install command, apps, static sites, databases and object storage on your own server.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: sticky top bar · pitch page (hero, product shot, features, comparison, architecture) · docs as three columns (nav / article / on-this-page).
+   Brand is light-only by decision, so the page commits to one light look and sets every color explicitly. */
+:root{
+  color-scheme: light;
+  --canvas:#FAF9F8; --surface:#FFFFFF; --subtle:#F1F0ED; --row-hover:#F6F5F2;
+  --border:#ECEAE6; --input:#E1DFDA; --border-strong:#CBD0D8;
+  --ink:#0B1F3A; --ink-hover:#1A3358; --ink-2:#3A4A63; --muted:#5A6577;
+  --brand:#8EBEFF; --brand-soft:#E3F0FF; --brand-mark:#3B93F5; --link:#0B57C9;
+  --ok:#1A7F4B; --ok-fg:#176B3D; --ok-bg:#E6F4EC;
+  --warn:#D98A00; --warn-fg:#8A5200; --warn-bg:#FBF0DC;
+  --err:#B3261E; --err-bg:#FBE8E6;
+  --code-bg:#0B1F3A; --code-fg:#E6EEF9; --code-dim:#9FB2CC; --code-accent:#8EBEFF;
+  --sans:"Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:"Geist Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r-chip:6px; --r-control:10px; --r-tile:12px; --r-card-sm:16px; --r-card:20px;
+  --gutter-l:max(16px, env(safe-area-inset-left, 0px));
+  --gutter-r:max(16px, env(safe-area-inset-right, 0px));
+  --header-h:64px;
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:calc(var(--header-h) + 24px)}
+body{background:var(--canvas);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+a{color:var(--link);text-decoration:none}
+a:hover{text-decoration:underline}
+:focus-visible{outline:2px solid var(--brand-mark);outline-offset:2px;border-radius:6px}
+h1,h2,h3{text-wrap:balance;color:var(--ink)}
+code,kbd,pre{font-family:var(--mono)}
+button{font:inherit;color:inherit}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* ---------- shared atoms ---------- */
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:3px 8px;border-radius:var(--r-chip);background:var(--subtle);color:var(--ink-2);font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;line-height:1.4;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;padding:0 18px;border-radius:var(--r-control);font-family:var(--mono);font-size:12px;font-weight:500;letter-spacing:.02em;text-transform:uppercase;cursor:pointer;text-decoration:none!important;white-space:nowrap;transition:background .15s,border-color .15s}
+.btn-primary{background:var(--ink);color:#fff;border:0}
+.btn-primary:hover{background:var(--ink-hover)}
+.btn-outline{background:transparent;color:var(--ink);border:1.5px solid var(--border-strong)}
+.btn-outline:hover{background:var(--surface)}
+.btn svg{flex:none}
+.star-count{padding:2px 7px;border-radius:var(--r-chip);background:var(--subtle);color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:0}
+.btn-primary .star-count{background:rgba(255,255,255,.14);color:#fff}
+.star-count:empty{display:none}
+.status{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;font-weight:500}
+.status::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.status.ok{color:var(--ok-fg)} .status.warn{color:var(--warn-fg)} .status.idle{color:var(--muted)}
+
+/* ---------- banner + header ---------- */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--canvas)}
+.banner{background:var(--brand);color:var(--ink);font-size:13px;font-weight:500;text-align:center;padding-block:8px;padding-left:var(--gutter-l);padding-right:var(--gutter-r)}
+.banner-in{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:10px}
+.banner .tag{padding:3px 8px;border-radius:var(--r-chip);background:var(--ink);color:#fff;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;line-height:1.3}
+.banner a{color:var(--ink);padding:3px 10px;border-radius:var(--r-chip);background:rgba(255,255,255,.6);font-size:12px}
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:50;background:rgba(250,249,248,.92);backdrop-filter:saturate(1.4) blur(10px);-webkit-backdrop-filter:saturate(1.4) blur(10px);border-bottom:1px solid var(--border);padding-left:var(--gutter-l);padding-right:var(--gutter-r)}
+.topbar-in{max-width:1440px;margin:0 auto;height:var(--header-h);display:flex;align-items:center;gap:20px}
+.logo{display:block;line-height:0;flex:none}
+.logo svg{width:132px;height:auto}
+.topnav{display:flex;gap:4px;margin-left:12px}
+.topnav a{display:inline-flex;align-items:center;min-height:40px;padding:0 12px;border-radius:var(--r-control);color:var(--ink-2);font-weight:500;font-size:14px}
+.topnav a:hover{background:var(--subtle);text-decoration:none}
+.topnav a[aria-current="page"]{color:var(--ink);background:var(--brand-soft)}
+.top-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.search-btn{display:flex;align-items:center;gap:10px;width:240px;min-height:40px;padding:0 10px 0 12px;border:1px solid var(--input);border-radius:var(--r-control);background:var(--surface);color:var(--muted);font-size:14px;cursor:pointer;text-align:left}
+.search-btn:hover{border-color:var(--border-strong)}
+.search-btn span{flex:1}
+kbd{font-size:11px;padding:2px 6px;border-radius:var(--r-chip);background:var(--subtle);color:var(--ink-2);border:0}
+.version{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.menu-btn{display:none;width:44px;height:44px;border:0;background:transparent;border-radius:var(--r-control);cursor:pointer;align-items:center;justify-content:center}
+.menu-btn:hover{background:var(--subtle)}
+.icon-btn{display:none}
+
+/* ---------- HOME / pitch ---------- */
+.wrap{max-width:1200px;margin:0 auto;padding-left:var(--gutter-l);padding-right:var(--gutter-r)}
+.hero{padding-block:72px 40px}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1fr);gap:28px;justify-items:center;text-align:center}
+.hero h1{font-size:clamp(40px,7vw,76px);font-weight:600;letter-spacing:-.045em;line-height:1.0;margin:0;max-width:16ch}
+.hero h1 em{font-style:normal;color:var(--brand-mark)}
+.hero p.lede{font-size:clamp(17px,2vw,19px);color:var(--ink-2);max-width:60ch;margin:0}
+.hero-actions{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.install{display:flex;align-items:center;gap:12px;width:100%;max-width:640px;background:var(--code-bg);color:var(--code-fg);border-radius:var(--r-card-sm);padding:8px 8px 8px 20px;text-align:left}
+.install code{flex:1;min-width:0;overflow-x:auto;white-space:nowrap;font-size:14px;padding-block:10px;scrollbar-width:none}
+.install code .p{color:var(--code-dim);user-select:none}
+.copy{flex:none;display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 12px;border:1px solid rgba(255,255,255,.18);border-radius:var(--r-control);background:transparent;color:var(--code-fg);font-family:var(--mono);font-size:11px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer}
+.copy:hover{background:rgba(255,255,255,.08)}
+.hero-meta{display:flex;flex-wrap:wrap;gap:8px 20px;justify-content:center;color:var(--muted);font-size:13px}
+.hero-meta span{display:inline-flex;align-items:center;gap:6px}
+
+/* product shot */
+.shot{margin-top:56px;border:1px solid var(--border);border-radius:var(--r-card);background:var(--surface);overflow:hidden;box-shadow:0 30px 60px -30px rgba(11,31,58,.25),0 2px 6px rgba(11,31,58,.04)}
+.shot-bar{display:flex;align-items:center;gap:8px;height:40px;padding:0 16px;border-bottom:1px solid var(--border);background:var(--canvas)}
+.shot-bar i{width:10px;height:10px;border-radius:50%;background:var(--input)}
+.shot-bar .url{margin:0 auto;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.shot-body{display:grid;grid-template-columns:200px minmax(0,1fr);min-height:420px;text-align:left}
+.shot-side{background:var(--canvas);border-right:1px solid var(--border);padding:18px 10px;display:flex;flex-direction:column;gap:2px;font-size:13px}
+.shot-side .logo-sm{padding:0 10px 14px;line-height:0}
+.shot-side .logo-sm svg{width:100px;height:auto}
+.shot-side .n{display:flex;align-items:center;gap:9px;min-height:34px;padding:0 10px;border-radius:8px;color:var(--ink-2);font-weight:500}
+.shot-side .n.on{background:var(--brand-soft);color:var(--ink)}
+.shot-side .lbl{margin:14px 10px 4px;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.shot-main{padding:24px 28px;display:flex;flex-direction:column;gap:20px;min-width:0}
+.shot-main h3{margin:0;font-size:28px;letter-spacing:-.04em;font-weight:600;line-height:1.1}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.stat{border:1px solid var(--border);border-radius:var(--r-card-sm);padding:14px 16px}
+.stat b{display:block;font-size:28px;font-weight:600;letter-spacing:-.03em;line-height:1.1;margin-top:4px;font-variant-numeric:tabular-nums}
+.stat .eyebrow{font-size:10px}
+.rows{border:1px solid var(--border);border-radius:var(--r-card-sm);overflow:hidden}
+.r{display:grid;grid-template-columns:36px minmax(0,1fr) auto;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid var(--border);font-size:13px}
+.r:first-child{border-top:0}
+.tile{width:36px;height:36px;border-radius:10px;background:var(--brand-soft);color:var(--link);display:grid;place-items:center}
+.r .nm{font-weight:600;font-size:14px;display:block}
+.r .mt{color:var(--muted);font-size:12px}
+.r .right{display:flex;align-items:center;gap:10px}
+.sha{font-family:var(--mono);font-size:11px;padding:2px 6px;border-radius:var(--r-chip);background:var(--subtle);color:var(--ink-2)}
+
+/* sections */
+.section{padding-block:96px 0}
+.section-head{display:flex;flex-direction:column;gap:12px;max-width:720px;margin-bottom:40px}
+.section-head h2{font-size:clamp(30px,4vw,44px);font-weight:600;letter-spacing:-.04em;line-height:1.05;margin:0}
+.section-head p{margin:0;color:var(--ink-2);font-size:17px;max-width:60ch}
+.features{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.feature{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-card);padding:24px;display:flex;flex-direction:column;gap:10px}
+.feature h3{margin:4px 0 0;font-size:18px;font-weight:600;letter-spacing:-.02em}
+.feature p{margin:0;color:var(--ink-2);font-size:14.5px}
+.feature .tile{width:40px;height:40px;border-radius:var(--r-tile)}
+.feature .tech{margin-top:auto;padding-top:8px;display:flex;flex-wrap:wrap;gap:6px}
+
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:48px;align-items:center}
+.checks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+.checks li{display:grid;grid-template-columns:22px minmax(0,1fr);gap:12px;color:var(--ink-2)}
+.checks li b{color:var(--ink);font-weight:600}
+.checks svg{margin-top:3px;color:var(--ok)}
+
+.term{background:var(--code-bg);color:var(--code-fg);border-radius:var(--r-card);padding:20px 22px;font-family:var(--mono);font-size:13px;line-height:1.75;overflow-x:auto}
+.term .d{color:var(--code-dim)} .term .g{color:#7FD3A4} .term .b{color:var(--code-accent)}
+.term pre{margin:0;font:inherit}
+
+.compare-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--r-card);background:var(--surface)}
+table.compare{width:100%;min-width:720px;border-collapse:collapse;font-size:14px}
+.compare th,.compare td{text-align:left;padding:14px 20px;border-top:1px solid var(--border);vertical-align:top}
+.compare thead th{border-top:0;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500;background:var(--canvas)}
+.compare tbody th{font-weight:500;color:var(--ink-2);width:22%}
+.compare td.us{background:#F5F9FF;color:var(--ink);font-weight:500}
+.compare thead th.us{background:var(--brand-soft);color:var(--ink)}
+
+.arch{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:stretch}
+.node{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-card-sm);padding:18px 20px;display:flex;flex-direction:column;gap:6px}
+.node h4{margin:0;font-size:15px;font-weight:600}
+.node p{margin:0;font-size:13.5px;color:var(--ink-2)}
+.node .chip{align-self:flex-start}
+.node.edge{background:var(--brand-soft);border-color:#C9DFFB}
+.arch-flow{grid-column:1/-1;display:flex;align-items:center;gap:10px;color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.arch-flow::before,.arch-flow::after{content:"";flex:1;height:1px;background:var(--border-strong)}
+
+.goals{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.goal{border-top:2px solid var(--ink);padding-top:14px}
+.goal b{display:block;font-size:34px;font-weight:600;letter-spacing:-.04em;line-height:1.1;font-variant-numeric:tabular-nums}
+.goal span{color:var(--ink-2);font-size:14px}
+
+.cta{margin-block:96px;background:var(--brand);border-radius:28px;padding:56px 40px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:32px;align-items:center}
+.cta h2{margin:0;font-size:clamp(28px,4vw,40px);letter-spacing:-.04em;line-height:1.05;font-weight:600}
+.cta p{margin:10px 0 0;color:var(--ink-2);max-width:52ch}
+.cta .btns{display:flex;flex-wrap:wrap;gap:10px}
+.cta .btn-outline{border-color:rgba(11,31,58,.35)}
+.cta .btn-outline:hover{background:rgba(255,255,255,.4)}
+
+footer.site{border-top:1px solid var(--border);padding-block:40px;padding-left:var(--gutter-l);padding-right:var(--gutter-r);color:var(--muted);font-size:13px}
+footer.site .in{max-width:1200px;margin:0 auto;display:flex;flex-wrap:wrap;gap:16px 32px;align-items:center;justify-content:space-between}
+footer.site nav{display:flex;flex-wrap:wrap;gap:20px}
+footer.site a{color:var(--ink-2)}
+
+/* ---------- DOCS ---------- */
+.docs{max-width:1440px;margin:0 auto;display:grid;grid-template-columns:272px minmax(0,1fr) 220px;padding-left:var(--gutter-l);padding-right:var(--gutter-r)}
+.sidebar{position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--header-h));align-self:start;height:calc(100vh - var(--header-h) - env(safe-area-inset-top,0px));overflow-y:auto;padding:28px 20px 40px 0;border-right:1px solid var(--border)}
+.sidebar .group{margin-bottom:24px}
+.sidebar .group > .eyebrow{display:block;padding:0 12px;margin-bottom:6px}
+.sidebar a{display:flex;align-items:center;min-height:36px;padding:0 12px;border-radius:8px;color:var(--ink-2);font-size:14px;font-weight:500}
+.sidebar a:hover{background:var(--subtle);text-decoration:none}
+.sidebar a[aria-current="page"]{background:var(--brand-soft);color:var(--ink)}
+.side-foot{margin-top:8px;border:1px solid var(--border);border-radius:var(--r-card-sm);padding:14px;background:var(--surface);display:flex;flex-direction:column;gap:8px;font-size:13px}
+.side-foot .status{font-size:10.5px}
+
+.article{min-width:0;padding:40px 56px 80px}
+.crumbs{display:flex;gap:8px;align-items:center;margin-bottom:14px}
+.doc{max-width:740px}
+.doc h1{font-size:44px;font-weight:600;letter-spacing:-.04em;line-height:1.04;margin:0 0 14px}
+.doc .lead{font-size:18px;color:var(--ink-2);margin:0 0 32px}
+.doc h2{font-size:24px;font-weight:600;letter-spacing:-.03em;margin:44px 0 12px;padding-top:20px;border-top:1px solid var(--border);line-height:1.2}
+.doc h3{font-size:17px;font-weight:600;letter-spacing:-.01em;margin:28px 0 8px}
+.doc p,.doc li{color:#2A3A52}
+.doc p{margin:0 0 16px}
+.doc ul,.doc ol{margin:0 0 16px;padding-left:22px;display:flex;flex-direction:column;gap:6px}
+.doc :not(pre) > code{font-size:.87em;padding:2px 6px;border-radius:var(--r-chip);background:var(--subtle);color:var(--ink);overflow-wrap:anywhere}
+.doc a code{color:var(--link)}
+.h-anchor{margin-left:8px;color:var(--border-strong);font-weight:400;opacity:0;text-decoration:none!important}
+.doc h2:hover .h-anchor,.doc h3:hover .h-anchor,.h-anchor:focus{opacity:1}
+.codeblock{position:relative;margin:0 0 20px;border-radius:var(--r-card-sm);background:var(--code-bg);overflow:hidden}
+.codeblock .cb-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 8px 6px 16px;border-bottom:1px solid rgba(255,255,255,.08);font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--code-dim)}
+.codeblock .copy{min-height:32px;padding:0 10px}
+.codeblock pre{margin:0;padding:16px 18px;overflow-x:auto;color:var(--code-fg);font-size:13px;line-height:1.7}
+.codeblock .c{color:var(--code-dim)} .codeblock .k{color:var(--code-accent)} .codeblock .s{color:#B5E3C4}
+.callout{display:grid;grid-template-columns:20px minmax(0,1fr);gap:12px;padding:14px 16px;border-radius:var(--r-card-sm);margin:0 0 20px;font-size:14.5px}
+.callout p{margin:0;color:inherit}
+.callout svg{margin-top:3px}
+.callout.tip{background:var(--brand-soft);color:var(--ink)}
+.callout.warn{background:var(--warn-bg);color:#5C3800}
+.callout.ok{background:var(--ok-bg);color:#0F4A2A}
+.callout b{font-weight:600}
+.tbl{overflow-x:auto;margin:0 0 20px;border:1px solid var(--border);border-radius:var(--r-card-sm);background:var(--surface)}
+.tbl table{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th,.tbl td{text-align:left;padding:10px 14px;border-top:1px solid var(--border);vertical-align:top}
+.tbl thead th{border-top:0;background:var(--canvas);font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500}
+.tbl td code{white-space:nowrap}
+.steps{list-style:none;counter-reset:s;padding:0!important}
+.steps > li{counter-increment:s;position:relative;padding-left:40px}
+.steps > li::before{content:counter(s);position:absolute;left:0;top:0;width:26px;height:26px;border-radius:50%;background:var(--ink);color:#fff;font-family:var(--mono);font-size:12px;display:grid;place-items:center}
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:56px;max-width:740px}
+.pager a{display:flex;flex-direction:column;gap:4px;padding:16px 18px;border:1px solid var(--border);border-radius:var(--r-card-sm);background:var(--surface);color:var(--ink);font-weight:600}
+.pager a:hover{border-color:var(--brand-mark);text-decoration:none}
+.pager a.next{text-align:right;grid-column:2}
+.pager .eyebrow{font-weight:500}
+.edit{margin-top:32px;max-width:740px;display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;color:var(--muted);font-size:13px}
+
+.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--header-h));align-self:start;padding:40px 0 40px 8px;font-size:13px;max-height:calc(100vh - var(--header-h));overflow-y:auto}
+.toc .eyebrow{display:block;margin-bottom:10px;font-size:11px}
+.toc ol{list-style:none;margin:0;padding:0;border-left:1px solid var(--border)}
+.toc a{display:block;padding:4px 0 4px 14px;margin-left:-1px;border-left:2px solid transparent;color:var(--muted)}
+.toc a:hover{color:var(--ink);text-decoration:none}
+.toc a.on{color:var(--ink);border-left-color:var(--brand-mark);font-weight:500}
+
+/* ---------- search dialog ---------- */
+dialog.search{width:min(620px,calc(100vw - 32px));max-height:min(560px,calc(100vh - 80px));padding:0;border:1px solid var(--border);border-radius:var(--r-card);background:var(--surface);color:var(--ink);box-shadow:0 30px 80px -20px rgba(11,31,58,.35);margin-top:10vh}
+dialog.search::backdrop{background:rgba(11,31,58,.28)}
+.search-field{display:flex;align-items:center;gap:10px;padding:0 16px;border-bottom:1px solid var(--border)}
+.search-field input{flex:1;min-width:0;height:56px;border:0;outline:0;background:transparent;font:inherit;font-size:16px;color:var(--ink)}
+.search-field label{color:var(--muted);display:flex}
+.results{list-style:none;margin:0;padding:8px;overflow-y:auto;max-height:440px}
+.results a{display:flex;flex-direction:column;gap:2px;padding:10px 12px;border-radius:var(--r-control);color:var(--ink)}
+.results a:hover,.results a.sel{background:var(--brand-soft);text-decoration:none}
+.results .sec{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.results .t{font-weight:600}
+.results .x{font-size:13px;color:var(--ink-2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.results .empty{padding:20px 12px;color:var(--muted)}
+
+/* ---------- responsive ---------- */
+@media (max-width:1180px){
+  .docs{grid-template-columns:248px minmax(0,1fr)}
+  .toc{display:none}
+  .article{padding:36px 0 80px 40px}
+}
+@media (max-width:960px){
+  .features{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .split{grid-template-columns:minmax(0,1fr)}
+  .arch{grid-template-columns:minmax(0,1fr)}
+  .goals{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .search-btn{width:44px;padding:0;justify-content:center}
+  .search-btn span,.search-btn kbd{display:none}
+  .version{display:none}
+}
+@media (max-width:860px){
+  .topnav{display:none}
+  .menu-btn{display:inline-flex}
+  .docs{grid-template-columns:minmax(0,1fr)}
+  .article{padding:28px 0 64px}
+  .sidebar{position:fixed;z-index:45;top:calc(env(safe-area-inset-top,0px) + var(--header-h));left:0;bottom:0;width:min(300px,86vw);height:auto;background:var(--canvas);padding:20px 16px 40px max(16px, env(safe-area-inset-left,0px));border-right:1px solid var(--border);transform:translateX(-105%);transition:transform .2s ease;box-shadow:20px 0 40px -20px rgba(11,31,58,.2)}
+  body.nav-open .sidebar{transform:none}
+  .shot-body{grid-template-columns:minmax(0,1fr)}
+  .shot-side{display:none}
+  .cta{grid-template-columns:minmax(0,1fr);padding:40px 24px}
+}
+@media (max-width:640px){
+  .features{grid-template-columns:minmax(0,1fr)}
+  .hero{padding-block:48px 24px}
+  .doc h1{font-size:34px}
+  .shot-main{padding:18px}
+  .r .right .mt{display:none}
+  .pager{grid-template-columns:minmax(0,1fr)}
+  .pager a.next{grid-column:1}
+  .top-right .gh-label{display:none}
+  .section{padding-block:72px 0}
+}
+</style>
+
+<!-- ============ SVG sprite ============ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <mask id="cubeMask" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64"><rect width="64" height="64" fill="#fff"/><path d="M8 22 L32 36 L56 22 M32 36 V52" fill="none" stroke="#000" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></mask>
+    <symbol id="wordmark" viewBox="0.00 -1.00 505.70 105.53">
+      <g transform="translate(-11.5385 -11.5385) scale(1.9231)"><g mask="url(#cubeMask)" stroke-width="3" stroke-linejoin="round"><path d="M32 8 L56 22 V46 q-6 -7 -12 0 t-12 0 t-12 0 t-12 0 V22 Z" fill="#8EBEFF" stroke="#8EBEFF"/><path d="M32 8 L56 22 L32 36 L8 22 Z" fill="#CFE3FF" stroke="#CFE3FF"/></g></g>
+      <path fill="#0B1F3A" d="M156.2 82.73Q148.2 82.73 141.9 78.930Q135.6 75.13 131.95 68.63Q128.3 62.13 128.3 54.23Q128.3 46.23 132 39.78Q135.7 33.33 142 29.53Q148.3 25.73 156.1 25.73Q162.1 25.73 166.8 27.93Q169.7 29.43 171.8 31.53V5.83H186.8V81.53H172.8V76.33Q170.3 79.13 166.6 80.63Q161.8 82.73 156.2 82.73ZM158 69.23Q162.1 69.23 165.2 67.33Q168.3 65.43 170.05 62.03Q171.8 58.630 171.8 54.23Q171.8 49.83 170.05 46.43Q168.3 43.03 165.2 41.13Q162.1 39.23 158 39.23Q153.9 39.23 150.65 41.18Q147.4 43.13 145.6 46.48Q143.8 49.83 143.8 54.23Q143.8 58.63 145.6 62.03Q147.4 65.43 150.65 67.33Q153.9 69.23 158 69.23Z M219.4 82.73Q211.3 82.73 204.65 79.03Q198 75.33 194.05 68.88Q190.1 62.43 190.1 54.23Q190.1 45.93 194.05 39.53Q198 33.13 204.65 29.43Q211.3 25.73 219.4 25.73Q227.5 25.73 234.1 29.43Q240.7 33.13 244.65 39.53Q248.6 45.93 248.6 54.23Q248.6 62.43 244.65 68.88Q240.7 75.33 234.1 79.03Q227.5 82.73 219.4 82.73ZM219.4 69.23Q223.5 69.23 226.55 67.33Q229.6 65.43 231.35 62.03Q233.1 58.63 233.1 54.23Q233.1 49.83 231.35 46.48Q229.6 43.13 226.55 41.18Q223.5 39.23 219.4 39.23Q215.3 39.23 212.2 41.18Q209.1 43.13 207.35 46.48Q205.6 49.83 205.6 54.23Q205.6 58.63 207.35 62.03Q209.1 65.43 212.2 67.33Q215.3 69.23 219.4 69.23Z M278.7 82.73Q270.5 82.73 263.95 78.98Q257.4 75.23 253.55 68.73Q249.7 62.23 249.7 54.13Q249.7 46.03 253.5 39.58Q257.3 33.13 263.9 29.43Q270.5 25.73 278.7 25.73Q284.8 25.73 290 27.83Q295.2 29.93 298.9 33.68Q302.6 37.43 304.2 42.53L291.2 48.13Q289.8 44.03 286.45 41.63Q283.1 39.23 278.7 39.23Q274.8 39.23 271.75 41.13Q268.7 43.03 266.95 46.43Q265.2 49.83 265.2 54.23Q265.2 58.63 266.95 62.03Q268.7 65.43 271.75 67.33Q274.8 69.23 278.7 69.23Q283.2 69.23 286.5 66.83Q289.8 64.43 291.2 60.33L304.2 66.03Q302.7 70.83 299 74.63Q295.3 78.43 290.1 80.58Q284.9 82.73 278.7 82.73Z M307.5 81.53V5.83H322.5V46.63L341 26.93H359.5L339.7 48.93L359.4 81.53H342.4L328.5 58.23L322.5 64.83V81.53Z M369.1 103.53Q366.7 103.53 364.45 103.13Q362.2 102.73 360.5 101.83V89.53Q361.9 89.93 363.8 90.23Q365.7 90.53 367.3 90.53Q371.7 90.53 373.6 88.48Q375.5 86.43 376.7 83.83L377.7 81.53L356.2 26.93H372.3L385.2 62.03L398.1 26.93H414.2L390.8 86.63Q388.6 92.23 385.4 96.03Q382.2 99.83 378.15 101.68Q374.1 103.53 369.1 103.53Z M415.3 81.53V26.93H429.3V35.03Q431.1 30.63 434.3 28.73Q438.4 26.33 444.1 26.33H447.3V39.33H442.6Q437.1 39.33 433.7 42.68Q430.3 46.03 430.3 52.13V81.53Z M474.1 82.73Q466.1 82.73 459.8 78.93Q453.5 75.13 449.85 68.63Q446.2 62.13 446.2 54.23Q446.2 46.23 449.9 39.78Q453.6 33.33 459.9 29.53Q466.2 25.73 474 25.73Q480 25.73 484.7 27.93Q487.6 29.43 489.7 31.53V5.83H504.7V81.53H490.7V76.33Q488.2 79.13 484.5 80.63Q479.7 82.73 474.1 82.73ZM475.9 69.23Q480 69.23 483.1 67.33Q486.2 65.43 487.95 62.03Q489.7 58.63 489.7 54.23Q489.7 49.83 487.95 46.43Q486.2 43.03 483.1 41.13Q480 39.23 475.9 39.23Q471.8 39.23 468.55 41.18Q465.3 43.13 463.5 46.48Q461.7 49.83 461.7 54.23Q461.7 58.63 463.5 62.03Q465.3 65.43 468.55 67.33Q471.8 69.23 475.9 69.23Z"/>
+    </symbol>
+    <symbol id="i-github" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.58 2 12.23c0 4.52 2.87 8.35 6.84 9.7.5.1.68-.22.68-.49v-1.7c-2.78.62-3.37-1.37-3.37-1.37-.46-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.89 1.57 2.34 1.12 2.91.85.09-.66.35-1.12.63-1.37-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.04 1.03-2.76-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05A9.3 9.3 0 0 1 12 6.98c.85 0 1.71.12 2.51.35 1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.64 1.03 2.76 0 3.94-2.34 4.8-4.57 5.06.36.32.68.94.68 1.9v2.82c0 .27.18.6.69.49A10.2 10.2 0 0 0 22 12.23C22 6.58 17.52 2 12 2z"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></g></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></g></symbol>
+    <symbol id="i-app" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></g></symbol>
+    <symbol id="i-db" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></g></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></g></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></g></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 15l4-5 3 3 5-6"/></g></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.3 3.4-5 6.5-5s5.7 1.7 6.5 5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 15.3c1.7.6 3 2.3 3.5 4.7"/></g></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5 12.5l4.2 4.2L19 7"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.01"/></g></symbol>
+    <symbol id="i-warn" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9.5 17h-19z"/><path d="M12 10v4M12 17v.01"/></g></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/></symbol>
+    <symbol id="i-dash" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="13" y="10" width="8" height="11" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/></g></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  </defs>
+</svg>
+
+<div class="banner" role="region" aria-label="Announcement">
+  <div class="banner-in">
+    <span class="tag">Open source</span>
+    <span>One lightweight binary on your own server. No lock-in, no mess.</span>
+    <a href="#docs-introduction">Read the docs →</a>
+  </div>
+</div>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <button class="menu-btn" type="button" id="menuBtn" aria-label="Open documentation menu" aria-expanded="false" aria-controls="sidebar"><svg width="20" height="20"><use href="#i-menu"/></svg></button>
+    <a class="logo" href="#home" aria-label="Dockyrd home"><svg viewBox="0 -1 505.7 105.53" role="img" aria-label="Dockyrd"><use href="#wordmark"/></svg></a>
+    <nav class="topnav" aria-label="Primary">
+      <a href="#home" data-nav="home">Product</a>
+      <a href="#docs-introduction" data-nav="docs">Docs</a>
+      <a href="#docs-cli" data-nav="cli">CLI</a>
+      <a href="#docs-architecture" data-nav="arch">Architecture</a>
+    </nav>
+    <div class="top-right">
+      <button class="search-btn" type="button" id="searchBtn" aria-label="Search documentation">
+        <svg width="16" height="16" aria-hidden="true"><use href="#i-search"/></svg><span>Search docs</span><kbd>⌘K</kbd>
+      </button>
+      <span class="version">v0.1 · preview</span>
+      <a class="btn btn-outline gh-btn" href="#" data-gh="repo" aria-label="Star Dockyrd on GitHub">
+        <svg width="16" height="16" aria-hidden="true"><use href="#i-github"/></svg>
+        <span class="gh-label">Star</span>
+        <span class="star-count" data-stars></span>
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- ======================================================= HOME ======== -->
+<main id="view-home">
+  <section class="hero">
+    <div class="wrap">
+      <div class="hero-grid">
+        <span class="chip"><span class="status warn" style="font-size:inherit">v0.1</span> in active development</span>
+        <h1>Deploy anything to your own server. <em>Keep it boring.</em></h1>
+        <p class="lede">Dockyrd is a lean, self-hosted alternative to Coolify. One Go binary turns a fresh VPS into a platform for Next.js apps, static sites, Postgres, Redis and S3 storage, with automatic HTTPS and zero-downtime deploys.</p>
+        <div class="install" aria-label="Install command">
+          <code><span class="p">$ </span>curl -fsSL https://raw.githubusercontent.com/Joeydekruis/dockyrd/development/scripts/install.sh | sudo sh</code>
+          <button class="copy" type="button" data-copy="curl -fsSL https://raw.githubusercontent.com/Joeydekruis/dockyrd/development/scripts/install.sh | sudo sh"><svg width="14" height="14" aria-hidden="true"><use href="#i-copy"/></svg><span>Copy</span></button>
+        </div>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#docs-quick-start">Deploy your first app</a>
+          <a class="btn btn-outline" href="#" data-gh="repo">
+            <svg width="16" height="16" aria-hidden="true"><use href="#i-github"/></svg>Star on GitHub<span class="star-count" data-stars></span>
+          </a>
+        </div>
+        <div class="hero-meta">
+          <span><svg width="14" height="14" style="color:var(--ok)"><use href="#i-check"/></svg>Apache-2.0</span>
+          <span><svg width="14" height="14" style="color:var(--ok)"><use href="#i-check"/></svg>Ubuntu &amp; Debian · amd64 &amp; arm64</span>
+          <span><svg width="14" height="14" style="color:var(--ok)"><use href="#i-check"/></svg>No telemetry</span>
+        </div>
+      </div>
+
+      <figure class="shot" aria-label="Preview of the Dockyrd dashboard" style="margin-inline:0;margin-bottom:0">
+        <div class="shot-bar" aria-hidden="true"><i></i><i></i><i></i><span class="url">dockyrd.example.com</span></div>
+        <div class="shot-body">
+          <div class="shot-side" aria-hidden="true">
+            <div class="logo-sm"><svg viewBox="0 -1 505.7 105.53"><use href="#wordmark"/></svg></div>
+            <span class="n on"><svg width="16" height="16"><use href="#i-dash"/></svg>Dashboard</span>
+            <span class="n"><svg width="16" height="16"><use href="#i-folder"/></svg>Projects</span>
+            <span class="n"><svg width="16" height="16"><use href="#i-app"/></svg>Applications</span>
+            <span class="n"><svg width="16" height="16"><use href="#i-db"/></svg>Databases</span>
+            <span class="n"><svg width="16" height="16"><use href="#i-globe"/></svg>Static sites</span>
+            <span class="n"><svg width="16" height="16"><use href="#i-box"/></svg>Object storage</span>
+            <span class="lbl">Server</span>
+            <span class="n"><svg width="16" height="16"><use href="#i-chart"/></svg>Analytics</span>
+          </div>
+          <div class="shot-main">
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <span class="eyebrow">Example workspace</span>
+              <h3>Good afternoon</h3>
+            </div>
+            <div class="stats">
+              <div class="stat"><span class="eyebrow">Services</span><b>7</b></div>
+              <div class="stat"><span class="eyebrow">Deploys today</span><b>12</b></div>
+              <div class="stat"><span class="eyebrow">CPU</span><b>18%</b></div>
+              <div class="stat"><span class="eyebrow">Memory</span><b>1.4 GB</b></div>
+            </div>
+            <div class="rows">
+              <div class="r"><span class="tile"><svg width="18" height="18"><use href="#i-app"/></svg></span><span><span class="nm">webshop</span><span class="mt">Next.js · webshop.example.com</span></span><span class="right"><span class="sha">a41f9c2</span><span class="mt">4 min ago</span><span class="status ok">Healthy</span></span></div>
+              <div class="r"><span class="tile"><svg width="18" height="18"><use href="#i-db"/></svg></span><span><span class="nm">db</span><span class="mt">Postgres 17 · internal:5432</span></span><span class="right"><span class="status ok">Healthy</span></span></div>
+              <div class="r"><span class="tile"><svg width="18" height="18"><use href="#i-globe"/></svg></span><span><span class="nm">marketing-site</span><span class="mt">Astro · static</span></span><span class="right"><span class="sha">7be20d1</span><span class="mt">just now</span><span class="status warn">Building</span></span></div>
+              <div class="r"><span class="tile"><svg width="18" height="18"><use href="#i-box"/></svg></span><span><span class="nm">uploads</span><span class="mt">Garage bucket</span></span><span class="right"><span class="status idle">Private</span></span></div>
+            </div>
+          </div>
+        </div>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="h-what">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">What you get</span>
+        <h2 id="h-what">Everything a small team ships, on one server you own.</h2>
+        <p>Dockyrd covers the services most projects actually need, with one consistent screen for each. No feature wall, no plugin store.</p>
+      </div>
+      <div class="features">
+        <article class="feature"><span class="tile"><svg width="20" height="20"><use href="#i-app"/></svg></span><h3>Applications</h3><p>Push to GitHub and Dockyrd builds with Railpack or your Dockerfile, health-checks the new container and only then switches traffic. Failed deploys never replace a working one.</p><div class="tech"><span class="chip">Railpack</span><span class="chip">Dockerfile</span><span class="chip">Image</span></div></article>
+        <article class="feature"><span class="tile"><svg width="20" height="20"><use href="#i-globe"/></svg></span><h3>Static sites</h3><p>Astro, Vite, Hugo or a Next.js export. No container needed: Caddy serves the build output from disk, and a rollback is an atomic symlink switch that takes milliseconds.</p><div class="tech"><span class="chip">Instant rollback</span><span class="chip">SPA fallback</span></div></article>
+        <article class="feature"><span class="tile"><svg width="20" height="20"><use href="#i-db"/></svg></span><h3>Databases</h3><p>Postgres and Redis-compatible Valkey from official images, with generated credentials. Link them to an app with <code style="font-size:.9em">${{db.DATABASE_URL}}</code> and skip the copy-paste.</p><div class="tech"><span class="chip">Postgres 16–18</span><span class="chip">Valkey</span></div></article>
+        <article class="feature"><span class="tile"><svg width="20" height="20"><use href="#i-box"/></svg></span><h3>Object storage</h3><p>Install Garage with one click for an S3-compatible bucket next to your app. Access keys and endpoints are injected as variables, ready for uploads.</p><div class="tech"><span class="chip">S3 API</span><span class="chip">Garage</span></div></article>
+        <article class="feature"><span class="tile"><svg width="20" height="20"><use href="#i-chart"/></svg></span><h3>Logs &amp; analytics</h3><p>Live build and runtime logs, request rates, latency percentiles and status codes per site. Server CPU, memory, disk and network in the same place. No cookies, no IP storage.</p><div class="tech"><span class="chip">p50–p99</span><span class="chip">Events</span></div></article>
+        <article class="feature"><span class="tile"><svg width="20" height="20"><use href="#i-users"/></svg></span><h3>Team access</h3><p>Owner, admin, member and viewer roles from day one. Invites, TOTP two-factor, session management, optional GitHub sign-in and a full audit log.</p><div class="tech"><span class="chip">2FA</span><span class="chip">Audit log</span></div></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="h-reliable">
+    <div class="wrap split">
+      <div>
+        <div class="section-head" style="margin-bottom:28px">
+          <span class="eyebrow">Built to stay up</span>
+          <h2 id="h-reliable">Restarting the panel never touches your traffic.</h2>
+          <p>The control plane and the data plane are separate. Caddy, your apps and your databases keep running while Dockyrd updates, crashes or restarts.</p>
+        </div>
+        <ul class="checks">
+          <li><svg width="18" height="18"><use href="#i-check"/></svg><span><b>Blue/green deploys.</b> The new container must pass its health check before Caddy switches the upstream.</span></li>
+          <li><svg width="18" height="18"><use href="#i-check"/></svg><span><b>Self-healing.</b> A reconciler compares what should run with what does every 30 seconds and repairs drift.</span></li>
+          <li><svg width="18" height="18"><use href="#i-check"/></svg><span><b>Signed updates.</b> Releases are checksummed and cosign-verified, with automatic rollback if the new version fails to start.</span></li>
+          <li><svg width="18" height="18"><use href="#i-check"/></svg><span><b>Volumes are sacred.</b> Nothing automatic ever deletes a volume. Only an explicit, confirmed delete does.</span></li>
+        </ul>
+      </div>
+      <div class="term" role="img" aria-label="Example deploy log showing a health-checked switch">
+<pre><span class="d">12:04:11</span>  <span class="b">deploy</span>  webshop · a41f9c2 · push to main
+<span class="d">12:04:12</span>  clone   depth=1 ok
+<span class="d">12:04:13</span>  build   railpack detected next.js
+<span class="d">12:05:02</span>  build   image dockyrd/webshop:01jc9k
+<span class="d">12:05:03</span>  start   dy-webshop-01jc9k on dy-edge
+<span class="d">12:05:05</span>  health  GET /api/health → 200
+<span class="d">12:05:05</span>  proxy   upstream switched, 0 errors
+<span class="d">12:05:35</span>  stop    dy-webshop-01jb4x (grace 30s)
+<span class="d">12:05:35</span>  <span class="g">live</span>    webshop.example.com</pre>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="h-compare">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">How it compares</span>
+        <h2 id="h-compare">Less platform, more server for your apps.</h2>
+        <p>Coolify and Dokploy are great projects that proved the model. Dockyrd keeps their mental model and cuts the platform itself down to one process and a proxy.</p>
+      </div>
+      <div class="compare-wrap">
+        <table class="compare">
+          <thead><tr><th scope="col"></th><th scope="col" class="us">Dockyrd</th><th scope="col">Coolify v4</th><th scope="col">Dokploy</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Control plane</th><td class="us">One Go binary + SQLite</td><td>Laravel, Postgres, Redis, soketi</td><td>Next.js, Postgres, Redis</td></tr>
+            <tr><th scope="row">Proxy</th><td class="us">Caddy via admin API</td><td>Traefik (default) or Caddy</td><td>Traefik</td></tr>
+            <tr><th scope="row">Orchestration</th><td class="us">Plain Docker Engine with labels</td><td>Docker over SSH, also to its own host</td><td>Docker Swarm</td></tr>
+            <tr><th scope="row">Builders</th><td class="us">Railpack, Dockerfile, image</td><td>Nixpacks, Dockerfile, Compose</td><td>Nixpacks, Railpack, Dockerfile, buildpacks</td></tr>
+            <tr><th scope="row">Fresh install claim</th><td class="us">One-time setup token</td><td>First visitor creates the admin</td><td>First visitor creates the admin</td></tr>
+            <tr><th scope="row">License</th><td class="us">Apache-2.0</td><td>Apache-2.0</td><td>Apache-2.0</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="h-arch">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Under the hood</span>
+        <h2 id="h-arch">Three moving parts. That is the whole platform.</h2>
+        <p>Every container Dockyrd creates carries labels, so Docker itself is the source of truth for what is running. SQLite holds what should be running.</p>
+      </div>
+      <div class="arch">
+        <div class="arch-flow">Internet · :80 / :443</div>
+        <div class="node edge"><span class="chip">dy-proxy</span><h4>Caddy</h4><p>TLS via ACME, routes to apps, serves static sites from disk, writes JSON access logs for analytics.</p></div>
+        <div class="node"><span class="chip">systemd</span><h4>dockyrd</h4><p>API, scheduler, builds, reconciler, metrics, updater and the embedded dashboard. Talks to the local Docker socket.</p></div>
+        <div class="node"><span class="chip">docker engine</span><h4>Your workloads</h4><p>Apps, Postgres, Valkey and Garage, each project on its own isolated network. BuildKit runs builds with cache.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="h-goals">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="eyebrow">Design targets for v0.1</span>
+        <h2 id="h-goals">Small enough for a 1 GB VPS.</h2>
+        <p>These are the budgets every release is measured against before it ships.</p>
+      </div>
+      <div class="goals">
+        <div class="goal"><b>&lt; 60 MB</b><span>Dockyrd memory at idle</span></div>
+        <div class="goal"><b>&lt; 150 MB</b><span>Total platform overhead, proxy included</span></div>
+        <div class="goal"><b>&lt; 3 min</b><span>From fresh VPS to running dashboard</span></div>
+        <div class="goal"><b>60 s</b><span>Maximum time to repair drift</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <section class="cta" aria-labelledby="h-cta">
+      <div>
+        <h2 id="h-cta">Your server. Your apps. One command.</h2>
+        <p>Dockyrd is built in the open. Star the repo to follow along, open an issue, or read the docs and try a preview build on a spare VPS.</p>
+      </div>
+      <div class="btns">
+        <a class="btn btn-primary" href="#docs-installation">Install Dockyrd</a>
+        <a class="btn btn-outline" href="#" data-gh="repo"><svg width="16" height="16" aria-hidden="true"><use href="#i-star"/></svg>Star<span class="star-count" data-stars></span></a>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- ======================================================= DOCS ======== -->
+<div id="view-docs" class="docs" hidden>
+  <aside class="sidebar" id="sidebar" aria-label="Documentation">
+    <nav id="docnav"></nav>
+    <div class="side-foot">
+      <span class="status warn">Pre-release</span>
+      <span style="color:var(--ink-2)">These docs track the v0.1 build. Details can change before the first release.</span>
+    </div>
+  </aside>
+
+  <main class="article" id="main">
+    <div class="crumbs"><span class="eyebrow" id="crumb"></span></div>
+    <div id="docs-pages">
+
+<!-- Introduction -->
+<article class="doc" data-page="introduction" data-section="Getting started" data-title="Introduction">
+<h1>Introduction</h1>
+<p class="lead">Dockyrd is an open source, self-hosted deploy platform for a single server. You install one binary, open a dashboard and deploy apps, static sites, databases and storage buckets with automatic HTTPS.</p>
+<h2 id="introduction-who">Who it is for</h2>
+<p>Developers and small teams who want the Vercel or Railway experience on a VPS they control. If you run a handful of Next.js apps, a marketing site and a Postgres database for a client, Dockyrd is built for you.</p>
+<h2 id="introduction-model">The mental model</h2>
+<p>Everything in Dockyrd fits in four levels:</p>
+<div class="tbl"><table><thead><tr><th>Level</th><th>What it is</th><th>Example</th></tr></thead><tbody>
+<tr><td>Server</td><td>The machine Dockyrd runs on. v0.1 manages one.</td><td><code>local</code></td></tr>
+<tr><td>Project</td><td>A group of services with its own private network.</td><td>Client X</td></tr>
+<tr><td>Environment</td><td>A stage inside a project.</td><td><code>production</code></td></tr>
+<tr><td>Service</td><td>Something that runs or is served.</td><td>app, static site, postgres, redis, bucket</td></tr>
+</tbody></table></div>
+<p>Each change to an app or static site creates a <b>deployment</b>. Deployments are kept, so you can roll back to any of the last five without rebuilding.</p>
+<h2 id="introduction-principles">Principles</h2>
+<ul>
+<li><b>Light.</b> One Go process and Caddy. No Postgres, Redis or queue for the platform itself.</li>
+<li><b>Stable.</b> The panel can crash or update without a single request failing.</li>
+<li><b>Safe by default.</b> Databases are private, secrets are encrypted at rest, and a fresh install needs a one-time token.</li>
+<li><b>Small UI.</b> One consistent screen per service type instead of a wall of options.</li>
+</ul>
+<div class="callout tip"><svg width="18" height="18"><use href="#i-info"/></svg><p><b>Ready to try it?</b> Read the <a href="#docs-installation">requirements</a>, then follow the <a href="#docs-quick-start">quick start</a>. A fresh install takes less than three minutes.</p></div>
+</article>
+
+<!-- Installation -->
+<article class="doc" data-page="installation" data-section="Getting started" data-title="Installation">
+<h1>Installation</h1>
+<p class="lead">Install Dockyrd on a fresh VPS with a single command. The installer is idempotent: running it again repairs or upgrades an existing install.</p>
+<h2 id="installation-requirements">Requirements</h2>
+<div class="tbl"><table><thead><tr><th></th><th>Minimum</th><th>Recommended</th></tr></thead><tbody>
+<tr><td>CPU</td><td>1 vCPU</td><td>2 vCPU</td></tr>
+<tr><td>Memory</td><td>1 GB (installer adds 2 GB swap)</td><td>4 GB for Next.js builds</td></tr>
+<tr><td>Disk</td><td>10 GB free</td><td>40 GB+</td></tr>
+<tr><td>OS</td><td colspan="2">Ubuntu 22.04 / 24.04, Debian 12 / 13 · x86_64 or arm64</td></tr>
+<tr><td>Ports</td><td colspan="2">80, 443 and 8000 free</td></tr>
+</tbody></table></div>
+<h2 id="installation-install">Install</h2>
+<p>Run this as root on the server:</p>
+<pre data-lang="bash">curl -fsSL https://raw.githubusercontent.com/Joeydekruis/dockyrd/development/scripts/install.sh | sudo sh</pre>
+<p>The script will:</p>
+<ol class="steps">
+<li>Check the OS, architecture, ports and free disk space.</li>
+<li>Install Docker Engine from Docker's official repository if it is missing (version 27 or newer is required).</li>
+<li>Set log rotation and <code>live-restore</code> in <code>/etc/docker/daemon.json</code>, merging with what is already there.</li>
+<li>Download the binary, verify its checksum and signature, and install it to <code>/usr/local/bin/dockyrd</code>.</li>
+<li>Run <code>dockyrd init</code>, start the proxy and BuildKit containers and enable the systemd service.</li>
+<li>Open ports 22, 80, 443 and 8000 if <code>ufw</code> is active.</li>
+</ol>
+<p>When it finishes you see a setup link:</p>
+<pre data-lang="output">✓ Dockyrd v0.1.0 is running.
+
+  Open:   http://203.0.113.10:8000/setup?token=8f3k-29xq-a71m
+  Token is valid for 60 minutes and can be used once.
+  Lost it?  sudo dockyrd setup-token</pre>
+<div class="callout warn"><svg width="18" height="18"><use href="#i-warn"/></svg><p><b>Keep the setup link private.</b> Whoever uses the token first becomes the owner of the instance. Without a valid token nobody can claim it.</p></div>
+<h2 id="installation-flags">Installer flags</h2>
+<p>Pass flags after <code>sh -s --</code>:</p>
+<pre data-lang="bash">curl -fsSL https://raw.githubusercontent.com/Joeydekruis/dockyrd/development/scripts/install.sh | sudo sh -s -- --version v0.1.2 --dashboard-domain dockyrd.example.com</pre>
+<div class="tbl"><table><thead><tr><th>Flag</th><th>Effect</th></tr></thead><tbody>
+<tr><td><code>--version vX.Y.Z</code></td><td>Install a specific release.</td></tr>
+<tr><td><code>--channel stable|beta</code></td><td>Choose the release channel. Default is <code>stable</code>.</td></tr>
+<tr><td><code>--no-docker-install</code></td><td>Fail instead of installing Docker.</td></tr>
+<tr><td><code>--dashboard-domain</code></td><td>Serve the dashboard on a domain with HTTPS right away.</td></tr>
+<tr><td><code>--force</code></td><td>Continue on an unsupported OS.</td></tr>
+</tbody></table></div>
+<h2 id="installation-setup">First-time setup</h2>
+<p>Open the setup link and the wizard asks for three things:</p>
+<ol>
+<li><b>Owner account.</b> Name, email and a password of at least 12 characters.</li>
+<li><b>Instance.</b> An optional dashboard domain, the email used for Let's Encrypt, and an optional wildcard domain for apps.</li>
+<li><b>GitHub.</b> Optional. You can connect a GitHub App now or later from Settings.</li>
+</ol>
+<h2 id="installation-uninstall">Uninstall</h2>
+<p>The uninstall script stops the service and removes the platform containers. It asks before touching your own containers, volumes or data, and keeps them by default.</p>
+<pre data-lang="bash">curl -fsSL https://raw.githubusercontent.com/Joeydekruis/dockyrd/development/scripts/uninstall.sh | sudo sh</pre>
+</article>
+
+<!-- Quick start -->
+<article class="doc" data-page="quick-start" data-section="Getting started" data-title="Quick start">
+<h1>Deploy your first app</h1>
+<p class="lead">From an empty dashboard to a Next.js app with a Postgres database on its own HTTPS domain in about ten minutes.</p>
+<h2 id="quick-start-github">1. Connect GitHub</h2>
+<p>Go to <b>Settings → Git providers</b> and choose <b>Create GitHub App</b>. Dockyrd uses GitHub's manifest flow, so you only confirm the app name and pick which repositories it may read. Push events start deploys automatically.</p>
+<h2 id="quick-start-project">2. Create a project</h2>
+<p>Open <b>Projects</b> and create one, for example <code>Client X</code>. Every project gets its own private Docker network, so services in different projects cannot see each other.</p>
+<h2 id="quick-start-db">3. Add a database</h2>
+<p>Inside the project, create a <b>Postgres</b> database and name it <code>db</code>. Dockyrd generates a 32-character password and starts it on the project network. Other services reach it at <code>db:5432</code>.</p>
+<h2 id="quick-start-app">4. Create the application</h2>
+<ol class="steps">
+<li>Choose <b>Create application → GitHub</b> and pick your repository and branch.</li>
+<li>Leave the builder on <b>Railpack</b>. It detects Next.js and sets the build and start commands.</li>
+<li>Under <b>Variables</b>, add a reference to the database:</li>
+</ol>
+<pre data-lang=".env">DATABASE_URL=${{db.DATABASE_URL}}</pre>
+<ol class="steps" start="4" style="counter-reset:s 3">
+<li>Choose <b>Deploy</b> and follow the build log live.</li>
+</ol>
+<p>Your app is now reachable on a generated domain such as <code>webshop-x7k2.203-0-113-10.sslip.io</code>, with HTTPS.</p>
+<h2 id="quick-start-domain">5. Add your own domain</h2>
+<p>Under <b>Domains</b>, add <code>webshop.example.com</code> and point an <code>A</code> record at your server's IP. Choose <b>Check again</b> once DNS has updated; Caddy requests a certificate on the first request.</p>
+<div class="callout ok"><svg width="18" height="18"><use href="#i-check"/></svg><p><b>Done.</b> Every push to the branch now deploys with zero downtime. If a build or health check fails, the previous version keeps serving traffic.</p></div>
+</article>
+
+<!-- Next.js -->
+<article class="doc" data-page="nextjs" data-section="Guides" data-title="Next.js apps">
+<h1>Next.js apps</h1>
+<p class="lead">Railpack detects Next.js automatically. A few settings make builds faster and images smaller.</p>
+<h2 id="nextjs-standalone">Use standalone output</h2>
+<p>Set <code>output: 'standalone'</code> so the image only contains what the server needs. Dockyrd shows a hint on the app page when it is missing, but it is never required.</p>
+<pre data-lang="next.config.ts"><span class="k">import</span> type { NextConfig } <span class="k">from</span> <span class="s">'next'</span>
+
+<span class="k">const</span> config: NextConfig = {
+  output: <span class="s">'standalone'</span>,
+}
+
+<span class="k">export default</span> config</pre>
+<h2 id="nextjs-public-vars">Public variables need a rebuild</h2>
+<p>Variables starting with <code>NEXT_PUBLIC_</code> are inlined into the client bundle at build time. Dockyrd marks them as build-time automatically and shows that changing one triggers a rebuild, not just a restart.</p>
+<h2 id="nextjs-health">Add a health check</h2>
+<p>By default Dockyrd waits until the port accepts connections. For a stricter check, set <b>Health path</b> to a route that returns <code>200</code> once the app can serve traffic:</p>
+<pre data-lang="app/api/health/route.ts"><span class="k">export function</span> GET() {
+  <span class="k">return</span> Response.json({ ok: <span class="k">true</span> })
+}</pre>
+<h2 id="nextjs-memory">Builds on small servers</h2>
+<p>Next.js builds are memory hungry. On a 1 GB server the installer adds swap so builds finish, but they are slow. Use 2 vCPU and 4 GB if you build often, or build in CI and deploy the resulting image.</p>
+</article>
+
+<!-- Static sites -->
+<article class="doc" data-page="static-sites" data-section="Guides" data-title="Static sites">
+<h1>Static sites</h1>
+<p class="lead">Static sites build in a throwaway container and are served by Caddy straight from disk. No container keeps running.</p>
+<h2 id="static-sites-detect">What gets detected</h2>
+<div class="tbl"><table><thead><tr><th>Setting</th><th>Detected from</th></tr></thead><tbody>
+<tr><td>Package manager</td><td>Lockfile: pnpm, npm, yarn or bun</td></tr>
+<tr><td>Build command</td><td>The <code>build</code> script in <code>package.json</code></td></tr>
+<tr><td>Node version</td><td><code>.nvmrc</code> or <code>engines</code>, otherwise current LTS</td></tr>
+<tr><td>Output directory</td><td>First of <code>dist</code>, <code>out</code>, <code>build</code>, <code>public</code>, <code>_site</code></td></tr>
+</tbody></table></div>
+<p>Set Node version to <code>none</code> for plain HTML repositories without a build step.</p>
+<h2 id="static-sites-releases">Releases and rollback</h2>
+<p>Each deploy copies the output to its own release folder. A symlink called <code>current</code> is switched atomically, so visitors never see a half-written site. Rolling back moves the symlink back and takes milliseconds. The last five releases are kept.</p>
+<h2 id="static-sites-spa">Single-page apps</h2>
+<p>Turn on <b>SPA fallback</b> to serve <code>index.html</code> for unknown paths, so client-side routes work on refresh.</p>
+<h2 id="static-sites-vars">Environment variables</h2>
+<p>Variables on a static site are injected at build time only. Changing one starts a new build.</p>
+</article>
+
+<!-- Databases -->
+<article class="doc" data-page="databases" data-section="Guides" data-title="Databases">
+<h1>Databases</h1>
+<p class="lead">Postgres and Redis-compatible databases from official images, each with its own volume and generated credentials.</p>
+<h2 id="databases-engines">Supported engines</h2>
+<div class="tbl"><table><thead><tr><th>Engine</th><th>Versions</th><th>Health check</th></tr></thead><tbody>
+<tr><td>Postgres</td><td>16, 17, 18</td><td><code>pg_isready</code></td></tr>
+<tr><td>Redis (Valkey)</td><td>8</td><td><code>PING</code></td></tr>
+</tbody></table></div>
+<p>The Redis option runs Valkey, the BSD-licensed fork of Redis. It speaks the same protocol, so existing Redis clients work unchanged.</p>
+<h2 id="databases-connect">Connecting from an app</h2>
+<p>Databases publish variables that apps in the same project can reference:</p>
+<pre data-lang=".env">DATABASE_URL=${{db.DATABASE_URL}}
+REDIS_URL=${{cache.REDIS_URL}}</pre>
+<p>References resolve on every deploy, so rotating a password only needs a redeploy of the apps that use it.</p>
+<h2 id="databases-private">Private by default</h2>
+<p>Dockyrd never publishes a database port. Databases are reachable only from services in the same project. Docker-published ports bypass <code>ufw</code>, so this default matters.</p>
+<h2 id="databases-backups">Backups</h2>
+<div class="callout warn"><svg width="18" height="18"><use href="#i-warn"/></svg><p><b>Scheduled database backups arrive in v0.2.</b> Until then, run <code>pg_dump</code> yourself on a schedule. Dockyrd does back up its own control-plane database daily.</p></div>
+</article>
+
+<!-- Object storage -->
+<article class="doc" data-page="object-storage" data-section="Guides" data-title="Object storage">
+<h1>Object storage</h1>
+<p class="lead">Dockyrd can run Garage, a lightweight S3-compatible server, next to your apps for uploads and assets.</p>
+<h2 id="object-storage-install">Install Garage</h2>
+<p>Open <b>Object storage</b> and choose <b>Install Garage</b>. Dockyrd starts a single-node Garage container, generates its secrets and stores data in <code>/var/lib/dockyrd/garage</code>.</p>
+<h2 id="object-storage-buckets">Buckets and keys</h2>
+<p>Create a bucket inside a project. Dockyrd creates an access key for it and connects Garage to that project's network. Apps reference the credentials like any other service:</p>
+<pre data-lang=".env">S3_ENDPOINT=${{uploads.S3_ENDPOINT}}
+S3_BUCKET=${{uploads.S3_BUCKET}}
+S3_ACCESS_KEY_ID=${{uploads.S3_ACCESS_KEY_ID}}
+S3_SECRET_ACCESS_KEY=${{uploads.S3_SECRET_ACCESS_KEY}}</pre>
+<h2 id="object-storage-public">Public access</h2>
+<p>Buckets are private. Turn on <b>Public read</b> to serve files such as images through a Caddy route. For browser uploads with presigned URLs, expose the S3 endpoint on <code>s3.&lt;your-dashboard-domain&gt;</code> in Settings.</p>
+<h2 id="object-storage-minio">Why not MinIO?</h2>
+<p>The MinIO community edition stopped shipping binaries and images in 2025 and its repository is now archived. Dockyrd only installs actively maintained software.</p>
+</article>
+
+<!-- Domains -->
+<article class="doc" data-page="domains" data-section="Guides" data-title="Domains & HTTPS">
+<h1>Domains &amp; HTTPS</h1>
+<p class="lead">Every app and static site gets a working HTTPS address immediately, and you can add your own domains at any time.</p>
+<h2 id="domains-platform">Platform domains</h2>
+<p>Without any DNS work, each service gets an address on <code>sslip.io</code> built from your server's IP, such as <code>blog-a3f9.203-0-113-10.sslip.io</code>. Set a wildcard domain in <b>Settings → Instance</b>, for example <code>*.apps.example.com</code>, to use your own.</p>
+<h2 id="domains-custom">Custom domains</h2>
+<p>Add the domain on the service's <b>Domains</b> tab and create the record shown:</p>
+<div class="tbl"><table><thead><tr><th>Type</th><th>Name</th><th>Value</th></tr></thead><tbody>
+<tr><td><code>A</code></td><td><code>example.com</code></td><td>Your server's IPv4 address</td></tr>
+<tr><td><code>AAAA</code></td><td><code>example.com</code></td><td>Your server's IPv6 address, if it has one</td></tr>
+<tr><td><code>CNAME</code></td><td><code>www</code></td><td><code>example.com</code></td></tr>
+</tbody></table></div>
+<p>Choose <b>Check again</b> to verify. Once DNS points at the server, Caddy gets a Let's Encrypt certificate and renews it automatically.</p>
+<h2 id="domains-redirects">Redirects</h2>
+<p>Mark one domain as primary and redirect the others to it, for example <code>www</code> to the apex. HTTP always redirects to HTTPS.</p>
+</article>
+
+<!-- Variables -->
+<article class="doc" data-page="variables" data-section="Guides" data-title="Environment variables">
+<h1>Environment variables</h1>
+<p class="lead">Variables are set per service, encrypted at rest and can reference other services in the same project.</p>
+<h2 id="variables-types">Build-time and runtime</h2>
+<p>Every variable can apply at build time, at runtime, or both. Secrets are passed to builds as BuildKit secrets rather than build arguments, so they never end up in image layers, and they are masked as <code>••••</code> in logs.</p>
+<h2 id="variables-references">References</h2>
+<p>Use <code>${{service.VARIABLE}}</code> to reference a value another service publishes:</p>
+<div class="tbl"><table><thead><tr><th>Service</th><th>Publishes</th></tr></thead><tbody>
+<tr><td>Postgres</td><td><code>DATABASE_URL</code>, <code>PGHOST</code>, <code>PGPORT</code>, <code>PGUSER</code>, <code>PGPASSWORD</code>, <code>PGDATABASE</code></td></tr>
+<tr><td>Redis</td><td><code>REDIS_URL</code>, <code>REDIS_HOST</code>, <code>REDIS_PORT</code>, <code>REDIS_PASSWORD</code></td></tr>
+<tr><td>Bucket</td><td><code>S3_ENDPOINT</code>, <code>S3_REGION</code>, <code>S3_BUCKET</code>, <code>S3_ACCESS_KEY_ID</code>, <code>S3_SECRET_ACCESS_KEY</code>, <code>S3_PUBLIC_URL</code></td></tr>
+<tr><td>App</td><td><code>PRIVATE_HOST</code>, <code>PUBLIC_URL</code></td></tr>
+</tbody></table></div>
+<p>References only resolve within a project. Circular references are rejected when you save.</p>
+<h2 id="variables-paste">Paste a .env file</h2>
+<p>The variables editor accepts a pasted <code>.env</code> file and creates one variable per line. Revealing secret values is recorded in the audit log.</p>
+</article>
+
+<!-- Updates -->
+<article class="doc" data-page="updates" data-section="Operations" data-title="Updates">
+<h1>Updates</h1>
+<p class="lead">Dockyrd updates itself from signed GitHub releases. Your apps, databases and the proxy keep running during an update.</p>
+<h2 id="updates-check">How updates are found</h2>
+<p>Dockyrd checks for a new release once a day. When one is available, the sidebar shows <b>Update available</b>. Applying it is manual by default; you can enable automatic installs for patch releases in Settings.</p>
+<h2 id="updates-flow">What an update does</h2>
+<ol class="steps">
+<li>Downloads the release and verifies its SHA-256 checksum and cosign signature.</li>
+<li>Takes a snapshot of the control-plane database.</li>
+<li>Swaps the binary atomically and keeps the previous one.</li>
+<li>Restarts the service. Caddy and your containers are not restarted.</li>
+<li>Rolls back to the previous binary and database automatically if the new version does not report ready within 60 seconds.</li>
+</ol>
+<p>The proxy only restarts when a release ships a new Caddy image. Release notes say so, and the restart takes about one second.</p>
+<h2 id="updates-cli">Update from the command line</h2>
+<pre data-lang="bash">sudo dockyrd update
+sudo dockyrd update --version v0.1.3</pre>
+</article>
+
+<!-- CLI -->
+<article class="doc" data-page="cli" data-section="Operations" data-title="CLI reference">
+<h1>CLI reference</h1>
+<p class="lead">The <code>dockyrd</code> binary is both the server and its admin tool. Run commands as root on the server.</p>
+<h2 id="cli-commands">Commands</h2>
+<div class="tbl"><table><thead><tr><th>Command</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>dockyrd serve</code></td><td>Starts the server. systemd runs this for you.</td></tr>
+<tr><td><code>dockyrd init</code></td><td>First-time setup: keys, database, network, proxy. Safe to rerun.</td></tr>
+<tr><td><code>dockyrd setup-token</code></td><td>Prints a new one-time setup link, as long as no owner exists.</td></tr>
+<tr><td><code>dockyrd admin reset-password &lt;email&gt;</code></td><td>Resets a user's password from the server.</td></tr>
+<tr><td><code>dockyrd admin disable-2fa &lt;email&gt;</code></td><td>Turns off two-factor for a locked-out user.</td></tr>
+<tr><td><code>dockyrd update [--version]</code></td><td>Installs the latest or a specific release.</td></tr>
+<tr><td><code>dockyrd doctor</code></td><td>Checks Docker, ports, DNS, disk, proxy config and clock, and suggests fixes.</td></tr>
+<tr><td><code>dockyrd proxy dump</code></td><td>Prints the Caddy configuration currently loaded.</td></tr>
+<tr><td><code>dockyrd backup</code></td><td>Writes a snapshot of the control-plane database.</td></tr>
+<tr><td><code>dockyrd version</code></td><td>Prints version, commit and build date.</td></tr>
+</tbody></table></div>
+<h2 id="cli-paths">Files and paths</h2>
+<div class="tbl"><table><thead><tr><th>Path</th><th>Contents</th></tr></thead><tbody>
+<tr><td><code>/usr/local/bin/dockyrd</code></td><td>The binary</td></tr>
+<tr><td><code>/etc/dockyrd/</code></td><td>Master key and optional <code>dockyrd.env</code></td></tr>
+<tr><td><code>/var/lib/dockyrd/dockyrd.db</code></td><td>Control-plane database (SQLite)</td></tr>
+<tr><td><code>/var/lib/dockyrd/backups/</code></td><td>Daily snapshots, seven kept</td></tr>
+<tr><td><code>/var/lib/dockyrd/sites/</code></td><td>Static site releases</td></tr>
+</tbody></table></div>
+<p>Logs go to journald: <code>journalctl -u dockyrd -f</code>.</p>
+</article>
+
+<!-- Troubleshooting -->
+<article class="doc" data-page="troubleshooting" data-section="Operations" data-title="Troubleshooting">
+<h1>Troubleshooting</h1>
+<p class="lead">Start with <code>dockyrd doctor</code>. It checks the usual suspects and prints a concrete fix for each problem it finds.</p>
+<pre data-lang="bash">sudo dockyrd doctor</pre>
+<h2 id="troubleshooting-cert">Certificate is not issued</h2>
+<ul>
+<li>Check that the domain's <code>A</code> record points at this server. The Domains tab shows the expected value.</li>
+<li>Ports 80 and 443 must be reachable from the internet. Check your provider's firewall as well as <code>ufw</code>.</li>
+<li>Let's Encrypt fails when the server clock is off. <code>doctor</code> checks this.</li>
+</ul>
+<h2 id="troubleshooting-deploy">A deploy fails its health check</h2>
+<p>The previous version keeps running. Open the deployment to see the build and runtime logs. Common causes are a wrong port, an app that listens on <code>127.0.0.1</code> instead of <code>0.0.0.0</code>, or a health path that needs the database before it is ready.</p>
+<h2 id="troubleshooting-disk">Builds refuse to start</h2>
+<p>Dockyrd refuses builds when less than 10% disk is free. Open <b>Analytics → Docker cleanup</b> to remove build cache, dangling images and old releases. Cleanup never touches running services or volumes.</p>
+<h2 id="troubleshooting-locked">Locked out</h2>
+<pre data-lang="bash">sudo dockyrd admin reset-password you@example.com
+sudo dockyrd admin disable-2fa you@example.com</pre>
+</article>
+
+<!-- Architecture -->
+<article class="doc" data-page="architecture" data-section="Concepts" data-title="Architecture">
+<h1>Architecture</h1>
+<p class="lead">Dockyrd separates the control plane from the data plane, so managing your server never interrupts what it serves.</p>
+<h2 id="architecture-parts">The three parts</h2>
+<ul>
+<li><b>dockyrd</b> runs on the host as a systemd service. It holds the API, the job runner, builds, the reconciler, metrics collectors, the updater and the embedded dashboard.</li>
+<li><b>Caddy</b> runs as the <code>dy-proxy</code> container. Dockyrd sends it a complete JSON configuration through its admin socket; Caddy validates it atomically and keeps the old one if the new one is invalid.</li>
+<li><b>Docker Engine</b> runs everything else. Each project has its own network, and only services with a public domain join the <code>dy-edge</code> network.</li>
+</ul>
+<h2 id="architecture-state">Desired and actual state</h2>
+<p>SQLite stores what should be running. Docker labels on every container, volume and network describe what is running:</p>
+<pre data-lang="labels">dev.dockyrd.managed=true
+dev.dockyrd.project=&lt;project_id&gt;
+dev.dockyrd.service=&lt;service_id&gt;
+dev.dockyrd.kind=app|database|redis|bucket|system
+dev.dockyrd.deployment=&lt;deployment_id&gt;</pre>
+<p>Every 30 seconds, at startup and after each job, the reconciler compares the two. It restarts services that should run, removes leftovers from failed deploys, reloads the proxy if its config drifted and marks interrupted deployments as failed.</p>
+<h2 id="architecture-deploy">A zero-downtime deploy</h2>
+<ol class="steps">
+<li>Build the image <code>dockyrd/&lt;service&gt;:&lt;deploy&gt;</code>.</li>
+<li>Start a new container next to the old one.</li>
+<li>Wait for a TCP connection and, if configured, a <code>2xx</code> from the health path.</li>
+<li>Switch the Caddy upstream, move the internal hostname, and stop the old container after a 30-second grace period.</li>
+</ol>
+<p>If the health check fails, the new container is stopped, its logs are kept and the old one stays live.</p>
+<h2 id="architecture-why-host">Why the binary runs on the host</h2>
+<p>One binary under systemd has the fewest moving parts. It reads host metrics from <code>/proc</code> directly, updates itself with an atomic file swap, and restarting it never restarts a container.</p>
+</article>
+
+<!-- Security -->
+<article class="doc" data-page="security" data-section="Concepts" data-title="Users & security">
+<h1>Users &amp; security</h1>
+<p class="lead">Dockyrd has team accounts, roles and two-factor sign-in from the first release.</p>
+<h2 id="security-roles">Roles</h2>
+<div class="tbl"><table><thead><tr><th>Permission</th><th>Owner</th><th>Admin</th><th>Member</th><th>Viewer</th></tr></thead><tbody>
+<tr><td>View everything except secrets</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td></tr>
+<tr><td>Reveal secrets</td><td>✓</td><td>✓</td><td>✓</td><td>–</td></tr>
+<tr><td>Deploy, restart, view logs</td><td>✓</td><td>✓</td><td>✓</td><td>–</td></tr>
+<tr><td>Create and delete services</td><td>✓</td><td>✓</td><td>✓</td><td>–</td></tr>
+<tr><td>Domains, GitHub, instance settings</td><td>✓</td><td>✓</td><td>–</td><td>–</td></tr>
+<tr><td>Invite users and change roles</td><td>✓</td><td>✓</td><td>–</td><td>–</td></tr>
+<tr><td>Transfer ownership</td><td>✓</td><td>–</td><td>–</td><td>–</td></tr>
+</tbody></table></div>
+<h2 id="security-signin">Sign-in</h2>
+<ul>
+<li>Passwords are hashed with argon2id.</li>
+<li>TOTP two-factor with ten recovery codes. The owner can require it for everyone.</li>
+<li>Optional GitHub sign-in through your GitHub App. It links to existing accounts; it never creates one without an invite.</li>
+<li>Sign-in attempts are rate-limited per IP and per account.</li>
+</ul>
+<h2 id="security-data">Secrets and isolation</h2>
+<ul>
+<li>Variables, database passwords, S3 keys and the GitHub App key are encrypted with AES-256-GCM.</li>
+<li>User containers never get the Docker socket and run with <code>no-new-privileges</code> and a memory limit.</li>
+<li>Projects cannot reach each other's networks.</li>
+<li>Every change is written to the audit log with user, target and IP.</li>
+</ul>
+<h2 id="security-report">Reporting a vulnerability</h2>
+<p>Please report security issues privately as described in <code>SECURITY.md</code> in the repository. We follow a 90-day disclosure policy.</p>
+</article>
+
+    </div>
+    <nav class="pager" id="pager" aria-label="Previous and next page"></nav>
+    <div class="edit"><a href="#" id="editLink">Edit this page on GitHub</a><span>Apache-2.0 licensed</span></div>
+  </main>
+
+  <aside class="toc" aria-label="On this page"><span class="eyebrow">On this page</span><ol id="toc"></ol></aside>
+</div>
+
+<footer class="site">
+  <div class="in">
+    <a class="logo" href="#home" aria-label="Dockyrd home"><svg viewBox="0 -1 505.7 105.53" width="104" height="22" role="img" aria-label="Dockyrd"><use href="#wordmark"/></svg></a>
+    <nav aria-label="Footer">
+      <a href="#docs-introduction">Docs</a>
+      <a href="#docs-installation">Install</a>
+      <a href="#docs-cli">CLI</a>
+      <a href="#" data-gh="repo">GitHub</a>
+      <a href="#" data-gh="releases">Releases</a>
+      <a href="#docs-security">Security</a>
+    </nav>
+    <span>Open source under Apache-2.0</span>
+  </div>
+</footer>
+
+<dialog class="search" id="searchDlg" aria-label="Search documentation">
+  <div class="search-field">
+    <label for="searchInput"><svg width="18" height="18" aria-hidden="true"><use href="#i-search"/></svg><span hidden>Search</span></label>
+    <input id="searchInput" type="search" placeholder="Search the docs" autocomplete="off" spellcheck="false">
+    <kbd>Esc</kbd>
+  </div>
+  <ul class="results" id="results" role="listbox"></ul>
+</dialog>
+
+<script>
+(function(){
+  /* ---- config: set once the GitHub org is decided ---- */
+  var REPO = 'Joeydekruis/dockyrd';
+  var REPO_URL = 'https://github.com/' + REPO;
+
+  /* GitHub links */
+  document.querySelectorAll('[data-gh]').forEach(function(a){
+    a.href = a.dataset.gh === 'releases' ? REPO_URL + '/releases' : REPO_URL;
+    a.target = '_blank'; a.rel = 'noopener';
+  });
+
+  /* GitHub stars: live from the API, cached for an hour */
+  function fmt(n){ return n >= 1000 ? (n/1000).toFixed(n >= 10000 ? 0 : 1).replace(/\.0$/,'') + 'k' : String(n); }
+  function showStars(n){
+    document.querySelectorAll('[data-stars]').forEach(function(el){ el.textContent = fmt(n); el.setAttribute('aria-label', n + ' stars'); });
+  }
+  try {
+    var c = JSON.parse(localStorage.getItem('dy-stars') || 'null');
+    if (c && typeof c.n === 'number') showStars(c.n);
+    if (!c || Date.now() - c.t > 3600e3) throw 0;
+  } catch(_) {
+    fetch('https://api.github.com/repos/' + REPO, { headers: { 'Accept': 'application/vnd.github+json' } })
+      .then(function(r){ if (!r.ok) throw r.status; return r.json(); })
+      .then(function(d){
+        if (typeof d.stargazers_count !== 'number') return;
+        showStars(d.stargazers_count);
+        try { localStorage.setItem('dy-stars', JSON.stringify({ n: d.stargazers_count, t: Date.now() })); } catch(_){}
+      })
+      .catch(function(){ /* stays as a plain "Star" button */ });
+  }
+
+  /* Copy buttons */
+  function copy(text, btn){
+    var label = btn.querySelector('span');
+    var done = function(){ if (label){ var o = label.textContent; label.textContent = 'Copied'; setTimeout(function(){ label.textContent = o; }, 1400); } };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done, function(){ selectNear(btn); });
+    } else selectNear(btn);
+  }
+  function selectNear(btn){
+    var el = btn.closest('.codeblock, .install').querySelector('pre, code');
+    var r = document.createRange(); r.selectNodeContents(el);
+    var s = getSelection(); s.removeAllRanges(); s.addRange(r);
+  }
+  document.addEventListener('click', function(e){
+    var b = e.target.closest('[data-copy]');
+    if (b) copy(b.dataset.copy || b.closest('.codeblock').querySelector('pre').innerText, b);
+  });
+
+  /* Wrap doc code blocks */
+  document.querySelectorAll('.doc > pre').forEach(function(pre){
+    var box = document.createElement('div'); box.className = 'codeblock';
+    var head = document.createElement('div'); head.className = 'cb-head';
+    var lang = document.createElement('span'); lang.textContent = pre.dataset.lang || 'code';
+    var btn = document.createElement('button'); btn.type = 'button'; btn.className = 'copy'; btn.setAttribute('data-copy','');
+    btn.innerHTML = '<svg width="13" height="13" aria-hidden="true"><use href="#i-copy"/></svg><span>Copy</span>';
+    head.appendChild(lang); head.appendChild(btn);
+    pre.parentNode.insertBefore(box, pre); box.appendChild(head); box.appendChild(pre);
+  });
+
+  /* Heading anchors */
+  document.querySelectorAll('.doc h2[id]').forEach(function(h){
+    var a = document.createElement('a'); a.className = 'h-anchor'; a.href = '#' + h.id; a.textContent = '#';
+    a.setAttribute('aria-label', 'Link to ' + h.textContent);
+    h.appendChild(a);
+  });
+
+  /* Pages + sidebar */
+  var pages = Array.prototype.slice.call(document.querySelectorAll('.doc[data-page]'));
+  var nav = document.getElementById('docnav');
+  var groups = {};
+  pages.forEach(function(p){
+    var s = p.dataset.section;
+    if (!groups[s]) {
+      var g = document.createElement('div'); g.className = 'group';
+      var l = document.createElement('span'); l.className = 'eyebrow'; l.textContent = s;
+      g.appendChild(l); nav.appendChild(g); groups[s] = g;
+    }
+    var a = document.createElement('a'); a.href = '#docs-' + p.dataset.page; a.textContent = p.dataset.title; a.dataset.page = p.dataset.page;
+    groups[s].appendChild(a);
+  });
+
+  var homeView = document.getElementById('view-home');
+  var docsView = document.getElementById('view-docs');
+  var toc = document.getElementById('toc');
+  var pager = document.getElementById('pager');
+  var crumb = document.getElementById('crumb');
+  var edit = document.getElementById('editLink');
+  var current = null, tocObserver = null;
+
+  function pageOf(id){
+    for (var i = 0; i < pages.length; i++) if (pages[i].dataset.page === id) return i;
+    return -1;
+  }
+  function headingPage(id){
+    var h = document.getElementById(id);
+    var art = h && h.closest('.doc[data-page]');
+    return art ? art.dataset.page : null;
+  }
+
+  function route(){
+    var hash = decodeURIComponent(location.hash.slice(1));
+    var pageId = null, anchor = null;
+    if (hash.indexOf('docs-') === 0) pageId = hash.slice(5);
+    else if (hash && hash !== 'home') { var hp = headingPage(hash); if (hp) { pageId = hp; anchor = hash; } }
+
+    document.body.classList.remove('nav-open');
+    document.getElementById('menuBtn').setAttribute('aria-expanded','false');
+
+    var idx = pageId ? pageOf(pageId) : -1;
+    if (idx < 0) {
+      homeView.hidden = false; docsView.hidden = true; current = null;
+      setTopnav('home');
+      document.title = 'Dockyrd Docs';
+      if (!hash || hash === 'home') window.scrollTo(0,0);
+      return;
+    }
+    homeView.hidden = true; docsView.hidden = false;
+    var p = pages[idx];
+    pages.forEach(function(x){ x.hidden = x !== p; });
+    crumb.textContent = p.dataset.section;
+    nav.querySelectorAll('a').forEach(function(a){ if (a.dataset.page === p.dataset.page) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); });
+    setTopnav(p.dataset.page === 'cli' ? 'cli' : p.dataset.page === 'architecture' ? 'arch' : 'docs');
+    edit.href = REPO_URL + '/edit/main/docs/' + p.dataset.page + '.md';
+    edit.target = '_blank'; edit.rel = 'noopener';
+
+    // pager
+    pager.innerHTML = '';
+    if (idx > 0) pager.appendChild(pageLink(pages[idx-1], 'Previous', 'prev'));
+    if (idx < pages.length - 1) pager.appendChild(pageLink(pages[idx+1], 'Next', 'next'));
+
+    // toc
+    toc.innerHTML = '';
+    var hs = p.querySelectorAll('h2[id]');
+    hs.forEach(function(h){
+      var li = document.createElement('li'); var a = document.createElement('a');
+      a.href = '#' + h.id; a.textContent = h.firstChild.textContent; a.dataset.target = h.id;
+      li.appendChild(a); toc.appendChild(li);
+    });
+    if (tocObserver) tocObserver.disconnect();
+    if ('IntersectionObserver' in window) {
+      tocObserver = new IntersectionObserver(function(entries){
+        entries.forEach(function(en){
+          if (en.isIntersecting) toc.querySelectorAll('a').forEach(function(a){ a.classList.toggle('on', a.dataset.target === en.target.id); });
+        });
+      }, { rootMargin: '-80px 0px -70% 0px' });
+      hs.forEach(function(h){ tocObserver.observe(h); });
+    }
+
+    document.title = p.dataset.title + ' · Dockyrd Docs';
+    if (current !== p.dataset.page && !anchor) window.scrollTo(0,0);
+    if (anchor) { var t = document.getElementById(anchor); if (t) t.scrollIntoView(); }
+    current = p.dataset.page;
+  }
+  function pageLink(p, label, cls){
+    var a = document.createElement('a'); a.href = '#docs-' + p.dataset.page; a.className = cls;
+    var e = document.createElement('span'); e.className = 'eyebrow'; e.textContent = label;
+    var t = document.createElement('span'); t.textContent = p.dataset.title;
+    a.appendChild(e); a.appendChild(t); return a;
+  }
+  function setTopnav(key){
+    document.querySelectorAll('.topnav a').forEach(function(a){ if (a.dataset.nav === key) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current'); });
+  }
+  window.addEventListener('hashchange', route);
+  route();
+
+  /* Mobile docs menu */
+  var menuBtn = document.getElementById('menuBtn');
+  menuBtn.addEventListener('click', function(){
+    if (docsView.hidden) { location.hash = 'docs-introduction'; }
+    var open = document.body.classList.toggle('nav-open');
+    menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+
+  /* Search */
+  var dlg = document.getElementById('searchDlg');
+  var input = document.getElementById('searchInput');
+  var results = document.getElementById('results');
+  var index = [];
+  pages.forEach(function(p){
+    index.push({ href: '#docs-' + p.dataset.page, title: p.dataset.title, sec: p.dataset.section, text: (p.querySelector('.lead') || {}).textContent || '' });
+    p.querySelectorAll('h2[id]').forEach(function(h){
+      var next = h.nextElementSibling;
+      index.push({ href: '#' + h.id, title: h.firstChild.textContent, sec: p.dataset.title, text: next ? next.textContent : '' , body: p.textContent });
+    });
+  });
+  var sel = 0;
+  function render(){
+    var q = input.value.trim().toLowerCase();
+    var list = index.filter(function(it){
+      if (!q) return it.href.indexOf('#docs-') === 0;
+      return (it.title + ' ' + it.text).toLowerCase().indexOf(q) > -1;
+    }).slice(0, 12);
+    results.innerHTML = '';
+    if (!list.length) { var li = document.createElement('li'); li.className = 'empty'; li.textContent = 'No results for "' + input.value + '"'; results.appendChild(li); return; }
+    sel = Math.min(sel, list.length - 1);
+    list.forEach(function(it, i){
+      var li = document.createElement('li'); li.setAttribute('role','option');
+      var a = document.createElement('a'); a.href = it.href; if (i === sel) a.className = 'sel';
+      a.innerHTML = '<span class="sec"></span><span class="t"></span><span class="x"></span>';
+      a.children[0].textContent = it.sec; a.children[1].textContent = it.title; a.children[2].textContent = it.text.trim();
+      a.addEventListener('click', function(){ dlg.close(); });
+      li.appendChild(a); results.appendChild(li);
+    });
+  }
+  function openSearch(){ input.value = ''; sel = 0; render(); if (dlg.showModal) dlg.showModal(); else dlg.setAttribute('open',''); input.focus(); }
+  document.getElementById('searchBtn').addEventListener('click', openSearch);
+  input.addEventListener('input', function(){ sel = 0; render(); });
+  input.addEventListener('keydown', function(e){
+    var items = results.querySelectorAll('a');
+    if (e.key === 'ArrowDown') { e.preventDefault(); sel = Math.min(sel + 1, items.length - 1); render(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); sel = Math.max(sel - 1, 0); render(); }
+    else if (e.key === 'Enter' && items[sel]) { e.preventDefault(); location.hash = items[sel].getAttribute('href').slice(1); dlg.close(); }
+  });
+  dlg.addEventListener('click', function(e){ if (e.target === dlg) dlg.close(); });
+  document.addEventListener('keydown', function(e){
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openSearch(); }
+    else if (e.key === '/' && !/input|textarea/i.test(document.activeElement.tagName) && !dlg.open) { e.preventDefault(); openSearch(); }
+  });
+})();
+</script>
+
+</body></html>

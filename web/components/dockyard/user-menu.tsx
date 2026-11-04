@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
 import { Avatar } from "@/components/dockyard/ui/avatar";
 import { logout, type MeResponse } from "@/lib/api";
+import { PUBLIC_DOCS_INTRO_URL } from "@/lib/public-links";
 
 export function initialsFromUser(name: string, email: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -36,20 +37,20 @@ type MenuLink = {
 const menuLinks: MenuLink[] = [
   {
     id: "profile",
-    label: "Profile & security",
-    href: "/settings/profile",
+    label: "Account settings",
+    href: "/settings/account/profile",
     icon: User,
   },
   {
     id: "settings",
-    label: "Settings",
-    href: "/settings/instance",
+    label: "Server settings",
+    href: "/settings/server/general",
     icon: SlidersHorizontal,
   },
   {
     id: "docs",
     label: "Documentation",
-    href: "https://github.com/Joeydekruis/dockyrd",
+    href: PUBLIC_DOCS_INTRO_URL,
     icon: FileText,
     external: true,
   },

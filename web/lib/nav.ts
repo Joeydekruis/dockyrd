@@ -2,10 +2,12 @@ import type { LucideIcon } from "lucide-react";
 import {
   ArrowLeft,
   BarChart3,
+  Bell,
   Box,
   Database,
   Globe,
   HardDrive,
+  KeyRound,
   Layers,
   LayoutDashboard,
   Plug,
@@ -13,6 +15,7 @@ import {
   Settings,
   Shield,
   SlidersHorizontal,
+  User,
   Users,
 } from "lucide-react";
 
@@ -49,11 +52,11 @@ export const serverNav: NavItem[] = [
   { label: "Analytics", href: "/analytics", icon: BarChart3, group: "server" },
 ];
 
-export const settingsNav: NavItem = {
-  label: "Settings",
-  href: "/settings/profile",
+export const serverSettingsNav: NavItem = {
+  label: "Server settings",
+  href: "/settings/server/general",
   icon: Settings,
-  group: "main",
+  group: "server",
 };
 
 export type SettingsNavItem = {
@@ -62,40 +65,81 @@ export type SettingsNavItem = {
   icon: LucideIcon;
 };
 
-export const settingsPersonalNav: SettingsNavItem[] = [
+export const accountSettingsNav: SettingsNavItem[] = [
+  { label: "Profile", href: "/settings/account/profile", icon: User },
   {
-    label: "Profile & security",
-    href: "/settings/profile",
+    label: "Password & 2FA",
+    href: "/settings/account/password",
+    icon: KeyRound,
+  },
+  {
+    label: "Notifications",
+    href: "/settings/account/notifications",
+    icon: Bell,
+  },
+  {
+    label: "Security",
+    href: "/settings/account/security",
     icon: Shield,
   },
 ];
 
-export const settingsInstanceNav: SettingsNavItem[] = [
+export const serverSettingsSidebarNav: SettingsNavItem[] = [
   {
     label: "General",
-    href: "/settings/instance",
+    href: "/settings/server/general",
     icon: SlidersHorizontal,
   },
-  { label: "Team", href: "/settings/team", icon: Users },
+  { label: "Team", href: "/settings/server/team", icon: Users },
   {
     label: "Git providers",
-    href: "/settings/integrations",
+    href: "/settings/server/integrations",
     icon: Plug,
   },
-  { label: "Updates", href: "/settings/updates", icon: RefreshCw },
+  { label: "Updates", href: "/settings/server/updates", icon: RefreshCw },
 ];
 
-export const settingsBackNav = {
+export const accountSettingsBackNav = {
   label: "Back to dashboard",
   href: "/",
   icon: ArrowLeft,
 };
 
+export const serverSettingsBackNav = {
+  label: "Back to dashboard",
+  href: "/",
+  icon: ArrowLeft,
+};
+
+/** @deprecated use accountSettingsNav */
+export const settingsPersonalNav = accountSettingsNav;
+
+/** @deprecated use serverSettingsSidebarNav */
+export const settingsInstanceNav = serverSettingsSidebarNav;
+
+/** @deprecated */
+export const settingsBackNav = accountSettingsBackNav;
+
+/** @deprecated */
+export const settingsNav = serverSettingsNav;
+
+export function isAccountSettingsPath(pathname: string): boolean {
+  return pathname.startsWith("/settings/account");
+}
+
+export function isServerSettingsPath(pathname: string): boolean {
+  return pathname.startsWith("/settings/server");
+}
+
+export function isSettingsPath(pathname: string): boolean {
+  return isAccountSettingsPath(pathname) || isServerSettingsPath(pathname);
+}
+
 export const palettePages = [
   ...mainNav,
   ...projectNav,
   ...serverNav,
-  settingsNav,
-  ...settingsPersonalNav,
-  ...settingsInstanceNav,
+  serverSettingsNav,
+  ...accountSettingsNav,
+  ...serverSettingsSidebarNav,
 ];

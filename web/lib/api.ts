@@ -64,6 +64,40 @@ export function getMe() {
   return apiFetch<MeResponse>("/api/v1/auth/me");
 }
 
+export function patchAccount(input: { name?: string; email?: string }) {
+  return apiFetch<MeResponse>("/api/v1/auth/account", {
+    method: "PATCH",
+    json: input,
+  });
+}
+
+export function changePassword(input: {
+  current_password: string;
+  new_password: string;
+}) {
+  return apiFetch<{ ok: boolean }>("/api/v1/auth/password/change", {
+    method: "POST",
+    json: input,
+  });
+}
+
+export type NotificationPrefs = {
+  deployments: boolean;
+  security_alerts: boolean;
+  product_updates: boolean;
+};
+
+export function getNotificationPrefs() {
+  return apiFetch<NotificationPrefs>("/api/v1/auth/notifications");
+}
+
+export function patchNotificationPrefs(prefs: NotificationPrefs) {
+  return apiFetch<NotificationPrefs>("/api/v1/auth/notifications", {
+    method: "PATCH",
+    json: prefs,
+  });
+}
+
 export function getSetupStatus() {
   return apiFetch<SetupStatusResponse>("/api/v1/setup/status");
 }

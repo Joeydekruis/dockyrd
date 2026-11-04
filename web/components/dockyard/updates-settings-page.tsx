@@ -92,7 +92,7 @@ export function UpdatesSettingsPage() {
   }
 
   return (
-    <DashboardShell title="Updates" breadcrumb="Settings">
+    <DashboardShell title="Updates" breadcrumb="Server settings">
       <UpdateApplyingOverlay
         open={updatePhase !== null}
         phase={updatePhase ?? "applying"}

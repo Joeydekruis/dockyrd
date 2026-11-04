@@ -1,7 +1,10 @@
-.PHONY: build test lint dev ensure-ui-stub web-build generate e2e release-snapshot
+.PHONY: build test lint dev ensure-ui-stub web-build generate e2e release-snapshot site
 
 VERSION := $(shell node -p "require('./package.json').version" 2>/dev/null || echo dev)
 LDFLAGS := -s -w -X main.version=$(VERSION)
+
+site:
+	node scripts/build-public-site.mjs
 
 build: web-build
 	go build -ldflags "$(LDFLAGS)" -o bin/dockyard ./cmd/dockyard

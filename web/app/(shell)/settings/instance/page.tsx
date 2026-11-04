@@ -1,10 +1,5 @@
-import { Suspense } from "react";
-import { InstanceSettingsPage } from "@/components/dockyard/instance-settings-page";
+import { SettingsLegacyRedirect } from "@/components/dockyard/settings-legacy-redirect";
 
-export default function InstanceSettingsRoute() {
-  return (
-    <Suspense fallback={null}>
-      <InstanceSettingsPage />
-    </Suspense>
-  );
+export default function LegacyInstanceSettingsPage() {
+  return <SettingsLegacyRedirect href="/settings/server/general" />;
 }

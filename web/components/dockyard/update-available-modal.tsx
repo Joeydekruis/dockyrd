@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Alert } from "@/components/dockyard/ui/alert";
 import { Button } from "@/components/dockyard/ui/button";
-import { Snackbar } from "@/components/dockyard/ui/snackbar";
 import { getServerInfo, type ServerInfo } from "@/lib/api";
 
 type Props = {
@@ -42,7 +42,7 @@ export function UpdateAvailableModal({ open, onClose, info }: Props) {
           dashboard.
         </p>
         <div className="mt-6 flex flex-wrap gap-2">
-          <Button href="/settings/updates" onClick={onClose}>
+          <Button href="/settings/server/updates" onClick={onClose}>
             Go to Updates
           </Button>
           <Button type="button" variant="outline" onClick={onClose}>
@@ -70,18 +70,18 @@ export function UpdateAvailableNotifier() {
   return (
     <>
       <div className="mb-4">
-        <Snackbar
+        <Alert
           tone="info"
-          elevated={false}
-          message={
+          title={
             <>
               Update <span className="font-mono">{info.latest_tag}</span> is
-              available.
+              available
             </>
           }
+          description="Review release notes and install from Settings → Updates."
           action={
             <>
-              <Button href="/settings/updates" variant="outline">
+              <Button href="/settings/server/updates" variant="outline">
                 Update
               </Button>
               <Button

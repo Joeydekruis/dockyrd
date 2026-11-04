@@ -7,6 +7,7 @@ import type { StaticSiteCreateResult } from "@/components/dockyard/static-site-c
 import { Button } from "@/components/dockyard/ui/button";
 import { Field } from "@/components/dockyard/ui/field";
 import { IconButton } from "@/components/dockyard/ui/icon-button";
+import { SearchSelectField } from "@/components/dockyard/ui/search-select-field";
 import { SelectField } from "@/components/dockyard/ui/select-field";
 import { Switch } from "@/components/dockyard/ui/switch";
 import {
@@ -415,7 +416,7 @@ function StepSource({
           </div>
         </div>
         <Link
-          href="/settings/integrations"
+          href="/settings/server/integrations"
           className="text-sm font-medium hover:underline"
           style={{ color: "var(--link-blue)" }}
         >
@@ -423,20 +424,18 @@ function StepSource({
         </Link>
       </div>
       <div className="grid gap-4 md:grid-cols-2">
-        <div>
-          <Field
-            label="Repository"
-            list="static-site-repos"
-            value={draft.repo}
-            onChange={(e) => onRepoChange(e.target.value)}
-            hint="Type to search your repositories."
-          />
-          <datalist id="static-site-repos">
-            {repos.map((r) => (
-              <option key={r.full_name} value={r.full_name} />
-            ))}
-          </datalist>
-        </div>
+        <SearchSelectField
+          label="Repository"
+          placeholder="Choose a repository"
+          searchPlaceholder="Search repositories…"
+          value={draft.repo}
+          onChange={onRepoChange}
+          hint="Type to search your repositories."
+          options={repos.map((r) => ({
+            value: r.full_name,
+            label: r.full_name,
+          }))}
+        />
         <Field
           label="Branch"
           value={draft.branch}

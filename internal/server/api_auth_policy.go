@@ -19,9 +19,14 @@ func ownerMustHave2FA(user sqlc.GetUserByIDRow) bool {
 
 func pathAllows2FASetup(path string) bool {
 	switch path {
-	case "/api/v1/auth/me", "/api/v1/auth/logout", "/api/v1/auth/mfa":
+	case "/api/v1/auth/me", "/api/v1/auth/logout", "/api/v1/auth/mfa",
+		"/api/v1/auth/account", "/api/v1/auth/notifications",
+		"/api/v1/auth/password/change":
 		return true
 	default:
+		if strings.HasPrefix(path, "/api/v1/auth/sessions") {
+			return true
+		}
 		return strings.HasPrefix(path, "/api/v1/auth/totp/")
 	}
 }

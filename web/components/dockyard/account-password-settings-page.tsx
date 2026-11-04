@@ -1,40 +1,47 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import {
+  Owner2FARequiredBanner,
+  SettingsErrorBanner,
+  SettingsSection,
+} from "@/components/dockyard/account-settings-shared";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import { SettingsPageBody } from "@/components/dockyard/settings-page-body";
 import { Button } from "@/components/dockyard/ui/button";
 import {
-  type AuthSession,
+  changePassword,
   enableTotp,
   getAuthSecurity,
-  listAuthSessions,
-  revokeAuthSession,
+  getMe,
   setupTotp,
+  type MeResponse,
 } from "@/lib/api";
 
-export function ProfileSettingsPage() {
+export function AccountPasswordSettingsPage() {
+  const [user, setUser] = useState<MeResponse | null>(null);
   const [totpEnabled, setTotpEnabled] = useState(false);
-  const [sessions, setSessions] = useState<AuthSession[]>([]);
   const [setupSecret, setSetupSecret] = useState<string | null>(null);
   const [setupURL, setSetupURL] = useState<string | null>(null);
   const [confirmCode, setConfirmCode] = useState("");
   const [recoveryCodes, setRecoveryCodes] = useState<string[] | null>(null);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [passwordSaved, setPasswordSaved] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [changingPassword, setChangingPassword] = useState(false);
 
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      const [sec, sess] = await Promise.all([
-        getAuthSecurity(),
-        listAuthSessions(),
-      ]);
+      const [me, sec] = await Promise.all([getMe(), getAuthSecurity()]);
+      setUser(me);
       setTotpEnabled(sec.totp_enabled);
-      setSessions(sess.sessions);
       setError(null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load profile");
+      setError(e instanceof Error ? e.message : "Failed to load settings");
     } finally {
       setLoading(false);
     }
@@ -73,36 +80,98 @@ export function ProfileSettingsPage() {
     }
   }
 
-  async function onRevoke(id: string) {
+  async function onChangePassword(e: React.FormEvent) {
+    e.preventDefault();
+    if (newPassword !== confirmPassword) {
+      setError("New passwords do not match");
+      return;
+    }
+    setChangingPassword(true);
+    setPasswordSaved(false);
     try {
-      await revokeAuthSession(id);
-      await refresh();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Revoke failed");
+      await changePassword({
+        current_password: currentPassword,
+        new_password: newPassword,
+      });
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setError(null);
+      setPasswordSaved(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not change password");
+    } finally {
+      setChangingPassword(false);
     }
   }
 
+  const needs2FA =
+    user?.role === "owner" && user.totp_enabled === false && !totpEnabled;
+
   return (
-    <DashboardShell title="Profile & security" breadcrumb="Settings">
+    <DashboardShell title="Password & 2FA" breadcrumb="Account settings">
       <SettingsPageBody>
-        {!loading && !totpEnabled ? (
-          <p
-            className="mb-4 rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm"
-            role="status"
+        <Owner2FARequiredBanner show={!loading && !!needs2FA} />
+        <SettingsErrorBanner message={error} />
+
+        <SettingsSection title="Password">
+          {passwordSaved ? (
+            <p className="text-sm text-green-700" role="status">
+              Password updated.
+            </p>
+          ) : null}
+          <form
+            onSubmit={(e) => void onChangePassword(e)}
+            className="space-y-3"
           >
-            Owners must enable two-factor authentication before using the rest
-            of the dashboard.
-          </p>
-        ) : null}
+            <label className="flex flex-col gap-1 text-sm">
+              <span className="text-[var(--muted-foreground)]">
+                Current password
+              </span>
+              <input
+                type="password"
+                className="field-input"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                autoComplete="current-password"
+                required
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              <span className="text-[var(--muted-foreground)]">
+                New password
+              </span>
+              <input
+                type="password"
+                className="field-input"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                autoComplete="new-password"
+                minLength={12}
+                required
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-sm">
+              <span className="text-[var(--muted-foreground)]">
+                Confirm new password
+              </span>
+              <input
+                type="password"
+                className="field-input"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                autoComplete="new-password"
+                minLength={12}
+                required
+              />
+            </label>
+            <Button type="submit" disabled={changingPassword}>
+              {changingPassword ? "Updating…" : "Update password"}
+            </Button>
+          </form>
+        </SettingsSection>
 
-        {error ? (
-          <p className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-700">
-            {error}
-          </p>
-        ) : null}
-
-        <section className="mb-8 space-y-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6">
-          <h2 className="text-lg font-medium">Two-factor authentication</h2>
+        <SettingsSection title="Two-factor authentication">
           {loading ? (
             <p className="text-sm text-[var(--muted-foreground)]">Loading…</p>
           ) : totpEnabled ? (
@@ -153,44 +222,7 @@ export function ProfileSettingsPage() {
               </pre>
             </div>
           ) : null}
-        </section>
-
-        <section className="space-y-3">
-          <h2 className="text-lg font-medium">Active sessions</h2>
-          <ul className="divide-y divide-[var(--border)] rounded-xl border border-[var(--border)] bg-[var(--surface)]">
-            {sessions.length === 0 ? (
-              <li className="px-4 py-4 text-sm text-[var(--muted-foreground)]">
-                No sessions.
-              </li>
-            ) : (
-              sessions.map((s) => (
-                <li
-                  key={s.id}
-                  className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm"
-                >
-                  <div>
-                    <p>{s.user_agent || "Unknown device"}</p>
-                    <p className="text-xs text-[var(--muted-foreground)]">
-                      {s.ip || "—"} ·{" "}
-                      {s.current ? "This device" : "Other device"}
-                    </p>
-                  </div>
-                  {!s.current ? (
-                    <Button
-                      type="button"
-                      variant="link"
-                      className="text-xs"
-                      style={{ color: "var(--danger)" }}
-                      onClick={() => void onRevoke(s.id)}
-                    >
-                      Revoke
-                    </Button>
-                  ) : null}
-                </li>
-              ))
-            )}
-          </ul>
-        </section>
+        </SettingsSection>
       </SettingsPageBody>
     </DashboardShell>
   );

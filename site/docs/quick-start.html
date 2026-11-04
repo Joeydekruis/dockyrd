@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Quick start · Dockyrd</title>
+<meta name="description" content="From an empty dashboard to a Next.js app with a Postgres database on its own HTTPS domain in about ten minutes.">
+<link rel="canonical" href="https://dockyrd.io/docs/quick-start.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Dockyrd">
+<meta property="og:title" content="Quick start · Dockyrd">
+<meta property="og:description" content="From an empty dashboard to a Next.js app with a Postgres database on its own HTTPS domain in about ten minutes.">
+<meta property="og:url" content="https://dockyrd.io/docs/quick-start.html">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Quick start · Dockyrd">
+<meta name="twitter:description" content="From an empty dashboard to a Next.js app with a Postgres database on its own HTTPS domain in about ten minutes.">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../assets/site.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <mask id="cubeMask" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64"><rect width="64" height="64" fill="#fff"/><path d="M8 22 L32 36 L56 22 M32 36 V52" fill="none" stroke="#000" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></mask>
+    <symbol id="wordmark" viewBox="0.00 -1.00 505.70 105.53">
+      <g transform="translate(-11.5385 -11.5385) scale(1.9231)"><g mask="url(#cubeMask)" stroke-width="3" stroke-linejoin="round"><path d="M32 8 L56 22 V46 q-6 -7 -12 0 t-12 0 t-12 0 t-12 0 V22 Z" fill="#8EBEFF" stroke="#8EBEFF"/><path d="M32 8 L56 22 L32 36 L8 22 Z" fill="#CFE3FF" stroke="#CFE3FF"/></g></g>
+      <path fill="#0B1F3A" d="M156.2 82.73Q148.2 82.73 141.9 78.930Q135.6 75.13 131.95 68.63Q128.3 62.13 128.3 54.23Q128.3 46.23 132 39.78Q135.7 33.33 142 29.53Q148.3 25.73 156.1 25.73Q162.1 25.73 166.8 27.93Q169.7 29.43 171.8 31.53V5.83H186.8V81.53H172.8V76.33Q170.3 79.13 166.6 80.63Q161.8 82.73 156.2 82.73ZM158 69.23Q162.1 69.23 165.2 67.33Q168.3 65.43 170.05 62.03Q171.8 58.630 171.8 54.23Q171.8 49.83 170.05 46.43Q168.3 43.03 165.2 41.13Q162.1 39.23 158 39.23Q153.9 39.23 150.65 41.18Q147.4 43.13 145.6 46.48Q143.8 49.83 143.8 54.23Q143.8 58.63 145.6 62.03Q147.4 65.43 150.65 67.33Q153.9 69.23 158 69.23Z M219.4 82.73Q211.3 82.73 204.65 79.03Q198 75.33 194.05 68.88Q190.1 62.43 190.1 54.23Q190.1 45.93 194.05 39.53Q198 33.13 204.65 29.43Q211.3 25.73 219.4 25.73Q227.5 25.73 234.1 29.43Q240.7 33.13 244.65 39.53Q248.6 45.93 248.6 54.23Q248.6 62.43 244.65 68.88Q240.7 75.33 234.1 79.03Q227.5 82.73 219.4 82.73ZM219.4 69.23Q223.5 69.23 226.55 67.33Q229.6 65.43 231.35 62.03Q233.1 58.63 233.1 54.23Q233.1 49.83 231.35 46.48Q229.6 43.13 226.55 41.18Q223.5 39.23 219.4 39.23Q215.3 39.23 212.2 41.18Q209.1 43.13 207.35 46.48Q205.6 49.83 205.6 54.23Q205.6 58.63 207.35 62.03Q209.1 65.43 212.2 67.33Q215.3 69.23 219.4 69.23Z M278.7 82.73Q270.5 82.73 263.95 78.98Q257.4 75.23 253.55 68.73Q249.7 62.23 249.7 54.13Q249.7 46.03 253.5 39.58Q257.3 33.13 263.9 29.43Q270.5 25.73 278.7 25.73Q284.8 25.73 290 27.83Q295.2 29.93 298.9 33.68Q302.6 37.43 304.2 42.53L291.2 48.13Q289.8 44.03 286.45 41.63Q283.1 39.23 278.7 39.23Q274.8 39.23 271.75 41.13Q268.7 43.03 266.95 46.43Q265.2 49.83 265.2 54.23Q265.2 58.63 266.95 62.03Q268.7 65.43 271.75 67.33Q274.8 69.23 278.7 69.23Q283.2 69.23 286.5 66.83Q289.8 64.43 291.2 60.33L304.2 66.03Q302.7 70.83 299 74.63Q295.3 78.43 290.1 80.58Q284.9 82.73 278.7 82.73Z M307.5 81.53V5.83H322.5V46.63L341 26.93H359.5L339.7 48.93L359.4 81.53H342.4L328.5 58.23L322.5 64.83V81.53Z M369.1 103.53Q366.7 103.53 364.45 103.13Q362.2 102.73 360.5 101.83V89.53Q361.9 89.93 363.8 90.23Q365.7 90.53 367.3 90.53Q371.7 90.53 373.6 88.48Q375.5 86.43 376.7 83.83L377.7 81.53L356.2 26.93H372.3L385.2 62.03L398.1 26.93H414.2L390.8 86.63Q388.6 92.23 385.4 96.03Q382.2 99.83 378.15 101.68Q374.1 103.53 369.1 103.53Z M415.3 81.53V26.93H429.3V35.03Q431.1 30.63 434.3 28.73Q438.4 26.33 444.1 26.33H447.3V39.33H442.6Q437.1 39.33 433.7 42.68Q430.3 46.03 430.3 52.13V81.53Z M474.1 82.73Q466.1 82.73 459.8 78.93Q453.5 75.13 449.85 68.63Q446.2 62.13 446.2 54.23Q446.2 46.23 449.9 39.78Q453.6 33.33 459.9 29.53Q466.2 25.73 474 25.73Q480 25.73 484.7 27.93Q487.6 29.43 489.7 31.53V5.83H504.7V81.53H490.7V76.33Q488.2 79.13 484.5 80.63Q479.7 82.73 474.1 82.73ZM475.9 69.23Q480 69.23 483.1 67.33Q486.2 65.43 487.95 62.03Q489.7 58.63 489.7 54.23Q489.7 49.83 487.95 46.43Q486.2 43.03 483.1 41.13Q480 39.23 475.9 39.23Q471.8 39.23 468.55 41.18Q465.3 43.13 463.5 46.48Q461.7 49.83 461.7 54.23Q461.7 58.63 463.5 62.03Q465.3 65.43 468.55 67.33Q471.8 69.23 475.9 69.23Z"/>
+    </symbol>
+    <symbol id="i-github" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2C6.48 2 2 6.58 2 12.23c0 4.52 2.87 8.35 6.84 9.7.5.1.68-.22.68-.49v-1.7c-2.78.62-3.37-1.37-3.37-1.37-.46-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.89 1.57 2.34 1.12 2.91.85.09-.66.35-1.12.63-1.37-2.22-.26-4.56-1.14-4.56-5.07 0-1.12.39-2.04 1.03-2.76-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05A9.3 9.3 0 0 1 12 6.98c.85 0 1.71.12 2.51.35 1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.64 1.03 2.76 0 3.94-2.34 4.8-4.57 5.06.36.32.68.94.68 1.9v2.82c0 .27.18.6.69.49A10.2 10.2 0 0 0 22 12.23C22 6.58 17.52 2 12 2z"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8z"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></g></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></g></symbol>
+    <symbol id="i-app" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/></g></symbol>
+    <symbol id="i-db" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v12c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></g></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></g></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5v8l9 5 9-5z"/><path d="M3 8l9 5 9-5M12 13v8"/></g></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V4M4 20h16"/><path d="M8 15l4-5 3 3 5-6"/></g></symbol>
+    <symbol id="i-users" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.3 3.4-5 6.5-5s5.7 1.7 6.5 5"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18 15.3c1.7.6 3 2.3 3.5 4.7"/></g></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5 12.5l4.2 4.2L19 7"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.5v.01"/></g></symbol>
+    <symbol id="i-warn" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9.5 17h-19z"/><path d="M12 10v4M12 17v.01"/></g></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/></symbol>
+    <symbol id="i-dash" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="5" rx="2"/><rect x="13" y="10" width="8" height="11" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/></g></symbol>
+    <symbol id="i-folder" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  </defs>
+</svg>
+<div class="banner" role="region" aria-label="Announcement">
+  <div class="banner-in">
+    <span class="tag">Open source</span>
+    <span>One lightweight binary on your own server. No lock-in, no mess.</span>
+    <a href="introduction.html">Read the docs →</a>
+  </div>
+</div>
+<header class="topbar">
+  <div class="topbar-in">
+    <button class="menu-btn" type="button" id="menuBtn" aria-label="Open documentation menu" aria-expanded="false" aria-controls="sidebar"><svg width="20" height="20"><use href="#i-menu"/></svg></button>
+    <a class="logo" href="../" aria-label="Dockyrd home"><svg viewBox="0 -1 505.7 105.53" role="img" aria-label="Dockyrd"><use href="#wordmark"/></svg></a>
+    <nav class="topnav" aria-label="Primary">
+      <a href="../" data-nav="home">Product</a>
+      <a href="introduction.html" data-nav="docs" aria-current="page">Docs</a>
+      <a href="cli.html" data-nav="cli">CLI</a>
+      <a href="architecture.html" data-nav="arch">Architecture</a>
+    </nav>
+    <div class="top-right">
+      <button class="search-btn" type="button" id="searchBtn" aria-label="Search documentation">
+        <svg width="16" height="16" aria-hidden="true"><use href="#i-search"/></svg><span>Search docs</span><kbd>⌘K</kbd>
+      </button>
+      <span class="version">v0.0.34</span>
+      <a class="btn btn-outline gh-btn" href="https://github.com/Joeydekruis/dockyrd" target="_blank" rel="noopener noreferrer" aria-label="Star Dockyrd on GitHub">
+        <svg width="16" height="16" aria-hidden="true"><use href="#i-github"/></svg>
+        <span class="gh-label">Star</span>
+        <span class="star-count" data-stars></span>
+      </a>
+    </div>
+  </div>
+</header>
+<div class="docs">
+  <aside class="sidebar" id="sidebar" aria-label="Documentation">
+    <nav id="docnav"><div class="group"><span class="eyebrow">Getting started</span><a href="introduction.html">Introduction</a><a href="installation.html">Installation</a><a href="quick-start.html" aria-current="page">Quick start</a></div><div class="group"><span class="eyebrow">Guides</span><a href="nextjs.html">Next.js apps</a><a href="static-sites.html">Static sites</a><a href="databases.html">Databases</a><a href="object-storage.html">Object storage</a><a href="domains.html">Domains & HTTPS</a><a href="variables.html">Environment variables</a></div><div class="group"><span class="eyebrow">Operations</span><a href="updates.html">Updates</a><a href="cli.html">CLI reference</a><a href="troubleshooting.html">Troubleshooting</a></div><div class="group"><span class="eyebrow">Concepts</span><a href="architecture.html">Architecture</a><a href="security.html">Users & security</a></div></nav>
+    <div class="side-foot">
+      <span class="status warn">Pre-release</span>
+      <span style="color:var(--ink-2)">These docs track v0.0.34. Details can change before the next release.</span>
+    </div>
+  </aside>
+  <main class="article" id="main">
+    <div class="crumbs"><span class="eyebrow">Getting started</span></div>
+    <article class="doc">
+<h1>Deploy your first app</h1>
+<p class="lead">From an empty dashboard to a Next.js app with a Postgres database on its own HTTPS domain in about ten minutes.</p>
+<h2 id="quick-start-github">1. Connect GitHub</h2>
+<p>Go to <b>Settings → Integrations</b> and choose <b>Create GitHub App</b>. Dockyrd uses GitHub's manifest flow, so you only confirm the app name and pick which repositories it may read. Push events start deploys automatically.</p>
+<h2 id="quick-start-project">2. Create a project</h2>
+<p>Open <b>Projects</b> and create one, for example <code>Client X</code>. Every project gets its own private Docker network, so services in different projects cannot see each other.</p>
+<h2 id="quick-start-db">3. Add a database</h2>
+<p>Inside the project, create a <b>Postgres</b> database and name it <code>db</code>. Dockyrd generates a 32-character password and starts it on the project network. Other services reach it at <code>db:5432</code>.</p>
+<h2 id="quick-start-app">4. Create the application</h2>
+<ol class="steps">
+<li>Choose <b>Create application → GitHub</b> and pick your repository and branch.</li>
+<li>Leave the builder on <b>Railpack</b>. It detects Next.js and sets the build and start commands.</li>
+<li>Under <b>Variables</b>, add a reference to the database:</li>
+</ol>
+<pre data-lang=".env">DATABASE_URL=${{db.DATABASE_URL}}</pre>
+<ol class="steps" start="4" style="counter-reset:s 3">
+<li>Choose <b>Deploy</b> and follow the build log live.</li>
+</ol>
+<p>Your app is now reachable on a generated domain such as <code>webshop-x7k2.203-0-113-10.sslip.io</code>, with HTTPS.</p>
+<h2 id="quick-start-domain">5. Add your own domain</h2>
+<p>Under <b>Domains</b>, add <code>webshop.example.com</code> and point an <code>A</code> record at your server's IP. Choose <b>Check again</b> once DNS has updated; Caddy requests a certificate on the first request.</p>
+<div class="callout ok"><svg width="18" height="18"><use href="#i-check"/></svg><p><b>Done.</b> Every push to the branch now deploys with zero downtime. If a build or health check fails, the previous version keeps serving traffic.</p></div>
+</article>
+    <nav class="pager" aria-label="Previous and next page"><a class="prev" href="installation.html"><span class="eyebrow">Previous</span><span>Installation</span></a><a class="next" href="nextjs.html"><span class="eyebrow">Next</span><span>Next.js apps</span></a></nav>
+    <div class="edit"><a href="https://github.com/Joeydekruis/dockyrd/edit/development/docs/user/first-app.md" target="_blank" rel="noopener noreferrer">Edit this page on GitHub</a><span>Apache-2.0 licensed</span></div>
+  </main>
+  <aside class="toc" aria-label="On this page"><span class="eyebrow">On this page</span><ol><li><a href="#quick-start-github">1. Connect GitHub</a></li><li><a href="#quick-start-project">2. Create a project</a></li><li><a href="#quick-start-db">3. Add a database</a></li><li><a href="#quick-start-app">4. Create the application</a></li><li><a href="#quick-start-domain">5. Add your own domain</a></li></ol></aside>
+</div>
+<footer class="site">
+  <div class="in">
+    <a class="logo" href="../" aria-label="Dockyrd home"><svg viewBox="0 -1 505.7 105.53" width="104" height="22" role="img" aria-label="Dockyrd"><use href="#wordmark"/></svg></a>
+    <nav aria-label="Footer">
+      <a href="introduction.html">Docs</a>
+      <a href="installation.html">Install</a>
+      <a href="cli.html">CLI</a>
+      <a href="https://github.com/Joeydekruis/dockyrd" target="_blank" rel="noopener noreferrer">GitHub</a>
+      <a href="https://github.com/Joeydekruis/dockyrd/releases" target="_blank" rel="noopener noreferrer">Releases</a>
+      <a href="security.html">Security</a>
+    </nav>
+    <span>Open source under Apache-2.0</span>
+  </div>
+</footer>
+<dialog class="search" id="searchDlg" aria-label="Search documentation">
+  <div class="search-field">
+    <label for="searchInput"><svg width="18" height="18" aria-hidden="true"><use href="#i-search"/></svg><span hidden>Search</span></label>
+    <input id="searchInput" type="search" placeholder="Search the docs" autocomplete="off" spellcheck="false">
+    <kbd>Esc</kbd>
+  </div>
+  <ul class="results" id="results" role="listbox"></ul>
+</dialog>
+<script src="../assets/site-config.js"></script>
+<script src="../assets/site.js"></script>
+</body></html>

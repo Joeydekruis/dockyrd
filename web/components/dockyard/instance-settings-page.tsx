@@ -124,7 +124,7 @@ export function InstanceSettingsPage() {
   }
 
   return (
-    <DashboardShell title="General" breadcrumb="Settings">
+    <DashboardShell title="General" breadcrumb="Server settings">
       <SettingsPageBody>
         <section aria-label="Public URL and TLS" className={settingsCardClass}>
           <h2 className="text-lg font-medium">Public URL &amp; TLS</h2>

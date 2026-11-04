@@ -2,6 +2,8 @@
 
 Dockyard ships as a single Go binary plus embedded dashboard UI.
 
+**Public docs:** [dockyrd.io/docs/installation](https://dockyrd.io/docs/installation.html)
+
 ## Quick install (production)
 
 On Ubuntu 24.04 or Debian 12 (amd64 or arm64):
@@ -10,7 +12,7 @@ On Ubuntu 24.04 or Debian 12 (amd64 or arm64):
 curl -fsSL https://raw.githubusercontent.com/Joeydekruis/dockyrd/development/scripts/install.sh | sudo sh
 ```
 
-When `https://get.dockyard.dev` is live, that URL will serve the same script.
+When `https://get.dockyard.dev` is live, the install one-liner on [dockyrd.io](https://dockyrd.io) will point there instead of the raw GitHub script URL.
 
 The installer checks the OS, installs **Docker Engine** on Debian/Ubuntu when missing, installs `/usr/local/bin/dockyard`, registers `dockyard.service`, and prints a **one-time setup token**.
 

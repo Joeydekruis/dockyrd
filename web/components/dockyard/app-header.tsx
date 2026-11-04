@@ -5,6 +5,7 @@ import { Button } from "@/components/dockyard/ui/button";
 import { SearchTrigger } from "@/components/dockyard/ui/search-trigger";
 import { UserMenu } from "@/components/dockyard/user-menu";
 import type { MeResponse } from "@/lib/api";
+import { PUBLIC_DOCS_INTRO_URL } from "@/lib/public-links";
 
 type AppHeaderProps = {
   title: string;
@@ -27,7 +28,7 @@ export function AppHeader({
       <Breadcrumbs items={[{ label: breadcrumb }, { label: title }]} />
       <div className="flex items-center gap-3">
         <SearchTrigger onClick={onOpenSearch} />
-        <Button href="https://github.com/Joeydekruis/dockyrd" variant="outline">
+        <Button href={PUBLIC_DOCS_INTRO_URL} variant="outline">
           Docs
         </Button>
         <UserMenu user={user} />

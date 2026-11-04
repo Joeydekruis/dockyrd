@@ -11,6 +11,7 @@ import { Sidebar } from "@/components/dockyard/sidebar";
 import { TopBar } from "@/components/dockyard/top-bar";
 import { UpdateAvailableNotifier } from "@/components/dockyard/update-available-modal";
 import { getMe, type MeResponse } from "@/lib/api";
+import { isAccountSettingsPath } from "@/lib/nav";
 
 type DashboardShellProps = {
   title: string;
@@ -36,9 +37,9 @@ export function DashboardShell({
         if (
           me.role === "owner" &&
           !me.totp_enabled &&
-          !window.location.pathname.startsWith("/settings/profile")
+          !isAccountSettingsPath(window.location.pathname)
         ) {
-          router.replace("/settings/profile");
+          router.replace("/settings/account/password");
           return;
         }
         setUser(me);

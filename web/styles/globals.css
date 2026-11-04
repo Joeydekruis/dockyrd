@@ -21,6 +21,7 @@
   --primary-button: #0b1f3a;
   --primary-button-hover: #1a3358;
   --hover-row: #f6f5f2;
+  --nav-hover: #f2f1ee;
   --danger: #b3261e;
   --status-ok-dot: #1a7f4b;
   --background: var(--page-bg);
@@ -422,7 +423,7 @@ button.btn-text:disabled {
 }
 
 .dockyard-nav-link:hover {
-  background: var(--hover-row);
+  background: var(--nav-hover);
   color: var(--ink-navy);
 }
 
@@ -489,8 +490,10 @@ button.btn-text:disabled {
 }
 
 .select-trigger {
-  cursor: pointer;
+  display: flex;
+  align-items: center;
   gap: 8px;
+  cursor: pointer;
   font: inherit;
   text-align: left;
 }
@@ -542,6 +545,211 @@ button.btn-text:disabled {
 
 .select-option[aria-selected="true"] {
   background: var(--brand-soft);
+}
+
+.select-menu-search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 4px 4px;
+  padding: 0 8px;
+  min-height: 40px;
+  border-radius: 8px;
+  border: 1px solid var(--input-border);
+  background: var(--surface);
+}
+
+.select-menu-search {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-size: 14px;
+  color: var(--ink-navy);
+  outline: none;
+}
+
+.select-menu-search::placeholder {
+  color: var(--muted-text);
+  opacity: 1;
+}
+
+.select-menu-empty {
+  margin: 0;
+  padding: 12px;
+  font-size: 13px;
+  text-align: center;
+}
+
+/* Inline messages (Alert) */
+.message-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  border-radius: 12px;
+  border: 1px solid;
+  padding: 16px 44px 16px 16px;
+  font-size: 14px;
+  position: relative;
+}
+
+.message-banner-icon {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+}
+
+.message-banner-title {
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.message-banner-description {
+  margin: 4px 0 0;
+  font-size: 13px;
+  line-height: 1.45;
+  opacity: 0.88;
+}
+
+.message-banner-dismiss {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 6px;
+  opacity: 0.75;
+}
+
+.message-banner-dismiss:hover {
+  opacity: 1;
+}
+
+.message-banner-dismiss:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* Floating toasts (Snackbar) */
+.snackbar-toast {
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--ink-navy);
+  color: #ffffff;
+}
+
+.snackbar-toast-elevated {
+  box-shadow: 0 12px 40px rgba(11, 31, 58, 0.35);
+}
+
+.snackbar-toast-body {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 16px 14px;
+}
+
+.snackbar-toast-with-progress .snackbar-toast-body {
+  padding-bottom: 12px;
+}
+
+.snackbar-toast-icon {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+}
+
+.snackbar-toast-title {
+  margin: 0;
+  padding-right: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.snackbar-toast-description {
+  margin: 4px 0 0;
+  padding-right: 8px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.snackbar-toast-actions {
+  margin-top: 10px;
+}
+
+.snackbar-toast-action {
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--banner-blue);
+  cursor: pointer;
+}
+
+.snackbar-toast-action:hover {
+  text-decoration: underline;
+}
+
+.snackbar-toast-action:focus-visible {
+  outline: 2px solid var(--banner-blue);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+.snackbar-toast-dismiss {
+  margin-left: auto;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.65);
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.snackbar-toast-dismiss:hover {
+  color: #ffffff;
+}
+
+.snackbar-toast-dismiss:focus-visible {
+  outline: 2px solid var(--banner-blue);
+  outline-offset: 2px;
+}
+
+.snackbar-toast-progress-track {
+  height: 3px;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.snackbar-toast-progress-fill {
+  display: block;
+  height: 100%;
+  transition: width 0.05s linear;
 }
 
 .dockyard-tooltip {
