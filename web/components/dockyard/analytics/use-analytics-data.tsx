@@ -42,6 +42,7 @@ export type AnalyticsData = {
   cleanupBusy: boolean;
   runCleanup: (targets: string[]) => Promise<void>;
   ack: (id: string) => Promise<void>;
+  lastRefreshedAt: number | null;
 };
 
 function metricRangeFromTimeRange(range: TimeRange): MetricRange {
@@ -63,6 +64,7 @@ export function useAnalyticsData(): AnalyticsData {
   const [cleanup, setCleanup] = useState<CleanupSummary | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [cleanupBusy, setCleanupBusy] = useState(false);
+  const [lastRefreshedAt, setLastRefreshedAt] = useState<number | null>(null);
 
   const refresh = useCallback(
     async (opts?: { silent?: boolean }) => {
@@ -103,6 +105,7 @@ export function useAnalyticsData(): AnalyticsData {
           setIsAdmin(false);
         }
         setError(null);
+        setLastRefreshedAt(Math.floor(Date.now() / 1000));
       } catch (e) {
         if (!silent) {
           setError(e instanceof Error ? e.message : "Failed to load analytics");
@@ -182,6 +185,7 @@ export function useAnalyticsData(): AnalyticsData {
     cleanupBusy,
     runCleanup,
     ack,
+    lastRefreshedAt,
   };
 }
 

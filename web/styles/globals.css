@@ -324,6 +324,17 @@ button.btn-text:disabled {
   background: var(--hover-row);
 }
 
+/* Resource catalog rows — minmax() commas break Tailwind arbitrary grid-cols */
+@media (min-width: 768px) {
+  .resource-row {
+    grid-template-columns:
+      minmax(0, 1fr)
+      minmax(0, 1.1fr)
+      auto
+      minmax(0, 1fr);
+  }
+}
+
 .btn-outline:focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;

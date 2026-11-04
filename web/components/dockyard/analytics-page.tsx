@@ -21,6 +21,7 @@ import { PageHeader } from "@/components/dockyard/ui/page-header";
 import { Tabs } from "@/components/dockyard/ui/tabs";
 import { TimeRangeToggle } from "@/components/dockyard/ui/time-range-toggle";
 import { formatBytes, formatUptime } from "@/lib/analytics-stats";
+import { useUserLocale } from "@/lib/user-locale-context";
 
 const analyticsTabs = [
   { id: "overview", label: "Overview" },
@@ -32,6 +33,7 @@ const analyticsTabs = [
 
 export function AnalyticsPage() {
   const data = useAnalyticsData();
+  const { formatDateTime } = useUserLocale();
   const [tab, setTab] = useState<AnalyticsTabId>("overview");
 
   const points = data.metrics?.points ?? [];
@@ -68,6 +70,24 @@ export function AnalyticsPage() {
     </div>
   );
 
+  const lastUpdatedLine =
+    data.lastRefreshedAt != null ? (
+      <p className="mt-2 text-[13px]" style={{ color: "var(--muted-text)" }}>
+        Last refreshed:{" "}
+        <time
+          dateTime={new Date(data.lastRefreshedAt * 1000).toISOString()}
+          className="font-mono tabular-nums"
+        >
+          {formatDateTime(data.lastRefreshedAt)}
+        </time>
+        {data.loading ? " · updating…" : null}
+      </p>
+    ) : data.loading ? (
+      <p className="mt-2 text-[13px]" style={{ color: "var(--muted-text)" }}>
+        Loading metrics…
+      </p>
+    ) : null;
+
   return (
     <DashboardShell title="Analytics">
       {metaChips}
@@ -76,6 +96,7 @@ export function AnalyticsPage() {
         subtitle="Monitor your server, from the key numbers to the detailed charts. Refreshes every minute while you stay on this page."
         action={<TimeRangeToggle value={data.range} onChange={data.setRange} />}
       />
+      {lastUpdatedLine}
 
       <Tabs
         tabs={[...analyticsTabs]}
@@ -98,7 +119,7 @@ export function AnalyticsPage() {
         ) : null}
 
         {data.loading && !data.metrics ? (
-          <p className="text-sm" style={{ color: "var(--muted-text)" }}>
+          <p className="sr-only" aria-live="polite">
             Loading metrics…
           </p>
         ) : null}

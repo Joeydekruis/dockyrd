@@ -1,6 +1,24 @@
 import type { HostMetricPoint } from "@/lib/api";
 import { formatTimeAxisLabel, type UserLocalePrefs } from "@/lib/user-locale";
 
+function metricSpanMultipleDays(
+  points: HostMetricPoint[],
+  timeZone: string,
+): boolean {
+  if (points.length < 2) return false;
+  const first = points[0]?.ts;
+  const last = points.at(-1)?.ts;
+  if (first == null || last == null) return false;
+  const dayKey = (ts: number) =>
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date(ts * 1000));
+  return dayKey(first) !== dayKey(last);
+}
+
 export function formatBytes(n: number): string {
   if (n <= 0) return "0 B";
   const units = ["B", "KB", "MB", "GB", "TB"];
@@ -62,8 +80,9 @@ export function formatTimeAxis(
   index: number,
   total: number,
   prefs: UserLocalePrefs,
+  includeDate?: boolean,
 ): string {
-  return formatTimeAxisLabel(ts, index, total, prefs);
+  return formatTimeAxisLabel(ts, index, total, prefs, includeDate);
 }
 
 export function formatDuration(sec: number): string {
@@ -90,6 +109,7 @@ export function networkRatesFromPoints(
   const inbound: number[] = [];
   const outbound: number[] = [];
   const labels: string[] = [];
+  const includeDate = metricSpanMultipleDays(points, prefs.timezone);
   for (let i = 1; i < points.length; i += 1) {
     const prev = points[i - 1];
     const cur = points[i];
@@ -99,7 +119,7 @@ export function networkRatesFromPoints(
     const tx = ((cur.net_tx ?? 0) - (prev.net_tx ?? 0)) / dt;
     inbound.push(Math.max(0, rx));
     outbound.push(Math.max(0, tx));
-    labels.push(formatTimeAxis(cur.ts, i, points.length, prefs));
+    labels.push(formatTimeAxis(cur.ts, i, points.length, prefs, includeDate));
   }
   return { inbound, outbound, labels };
 }

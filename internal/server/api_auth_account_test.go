@@ -79,6 +79,21 @@ func TestPatchAccountAndNotifications(t *testing.T) {
 		t.Fatalf("patch locale: %d %s", wLP.Code, wLP.Body.String())
 	}
 
+	reqL2 := httptest.NewRequest(http.MethodGet, "/api/v1/auth/locale", nil)
+	reqL2.AddCookie(cookie)
+	wL2 := httptest.NewRecorder()
+	mux.ServeHTTP(wL2, reqL2)
+	if wL2.Code != http.StatusOK {
+		t.Fatalf("get locale after patch: %d", wL2.Code)
+	}
+	var storedLocale localePrefs
+	if err := json.Unmarshal(wL2.Body.Bytes(), &storedLocale); err != nil {
+		t.Fatal(err)
+	}
+	if storedLocale.Timezone != "Europe/Amsterdam" || storedLocale.TimeFormat != "12h" {
+		t.Fatalf("expected persisted locale, got %+v", storedLocale)
+	}
+
 	reqBad := httptest.NewRequest(http.MethodPatch, "/api/v1/auth/locale", bytes.NewReader([]byte(`{"timezone":"Invalid/Zone","time_format":"24h"}`)))
 	reqBad.Header.Set("Content-Type", "application/json")
 	reqBad.AddCookie(cookie)

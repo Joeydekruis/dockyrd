@@ -95,7 +95,7 @@ export function ResourceRow({
 
   return (
     <div
-      className={`resource-row relative -mx-6 grid grid-cols-1 items-center gap-4 border-t px-6 py-4 first:border-t-0 md:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)_auto_auto_minmax(0,1fr)]${navigable ? " transition-colors hover:bg-[var(--hover-row)]" : ""}`}
+      className={`resource-row relative -mx-6 grid grid-cols-1 items-center gap-4 border-t px-6 py-4 first:border-t-0${navigable ? " transition-colors hover:bg-[var(--hover-row)]" : ""}`}
       style={{ borderColor: "var(--border)" }}
     >
       {navigable ? (

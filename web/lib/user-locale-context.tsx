@@ -13,6 +13,7 @@ import { getLocalePrefs, patchLocalePrefs } from "@/lib/api";
 import {
   defaultUserLocalePrefs,
   formatClockTime,
+  formatDateTime,
   formatTimeAxisLabel,
   metricTimeLabels,
   type UserLocalePrefs,
@@ -24,6 +25,7 @@ type UserLocaleContextValue = {
   refresh: () => Promise<void>;
   save: (next: UserLocalePrefs) => Promise<UserLocalePrefs>;
   formatClockTime: (tsUnixSec: number) => string;
+  formatDateTime: (tsUnixSec: number) => string;
   formatTimeAxisLabel: (
     tsUnixSec: number,
     index: number,
@@ -67,6 +69,7 @@ export function UserLocaleProvider({ children }: { children: ReactNode }) {
       refresh,
       save,
       formatClockTime: (ts) => formatClockTime(ts, prefs),
+      formatDateTime: (ts) => formatDateTime(ts, prefs),
       formatTimeAxisLabel: (ts, index, total) =>
         formatTimeAxisLabel(ts, index, total, prefs),
       metricTimeLabels: (points) => metricTimeLabels(points, prefs),
@@ -89,6 +92,7 @@ export function useUserLocale(): UserLocaleContextValue {
       refresh: async () => {},
       save: async (next) => next,
       formatClockTime: (ts) => formatClockTime(ts, defaultUserLocalePrefs),
+      formatDateTime: (ts) => formatDateTime(ts, defaultUserLocalePrefs),
       formatTimeAxisLabel: (ts, index, total) =>
         formatTimeAxisLabel(ts, index, total, defaultUserLocalePrefs),
       metricTimeLabels: (points) =>

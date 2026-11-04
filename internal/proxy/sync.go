@@ -38,6 +38,7 @@ func SyncFromDB(ctx context.Context, q *sqlc.Queries, cfg config.Config) error {
 	}
 	staticRoutes := make([]StaticRoute, 0, len(staticRows))
 	for _, row := range staticRows {
+		_ = staticsite.EnsureRelativeCurrentLink(cfg.SitesDir(), row.ServiceSlug)
 		root := staticsite.CaddyFileServerRoot(row.ServiceSlug)
 		var siteCfg staticsite.Config
 		raw := appconfig.RawConfig(row.ServiceConfig)

@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.42] - 2026-11-04
+
+_Finished: 2026-11-04_
+
+### Fixed
+
+- **Static site 404 (symlink)** — `current` now symlinks with a **relative** `releases/<id>` target so dy-proxy can follow it under `/srv/sites`; proxy sync **repairs** legacy absolute symlinks on existing sites (`internal/staticsite/release.go`, `internal/proxy/sync.go`)
+
 ## [0.0.41] - 2026-11-04
 
 _Finished: 2026-11-04_

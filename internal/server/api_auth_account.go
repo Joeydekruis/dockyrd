@@ -166,8 +166,11 @@ func (d apiDeps) loadNotificationPrefs(ctx context.Context, userID string) (noti
 		}
 		return prefs, err
 	}
-	raw := []byte(fmt.Sprint(row.Value))
-	if len(raw) == 0 || string(raw) == "<nil>" {
+	raw, err := settingValueBytes(row.Value)
+	if err != nil {
+		return prefs, err
+	}
+	if len(raw) == 0 {
 		return prefs, nil
 	}
 	if err := json.Unmarshal(raw, &prefs); err != nil {

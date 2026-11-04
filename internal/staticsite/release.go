@@ -40,12 +40,7 @@ func PublishRelease(outputDir, sitesRoot, serviceSlug, deploymentID string) (rel
 	if err := os.MkdirAll(paths.ServiceRoot, 0o750); err != nil {
 		return "", err
 	}
-	tmpLink := paths.CurrentLink + ".tmp"
-	_ = os.Remove(tmpLink)
-	if err := os.Symlink(releasePath, tmpLink); err != nil {
-		return "", err
-	}
-	if err := os.Rename(tmpLink, paths.CurrentLink); err != nil {
+	if err := linkCurrentRelease(paths.CurrentLink, releasePath); err != nil {
 		return "", err
 	}
 	return releasePath, nil
@@ -58,15 +53,43 @@ func ActivateRelease(sitesRoot, serviceSlug, deploymentID string) (releasePath s
 	if _, err := os.Stat(releasePath); err != nil {
 		return "", fmt.Errorf("release not found: %w", err)
 	}
-	tmpLink := paths.CurrentLink + ".tmp"
-	_ = os.Remove(tmpLink)
-	if err := os.Symlink(releasePath, tmpLink); err != nil {
-		return "", err
-	}
-	if err := os.Rename(tmpLink, paths.CurrentLink); err != nil {
+	if err := linkCurrentRelease(paths.CurrentLink, releasePath); err != nil {
 		return "", err
 	}
 	return releasePath, nil
+}
+
+// linkCurrentRelease atomically points current at releasePath using a relative symlink target.
+func linkCurrentRelease(currentLink, releasePath string) error {
+	rel, err := filepath.Rel(filepath.Dir(currentLink), releasePath)
+	if err != nil {
+		return err
+	}
+	tmpLink := currentLink + ".tmp"
+	_ = os.Remove(tmpLink)
+	if err := os.Symlink(rel, tmpLink); err != nil {
+		return err
+	}
+	return os.Rename(tmpLink, currentLink)
+}
+
+// EnsureRelativeCurrentLink rewrites legacy absolute current→release symlinks (dy-proxy mount safe).
+func EnsureRelativeCurrentLink(sitesRoot, serviceSlug string) error {
+	paths := PathsForService(sitesRoot, serviceSlug)
+	target, err := os.Readlink(paths.CurrentLink)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return err
+	}
+	if !filepath.IsAbs(target) {
+		return nil
+	}
+	if _, err := os.Stat(target); err != nil {
+		return err
+	}
+	return linkCurrentRelease(paths.CurrentLink, target)
 }
 
 // CaddyMountSitesRoot is the bind mount target inside dy-proxy (see docker.EnsureProxy).
