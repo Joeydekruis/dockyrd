@@ -69,20 +69,28 @@ function buildSettingsPatch(
     type: cfg.source?.type ?? prevSource.type ?? "github",
     repo: cfg.source?.repo ?? prevSource.repo,
     branch: cfg.source?.branch ?? prevSource.branch,
-    rootDir: state.rootDir.trim(),
+    rootDir: normalizeRootDirForSave(state.rootDir),
   };
+  const out = state.outputDir.trim();
+  const defaultOutput = state.buildEnabled ? "dist" : ".";
   return {
     ...base,
     buildEnabled: state.buildEnabled,
     installCmd: ic,
     buildScript: bc,
     buildCmd: state.buildEnabled ? joinBuildCmd(ic, bc) : "",
-    outputDir: state.outputDir.trim() || "dist",
+    outputDir: out || defaultOutput,
     nodeImage: `node:${state.nodeMajor}-alpine`,
     indexFile: state.indexFile.trim() || "index.html",
     errorFile: state.errorFile.trim(),
     source: mergedSource,
   };
+}
+
+function normalizeRootDirForSave(rootDir: string): string {
+  const r = rootDir.trim();
+  if (r === "" || r === "." || r === "/") return "";
+  return r.replace(/^\/+/, "");
 }
 
 function formatRootDir(rootDir?: string): string {

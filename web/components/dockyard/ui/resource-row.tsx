@@ -115,7 +115,12 @@ export function ResourceRow({
           <Icon strokeWidth={1.8} className="size-5" aria-hidden />
         </div>
         <div className="min-w-0 flex-1">
-          <RowName name={name} navigable={navigable} />
+          <div className="flex items-start justify-between gap-3">
+            <RowName name={name} navigable={navigable} />
+            <div className="shrink-0 md:hidden">
+              <StatusBadge label={statusLabel} variant={statusVariant} />
+            </div>
+          </div>
           {meta ? (
             <p
               className="mt-0.5 font-mono text-[13px]"
@@ -150,7 +155,9 @@ export function ResourceRow({
         <div className={`hidden md:block ${cellClass ?? ""}`} aria-hidden />
       )}
 
-      <div className={`flex flex-wrap items-center gap-2 ${cellClass ?? ""}`}>
+      <div
+        className={`hidden flex-wrap items-center gap-2 md:flex ${cellClass ?? ""}`}
+      >
         <StatusBadge label={statusLabel} variant={statusVariant} />
         {trailing}
       </div>

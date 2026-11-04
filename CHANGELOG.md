@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.40] - 2026-11-04
+
+_Finished: 2026-11-04_
+
+### Changed
+
+- **Static sites overview** — list rows load **service domains** (primary hostname link), show **project / branch** meta, and **Live/Failed/Deploying** from latest deployment; resource row status badge aligned on narrow viewports (`static-sites-page.tsx`, `resource-row.tsx`)
+
+### Fixed
+
+- **Static deploy publish** — clone tree is no longer deleted before `PublishRelease` copies files (fixes `lstat …/src/site: no such file or directory` on publish-without-build) (`internal/staticsite/build.go`, `internal/deploy/static.go`)
+- **Static site settings save** — root `/` normalizes to repo root; default publish dir `.` when build is off (`static-site-settings-tab.tsx`)
+
 ## [0.0.39] - 2026-11-04
 
 _Finished: 2026-11-04_

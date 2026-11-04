@@ -37,7 +37,6 @@ func Build(ctx context.Context, dockerBin string, in BuildInput) (outputDir stri
 	if logPath == "" {
 		logPath = filepath.Join(base, "build.log")
 	}
-	defer func() { _ = os.RemoveAll(srcDir) }()
 
 	if err := build.CloneShallow(ctx, in.CloneURL, in.Branch, srcDir); err != nil {
 		return "", err

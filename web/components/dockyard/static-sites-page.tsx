@@ -14,35 +14,48 @@ import { ResourceListAddLink } from "@/components/dockyard/ui/resource-list-add-
 import { ResourceListSection } from "@/components/dockyard/ui/resource-list-section";
 import { ResourceRow } from "@/components/dockyard/ui/resource-row";
 import { StatCard } from "@/components/dockyard/ui/stat-card";
+import type { StatusVariant } from "@/components/dockyard/ui/status-badge";
 import {
   type Deployment,
   listDeployments,
   listProjects,
+  listServiceDomains,
   listServices,
   type Project,
   type Service,
+  type ServiceDomain,
 } from "@/lib/api";
 import {
   formatResourceCount,
   formatTimeAgo,
-  projectPathLabel,
+  projectBranchLabel,
   resourceStatusDisplay,
 } from "@/lib/resource-dashboard";
 import { filterByQuery } from "@/lib/service-display";
+import {
+  parseStaticSiteConfig,
+  primaryDomainHost,
+  visitSiteHref,
+} from "@/lib/static-site-display";
 
 type StaticRow = {
   project: Project;
   service: Service;
   deployments: Deployment[];
+  domains: ServiceDomain[];
 };
 
-function staticSitePublicHost(service: Service): string | undefined {
-  const cfg = service.config as {
-    publicHost?: string;
-    domain?: string;
-    hostname?: string;
-  };
-  return cfg.publicHost ?? cfg.domain ?? cfg.hostname;
+function staticSiteRowStatus(
+  service: Service,
+  latest?: Deployment,
+): { label: string; variant: StatusVariant } {
+  const st = (latest?.status ?? "").trim().toLowerCase();
+  if (st === "live") return { label: "Live", variant: "ok" };
+  if (st === "building" || st === "queued" || st === "starting") {
+    return { label: "Deploying", variant: "warn" };
+  }
+  if (st === "failed") return { label: "Failed", variant: "err" };
+  return resourceStatusDisplay(service.desired_state, "static");
 }
 
 function deploymentSummary(latest?: Deployment) {
@@ -74,8 +87,11 @@ export function StaticSitesPage() {
       for (const p of ps) {
         const { services } = await listServices(p.id, "static_site");
         for (const service of services) {
-          const { deployments } = await listDeployments(service.id);
-          collected.push({ project: p, service, deployments });
+          const [{ deployments }, { domains }] = await Promise.all([
+            listDeployments(service.id),
+            listServiceDomains(service.id),
+          ]);
+          collected.push({ project: p, service, deployments, domains });
         }
       }
       setRows(collected);
@@ -109,7 +125,7 @@ export function StaticSitesPage() {
   );
 
   const live = rows.filter(
-    ({ service }) => service.desired_state === "running",
+    ({ deployments }) => deployments[0]?.status === "live",
   ).length;
   const projectCount = new Set(rows.map((r) => r.project.id)).size;
   const dash = loading && rows.length === 0 ? "—" : undefined;
@@ -206,22 +222,22 @@ export function StaticSitesPage() {
               No static sites match your filter.
             </p>
           ) : (
-            filtered.map(({ project, service, deployments }) => {
-              const status = resourceStatusDisplay(
-                service.desired_state,
-                "static",
-              );
+            filtered.map(({ project, service, deployments, domains }) => {
+              const cfg = parseStaticSiteConfig(service);
+              const status = staticSiteRowStatus(service, deployments[0]);
               const latest = deployments[0];
               const deploy = deploymentSummary(latest);
-              const publicHost = staticSitePublicHost(service);
+              const host = primaryDomainHost(domains);
+              const visit = visitSiteHref(host);
               return (
                 <ResourceRow
                   key={service.id}
                   name={service.name}
                   href={`/static-sites/${service.slug}`}
-                  meta={projectPathLabel(project.name)}
-                  url={publicHost}
-                  internalOnly={!publicHost}
+                  meta={projectBranchLabel(project.name, cfg.source?.branch)}
+                  url={host}
+                  urlHref={visit}
+                  internalOnly={!host}
                   statusLabel={status.label}
                   statusVariant={status.variant}
                   icon={Globe}

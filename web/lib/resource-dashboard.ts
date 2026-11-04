@@ -9,6 +9,15 @@ export function projectPathLabel(projectName: string): string {
   return `${projectName} / production`;
 }
 
+/** Project line for resource lists when a git branch is known (static sites). */
+export function projectBranchLabel(
+  projectName: string,
+  branch?: string,
+): string {
+  const b = (branch ?? "main").trim() || "main";
+  return `${projectName} / ${b}`;
+}
+
 export function resourceStatusDisplay(
   desiredState: string,
   surface: "application" | "static" | "database" = "application",

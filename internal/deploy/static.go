@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 	"time"
 
@@ -54,7 +55,10 @@ func (rt *Runtime) RunStaticSiteDeployment(ctx context.Context, deploymentID str
 		return err
 	}
 
-	logPath := filepath.Join(build.DeploymentWorkDir(rt.Cfg.BuildsDir(), deploymentID), "build.log")
+	workBase := build.DeploymentWorkDir(rt.Cfg.BuildsDir(), deploymentID)
+	logPath := filepath.Join(workBase, "build.log")
+	srcDir := filepath.Join(workBase, "src")
+	defer func() { _ = os.RemoveAll(srcDir) }()
 
 	if rt.Docker == nil {
 		return rt.fail(ctx, deploymentID, errors.New("docker unavailable"))
