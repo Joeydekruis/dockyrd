@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
+import { Button } from "@/components/dockyard/ui/button";
 import { getServerInfo, type ServerInfo } from "@/lib/api";
 
 type Props = {
@@ -41,20 +41,12 @@ export function UpdateAvailableModal({ open, onClose, info }: Props) {
           dashboard.
         </p>
         <div className="mt-6 flex flex-wrap gap-2">
-          <Link
-            href="/settings/updates"
-            className="rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-foreground)]"
-            onClick={onClose}
-          >
+          <Button href="/settings/updates" onClick={onClose}>
             Go to Updates
-          </Link>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm"
-          >
+          </Button>
+          <Button type="button" variant="outline" onClick={onClose}>
             Close
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -82,19 +74,21 @@ export function UpdateAvailableNotifier() {
           available.
         </span>
         <div className="flex gap-2">
-          <Link
+          <Button
             href="/settings/updates"
-            className="rounded-md border border-current px-3 py-1 text-xs font-medium"
+            variant="outline"
+            className="min-h-9 px-3 py-1 text-xs normal-case"
           >
             Update
-          </Link>
-          <button
+          </Button>
+          <Button
             type="button"
-            className="rounded-md border border-current px-3 py-1 text-xs font-medium"
+            variant="outline"
+            className="min-h-9 px-3 py-1 text-xs normal-case"
             onClick={() => setOpen(true)}
           >
             Release notes
-          </button>
+          </Button>
         </div>
       </div>
       <UpdateAvailableModal

@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { Button } from "@/components/dockyard/ui/button";
+import { SelectField } from "@/components/dockyard/ui/select-field";
 import {
   createDeployment,
   createService,
@@ -116,21 +118,13 @@ export function StaticSitesPage() {
           onSubmit={onCreate}
           className="grid gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 md:grid-cols-2"
         >
-          <label className="flex flex-col gap-1 text-sm">
-            <span className="text-[var(--muted-foreground)]">Project</span>
-            <select
-              className="rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2"
-              value={projectId}
-              onChange={(ev) => setProjectId(ev.target.value)}
-            >
-              <option value="">Select project</option>
-              {projects.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-          </label>
+          <SelectField
+            label="Project"
+            placeholder="Select project"
+            value={projectId}
+            onChange={setProjectId}
+            options={projects.map((p) => ({ value: p.id, label: p.name }))}
+          />
           <label className="flex flex-col gap-1 text-sm">
             <span className="text-[var(--muted-foreground)]">Site name</span>
             <input
@@ -157,12 +151,7 @@ export function StaticSitesPage() {
             </datalist>
           </label>
           <div className="md:col-span-2">
-            <button
-              type="submit"
-              className="rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-foreground)]"
-            >
-              Create static site
-            </button>
+            <Button type="submit">Create static site</Button>
           </div>
         </form>
 

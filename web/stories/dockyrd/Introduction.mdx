@@ -1,30 +1,32 @@
-import { Meta, Title, Subtitle, Description } from "@storybook/addon-docs/blocks";
+import { Meta, Title, Subtitle } from "@storybook/addon-docs/blocks";
+import * as IntroductionStories from "./Introduction.stories";
 
-<Meta title="Dockyrd/Introduction" />
+<Meta of={IntroductionStories} />
 
 <Title>Dockyrd design system</Title>
 
 <Subtitle>Component catalog (not full pages)</Subtitle>
 
-<Description>
-  Stories mirror **`docs/design-index.json`** tokens and briefing §9.3 primitives.
-  Each story imports **`web/components/dockyard/ui/*`** (or composites that compose `ui/`) — the same modules the panel uses. See **`.cursor/rules/storybook-ui-source.mdc`**. Run with{" "}
-  **`pnpm --dir web storybook`** on port 6006.
-</Description>
+Stories mirror **`docs/design-index.json`** tokens and briefing §9.3 primitives.
+Each story imports **`web/components/dockyard/ui/*`** (or composites that compose `ui/`) — the same modules the panel uses. See **`.cursor/rules/storybook-ui-source.mdc`**. Run with **`pnpm --dir web storybook`** on port 6006.
+
+Design boards live in **`docs/design/component-boards/*.dc.html`** (see **`docs/design/components-catalog.json`**). Storybook has two layers:
+
+| Layer | Sidebar | Use |
+| --- | --- | --- |
+| **Board overview** | `Design/1 · …` through `Design/4 · …` | Section snapshots vs the HTML artboards |
+| **Component reference** | **`Design/Components/*`** | One file per primitive — **Playground** + Controls match `web/components/dockyard/ui/*` props (start here to align UI with design). The full primitive list lives under **`Design/Components/`** (alphabetically in the sidebar). |
+
+Example: **`Design/Components/Button`** → `Playground` for variant / icons / disabled; **`All variants`** for the full matrix.
 
 ## Coverage map
 
-| Design block | Story |
+| Design board section | Story |
 | --- | --- |
-| Primary / outline buttons | `Dockyrd/Button` |
-| Status pills | `Dockyrd/StatusBadge` |
-| Stat tile | `Dockyrd/StatCard` |
-| List row | `Dockyrd/ResourceRow` |
-| Chips / commit SHA | `Dockyrd/Chips` |
-| Breadcrumbs + page header | `Dockyrd/Page chrome` |
-| Sidebar nav item | `Dockyrd/Nav menu` |
-| Search dialog, modal, snackbar, tabs, time range | `Dockyrd/Overlays` |
-| Announcement, search trigger, empty state | `Dockyrd/UiPrimitives` |
-| Top bar, header, sidebar (composites) | `Dockyrd/Shell pieces` |
+| **1 · Foundations & atoms** — colors, type, shape, logo, icons, buttons, chips, inputs, small atoms | `Design/1 · Foundations & atoms` |
+| **2 · Molecules** — cards, rows, deployment/service/project cards, nav, feedback, data rows | `Design/2 · Molecules` |
+| **3 · Organisms** — sidebars, chrome, command palette, charts, panels, settings/domain, tables & layouts | `Design/3 · Organisms` |
+| **4 · Forms & overlays** — selection, text entry, menus, upload, messages, progress, overlays | `Design/4 · Forms & overlays` |
+| **Component APIs** (Button, Split button, …) | **`Design/Components/*`** |
 
 **Single source:** primitives in `web/components/dockyard/ui/`; composites in `web/components/dockyard/` compose `ui/` only. Rule: `.cursor/rules/storybook-ui-source.mdc`.

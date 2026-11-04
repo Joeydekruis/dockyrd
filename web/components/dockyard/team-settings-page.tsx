@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { Button } from "@/components/dockyard/ui/button";
+import { SelectField } from "@/components/dockyard/ui/select-field";
 import {
   type AuditEntry,
   createInvite,
@@ -89,24 +91,17 @@ export function TeamSettingsPage() {
               className="field-input"
             />
           </label>
-          <label className="flex flex-col gap-1 text-sm">
-            <span className="text-[var(--muted-foreground)]">Role</span>
-            <select
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
-              className="rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2"
-            >
-              <option value="admin">Admin</option>
-              <option value="member">Member</option>
-              <option value="viewer">Viewer</option>
-            </select>
-          </label>
-          <button
-            type="submit"
-            className="rounded-md bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-foreground)]"
-          >
-            Send invite
-          </button>
+          <SelectField
+            label="Role"
+            value={role}
+            onChange={setRole}
+            options={[
+              { value: "admin", label: "Admin" },
+              { value: "member", label: "Member" },
+              { value: "viewer", label: "Viewer" },
+            ]}
+          />
+          <Button type="submit">Send invite</Button>
         </form>
         {lastToken ? (
           <>

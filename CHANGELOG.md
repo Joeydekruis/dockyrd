@@ -6,6 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.29] - 2026-11-04
+
+_Finished: 2026-11-04_
+
+### Added
+
+- **Design component catalog** — `docs/design/component-boards/` HTML exports + `components-catalog.json`; **Storybook** `Design/Components/*` playgrounds (63 primitives) and board stories (`FoundationsAtoms`, `Molecules`, `Organisms`, `FormsOverlays`)
+- **UI primitives (`web/components/dockyard/ui/`)** — custom **Select** / **SelectField**, **SplitButton** with deploy menu, navy **Tooltip** (placements + inline icon chip), **TextareaField**, menus (`.dockyard-menu-panel`), and dozens of molecules/organisms aligned to design boards
+
+### Changed
+
+- **Dashboard & auth** — migrate ad-hoc buttons to shared **`Button`**; native `<select>` → **SelectField** on databases, static sites, object storage, team role; **pointer** cursor on interactive controls (`globals.css`)
+- **Switch** — animated thumb (`translateX`) and track color transition; respects `prefers-reduced-motion`
+- **Storybook** — legacy `web/stories/dockyrd/*` component stories removed in favor of `web/stories/design/`; Introduction MDX wired for SB10
+
+### Fixed
+
+- **Textarea** — padding `12px 14px` per forms design (`.field-textarea`)
+
 ## [0.0.28] - 2026-11-04
 
 _Finished: 2026-11-04_

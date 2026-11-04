@@ -150,10 +150,10 @@ export function SignInClient() {
               className="font-mono tracking-widest"
             />
           )}
-          <button
+          <Button
             type="button"
-            className="text-left text-sm"
-            style={{ color: "var(--link-blue)" }}
+            variant="link"
+            className="h-auto min-h-0 justify-start px-0 text-left"
             onClick={() => {
               setUseRecovery((v) => !v);
               setError(null);
@@ -164,7 +164,7 @@ export function SignInClient() {
             {useRecovery
               ? "Use authenticator app instead"
               : "Use a recovery code"}
-          </button>
+          </Button>
           {error ? (
             <p
               className="text-sm"

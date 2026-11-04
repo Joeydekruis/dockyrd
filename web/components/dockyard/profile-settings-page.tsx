@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { Button } from "@/components/dockyard/ui/button";
 import {
   type AuthSession,
   enableTotp,
@@ -129,21 +130,16 @@ export function ProfileSettingsPage() {
                 placeholder="000000"
               />
             </label>
-            <button
-              type="submit"
-              className="rounded-md bg-[var(--primary)] px-4 py-2 text-sm text-[var(--primary-foreground)]"
-            >
-              Confirm and enable
-            </button>
+            <Button type="submit">Confirm and enable</Button>
           </form>
         ) : (
-          <button
+          <Button
             type="button"
+            variant="outline"
             onClick={() => void onStartTotp()}
-            className="rounded-md border border-[var(--border)] px-4 py-2 text-sm"
           >
             Set up authenticator app
-          </button>
+          </Button>
         )}
         {recoveryCodes ? (
           <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
@@ -177,13 +173,15 @@ export function ProfileSettingsPage() {
                   </p>
                 </div>
                 {!s.current ? (
-                  <button
+                  <Button
                     type="button"
-                    className="text-xs text-red-600 underline"
+                    variant="link"
+                    className="text-xs"
+                    style={{ color: "var(--danger)" }}
                     onClick={() => void onRevoke(s.id)}
                   >
                     Revoke
-                  </button>
+                  </Button>
                 ) : null}
               </li>
             ))

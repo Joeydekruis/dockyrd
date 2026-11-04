@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { Button } from "@/components/dockyard/ui/button";
 import {
   ackEvent,
   type CleanupSummary,
@@ -411,10 +412,10 @@ export function AnalyticsPage() {
               </p>
             )}
             {isAdmin && cleanup ? (
-              <button
+              <Button
                 type="button"
                 disabled={cleanupBusy}
-                className="mt-4 rounded-md bg-[var(--primary)] px-3 py-1.5 text-xs text-[var(--primary-foreground)]"
+                className="mt-4"
                 onClick={() =>
                   void onCleanup([
                     "dangling_images",
@@ -425,7 +426,7 @@ export function AnalyticsPage() {
                 }
               >
                 {cleanupBusy ? "Cleaning…" : "Review and clean up"}
-              </button>
+              </Button>
             ) : null}
           </div>
         </section>

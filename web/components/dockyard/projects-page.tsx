@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { Button } from "@/components/dockyard/ui/button";
 import { createProject, listProjects, type Project } from "@/lib/api";
 
 export function ProjectsPage() {
@@ -57,12 +58,7 @@ export function ProjectsPage() {
               placeholder="Client name"
             />
           </label>
-          <button
-            type="submit"
-            className="rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-foreground)]"
-          >
-            Create project
-          </button>
+          <Button type="submit">Create project</Button>
         </form>
 
         {error ? (

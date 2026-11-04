@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { Button } from "@/components/dockyard/ui/button";
 import {
   createDeployment,
   createService,
@@ -141,12 +142,7 @@ export function ProjectDetailPage() {
                   placeholder="API service"
                 />
               </label>
-              <button
-                type="submit"
-                className="rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-foreground)]"
-              >
-                Add app
-              </button>
+              <Button type="submit">Add app</Button>
             </form>
             <ul className="space-y-4">
               {services.map((s) => {

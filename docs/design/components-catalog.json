@@ -1,0 +1,66 @@
+{
+  "source": "docs/design/component-boards/",
+  "boards": [
+    {
+      "id": "1",
+      "title": "Foundations & atoms",
+      "html": "ComponentsAtoms.dc.html",
+      "storybook": "Design/1 · Foundations & atoms",
+      "sections": [
+        "Colors",
+        "Typography",
+        "ShapeAndElevation",
+        "Logo",
+        "Icons",
+        "Buttons",
+        "ChipsAndStatusPills",
+        "Inputs",
+        "SmallAtoms"
+      ]
+    },
+    {
+      "id": "2",
+      "title": "Molecules",
+      "html": "ComponentsMolecules.dc.html",
+      "storybook": "Design/2 · Molecules",
+      "sections": [
+        "CardsAndTiles",
+        "ResourceRows",
+        "DeploymentServiceProjectCards",
+        "NavigationAndSwitching",
+        "Feedback",
+        "DataRows"
+      ]
+    },
+    {
+      "id": "3",
+      "title": "Organisms",
+      "html": "ComponentsOrganisms.dc.html",
+      "storybook": "Design/3 · Organisms",
+      "sections": [
+        "Sidebars",
+        "PageHeaderTopBarHero",
+        "CommandPalette",
+        "Charts",
+        "FeaturePanels",
+        "SettingsDomainPanels",
+        "TablesAndLayouts"
+      ]
+    },
+    {
+      "id": "4",
+      "title": "Forms & overlays",
+      "html": "ComponentsForms.dc.html",
+      "storybook": "Design/4 · Forms & overlays",
+      "sections": [
+        "SelectionAndChoice",
+        "TextAndDateEntry",
+        "ButtonsWithMenus",
+        "Upload",
+        "MessagesAndToasts",
+        "ProgressAndLoading",
+        "Overlays"
+      ]
+    }
+  ]
+}

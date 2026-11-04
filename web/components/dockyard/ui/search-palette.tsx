@@ -29,7 +29,7 @@ export const SearchPalette = forwardRef(function SearchPalette(
 ) {
   return (
     <div
-      className="w-full max-w-xl overflow-hidden rounded-[20px] border shadow-lg"
+      className="w-full max-w-xl rounded-[20px] border shadow-lg"
       style={{ background: "var(--surface)", borderColor: "var(--border)" }}
     >
       <input
@@ -37,11 +37,11 @@ export const SearchPalette = forwardRef(function SearchPalette(
         value={query}
         onChange={(e) => onQueryChange(e.target.value)}
         placeholder="Search pages and projects…"
-        className="field-input rounded-none border-0 border-b"
+        className="search-palette-query field-input rounded-none rounded-t-[20px] border-0 border-b"
         style={{ borderColor: "var(--border)" }}
         aria-label="Search query"
       />
-      <ul className="max-h-80 overflow-auto p-2">
+      <ul className="max-h-80 overflow-auto rounded-b-[20px] p-2">
         {results.map((row) => (
           <li key={`${row.kind}-${row.href}`}>
             <Link

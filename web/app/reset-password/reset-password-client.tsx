@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import { AuthLayout } from "@/components/dockyard/auth-layout";
+import { Button } from "@/components/dockyard/ui/button";
 import { resetPassword } from "@/lib/api";
 
 export function ResetPasswordClient() {
@@ -59,14 +60,9 @@ export function ResetPasswordClient() {
             {error}
           </p>
         ) : null}
-        <button
-          type="submit"
-          disabled={loading || !token}
-          className="min-h-11 rounded-[10px] font-mono text-xs uppercase tracking-wide text-white"
-          style={{ background: "var(--ink-navy)" }}
-        >
+        <Button type="submit" disabled={loading || !token} className="w-full">
           {loading ? "Saving…" : "Update password"}
-        </button>
+        </Button>
       </form>
       <Link
         href="/sign-in"

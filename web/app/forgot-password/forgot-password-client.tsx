@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { type FormEvent, useEffect, useState } from "react";
 import { AuthLayout } from "@/components/dockyard/auth-layout";
+import { Button } from "@/components/dockyard/ui/button";
 import { getPublicSettings, requestPasswordReset } from "@/lib/api";
 
 export function ForgotPasswordClient() {
@@ -83,14 +84,13 @@ export function ForgotPasswordClient() {
             {error}
           </p>
         ) : null}
-        <button
+        <Button
           type="submit"
           disabled={loading || smtpConfigured === false}
-          className="min-h-11 rounded-[10px] font-mono text-xs uppercase tracking-wide text-white disabled:opacity-50"
-          style={{ background: "var(--ink-navy)" }}
+          className="w-full"
         >
           {loading ? "Please wait…" : "Request reset link"}
-        </button>
+        </Button>
       </form>
       <Link
         href="/sign-in"

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { Button } from "@/components/dockyard/ui/button";
 import {
   applyDockyardUpdate,
   getUpdatesStatus,
@@ -132,23 +133,22 @@ export function UpdatesSettingsPage() {
         )}
 
         <div className="flex flex-wrap gap-2 pt-2">
-          <button
+          <Button
             type="button"
+            variant="outline"
             disabled={loading || checking || applying}
             onClick={() => void load(false)}
-            className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm disabled:opacity-50"
           >
             {checking ? "Checking…" : "Check again"}
-          </button>
+          </Button>
           {status?.update_available ? (
-            <button
+            <Button
               type="button"
               disabled={applying || !status.apply_supported || !status.check_ok}
               onClick={() => void onApply()}
-              className="rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-foreground)] disabled:opacity-50"
             >
               {applying ? "Updating…" : "Update now"}
-            </button>
+            </Button>
           ) : null}
         </div>
 

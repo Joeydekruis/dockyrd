@@ -28,6 +28,7 @@ export function DashboardShell({
   const palette = useCommandPalette();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [topBarVisible, setTopBarVisible] = useState(true);
+  const [announcementOccupied, setAnnouncementOccupied] = useState(false);
 
   const onScroll = useCallback(() => {
     const el = scrollRef.current;
@@ -71,13 +72,29 @@ export function DashboardShell({
 
   return (
     <div className="min-h-dvh" style={{ background: "var(--page-bg)" }}>
+      <TopBar
+        visible={topBarVisible}
+        onOccupiedChange={setAnnouncementOccupied}
+        className="fixed top-0 right-0 left-0 z-50"
+      />
       <Sidebar />
-      <div className="flex min-h-dvh flex-col pl-[232px]">
+      <div
+        className="flex min-h-dvh flex-col pl-[232px]"
+        style={{
+          paddingTop: announcementOccupied
+            ? "var(--dockyard-announcement-height, 44px)"
+            : undefined,
+        }}
+      >
         <div
-          className="sticky top-0 z-30 shrink-0"
-          style={{ background: "var(--page-bg)" }}
+          className="sticky z-30 shrink-0"
+          style={{
+            top: announcementOccupied
+              ? "var(--dockyard-announcement-height, 44px)"
+              : 0,
+            background: "var(--page-bg)",
+          }}
         >
-          <TopBar visible={topBarVisible} />
           <AppHeader
             title={title}
             breadcrumb={breadcrumb}

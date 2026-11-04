@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { Button } from "@/components/dockyard/ui/button";
+import { SelectField } from "@/components/dockyard/ui/select-field";
 import {
   createService,
   type DatabaseRow,
@@ -80,34 +82,22 @@ export function DatabasesPage() {
           onSubmit={onCreate}
           className="flex flex-col gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4 lg:flex-row lg:items-end"
         >
-          <label className="flex flex-col gap-1 text-sm">
-            <span className="text-[var(--muted-foreground)]">Project</span>
-            <select
-              className="rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2"
-              value={projectId}
-              onChange={(ev) => setProjectId(ev.target.value)}
-            >
-              <option value="">Select…</option>
-              {projects.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="flex flex-col gap-1 text-sm">
-            <span className="text-[var(--muted-foreground)]">Engine</span>
-            <select
-              className="rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2"
-              value={kind}
-              onChange={(ev) =>
-                setKind(ev.target.value as "postgres" | "redis")
-              }
-            >
-              <option value="postgres">Postgres 17</option>
-              <option value="redis">Redis (Valkey 8)</option>
-            </select>
-          </label>
+          <SelectField
+            label="Project"
+            placeholder="Select…"
+            value={projectId}
+            onChange={setProjectId}
+            options={projects.map((p) => ({ value: p.id, label: p.name }))}
+          />
+          <SelectField
+            label="Engine"
+            value={kind}
+            onChange={(v) => setKind(v as "postgres" | "redis")}
+            options={[
+              { value: "postgres", label: "Postgres 17" },
+              { value: "redis", label: "Redis (Valkey 8)" },
+            ]}
+          />
           <label className="flex flex-1 flex-col gap-1 text-sm">
             <span className="text-[var(--muted-foreground)]">Name</span>
             <input
@@ -117,12 +107,7 @@ export function DatabasesPage() {
               placeholder="Primary database"
             />
           </label>
-          <button
-            type="submit"
-            className="rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-foreground)]"
-          >
-            Create database
-          </button>
+          <Button type="submit">Create database</Button>
         </form>
 
         {error ? (

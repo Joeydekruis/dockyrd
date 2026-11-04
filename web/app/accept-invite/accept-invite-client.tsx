@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { type FormEvent, useEffect, useState } from "react";
 import { AuthLayout } from "@/components/dockyard/auth-layout";
+import { Button } from "@/components/dockyard/ui/button";
 import { acceptInvite, previewInvite } from "@/lib/api";
 
 export function AcceptInviteClient() {
@@ -96,14 +97,9 @@ export function AcceptInviteClient() {
             {error}
           </p>
         ) : null}
-        <button
-          type="submit"
-          disabled={loading || !token}
-          className="min-h-11 rounded-[10px] font-mono text-xs uppercase tracking-wide text-white"
-          style={{ background: "var(--ink-navy)" }}
-        >
+        <Button type="submit" disabled={loading || !token} className="w-full">
           {loading ? "Creating account…" : "Accept invite"}
-        </button>
+        </Button>
       </form>
       <p className="mt-6 text-sm">
         <Link href="/sign-in" style={{ color: "var(--link-blue)" }}>

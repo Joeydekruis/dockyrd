@@ -3,6 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { Button } from "@/components/dockyard/ui/button";
 import {
   getGitHubStatus,
   getInstanceSettings,
@@ -267,12 +268,7 @@ export function InstanceSettingsPage() {
                 placeholder="Dockyard <noreply@example.com>"
               />
             </label>
-            <button
-              type="submit"
-              className="rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-foreground)]"
-            >
-              Save instance settings
-            </button>
+            <Button type="submit">Save instance settings</Button>
           </form>
         ) : loading ? (
           <p className="text-sm text-[var(--muted-foreground)]">Loading…</p>
@@ -295,13 +291,13 @@ export function InstanceSettingsPage() {
                 onChange={(e) => setTestTo(e.target.value)}
               />
             </label>
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={() => void onTestSMTP()}
-              className="rounded-lg border border-[var(--border)] px-4 py-2 text-sm"
             >
               Test SMTP
-            </button>
+            </Button>
           </div>
         ) : null}
       </section>
@@ -345,13 +341,9 @@ export function InstanceSettingsPage() {
             </p>
           </dl>
         ) : (
-          <button
-            type="button"
-            onClick={() => void onConnect()}
-            className="rounded-lg bg-[var(--primary)] px-4 py-2 text-sm font-medium text-[var(--primary-foreground)]"
-          >
+          <Button type="button" onClick={() => void onConnect()}>
             Install GitHub App
-          </button>
+          </Button>
         )}
       </section>
     </DashboardShell>

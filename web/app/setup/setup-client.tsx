@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { type FormEvent, useEffect, useState } from "react";
 import { AuthLayout } from "@/components/dockyard/auth-layout";
+import { Button } from "@/components/dockyard/ui/button";
 import { completeSetup, getSetupStatus } from "@/lib/api";
 
 export function SetupClient() {
@@ -95,14 +96,9 @@ export function SetupClient() {
             {error}
           </p>
         ) : null}
-        <button
-          type="submit"
-          disabled={loading}
-          className="mt-2 min-h-11 rounded-[10px] font-mono text-xs uppercase tracking-wide text-white"
-          style={{ background: "var(--ink-navy)" }}
-        >
+        <Button type="submit" disabled={loading} className="mt-2 w-full">
           {loading ? "Saving…" : "Finish setup"}
-        </button>
+        </Button>
       </form>
     </AuthLayout>
   );
