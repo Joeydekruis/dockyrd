@@ -3,16 +3,20 @@
 import { Breadcrumbs } from "@/components/dockyard/ui/breadcrumbs";
 import { Button } from "@/components/dockyard/ui/button";
 import { SearchTrigger } from "@/components/dockyard/ui/search-trigger";
+import { UserMenu } from "@/components/dockyard/user-menu";
+import type { MeResponse } from "@/lib/api";
 
 type AppHeaderProps = {
   title: string;
   breadcrumb?: string;
+  user: MeResponse;
   onOpenSearch: () => void;
 };
 
 export function AppHeader({
   title,
   breadcrumb = "Dashboard",
+  user,
   onOpenSearch,
 }: AppHeaderProps) {
   return (
@@ -26,6 +30,7 @@ export function AppHeader({
         <Button href="https://github.com/Joeydekruis/dockyrd" variant="outline">
           Docs
         </Button>
+        <UserMenu user={user} />
       </div>
     </header>
   );

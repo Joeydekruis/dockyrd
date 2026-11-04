@@ -28,6 +28,7 @@ var searchNavPages = []searchHit{
 	{Kind: "page", Label: "Profile & security", Href: "/settings/profile"},
 	{Kind: "page", Label: "Team", Href: "/settings/team"},
 	{Kind: "page", Label: "Updates", Href: "/settings/updates"},
+	{Kind: "page", Label: "Integrations", Href: "/settings/integrations"},
 	{Kind: "page", Label: "Instance settings", Href: "/settings/instance"},
 }
 

@@ -38,6 +38,7 @@ export { PopoverMenu, type PopoverMenuItem } from "./popover-menu";
 export { ProgressBar } from "./progress-bar";
 export { ProjectCard } from "./project-card";
 export { RadioGroup } from "./radio-group";
+export { ResourceListSection } from "./resource-list-section";
 export { ResourceRow } from "./resource-row";
 export { SearchPalette, type SearchResultRow } from "./search-palette";
 export { SearchTrigger } from "./search-trigger";

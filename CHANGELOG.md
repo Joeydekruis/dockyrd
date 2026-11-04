@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.30] - 2026-11-04
+
+_Finished: 2026-11-04_
+
+### Added
+
+- **Resource catalog pages** — Applications, Databases, Static sites, and Object storage overviews use design **`PageHeader`**, summary **`StatCard`** tiles, filterable **`ResourceListSection`**, and **`ResourceRow`** lists (`web/lib/service-display.ts`)
+- **Settings → Integrations** — GitHub App install/callback and manifest setup URL point to `/settings/integrations`; search palette entry; shared **`SettingsPageBody`** wrapper for settings screens
+- **User menu** — header account menu component + Storybook (`web/components/dockyard/user-menu.tsx`)
+- **Self-update UX** — **`UpdateApplyingOverlay`** and panel health wait helper during apply/restart
+
+### Changed
+
+- **Settings pages** — Profile, Team, Instance, and Updates layouts aligned to settings shell pattern; instance GitHub UI moved to Integrations
+- **Announcement banner & top bar** — dismiss/state styling tweaks; dashboard shell padding with user menu slot
+- **`ResourceRow`** — Next.js `Link` for internal hrefs; optional `subMeta` and `trailing` slots
+
 ## [0.0.29] - 2026-11-04
 
 _Finished: 2026-11-04_

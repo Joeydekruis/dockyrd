@@ -8,6 +8,7 @@ import {
   HardDrive,
   Layers,
   LayoutDashboard,
+  Plug,
   RefreshCw,
   Settings,
   Shield,
@@ -76,6 +77,11 @@ export const settingsInstanceNav: SettingsNavItem[] = [
     icon: SlidersHorizontal,
   },
   { label: "Team", href: "/settings/team", icon: Users },
+  {
+    label: "Integrations",
+    href: "/settings/integrations",
+    icon: Plug,
+  },
   { label: "Updates", href: "/settings/updates", icon: RefreshCw },
 ];
 

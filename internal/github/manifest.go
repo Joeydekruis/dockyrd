@@ -35,7 +35,7 @@ func CreateManifestURL(p ManifestParams) (string, error) {
 		p.WebhookURL = base + "/api/v1/hooks/github"
 	}
 	if p.SetupURL == "" {
-		p.SetupURL = base + "/settings/instance"
+		p.SetupURL = base + "/settings/integrations"
 	}
 	name := strings.TrimSpace(p.AppName)
 	if name == "" {

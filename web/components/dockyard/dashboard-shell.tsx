@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { AppHeader } from "@/components/dockyard/app-header";
 import {
   CommandPalette,
@@ -10,7 +10,7 @@ import {
 import { Sidebar } from "@/components/dockyard/sidebar";
 import { TopBar } from "@/components/dockyard/top-bar";
 import { UpdateAvailableNotifier } from "@/components/dockyard/update-available-modal";
-import { getMe } from "@/lib/api";
+import { getMe, type MeResponse } from "@/lib/api";
 
 type DashboardShellProps = {
   title: string;
@@ -25,16 +25,8 @@ export function DashboardShell({
 }: DashboardShellProps) {
   const router = useRouter();
   const [ready, setReady] = useState(false);
+  const [user, setUser] = useState<MeResponse | null>(null);
   const palette = useCommandPalette();
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [topBarVisible, setTopBarVisible] = useState(true);
-  const [announcementOccupied, setAnnouncementOccupied] = useState(false);
-
-  const onScroll = useCallback(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    setTopBarVisible(el.scrollTop <= 8);
-  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -49,6 +41,7 @@ export function DashboardShell({
           router.replace("/settings/profile");
           return;
         }
+        setUser(me);
         setReady(true);
       })
       .catch(() => {
@@ -59,7 +52,7 @@ export function DashboardShell({
     };
   }, [router]);
 
-  if (!ready) {
+  if (!ready || !user) {
     return (
       <div
         className="flex min-h-dvh items-center justify-center text-sm"
@@ -72,40 +65,27 @@ export function DashboardShell({
 
   return (
     <div className="min-h-dvh" style={{ background: "var(--page-bg)" }}>
-      <TopBar
-        visible={topBarVisible}
-        onOccupiedChange={setAnnouncementOccupied}
-        className="fixed top-0 right-0 left-0 z-50"
-      />
       <Sidebar />
+      <TopBar className="fixed top-0 right-0 left-[232px] z-30" />
       <div
         className="flex min-h-dvh flex-col pl-[232px]"
-        style={{
-          paddingTop: announcementOccupied
-            ? "var(--dockyard-announcement-height, 44px)"
-            : undefined,
-        }}
+        style={{ paddingTop: "var(--dockyard-announcement-height, 44px)" }}
       >
         <div
-          className="sticky z-30 shrink-0"
+          className="sticky z-20 shrink-0"
           style={{
-            top: announcementOccupied
-              ? "var(--dockyard-announcement-height, 44px)"
-              : 0,
+            top: "var(--dockyard-announcement-height, 44px)",
             background: "var(--page-bg)",
           }}
         >
           <AppHeader
             title={title}
             breadcrumb={breadcrumb}
+            user={user}
             onOpenSearch={() => palette.setOpen(true)}
           />
         </div>
-        <div
-          ref={scrollRef}
-          onScroll={onScroll}
-          className="flex-1 overflow-y-auto px-8 py-6"
-        >
+        <div className="flex-1 overflow-y-auto px-8 py-6">
           <UpdateAvailableNotifier />
           {children}
         </div>

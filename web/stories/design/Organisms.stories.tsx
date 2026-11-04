@@ -105,10 +105,17 @@ export const PageHeaderTopBarHero: StoryObj = {
   render: () => (
     <CatalogCanvas>
       <Section title="Page header, top bar & hero">
-        <TopBar visible />
+        <TopBar />
         <AppHeader
           breadcrumb="Home"
           title="Dashboard"
+          user={{
+            id: "1",
+            name: "Joey de Kruis",
+            email: "joey@derisory.nl",
+            role: "owner",
+            totp_enabled: true,
+          }}
           onOpenSearch={() => undefined}
         />
         <PageHeader
