@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 # Dry-run install path for CI: local binary, temp config/data, no systemd.
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"

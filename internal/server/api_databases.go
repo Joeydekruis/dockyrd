@@ -9,6 +9,7 @@ import (
 
 func registerDatabaseRoutes(mux *http.ServeMux, deps apiDeps) {
 	mux.HandleFunc("GET /api/v1/databases", deps.handleListDatabases)
+	registerDatabaseQueryRoutes(mux, deps)
 }
 
 type databaseRowResponse struct {

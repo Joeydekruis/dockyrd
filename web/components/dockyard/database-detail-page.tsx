@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { DatabaseConnectionCards } from "@/components/dockyard/database-connection-cards";
 import { DatabaseDetailSettings } from "@/components/dockyard/database-detail-settings";
-import { ServiceConnectionPanel } from "@/components/dockyard/service-connection-panel";
+import { DatabaseQueryPanel } from "@/components/dockyard/database-query-panel";
 import { ServiceLogsPanel } from "@/components/dockyard/service-logs-panel";
 import { Button } from "@/components/dockyard/ui/button";
 import { Chip } from "@/components/dockyard/ui/chip";
@@ -31,6 +32,7 @@ import { useRouteParam } from "@/lib/use-route-param";
 
 const DETAIL_TABS = [
   { id: "overview", label: "Overview" },
+  { id: "query", label: "Query" },
   { id: "logs", label: "Logs" },
   { id: "settings", label: "Settings" },
 ] as const;
@@ -195,7 +197,7 @@ export function DatabaseDetailPage() {
           />
 
           {tab === "overview" ? (
-            <div className="grid gap-6 lg:grid-cols-2">
+            <div className="space-y-6">
               <section
                 className={RESOURCE_DETAIL_CARD}
                 style={resourceDetailCardStyle()}
@@ -245,11 +247,20 @@ export function DatabaseDetailPage() {
                   />
                 </dl>
               </section>
-              <ServiceConnectionPanel serviceId={row.id} />
+              <DatabaseConnectionCards serviceId={row.id} kind={row.kind} />
             </div>
           ) : null}
 
           {tab === "logs" ? <ServiceLogsPanel serviceId={row.id} /> : null}
+
+          {tab === "query" && row.kind === "postgres" ? (
+            <DatabaseQueryPanel serviceId={row.id} />
+          ) : null}
+          {tab === "query" && row.kind !== "postgres" ? (
+            <p className="text-sm" style={{ color: "var(--muted-text)" }}>
+              Query studio is available for Postgres databases only.
+            </p>
+          ) : null}
 
           {tab === "settings" ? <DatabaseDetailSettings row={row} /> : null}
         </div>

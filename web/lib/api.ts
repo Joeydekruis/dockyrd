@@ -301,8 +301,31 @@ export function listDatabases() {
 
 export function getServiceConnection(serviceId: string, reveal = false) {
   const q = reveal ? "?reveal=1" : "";
-  return apiFetch<{ variables: Record<string, string> }>(
+  return apiFetch<ServiceConnectionResponse>(
     `/api/v1/services/${serviceId}/connection${q}`,
+  );
+}
+
+export type ServiceConnectionEndpoint = {
+  enabled?: boolean;
+  host?: string;
+  port?: number;
+  variables: Record<string, string>;
+};
+
+export type ServiceConnectionResponse = {
+  variables: Record<string, string>;
+  internal: ServiceConnectionEndpoint;
+  external: ServiceConnectionEndpoint;
+};
+
+export function patchDatabasePublicAccess(
+  serviceId: string,
+  input: { enabled: boolean; port?: number },
+) {
+  return apiFetch<{ enabled: boolean; port: number }>(
+    `/api/v1/services/${serviceId}/public-access`,
+    { method: "PATCH", json: input },
   );
 }
 
@@ -348,6 +371,68 @@ export function patchDatabaseBackupPolicy(
   return apiFetch<DatabaseBackupPolicy>(
     `/api/v1/services/${serviceId}/backup-policy`,
     { method: "PATCH", json: input },
+  );
+}
+
+export function triggerDatabaseBackup(serviceId: string) {
+  return apiFetch<{ queued: boolean }>(
+    `/api/v1/services/${serviceId}/backup-runs`,
+    { method: "POST" },
+  );
+}
+
+export function listDatabaseBackupRuns(serviceId: string) {
+  return apiFetch<{ runs: DatabaseBackupRun[] }>(
+    `/api/v1/services/${serviceId}/backup-runs`,
+  );
+}
+
+export type DatabaseBackupRun = {
+  id: string;
+  status: string;
+  destination: string;
+  object_key?: string;
+  size_bytes?: number;
+  started_at?: number;
+  finished_at?: number;
+  error?: string;
+};
+
+export type DatabaseQueryResult = {
+  columns: string[];
+  rows: string[][];
+  row_count: number;
+  truncated: boolean;
+  duration_ms: number;
+};
+
+export function runDatabaseQuery(
+  serviceId: string,
+  sql: string,
+  maxRows = 200,
+) {
+  return apiFetch<DatabaseQueryResult>(`/api/v1/services/${serviceId}/query`, {
+    method: "POST",
+    json: { sql, max_rows: maxRows },
+  });
+}
+
+export type DatabaseSchemaTable = {
+  schema: string;
+  name: string;
+  columns: { name: string; data_type: string }[];
+};
+
+export function getDatabaseSchema(serviceId: string) {
+  return apiFetch<{ tables: DatabaseSchemaTable[] }>(
+    `/api/v1/services/${serviceId}/schema`,
+  );
+}
+
+export function restoreDatabaseBackup(serviceId: string, runId: string) {
+  return apiFetch<{ restored: boolean }>(
+    `/api/v1/services/${serviceId}/backup-runs/${runId}/restore`,
+    { method: "POST" },
   );
 }
 

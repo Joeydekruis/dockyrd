@@ -84,6 +84,85 @@ func (q *Queries) GetDatabaseBackupPolicy(ctx context.Context, serviceID string)
 	return i, err
 }
 
+const getDatabaseBackupRun = `-- name: GetDatabaseBackupRun :one
+SELECT
+  id,
+  service_id,
+  policy_id,
+  status,
+  destination,
+  object_key,
+  size_bytes,
+  started_at,
+  finished_at,
+  error
+FROM database_backup_runs
+WHERE id = ?
+LIMIT 1
+`
+
+func (q *Queries) GetDatabaseBackupRun(ctx context.Context, id string) (DatabaseBackupRun, error) {
+	row := q.db.QueryRowContext(ctx, getDatabaseBackupRun, id)
+	var i DatabaseBackupRun
+	err := row.Scan(
+		&i.ID,
+		&i.ServiceID,
+		&i.PolicyID,
+		&i.Status,
+		&i.Destination,
+		&i.ObjectKey,
+		&i.SizeBytes,
+		&i.StartedAt,
+		&i.FinishedAt,
+		&i.Error,
+	)
+	return i, err
+}
+
+const insertDatabaseBackupRun = `-- name: InsertDatabaseBackupRun :exec
+INSERT INTO database_backup_runs (
+  id,
+  service_id,
+  policy_id,
+  status,
+  destination,
+  object_key,
+  size_bytes,
+  started_at,
+  finished_at,
+  error
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+`
+
+type InsertDatabaseBackupRunParams struct {
+	ID          string
+	ServiceID   string
+	PolicyID    sql.NullString
+	Status      string
+	Destination string
+	ObjectKey   string
+	SizeBytes   int64
+	StartedAt   sql.NullInt64
+	FinishedAt  sql.NullInt64
+	Error       string
+}
+
+func (q *Queries) InsertDatabaseBackupRun(ctx context.Context, arg InsertDatabaseBackupRunParams) error {
+	_, err := q.db.ExecContext(ctx, insertDatabaseBackupRun,
+		arg.ID,
+		arg.ServiceID,
+		arg.PolicyID,
+		arg.Status,
+		arg.Destination,
+		arg.ObjectKey,
+		arg.SizeBytes,
+		arg.StartedAt,
+		arg.FinishedAt,
+		arg.Error,
+	)
+	return err
+}
+
 const listDatabaseBackupRuns = `-- name: ListDatabaseBackupRuns :many
 SELECT
   id,
@@ -139,6 +218,189 @@ func (q *Queries) ListDatabaseBackupRuns(ctx context.Context, arg ListDatabaseBa
 		return nil, err
 	}
 	return items, nil
+}
+
+const listDatabaseBackupRunsForPrune = `-- name: ListDatabaseBackupRunsForPrune :many
+SELECT id, object_key, started_at
+FROM database_backup_runs
+WHERE service_id = ?
+  AND status = 'succeeded'
+  AND destination = ?
+  AND started_at IS NOT NULL
+  AND started_at < ?
+ORDER BY started_at ASC
+`
+
+type ListDatabaseBackupRunsForPruneParams struct {
+	ServiceID   string
+	Destination string
+	StartedAt   sql.NullInt64
+}
+
+type ListDatabaseBackupRunsForPruneRow struct {
+	ID        string
+	ObjectKey string
+	StartedAt sql.NullInt64
+}
+
+func (q *Queries) ListDatabaseBackupRunsForPrune(ctx context.Context, arg ListDatabaseBackupRunsForPruneParams) ([]ListDatabaseBackupRunsForPruneRow, error) {
+	rows, err := q.db.QueryContext(ctx, listDatabaseBackupRunsForPrune, arg.ServiceID, arg.Destination, arg.StartedAt)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListDatabaseBackupRunsForPruneRow
+	for rows.Next() {
+		var i ListDatabaseBackupRunsForPruneRow
+		if err := rows.Scan(&i.ID, &i.ObjectKey, &i.StartedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listDueDatabaseBackupPolicies = `-- name: ListDueDatabaseBackupPolicies :many
+SELECT
+  p.id,
+  p.service_id,
+  p.enabled,
+  p.interval_kind,
+  p.retention_days,
+  p.local_enabled,
+  p.remote_enabled,
+  p.last_run_at,
+  p.next_run_at,
+  p.created_at,
+  p.updated_at,
+  s.kind AS service_kind,
+  s.slug AS service_slug,
+  e.project_id,
+  pr.slug AS project_slug
+FROM database_backup_policies p
+JOIN services s ON s.id = p.service_id
+JOIN environments e ON e.id = s.environment_id
+JOIN projects pr ON pr.id = e.project_id
+WHERE p.enabled = 1
+  AND (p.next_run_at IS NULL OR p.next_run_at <= ?)
+`
+
+type ListDueDatabaseBackupPoliciesRow struct {
+	ID            string
+	ServiceID     string
+	Enabled       int64
+	IntervalKind  string
+	RetentionDays int64
+	LocalEnabled  int64
+	RemoteEnabled int64
+	LastRunAt     sql.NullInt64
+	NextRunAt     sql.NullInt64
+	CreatedAt     sql.NullInt64
+	UpdatedAt     sql.NullInt64
+	ServiceKind   string
+	ServiceSlug   string
+	ProjectID     string
+	ProjectSlug   string
+}
+
+func (q *Queries) ListDueDatabaseBackupPolicies(ctx context.Context, nextRunAt sql.NullInt64) ([]ListDueDatabaseBackupPoliciesRow, error) {
+	rows, err := q.db.QueryContext(ctx, listDueDatabaseBackupPolicies, nextRunAt)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListDueDatabaseBackupPoliciesRow
+	for rows.Next() {
+		var i ListDueDatabaseBackupPoliciesRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.ServiceID,
+			&i.Enabled,
+			&i.IntervalKind,
+			&i.RetentionDays,
+			&i.LocalEnabled,
+			&i.RemoteEnabled,
+			&i.LastRunAt,
+			&i.NextRunAt,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.ServiceKind,
+			&i.ServiceSlug,
+			&i.ProjectID,
+			&i.ProjectSlug,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateDatabaseBackupPolicySchedule = `-- name: UpdateDatabaseBackupPolicySchedule :exec
+UPDATE database_backup_policies
+SET last_run_at = ?, next_run_at = ?, updated_at = ?
+WHERE id = ?
+`
+
+type UpdateDatabaseBackupPolicyScheduleParams struct {
+	LastRunAt sql.NullInt64
+	NextRunAt sql.NullInt64
+	UpdatedAt sql.NullInt64
+	ID        string
+}
+
+func (q *Queries) UpdateDatabaseBackupPolicySchedule(ctx context.Context, arg UpdateDatabaseBackupPolicyScheduleParams) error {
+	_, err := q.db.ExecContext(ctx, updateDatabaseBackupPolicySchedule,
+		arg.LastRunAt,
+		arg.NextRunAt,
+		arg.UpdatedAt,
+		arg.ID,
+	)
+	return err
+}
+
+const updateDatabaseBackupRun = `-- name: UpdateDatabaseBackupRun :exec
+UPDATE database_backup_runs
+SET
+  status = ?,
+  object_key = ?,
+  size_bytes = ?,
+  finished_at = ?,
+  error = ?
+WHERE id = ?
+`
+
+type UpdateDatabaseBackupRunParams struct {
+	Status     string
+	ObjectKey  string
+	SizeBytes  int64
+	FinishedAt sql.NullInt64
+	Error      string
+	ID         string
+}
+
+func (q *Queries) UpdateDatabaseBackupRun(ctx context.Context, arg UpdateDatabaseBackupRunParams) error {
+	_, err := q.db.ExecContext(ctx, updateDatabaseBackupRun,
+		arg.Status,
+		arg.ObjectKey,
+		arg.SizeBytes,
+		arg.FinishedAt,
+		arg.Error,
+		arg.ID,
+	)
+	return err
 }
 
 const upsertBackupTarget = `-- name: UpsertBackupTarget :exec

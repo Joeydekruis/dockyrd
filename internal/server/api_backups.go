@@ -11,6 +11,8 @@ import (
 
 	"github.com/oklog/ulid/v2"
 
+	"github.com/Joeydekruis/dockyrd/internal/audit"
+	"github.com/Joeydekruis/dockyrd/internal/backup"
 	"github.com/Joeydekruis/dockyrd/internal/crypto"
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
 )
@@ -21,6 +23,8 @@ func registerBackupRoutes(mux *http.ServeMux, deps apiDeps) {
 	mux.HandleFunc("GET /api/v1/services/{id}/backup-policy", deps.handleGetDatabaseBackupPolicy)
 	mux.HandleFunc("PATCH /api/v1/services/{id}/backup-policy", deps.handlePatchDatabaseBackupPolicy)
 	mux.HandleFunc("GET /api/v1/services/{id}/backup-runs", deps.handleListDatabaseBackupRuns)
+	mux.HandleFunc("POST /api/v1/services/{id}/backup-runs", deps.handleCreateDatabaseBackupRun)
+	mux.HandleFunc("POST /api/v1/services/{id}/backup-runs/{runId}/restore", deps.handleRestoreDatabaseBackup)
 }
 
 type backupTargetResponse struct {
@@ -237,6 +241,12 @@ func (d apiDeps) handlePatchDatabaseBackupPolicy(w http.ResponseWriter, r *http.
 		return
 	}
 	now := time.Now().Unix()
+	if enabled && (!nextRun.Valid || nextRun.Int64 == 0) {
+		nextRun = sql.NullInt64{Int64: now, Valid: true}
+	}
+	if !enabled {
+		nextRun = sql.NullInt64{}
+	}
 	if err := d.q.UpsertDatabaseBackupPolicy(ctx, sqlc.UpsertDatabaseBackupPolicyParams{
 		ID:            policyID,
 		ServiceID:     serviceID,
@@ -292,6 +302,62 @@ func (d apiDeps) handleListDatabaseBackupRuns(w http.ResponseWriter, r *http.Req
 		out = append(out, item)
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"runs": out})
+}
+
+func (d apiDeps) handleCreateDatabaseBackupRun(w http.ResponseWriter, r *http.Request) {
+	if _, ok := d.requireUser(w, r); !ok {
+		return
+	}
+	serviceID := r.PathValue("id")
+	ctx := r.Context()
+	if err := d.requireDatabaseService(ctx, serviceID); err != nil {
+		writeServiceKindError(w, err)
+		return
+	}
+	policy, err := d.q.GetDatabaseBackupPolicy(ctx, serviceID)
+	if errors.Is(err, sql.ErrNoRows) {
+		writeJSONError(w, http.StatusBadRequest, "configure a backup policy first")
+		return
+	}
+	if err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "database error")
+		return
+	}
+	if policy.LocalEnabled != 1 && policy.RemoteEnabled != 1 {
+		writeJSONError(w, http.StatusBadRequest, "enable local or remote backup on the policy")
+		return
+	}
+	if err := backup.EnqueueManualBackup(ctx, d.q, serviceID, policy.ID); err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "enqueue error")
+		return
+	}
+	writeJSON(w, http.StatusAccepted, map[string]any{"queued": true})
+}
+
+func (d apiDeps) handleRestoreDatabaseBackup(w http.ResponseWriter, r *http.Request) {
+	user, ok := d.requireUser(w, r)
+	if !ok {
+		return
+	}
+	serviceID := r.PathValue("id")
+	runID := r.PathValue("runId")
+	ctx := r.Context()
+	if err := d.requireDatabaseService(ctx, serviceID); err != nil {
+		writeServiceKindError(w, err)
+		return
+	}
+	if err := backup.RestoreRun(ctx, d.cfg, d.q, d.docker, serviceID, runID); err != nil {
+		writeJSONError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	_ = d.audit.Record(ctx, audit.Entry{
+		UserID:     user.ID,
+		Action:     "database.restore",
+		TargetKind: "service",
+		TargetID:   serviceID,
+		Meta:       map[string]any{"run_id": runID},
+	})
+	writeJSON(w, http.StatusOK, map[string]any{"restored": true})
 }
 
 func (d apiDeps) requireDatabaseService(ctx context.Context, serviceID string) error {

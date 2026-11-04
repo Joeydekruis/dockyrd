@@ -8,6 +8,10 @@ description: Run relevant setup.md gates and capture output before GitHub issue 
 
 **Capture output** — paste it in the GitHub handoff comment (not “tests green”).
 
+## Before merge to `main` or GitHub release
+
+Run the **CI parity** matrix in [push-to-main](../../../.cursor/skills/push-to-main/SKILL.md) §2 (especially `./scripts/verify-install.sh` when `scripts/install.sh` or install verify changed). Capture output for the ship report.
+
 ## Before Feature / GitHub issue handoff
 
 - Relevant commands from `docs/project/setup.md` for touched surfaces

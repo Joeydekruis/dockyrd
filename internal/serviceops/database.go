@@ -2,6 +2,7 @@ package serviceops
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/Joeydekruis/dockyrd/internal/docker"
 )
@@ -39,4 +40,28 @@ func TeardownDatabase(ctx context.Context, dc *docker.Client, serviceID, service
 		return dc.RemoveVolume(ctx, docker.VolumeName(serviceSlug))
 	}
 	return nil
+}
+
+// FindDatabaseContainerID returns a running postgres/redis container for a service.
+func FindDatabaseContainerID(ctx context.Context, dc *docker.Client, serviceID string) (string, error) {
+	if dc == nil {
+		return "", fmt.Errorf("docker not available")
+	}
+	managed, err := dc.ListManaged(ctx)
+	if err != nil {
+		return "", err
+	}
+	for _, c := range managed {
+		if c.Identity.ServiceID != serviceID || c.Identity.DeploymentID != "" {
+			continue
+		}
+		if c.Identity.Kind != docker.KindDatabase && c.Identity.Kind != docker.KindRedis {
+			continue
+		}
+		if c.State != "running" {
+			continue
+		}
+		return c.ID, nil
+	}
+	return "", fmt.Errorf("database container not running")
 }

@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.44] - 2026-11-04
+
+_Finished: 2026-11-04_
+
+### Added
+
+- **#48 Database platform** — scheduled and manual Postgres/Redis backups (local + S3), remote retention prune, restore succeeded Postgres runs from local or S3 (`internal/backup/`, `POST …/backup-runs/{runId}/restore`).
+- **Query Studio** — read-only SQL proxy with audit log and schema sidebar (`POST …/query`, `GET …/schema`, `web/components/dockyard/database-query-panel.tsx`).
+- **Database connection UX** — internal/external connection cards and Postgres public access toggle (`PATCH …/public-access`, `web/components/dockyard/database-connection-cards.tsx`).
+- **Database lifecycle** — delete/restart managed databases from detail UI (`DELETE`/`POST …/restart`, settings danger zone).
+
+### Changed
+
+- **Connection API** — `GET …/connection` returns `internal` / `external` blocks for Postgres (https://github.com/Joeydekruis/dockyrd/issues/48).
+
 ## [0.0.43] - 2026-11-04
 
 _Finished: 2026-11-04_

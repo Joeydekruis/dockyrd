@@ -14,13 +14,19 @@ title: Database platform (Query Studio, backups, lifecycle)
 - [x] Migration `00004_database_backups` (targets, policies, runs)
 - [x] Server S3 target API + `/settings/server/backups`
 - [x] Per-database backup policy API + settings modal (hourly/daily/weekly, retention default 30)
-- [ ] Job runner: pg_dump, local retention, S3 upload, restore, manual “Backup now”
+- [x] Job runner: pg_dump / Valkey RDB, local files + S3 upload, scheduler + **Backup now**
+- [x] Restore to **same** Postgres database (`POST …/backup-runs/{runId}/restore`)
+- [x] Remote retention prune after S3 upload (per slug prefix + policy retention)
+- [ ] Restore to **new** database; Redis restore
 
-### Query Studio (slice 3 — open)
-- [ ] Postgres tab: schema browser + SQL editor + audited proxy API
+### Query Studio (slice 3 — MVP)
+- [x] Postgres tab: SQL editor + read-only proxy (`POST …/query`, audit log, row cap)
+- [x] Schema browser (`GET …/schema`, sidebar in Query tab)
+- [ ] Redis CLI; admin **write** queries
 
-### Connection UX (slice 4 — open)
-- [ ] Internal / external connection cards, enable public access
+### Connection UX (slice 4)
+- [x] Internal / external connection cards; enable Postgres public access (`PATCH …/public-access`)
+- [ ] Redis external / public access
 
 ## Notes
 

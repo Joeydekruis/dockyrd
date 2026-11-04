@@ -30,7 +30,7 @@ GoReleaser builds **linux amd64 + arm64** only (see `.goreleaser.yaml`). Both ta
 ## Canonical release sequence
 
 1. Close cycle on **`development`** (changelog + patch bump + push).
-2. Run **full** pre-ship gates from [push-to-main](../skills/push-to-main/SKILL.md) — **`make build` must pass** (GoReleaser runs `pnpm --dir web build` again in CI).
+2. Run **full** pre-ship gates from [push-to-main](../skills/push-to-main/SKILL.md) — **`make build` must pass** (GoReleaser runs `pnpm --dir web build` again in CI). Include **CI parity** checks: at minimum `./scripts/verify-install.sh` (same step as `e2e.yml` / `install-matrix.yml` on push to `main`).
 3. Merge **`development` → `main`**, push **`main`**.
 4. Create and push tag on **`main`** (pick one; do not duplicate):
 

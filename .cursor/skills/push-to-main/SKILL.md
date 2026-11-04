@@ -31,6 +31,14 @@ Confirm HEAD is `development` and up to date.
 
 Run the **full** matrix from `docs/project/setup.md` — not a subset. Abort merge on any failure.
 
+**CI parity:** Anything that runs on push to `main` must pass locally first (see `.github/workflows/`). A common miss is `./scripts/verify-install.sh` — invoked with its shebang (`bash`), not the Actions shell; scripts using `set -o pipefail` must use `#!/usr/bin/env bash`, not `#!/bin/sh` (Ubuntu `/bin/sh` is dash).
+
+| Workflow | Local mirror (before merge) |
+|----------|-----------------------------|
+| `ci.yml` | `make lint`, `make test`, `chmod +x scripts/ensure-ui-stub.sh && ./scripts/ensure-ui-stub.sh`, `pnpm --dir web build`, `./scripts/check-no-radix.sh` |
+| `e2e.yml` | `make build`, `./e2e/smoke.sh`, **`./scripts/verify-install.sh`**, `pnpm --dir e2e test` (Playwright + Docker as in CI) |
+| `install-matrix.yml` | `make build`, **`./scripts/verify-install.sh`** |
+
 When Makefile exists (briefing §14.3):
 
 ```bash
@@ -40,6 +48,7 @@ make build
 ./scripts/check-no-radix.sh
 pnpm --dir web lint
 pnpm --dir web build
+chmod +x scripts/verify-install.sh && ./scripts/verify-install.sh
 go test -tags=integration ./...   # when Docker available
 make e2e                          # when e2e/ exists and Docker available
 ```

@@ -35,7 +35,7 @@ func startBackground(ctx context.Context, cfg config.Config, q *sqlc.Queries, hu
 	eventLog := &eventlog.Logger{Q: q, Hub: hub}
 	inboxDispatch := &inbox.Dispatcher{Cfg: cfg, Q: q, Hub: hub, Log: log}
 	deployRT := &deploy.Runtime{Cfg: cfg, Q: q, Docker: dockerCli, Log: log, Events: eventLog, Inbox: inboxDispatch}
-	worker := &jobs.Worker{Q: q, Deploy: deployRT, Docker: dockerCli, Log: log}
+	worker := &jobs.Worker{Cfg: cfg, Q: q, Deploy: deployRT, Docker: dockerCli, Log: log}
 	rec := &reconcile.Loop{Cfg: cfg, Q: q, Docker: dockerCli, Log: log}
 
 	go metrics.RunHostCollector(ctx, cfg, q, log, 10*time.Second)

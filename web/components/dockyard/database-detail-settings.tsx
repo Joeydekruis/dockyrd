@@ -16,10 +16,14 @@ import {
 } from "@/components/dockyard/ui/settings-detail-block";
 import {
   type DatabaseBackupPolicy,
+  type DatabaseBackupRun,
   type DatabaseRow,
   deleteDatabaseService,
   getDatabaseBackupPolicy,
+  listDatabaseBackupRuns,
   patchDatabaseBackupPolicy,
+  restoreDatabaseBackup,
+  triggerDatabaseBackup,
 } from "@/lib/api";
 import {
   RESOURCE_DETAIL_CARD,
@@ -44,6 +48,9 @@ export function DatabaseDetailSettings({ row }: DatabaseDetailSettingsProps) {
   });
   const [backupBusy, setBackupBusy] = useState(false);
   const [backupError, setBackupError] = useState<string | null>(null);
+  const [runs, setRuns] = useState<DatabaseBackupRun[]>([]);
+  const [runNowBusy, setRunNowBusy] = useState(false);
+  const [restoreBusy, setRestoreBusy] = useState<string | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteBusy, setDeleteBusy] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -51,10 +58,15 @@ export function DatabaseDetailSettings({ row }: DatabaseDetailSettingsProps) {
 
   const loadPolicy = useCallback(async () => {
     try {
-      const p = await getDatabaseBackupPolicy(row.id);
+      const [p, runList] = await Promise.all([
+        getDatabaseBackupPolicy(row.id),
+        listDatabaseBackupRuns(row.id),
+      ]);
       setPolicy(p);
+      setRuns(runList.runs);
     } catch {
       setPolicy(null);
+      setRuns([]);
     }
   }, [row.id]);
 
@@ -74,6 +86,32 @@ export function DatabaseDetailSettings({ row }: DatabaseDetailSettingsProps) {
     }
     setBackupError(null);
     setBackupModal(true);
+  }
+
+  async function onRestore(runId: string) {
+    setRestoreBusy(runId);
+    setBackupError(null);
+    try {
+      await restoreDatabaseBackup(row.id, runId);
+      await loadPolicy();
+    } catch (e) {
+      setBackupError(e instanceof Error ? e.message : "Restore failed");
+    } finally {
+      setRestoreBusy(null);
+    }
+  }
+
+  async function runBackupNow() {
+    setRunNowBusy(true);
+    setBackupError(null);
+    try {
+      await triggerDatabaseBackup(row.id);
+      await loadPolicy();
+    } catch (e) {
+      setBackupError(e instanceof Error ? e.message : "Backup failed to queue");
+    } finally {
+      setRunNowBusy(false);
+    }
   }
 
   async function saveBackupPolicy() {
@@ -139,7 +177,7 @@ export function DatabaseDetailSettings({ row }: DatabaseDetailSettingsProps) {
         />
         <SettingsDetailBlock
           title="Backups"
-          description="Scheduled dumps on this server and optional upload to the server S3 target. Restore and manual runs ship next."
+          description="Scheduled dumps on this server and optional upload to the server S3 target."
           rows={[
             {
               label: "Schedule",
@@ -171,6 +209,52 @@ export function DatabaseDetailSettings({ row }: DatabaseDetailSettingsProps) {
           actionLabel="Configure"
           onAction={openBackupModal}
         />
+        <div className="mt-4 flex flex-wrap gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            disabled={runNowBusy || !policy?.enabled}
+            onClick={() => void runBackupNow()}
+          >
+            {runNowBusy ? "Queuing…" : "Backup now"}
+          </Button>
+        </div>
+        {runs.length > 0 ? (
+          <ul
+            className="mt-4 space-y-2 text-sm"
+            style={{ color: "var(--muted-text)" }}
+          >
+            {runs.slice(0, 5).map((run) => (
+              <li
+                key={run.id}
+                className="flex flex-wrap items-center justify-between gap-2 font-mono text-[12px]"
+              >
+                <span>
+                  {run.status} · {run.destination}
+                  {run.started_at
+                    ? ` · ${new Date(run.started_at * 1000).toLocaleString()}`
+                    : ""}
+                </span>
+                {run.status === "succeeded" && row.kind === "postgres" ? (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="text-[11px]"
+                    disabled={restoreBusy === run.id}
+                    onClick={() => void onRestore(run.id)}
+                  >
+                    {restoreBusy === run.id ? "Restoring…" : "Restore"}
+                  </Button>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        {backupError ? (
+          <p className="mt-2 text-sm text-red-600" role="alert">
+            {backupError}
+          </p>
+        ) : null}
         <p className="text-sm" style={{ color: "var(--muted-text)" }}>
           Remote backups need a server target in{" "}
           <Link
@@ -213,7 +297,7 @@ export function DatabaseDetailSettings({ row }: DatabaseDetailSettingsProps) {
       <Modal
         open={backupModal}
         title="Backup schedule"
-        description="Dockyard runs pg_dump (Postgres) or a snapshot job (Redis) on this interval. Jobs execute in a follow-up release."
+        description="Dockyard runs pg_dump (Postgres) or Valkey RDB snapshots on this interval."
         onClose={() => setBackupModal(false)}
         footer={
           <>

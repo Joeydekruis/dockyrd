@@ -2,8 +2,10 @@ package server
 
 import (
 	"database/sql"
+	"encoding/json"
 	"errors"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/Joeydekruis/dockyrd/internal/crypto"
@@ -40,29 +42,69 @@ func (d apiDeps) handleServiceConnection(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	raw := serviceConfigJSON(row.Config)
-	vars := map[string]string{}
-	switch row.Kind {
+	writeJSON(w, http.StatusOK, buildServiceConnectionResponse(d.cfg.PublicIPv4, row.Kind, row.Slug, raw, key, reveal))
+}
+
+func buildServiceConnectionResponse(publicHost, kind, slug string, raw json.RawMessage, key []byte, reveal bool) map[string]any {
+	switch kind {
 	case "postgres":
 		pg, pw, err := dbkind.ParsePostgres(raw, key)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, "config error")
-			return
+			return map[string]any{"variables": map[string]string{}}
 		}
-		vars = dbkind.Published("postgres", row.Slug, pw, pg)
+		internal := dbkind.Published("postgres", slug, pw, pg)
+		maskConnectionSecrets(internal, reveal)
+		external := map[string]any{
+			"enabled":   pg.PublicPort > 0,
+			"host":      "",
+			"port":      pg.PublicPort,
+			"variables": map[string]string{},
+		}
+		if pg.PublicPort > 0 {
+			host := externalHost(publicHost)
+			extVars := dbkind.PublishedPostgresAt(host, strconv.Itoa(pg.PublicPort), pw, pg)
+			maskConnectionSecrets(extVars, reveal)
+			external = map[string]any{
+				"enabled":   true,
+				"host":      host,
+				"port":      pg.PublicPort,
+				"variables": extVars,
+			}
+		}
+		return map[string]any{
+			"variables": internal,
+			"internal":  map[string]any{"variables": internal},
+			"external":  external,
+		}
 	case "redis":
 		_, pw, err := dbkind.ParseRedis(raw, key)
 		if err != nil {
-			writeJSONError(w, http.StatusInternalServerError, "config error")
-			return
+			return map[string]any{"variables": map[string]string{}}
 		}
-		vars = dbkind.Published("redis", row.Slug, pw, dbkind.PostgresConfig{})
+		internal := dbkind.Published("redis", slug, pw, dbkind.PostgresConfig{})
+		maskConnectionSecrets(internal, reveal)
+		return map[string]any{
+			"variables": internal,
+			"internal":  map[string]any{"variables": internal},
+			"external": map[string]any{
+				"enabled":   false,
+				"host":      "",
+				"port":      0,
+				"variables": map[string]string{},
+			},
+		}
+	default:
+		return map[string]any{"variables": map[string]string{}}
 	}
-	if !reveal {
-		for k := range vars {
-			if strings.Contains(strings.ToUpper(k), "PASSWORD") || k == "DATABASE_URL" || k == "REDIS_URL" {
-				vars[k] = "••••••••"
-			}
+}
+
+func maskConnectionSecrets(vars map[string]string, reveal bool) {
+	if reveal {
+		return
+	}
+	for k := range vars {
+		if strings.Contains(strings.ToUpper(k), "PASSWORD") || k == "DATABASE_URL" || k == "REDIS_URL" {
+			vars[k] = "••••••••"
 		}
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"variables": vars})
 }

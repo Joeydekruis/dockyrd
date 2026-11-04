@@ -10,15 +10,18 @@ import (
 
 	"github.com/oklog/ulid/v2"
 
+	"github.com/Joeydekruis/dockyrd/internal/config"
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
 	"github.com/Joeydekruis/dockyrd/internal/deploy"
 	"github.com/Joeydekruis/dockyrd/internal/docker"
+	"github.com/Joeydekruis/dockyrd/internal/backup"
 )
 
 const (
-	KindDeploy = "deploy"
-	KindPrune  = "prune"
-	lockSeconds = 120
+	KindDeploy         = "deploy"
+	KindPrune          = "prune"
+	KindDatabaseBackup = "database_backup"
+	lockSeconds        = 120
 )
 
 // DeployPayload is stored on deploy jobs.
@@ -28,6 +31,7 @@ type DeployPayload struct {
 
 // Worker processes the SQLite job queue.
 type Worker struct {
+	Cfg     config.Config
 	Q       *sqlc.Queries
 	Deploy  *deploy.Runtime
 	Docker  *docker.Client
@@ -100,6 +104,17 @@ func (w *Worker) ProcessOnce(ctx context.Context) (bool, error) {
 		} else {
 			runErr = RunImagePrune(ctx, w.Docker, payload.ServiceSlug)
 		}
+	case row.Kind.Valid && row.Kind.String == KindDatabaseBackup:
+		var payload backup.JobPayload
+		raw, err := payloadBytes(row.Payload)
+		if err != nil {
+			runErr = err
+		} else if err := json.Unmarshal(raw, &payload); err != nil {
+			runErr = err
+		} else {
+			runner := &backup.Runner{Cfg: w.Cfg, Q: w.Q, Docker: w.Docker, Log: w.Log}
+			runErr = runner.RunJob(ctx, payload)
+		}
 	default:
 		runErr = errors.New("unknown job kind")
 	}
@@ -127,6 +142,9 @@ func (w *Worker) RunLoop(ctx context.Context, interval time.Duration) {
 		case <-ctx.Done():
 			return
 		case <-t.C:
+			if w.Q != nil {
+				_ = backup.EnqueueDuePolicies(ctx, w.Q, time.Now().Unix())
+			}
 			for {
 				done, err := w.ProcessOnce(ctx)
 				if err != nil || !done {

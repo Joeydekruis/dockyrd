@@ -136,6 +136,11 @@ func (c Config) SitesDir() string {
 	return filepath.Join(c.DataDir, "sites")
 }
 
+// DatabaseBackupsDir is the root for on-server database dump files.
+func (c Config) DatabaseBackupsDir() string {
+	return filepath.Join(c.DataDir, "backups", "databases")
+}
+
 // EnvFilePath is the optional systemd EnvironmentFile.
 func (c Config) EnvFilePath() string {
 	return filepath.Join(c.ConfigDir, "dockyard.env")
