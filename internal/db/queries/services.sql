@@ -109,6 +109,17 @@ JOIN projects p ON p.id = e.project_id
 WHERE s.kind = ?
 ORDER BY s.created_at DESC;
 
+-- name: GetServiceAnalyticsLabel :one
+SELECT
+  p.name AS project_name,
+  p.slug AS project_slug,
+  e.name AS environment_name
+FROM services s
+JOIN environments e ON e.id = s.environment_id
+JOIN projects p ON p.id = e.project_id
+WHERE s.id = ?
+LIMIT 1;
+
 -- name: UpdateServiceConfig :exec
 UPDATE services
 SET config = ?, updated_at = ?

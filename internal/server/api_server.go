@@ -14,6 +14,7 @@ import (
 func registerServerRoutes(mux *http.ServeMux, deps apiDeps) {
 	mux.HandleFunc("GET /api/v1/server", deps.handleServerInfo)
 	mux.HandleFunc("GET /api/v1/server/metrics", deps.handleServerMetrics)
+	mux.HandleFunc("GET /api/v1/server/metrics/containers", deps.handleServerMetricsContainers)
 	mux.HandleFunc("GET /api/v1/server/containers", deps.handleServerContainers)
 	mux.HandleFunc("GET /api/v1/server/cleanup", deps.handleServerCleanupGet)
 	mux.HandleFunc("POST /api/v1/server/cleanup", deps.handleServerCleanupPost)
@@ -26,6 +27,8 @@ type hostMetricPoint struct {
 	MemTotal  int64   `json:"mem_total"`
 	DiskUsed  int64   `json:"disk_used"`
 	DiskTotal int64   `json:"disk_total"`
+	NetRx     int64   `json:"net_rx"`
+	NetTx     int64   `json:"net_tx"`
 	Load1     float64 `json:"load1"`
 }
 
@@ -39,6 +42,8 @@ func (d apiDeps) handleServerMetrics(w http.ResponseWriter, r *http.Request) {
 	}
 	since := time.Now().UTC().Add(-24 * time.Hour).Unix()
 	switch rangeQ {
+	case "30d":
+		since = time.Now().UTC().Add(-30 * 24 * time.Hour).Unix()
 	case "7d":
 		since = time.Now().UTC().Add(-7 * 24 * time.Hour).Unix()
 	case "1h":
@@ -62,6 +67,8 @@ func (d apiDeps) handleServerMetrics(w http.ResponseWriter, r *http.Request) {
 			MemTotal:  nullInt64(row.MemTotal),
 			DiskUsed:  nullInt64(row.DiskUsed),
 			DiskTotal: nullInt64(row.DiskTotal),
+			NetRx:     nullInt64(row.NetRx),
+			NetTx:     nullInt64(row.NetTx),
 			Load1:     nullFloat64(row.Load1),
 		})
 	}

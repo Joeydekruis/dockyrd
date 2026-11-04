@@ -29,6 +29,7 @@ type ContainerRow struct {
 	State     string `json:"state"`
 	Kind      string `json:"kind,omitempty"`
 	ServiceID string `json:"service_id,omitempty"`
+	CreatedAt int64  `json:"created_at,omitempty"`
 }
 
 // CleanupSummary collects disk usage and stopped unmanaged container count.
@@ -91,6 +92,7 @@ func (c *Client) ListContainerRows(ctx context.Context) ([]ContainerRow, error) 
 			State:     m.State,
 			Kind:      m.Identity.Kind,
 			ServiceID: m.Identity.ServiceID,
+			CreatedAt: m.Created,
 		})
 	}
 	return out, nil

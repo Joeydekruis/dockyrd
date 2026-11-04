@@ -371,7 +371,7 @@ export function listGitHubRepos(query?: string) {
   return apiFetch<{ repos: GitHubRepo[] }>(`/api/v1/github/repos${q}`);
 }
 
-export type MetricRange = "1h" | "24h" | "7d";
+export type MetricRange = "1h" | "24h" | "7d" | "30d";
 
 export type HostMetricPoint = {
   ts: number;
@@ -380,6 +380,8 @@ export type HostMetricPoint = {
   mem_total: number;
   disk_used: number;
   disk_total: number;
+  net_rx: number;
+  net_tx: number;
   load1: number;
 };
 
@@ -492,6 +494,11 @@ export type ServerContainer = {
   state: string;
   kind?: string;
   service_id?: string;
+  created_at?: number;
+  project_label?: string;
+  cpu_percent?: number;
+  memory_bytes?: number;
+  memory_limit?: number;
 };
 
 export type CleanupSummary = {
@@ -515,10 +522,34 @@ export function getServerCleanup() {
 export type ServerInfo = {
   version: string;
   uptime_sec: number;
+  hostname?: string;
+  cpu_count?: number;
+  swap_used?: number;
+  swap_total?: number;
+  cores?: { core: number; cpu: number }[];
   update_available: boolean;
   latest_tag?: string;
   release_notes?: string;
 };
+
+export type ContainerMetricSnapshot = {
+  service_id: string;
+  name?: string;
+  project_label?: string;
+  ts: number;
+  cpu_percent: number;
+  memory_bytes: number;
+  memory_limit: number;
+  net_rx: number;
+  net_tx: number;
+};
+
+export function getServerContainerMetrics(range: MetricRange = "24h") {
+  const q = new URLSearchParams({ range });
+  return apiFetch<{ range: MetricRange; metrics: ContainerMetricSnapshot[] }>(
+    `/api/v1/server/metrics/containers?${q}`,
+  );
+}
 
 export function getServerInfo() {
   return apiFetch<ServerInfo>("/api/v1/server");

@@ -10,6 +10,47 @@ import (
 	"database/sql"
 )
 
+const insertMetricContainer = `-- name: InsertMetricContainer :exec
+INSERT OR REPLACE INTO metric_container (
+  ts,
+  res,
+  service_id,
+  cpu,
+  mem,
+  mem_limit,
+  net_rx,
+  net_tx,
+  restarts
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+`
+
+type InsertMetricContainerParams struct {
+	Ts        sql.NullInt64
+	Res       sql.NullInt64
+	ServiceID sql.NullString
+	Cpu       sql.NullFloat64
+	Mem       sql.NullInt64
+	MemLimit  sql.NullInt64
+	NetRx     sql.NullInt64
+	NetTx     sql.NullInt64
+	Restarts  sql.NullInt64
+}
+
+func (q *Queries) InsertMetricContainer(ctx context.Context, arg InsertMetricContainerParams) error {
+	_, err := q.db.ExecContext(ctx, insertMetricContainer,
+		arg.Ts,
+		arg.Res,
+		arg.ServiceID,
+		arg.Cpu,
+		arg.Mem,
+		arg.MemLimit,
+		arg.NetRx,
+		arg.NetTx,
+		arg.Restarts,
+	)
+	return err
+}
+
 const insertMetricHost = `-- name: InsertMetricHost :exec
 INSERT OR REPLACE INTO metric_host (
   ts,
@@ -52,6 +93,128 @@ func (q *Queries) InsertMetricHost(ctx context.Context, arg InsertMetricHostPara
 		arg.Load1,
 	)
 	return err
+}
+
+const listLatestContainerMetrics = `-- name: ListLatestContainerMetrics :many
+SELECT
+  m.service_id,
+  m.ts,
+  m.cpu,
+  m.mem,
+  m.mem_limit,
+  m.net_rx,
+  m.net_tx,
+  m.restarts
+FROM metric_container m
+WHERE m.res = ?
+  AND m.ts = (
+    SELECT MAX(m2.ts)
+    FROM metric_container m2
+    WHERE m2.res = ?
+      AND m2.service_id = m.service_id
+  )
+`
+
+type ListLatestContainerMetricsParams struct {
+	Res   sql.NullInt64
+	Res_2 sql.NullInt64
+}
+
+type ListLatestContainerMetricsRow struct {
+	ServiceID sql.NullString
+	Ts        sql.NullInt64
+	Cpu       sql.NullFloat64
+	Mem       sql.NullInt64
+	MemLimit  sql.NullInt64
+	NetRx     sql.NullInt64
+	NetTx     sql.NullInt64
+	Restarts  sql.NullInt64
+}
+
+func (q *Queries) ListLatestContainerMetrics(ctx context.Context, arg ListLatestContainerMetricsParams) ([]ListLatestContainerMetricsRow, error) {
+	rows, err := q.db.QueryContext(ctx, listLatestContainerMetrics, arg.Res, arg.Res_2)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListLatestContainerMetricsRow
+	for rows.Next() {
+		var i ListLatestContainerMetricsRow
+		if err := rows.Scan(
+			&i.ServiceID,
+			&i.Ts,
+			&i.Cpu,
+			&i.Mem,
+			&i.MemLimit,
+			&i.NetRx,
+			&i.NetTx,
+			&i.Restarts,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listMetricContainerSince = `-- name: ListMetricContainerSince :many
+SELECT
+  ts,
+  res,
+  service_id,
+  cpu,
+  mem,
+  mem_limit,
+  net_rx,
+  net_tx,
+  restarts
+FROM metric_container
+WHERE res = ? AND ts >= ?
+ORDER BY ts ASC
+`
+
+type ListMetricContainerSinceParams struct {
+	Res sql.NullInt64
+	Ts  sql.NullInt64
+}
+
+func (q *Queries) ListMetricContainerSince(ctx context.Context, arg ListMetricContainerSinceParams) ([]MetricContainer, error) {
+	rows, err := q.db.QueryContext(ctx, listMetricContainerSince, arg.Res, arg.Ts)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []MetricContainer
+	for rows.Next() {
+		var i MetricContainer
+		if err := rows.Scan(
+			&i.Ts,
+			&i.Res,
+			&i.ServiceID,
+			&i.Cpu,
+			&i.Mem,
+			&i.MemLimit,
+			&i.NetRx,
+			&i.NetTx,
+			&i.Restarts,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const listMetricHostSince = `-- name: ListMetricHostSince :many

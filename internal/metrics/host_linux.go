@@ -18,6 +18,13 @@ var cpuPrev struct {
 	ok    bool
 }
 
+var corePrev struct {
+	sync.Mutex
+	total map[int]int64
+	idle  map[int]int64
+	ok    bool
+}
+
 // SampleHost reads CPU, memory, disk, and load from /proc (Linux).
 func SampleHost(dataDir string) (HostSample, error) {
 	var s HostSample
@@ -38,6 +45,15 @@ func SampleHost(dataDir string) (HostSample, error) {
 			s.DiskTotal = dt
 		}
 	}
+	if rx, tx, err := readNetBytes(); err == nil {
+		s.NetRx = rx
+		s.NetTx = tx
+	}
+	if swapUsed, swapTotal, err := readSwap(); err == nil {
+		s.SwapUsed = swapUsed
+		s.SwapTotal = swapTotal
+	}
+	s.CoreUsage = readPerCoreCPUFractions()
 	return s, nil
 }
 
@@ -76,6 +92,111 @@ func readMemInfo() (used, total int64, err error) {
 		used = total - free - buffers - cached
 	}
 	return used, total, sc.Err()
+}
+
+func readSwap() (used, total int64, err error) {
+	f, err := os.Open("/proc/meminfo")
+	if err != nil {
+		return 0, 0, err
+	}
+	defer f.Close()
+	var swapFree int64
+	sc := bufio.NewScanner(f)
+	for sc.Scan() {
+		fields := strings.Fields(sc.Text())
+		if len(fields) < 2 {
+			continue
+		}
+		val, _ := strconv.ParseInt(fields[1], 10, 64)
+		val *= 1024
+		switch fields[0] {
+		case "SwapTotal:":
+			total = val
+		case "SwapFree:":
+			swapFree = val
+		}
+	}
+	if total > 0 {
+		used = total - swapFree
+	}
+	return used, total, sc.Err()
+}
+
+func readPerCoreCPUFractions() []float64 {
+	counters, err := readPerCoreCounters()
+	if err != nil || len(counters) == 0 {
+		return nil
+	}
+	corePrev.Lock()
+	defer corePrev.Unlock()
+	out := make([]float64, 0, len(counters))
+	if !corePrev.ok {
+		corePrev.total = make(map[int]int64, len(counters))
+		corePrev.idle = make(map[int]int64, len(counters))
+		for idx, c := range counters {
+			corePrev.total[idx] = c.total
+			corePrev.idle[idx] = c.idle
+			out = append(out, 0)
+		}
+		corePrev.ok = true
+		return out
+	}
+	for idx, c := range counters {
+		pt := corePrev.total[idx]
+		pi := corePrev.idle[idx]
+		corePrev.total[idx] = c.total
+		corePrev.idle[idx] = c.idle
+		dTotal := c.total - pt
+		dIdle := c.idle - pi
+		busy := 0.0
+		if dTotal > 0 {
+			busy = 1 - float64(dIdle)/float64(dTotal)
+		}
+		if busy < 0 {
+			busy = 0
+		}
+		if busy > 1 {
+			busy = 1
+		}
+		out = append(out, busy)
+	}
+	return out
+}
+
+type coreCounter struct {
+	total int64
+	idle  int64
+}
+
+func readPerCoreCounters() (map[int]coreCounter, error) {
+	f, err := os.Open("/proc/stat")
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+	out := make(map[int]coreCounter)
+	sc := bufio.NewScanner(f)
+	for sc.Scan() {
+		fields := strings.Fields(sc.Text())
+		if len(fields) < 5 || !strings.HasPrefix(fields[0], "cpu") || fields[0] == "cpu" {
+			continue
+		}
+		idStr := strings.TrimPrefix(fields[0], "cpu")
+		id, err := strconv.Atoi(idStr)
+		if err != nil {
+			continue
+		}
+		var total, idle int64
+		for i := 1; i < len(fields); i++ {
+			v, _ := strconv.ParseInt(fields[i], 10, 64)
+			total += v
+			if i == 4 {
+				idle = v
+			}
+		}
+		out[id] = coreCounter{total: total, idle: idle}
+	}
+	return out, sc.Err()
 }
 
 // readCPUUsageFraction returns busy CPU in [0,1] from delta since the prior sample.
@@ -153,4 +274,36 @@ func diskUsage(path string) (used, total int64, err error) {
 	total = int64(st.Blocks) * int64(st.Bsize)
 	free := int64(st.Bfree) * int64(st.Bsize)
 	return total - free, total, nil
+}
+
+func readNetBytes() (rx, tx int64, err error) {
+	f, err := os.Open("/proc/net/dev")
+	if err != nil {
+		return 0, 0, err
+	}
+	defer f.Close()
+	sc := bufio.NewScanner(f)
+	for sc.Scan() {
+		line := strings.TrimSpace(sc.Text())
+		if strings.HasPrefix(line, "Inter-|") || strings.HasPrefix(line, " face |") {
+			continue
+		}
+		parts := strings.Split(line, ":")
+		if len(parts) != 2 {
+			continue
+		}
+		iface := strings.TrimSpace(parts[0])
+		if iface == "lo" {
+			continue
+		}
+		fields := strings.Fields(parts[1])
+		if len(fields) < 9 {
+			continue
+		}
+		r, _ := strconv.ParseInt(fields[0], 10, 64)
+		t, _ := strconv.ParseInt(fields[8], 10, 64)
+		rx += r
+		tx += t
+	}
+	return rx, tx, sc.Err()
 }

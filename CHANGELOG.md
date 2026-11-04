@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.33] - 2026-11-04
+
+_Finished: 2026-11-04_
+
+### Added
+
+- **#46 / Container metrics** — `RunContainerCollector` (Docker stats → `metric_container`), `GET /api/v1/server/metrics/containers`, enriched `GET /api/v1/server/containers` with project label and live cpu/memory — https://github.com/Joeydekruis/dockyrd/issues/46
+- **#47 / Analytics dashboard** — Overview + CPU/Memory/Disk/Network tabs, ECharts (`#3B93F5` theme), meta chips, per-core CPU, top containers, `ServerContainersTable` — https://github.com/Joeydekruis/dockyrd/issues/47
+- **Host metrics API** — `30d` range, `net_rx`/`net_tx` on points; live swap + per-core usage on `GET /api/v1/server` (Linux)
+
+### Changed
+
+- **Analytics** — replaces single-page sparkline layout; events/cleanup/running containers on Overview tab
+- **`echarts`** dependency in `web/` for dashboard charts
+
 ## [0.0.32] - 2026-11-04
 
 _Finished: 2026-11-04_

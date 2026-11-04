@@ -37,6 +37,9 @@ func startBackground(ctx context.Context, cfg config.Config, q *sqlc.Queries, hu
 	rec := &reconcile.Loop{Cfg: cfg, Q: q, Docker: dockerCli, Log: log}
 
 	go metrics.RunHostCollector(ctx, cfg, q, log, 10*time.Second)
+	if dockerCli != nil {
+		go metrics.RunContainerCollector(ctx, dockerCli, q, log, 15*time.Second)
+	}
 
 	if dockerCli != nil {
 		if err := dockerCli.EnsureEdgeNetwork(ctx); err != nil && log != nil {

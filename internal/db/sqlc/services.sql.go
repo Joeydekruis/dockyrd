@@ -70,6 +70,31 @@ func (q *Queries) GetEnvironmentByProjectAndName(ctx context.Context, arg GetEnv
 	return i, err
 }
 
+const getServiceAnalyticsLabel = `-- name: GetServiceAnalyticsLabel :one
+SELECT
+  p.name AS project_name,
+  p.slug AS project_slug,
+  e.name AS environment_name
+FROM services s
+JOIN environments e ON e.id = s.environment_id
+JOIN projects p ON p.id = e.project_id
+WHERE s.id = ?
+LIMIT 1
+`
+
+type GetServiceAnalyticsLabelRow struct {
+	ProjectName     string
+	ProjectSlug     string
+	EnvironmentName string
+}
+
+func (q *Queries) GetServiceAnalyticsLabel(ctx context.Context, id string) (GetServiceAnalyticsLabelRow, error) {
+	row := q.db.QueryRowContext(ctx, getServiceAnalyticsLabel, id)
+	var i GetServiceAnalyticsLabelRow
+	err := row.Scan(&i.ProjectName, &i.ProjectSlug, &i.EnvironmentName)
+	return i, err
+}
+
 const getServiceByID = `-- name: GetServiceByID :one
 SELECT
   id,

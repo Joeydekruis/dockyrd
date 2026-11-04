@@ -91,6 +91,7 @@ func (c *Client) ListManaged(ctx context.Context) ([]ManagedContainer, error) {
 			ID:       item.ID,
 			Name:     strings.TrimPrefix(item.Names[0], "/"),
 			State:    item.State,
+			Created:  item.Created,
 			Identity: id,
 		})
 	}
@@ -102,5 +103,6 @@ type ManagedContainer struct {
 	ID       string
 	Name     string
 	State    string
+	Created  int64
 	Identity Identity
 }

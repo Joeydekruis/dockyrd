@@ -7,6 +7,11 @@ export { Backdrop } from "./backdrop";
 export { Breadcrumbs } from "./breadcrumbs";
 export { Button, type ButtonVariant } from "./button";
 export { ChartPanel } from "./chart-panel";
+export { EChart } from "./echart";
+export {
+  ServerContainersTable,
+  type ServerContainersTableRow,
+} from "./server-containers-table";
 export { Checkbox } from "./checkbox";
 export { Chip } from "./chip";
 export { CodeInline } from "./code-inline";

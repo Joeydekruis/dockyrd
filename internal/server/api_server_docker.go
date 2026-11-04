@@ -30,7 +30,9 @@ func (d apiDeps) handleServerContainers(w http.ResponseWriter, r *http.Request) 
 		writeJSONError(w, http.StatusInternalServerError, "docker error")
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"containers": rows})
+	writeJSON(w, http.StatusOK, map[string]any{
+		"containers": d.enrichContainerRows(r.Context(), rows),
+	})
 }
 
 func (d apiDeps) handleServerCleanupGet(w http.ResponseWriter, r *http.Request) {
