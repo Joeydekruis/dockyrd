@@ -23,6 +23,8 @@ export { EnvVarRow } from "./env-var-row";
 export { EventFeedItem } from "./event-feed-item";
 export { Field } from "./field";
 export { FilterChips } from "./filter-chips";
+export { HeroPromoCard } from "./hero-promo-card";
+export { ResourceListAddLink } from "./resource-list-add-link";
 export { IconButton } from "./icon-button";
 export { IconTile } from "./icon-tile";
 export { InlineLink } from "./inline-link";
@@ -66,6 +68,7 @@ export { type TimeRange, TimeRangeToggle } from "./time-range-toggle";
 export { TokenSwatch } from "./token-swatch";
 export { Tooltip, TooltipInlineIcon, type TooltipPlacement } from "./tooltip";
 export { type TypographyRole, TypographySample } from "./typography-sample";
+export { WizardModalShell, type WizardStepDef } from "./wizard-modal-shell";
 export {
   UploadDropzone,
   type UploadDropzoneState,

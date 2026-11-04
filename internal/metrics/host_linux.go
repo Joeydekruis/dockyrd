@@ -7,8 +7,16 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"sync"
 	"syscall"
 )
+
+var cpuPrev struct {
+	sync.Mutex
+	total int64
+	idle  int64
+	ok    bool
+}
 
 // SampleHost reads CPU, memory, disk, and load from /proc (Linux).
 func SampleHost(dataDir string) (HostSample, error) {
@@ -18,7 +26,7 @@ func SampleHost(dataDir string) (HostSample, error) {
 		s.MemUsed = memUsed
 		s.MemTotal = memTotal
 	}
-	if cpu, err := readCPUUsage(); err == nil {
+	if cpu, ok := readCPUUsageFraction(); ok {
 		s.CPU = cpu
 	}
 	if load, err := readLoad(); err == nil {
@@ -70,21 +78,51 @@ func readMemInfo() (used, total int64, err error) {
 	return used, total, sc.Err()
 }
 
-func readCPUUsage() (float64, error) {
+// readCPUUsageFraction returns busy CPU in [0,1] from delta since the prior sample.
+func readCPUUsageFraction() (float64, bool) {
+	total, idle, err := readCPUCounters()
+	if err != nil || total <= 0 {
+		return 0, false
+	}
+	cpuPrev.Lock()
+	defer cpuPrev.Unlock()
+	if !cpuPrev.ok {
+		cpuPrev.total = total
+		cpuPrev.idle = idle
+		cpuPrev.ok = true
+		return 0, true
+	}
+	dTotal := total - cpuPrev.total
+	dIdle := idle - cpuPrev.idle
+	cpuPrev.total = total
+	cpuPrev.idle = idle
+	if dTotal <= 0 {
+		return 0, true
+	}
+	busy := 1 - float64(dIdle)/float64(dTotal)
+	if busy < 0 {
+		busy = 0
+	}
+	if busy > 1 {
+		busy = 1
+	}
+	return busy, true
+}
+
+func readCPUCounters() (total, idle int64, err error) {
 	f, err := os.Open("/proc/stat")
 	if err != nil {
-		return 0, err
+		return 0, 0, err
 	}
 	defer f.Close()
 	sc := bufio.NewScanner(f)
 	if !sc.Scan() {
-		return 0, sc.Err()
+		return 0, 0, sc.Err()
 	}
 	fields := strings.Fields(sc.Text())
 	if len(fields) < 5 || fields[0] != "cpu" {
-		return 0, nil
+		return 0, 0, nil
 	}
-	var total, idle int64
 	for i := 1; i < len(fields); i++ {
 		v, _ := strconv.ParseInt(fields[i], 10, 64)
 		total += v
@@ -92,10 +130,7 @@ func readCPUUsage() (float64, error) {
 			idle = v
 		}
 	}
-	if total == 0 {
-		return 0, nil
-	}
-	return float64(total-idle) / float64(total) * 100, nil
+	return total, idle, sc.Err()
 }
 
 func readLoad() (float64, error) {

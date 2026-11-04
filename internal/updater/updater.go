@@ -50,9 +50,16 @@ func Check(ctx context.Context, current string, opts Options) (CheckResult, erro
 
 // Apply downloads and installs a release (Linux only; see apply_linux.go).
 func Apply(ctx context.Context, cfg config.Config, current string, opts Options) (ApplyResult, error) {
-	check, err := Check(ctx, current, opts)
-	if err != nil {
-		return ApplyResult{}, err
+	snap := DefaultReleaseCache.Snapshot()
+	var check CheckResult
+	var err error
+	if snap.HasData && snap.Err == nil {
+		check = snap.Result
+	} else {
+		check, err = Check(ctx, current, opts)
+		if err != nil {
+			return ApplyResult{}, err
+		}
 	}
 	rel := check.Latest
 	if opts.TargetVersion != "" {

@@ -33,8 +33,11 @@ export function UpdatesSettingsPage() {
     }
     setError(null);
     try {
-      const data = await getUpdatesStatus();
+      const data = await getUpdatesStatus({ refresh: !initial });
       setStatus(data);
+      if (data.check_error && !initial) {
+        setError(data.check_error);
+      }
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not check for updates");
       setStatus(null);
@@ -102,7 +105,9 @@ export function UpdatesSettingsPage() {
         >
           <h2 className="text-lg font-medium">Dockyard version</h2>
           <p className="text-sm text-[var(--muted-foreground)]">
-            Checks GitHub Releases when you open this page. Applying an update
+            Dockyard checks GitHub every 5 minutes in the background. This page
+            shows the cached result; use Check again to refresh manually (up to
+            40 times per hour without a GitHub token). Applying an update
             replaces the host binary and restarts the Dockyard service; your
             apps and proxy keep running.
           </p>
@@ -120,7 +125,7 @@ export function UpdatesSettingsPage() {
 
           {loading ? (
             <p className="text-sm text-[var(--muted-foreground)]">
-              Checking for updates…
+              Loading update status…
             </p>
           ) : status ? (
             <dl className="space-y-3 text-sm">

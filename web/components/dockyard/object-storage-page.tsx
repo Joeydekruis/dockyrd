@@ -1,37 +1,44 @@
 "use client";
 
-import { HardDrive } from "lucide-react";
+import { HardDrive, Plus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { CreateBucketModal } from "@/components/dockyard/create-bucket-modal";
+import {
+  ResourceProvisioningModal,
+  type ResourceProvisionContext,
+} from "@/components/dockyard/resource-provisioning-modal";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
-import { AddCard } from "@/components/dockyard/ui/add-card";
 import { Button } from "@/components/dockyard/ui/button";
-import { Chip } from "@/components/dockyard/ui/chip";
-import { EmptyState } from "@/components/dockyard/ui/empty-state";
+import { HeroPromoCard } from "@/components/dockyard/ui/hero-promo-card";
 import { PageHeader } from "@/components/dockyard/ui/page-header";
+import { ResourceListAddLink } from "@/components/dockyard/ui/resource-list-add-link";
 import { ResourceListSection } from "@/components/dockyard/ui/resource-list-section";
 import { ResourceRow } from "@/components/dockyard/ui/resource-row";
-import { SelectField } from "@/components/dockyard/ui/select-field";
 import { StatCard } from "@/components/dockyard/ui/stat-card";
 import { TemplateCard } from "@/components/dockyard/ui/template-card";
 import {
-  createService,
   getStorageStatus,
   installGarage,
   listProjects,
   type Project,
   type StorageStatus,
 } from "@/lib/api";
+import {
+  formatResourceCount,
+  projectPathLabel,
+} from "@/lib/resource-dashboard";
 import { filterByQuery } from "@/lib/service-display";
 
 export function ObjectStoragePage() {
   const [status, setStatus] = useState<StorageStatus | null>(null);
   const [projects, setProjects] = useState<Project[]>([]);
-  const [projectId, setProjectId] = useState("");
-  const [bucketName, setBucketName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
-  const [showCreate, setShowCreate] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [provisionOpen, setProvisionOpen] = useState(false);
+  const [provisionContext, setProvisionContext] =
+    useState<ResourceProvisionContext | null>(null);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -67,12 +74,9 @@ export function ObjectStoragePage() {
     [buckets, query],
   );
 
-  const projectCount = new Set(buckets.map((b) => b.project_id)).size;
-
-  const countLabel =
-    filtered.length === buckets.length
-      ? `${buckets.length} total`
-      : `${filtered.length} of ${buckets.length}`;
+  const dash = loading ? "—" : undefined;
+  const bucketCount = buckets.length;
+  const showGarageSetup = !loading && bucketCount === 0 && !status?.installed;
 
   async function onInstall() {
     try {
@@ -83,72 +87,30 @@ export function ObjectStoragePage() {
     }
   }
 
-  async function onCreateBucket(e: React.FormEvent) {
-    e.preventDefault();
-    if (!projectId || !bucketName.trim()) return;
-    try {
-      await createService({
-        project_id: projectId,
-        kind: "bucket",
-        name: bucketName.trim(),
-        config: {
-          bucket_name: bucketName.trim().toLowerCase().replace(/\s+/g, "-"),
-        },
-      });
-      setBucketName("");
-      setShowCreate(false);
-      await refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Create bucket failed");
+  function openCreate() {
+    if (!status?.installed) {
+      setError("Install Garage before creating buckets.");
+      return;
     }
+    setCreateOpen(true);
   }
 
-  const bucketForm =
-    status?.installed && showCreate ? (
-      <form
-        onSubmit={onCreateBucket}
-        className="flex flex-col gap-3 rounded-[20px] border p-4 sm:flex-row sm:items-end"
-        style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-      >
-        <SelectField
-          label="Project"
-          placeholder="Select…"
-          value={projectId}
-          onChange={setProjectId}
-          options={projects.map((p) => ({ value: p.id, label: p.name }))}
-        />
-        <label className="flex flex-1 flex-col gap-1 text-sm">
-          <span
-            className="font-mono text-[11px] uppercase tracking-widest"
-            style={{ color: "var(--muted-text)" }}
-          >
-            Bucket name
-          </span>
-          <input
-            className="field-input"
-            value={bucketName}
-            onChange={(ev) => setBucketName(ev.target.value)}
-            placeholder="uploads"
-          />
-        </label>
-        <div className="flex flex-wrap gap-2">
-          <Button type="submit">Create bucket</Button>
+  return (
+    <DashboardShell title="Object storage" breadcrumb="Projects">
+      <PageHeader
+        eyebrow="All projects"
+        title="Object storage"
+        subtitle="S3-compatible buckets running on your server."
+        action={
           <Button
             type="button"
-            variant="outline"
-            onClick={() => setShowCreate(false)}
+            iconLeft={Plus}
+            onClick={openCreate}
+            disabled={!status?.installed}
           >
-            Cancel
+            Create bucket
           </Button>
-        </div>
-      </form>
-    ) : null;
-
-  return (
-    <DashboardShell title="Object storage">
-      <PageHeader
-        title="Object storage"
-        subtitle="S3-compatible buckets on this server via Garage."
+        }
       />
 
       {error ? (
@@ -161,108 +123,75 @@ export function ObjectStoragePage() {
         aria-label="Summary"
         className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
       >
-        <StatCard label="Buckets" value={loading ? "—" : buckets.length} />
-        <StatCard label="Projects" value={loading ? "—" : projectCount} />
         <StatCard
-          label="Garage"
-          value={
-            loading ? "—" : status?.installed ? "Installed" : "Not installed"
-          }
-          hint={
-            status?.installed
-              ? (status.version ?? "Self-hosted S3")
-              : "Install to create buckets"
-          }
+          label="Buckets"
+          value={dash ?? bucketCount}
+          hint={bucketCount === 0 && !loading ? "none yet" : undefined}
         />
         <StatCard
-          label="Endpoint"
-          value={loading ? "—" : status?.installed ? "Internal" : "—"}
-          hint={
-            status?.installed && status.internal_endpoint
-              ? status.internal_endpoint
-              : undefined
-          }
+          label="Storage used"
+          value={dash ?? "0 B"}
+          hint="of 214 GB free"
         />
+        <StatCard
+          label="Objects"
+          value={dash ?? 0}
+          hint={bucketCount === 0 && !loading ? "no data" : undefined}
+        />
+        <StatCard label="Requests" value={dash ?? "—"} hint="last 24 hours" />
       </section>
-
-      {!loading && !status?.installed ? (
-        <section aria-label="Storage servers" className="mt-10">
-          <h2 className="mb-4 text-xl font-semibold tracking-[-0.03em]">
-            Storage servers
-          </h2>
-          <div className="grid gap-4 md:grid-cols-2">
-            <TemplateCard
-              name="Garage"
-              description="Lightweight, self-hosted S3-compatible storage. Recommended for Dockyard."
-              stack="S3 API"
-              recommended
-              onSelect={() => void onInstall()}
-            />
-            <article
-              className="rounded-[20px] border p-5 opacity-60"
-              style={{
-                borderColor: "var(--border)",
-                background: "var(--surface)",
-              }}
-            >
-              <Chip>Not in MVP</Chip>
-              <p className="mt-3 font-semibold">MinIO</p>
-              <p
-                className="mt-2 text-[13px]"
-                style={{ color: "var(--muted-text)" }}
-              >
-                Alternative S3 server — not offered in the first release.
-              </p>
-            </article>
-          </div>
-        </section>
-      ) : null}
 
       {loading ? (
         <p className="mt-10 text-sm" style={{ color: "var(--muted-text)" }}>
           Loading…
         </p>
-      ) : !status?.installed ? (
-        buckets.length === 0 ? (
-          <div className="mt-10">
-            <EmptyState
-              title="No buckets yet"
-              description="Install Garage on this server, then create project-scoped buckets for uploads and static assets."
-            />
-          </div>
-        ) : null
-      ) : buckets.length === 0 ? (
-        <div className="mt-10 space-y-4">
-          <EmptyState
+      ) : showGarageSetup ? (
+        <div className="mt-10 space-y-6">
+          <HeroPromoCard
+            badge="S3-compatible"
             title="No buckets yet"
-            description="Create a bucket and attach it to a project for app uploads or static assets."
+            description="Store uploads, backups and assets on your own disk. Pick a bundled S3 server and Dockyard runs it for you."
           />
-          {!showCreate ? (
-            <AddCard
-              title="Create bucket"
-              description="Name a bucket under a project."
-              onClick={() => setShowCreate(true)}
+          <section aria-label="Storage servers" className="grid gap-4 md:grid-cols-2">
+            <TemplateCard
+              name="Garage"
+              description="Lightweight, built for small self-hosted clusters. Recommended for Dockyard."
+              recommended
+              actionLabel="Install Garage"
+              onSelect={() => void onInstall()}
             />
-          ) : (
-            bucketForm
-          )}
+            <TemplateCard
+              name="MinIO"
+              description="Full-featured S3 server with a familiar console."
+              popular
+              actionLabel="Install MinIO"
+              actionDisabled
+            />
+          </section>
         </div>
+      ) : bucketCount === 0 ? (
+        <ResourceListSection
+          title="All buckets"
+          countLabel={formatResourceCount(0, "bucket")}
+          footer={
+            <ResourceListAddLink label="Create bucket" onClick={openCreate} />
+          }
+        >
+          <p
+            className="py-8 text-center text-sm"
+            style={{ color: "var(--muted-text)" }}
+          >
+            No buckets yet. Create one for uploads, backups, or static assets.
+          </p>
+        </ResourceListSection>
       ) : (
         <ResourceListSection
           title="All buckets"
-          countLabel={countLabel}
+          countLabel={formatResourceCount(bucketCount, "bucket")}
           filterValue={query}
           onFilterChange={setQuery}
           footer={
-            showCreate ? (
-              bucketForm
-            ) : (
-              <AddCard
-                title="Create bucket"
-                description="Add another S3 bucket."
-                onClick={() => setShowCreate(true)}
-              />
-            )
+            <ResourceListAddLink label="Create bucket" onClick={openCreate} />
           }
         >
           {filtered.length === 0 ? (
@@ -285,17 +214,34 @@ export function ObjectStoragePage() {
                   key={b.id}
                   name={b.name}
                   href={`/projects/${projectSlug}`}
-                  meta={`${b.project_name} · ${bucketNameValue}`}
-                  subMeta="S3 · Garage"
+                  meta={projectPathLabel(b.project_name)}
+                  subMeta={`S3 · ${bucketNameValue}`}
                   statusLabel="Ready"
                   statusVariant="ok"
                   icon={HardDrive}
+                  internalOnly
                 />
               );
             })
           )}
         </ResourceListSection>
       )}
+
+      <CreateBucketModal
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        onCreated={(ctx) => {
+          setProvisionContext(ctx);
+          setProvisionOpen(true);
+        }}
+      />
+
+      <ResourceProvisioningModal
+        open={provisionOpen}
+        context={provisionContext}
+        onClose={() => setProvisionOpen(false)}
+        onFinished={() => void refresh()}
+      />
     </DashboardShell>
   );
 }

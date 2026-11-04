@@ -1,29 +1,34 @@
 "use client";
 
-import { Globe } from "lucide-react";
+import { Globe, Plus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { CreateStaticSiteWizard } from "@/components/dockyard/create-static-site-wizard";
+import {
+  StaticSiteCreateProgressModal,
+  type StaticSiteCreateResult,
+} from "@/components/dockyard/static-site-create-progress-modal";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
-import { AddCard } from "@/components/dockyard/ui/add-card";
 import { Button } from "@/components/dockyard/ui/button";
-import { EmptyState } from "@/components/dockyard/ui/empty-state";
 import { PageHeader } from "@/components/dockyard/ui/page-header";
+import { ResourceListAddLink } from "@/components/dockyard/ui/resource-list-add-link";
 import { ResourceListSection } from "@/components/dockyard/ui/resource-list-section";
 import { ResourceRow } from "@/components/dockyard/ui/resource-row";
-import { SelectField } from "@/components/dockyard/ui/select-field";
 import { StatCard } from "@/components/dockyard/ui/stat-card";
 import {
-  createDeployment,
-  createService,
   type Deployment,
   listDeployments,
-  listGitHubRepos,
   listProjects,
   listServices,
   type Project,
-  promoteDeployment,
   type Service,
 } from "@/lib/api";
-import { filterByQuery, serviceStatusDisplay } from "@/lib/service-display";
+import {
+  formatResourceCount,
+  formatTimeAgo,
+  projectPathLabel,
+  resourceStatusDisplay,
+} from "@/lib/resource-dashboard";
+import { filterByQuery } from "@/lib/service-display";
 
 type StaticRow = {
   project: Project;
@@ -31,33 +36,40 @@ type StaticRow = {
   deployments: Deployment[];
 };
 
-function staticSiteMeta(service: Service, project: Project): string {
+function staticSitePublicHost(service: Service): string | undefined {
   const cfg = service.config as {
-    source?: { repo?: string; branch?: string };
+    publicHost?: string;
+    domain?: string;
+    hostname?: string;
   };
-  const repo = cfg.source?.repo;
-  const branch = cfg.source?.branch ?? "main";
-  if (repo) return `${project.name} · ${repo} · ${branch}`;
-  return project.name;
+  return cfg.publicHost ?? cfg.domain ?? cfg.hostname;
+}
+
+function deploymentSummary(latest?: Deployment) {
+  if (!latest?.commit_sha) {
+    return { sha: undefined, message: undefined, timeAgo: undefined };
+  }
+  return {
+    sha: latest.commit_sha,
+    message: latest.branch ? `on ${latest.branch}` : latest.trigger,
+    timeAgo: formatTimeAgo(latest.finished_at ?? latest.started_at),
+  };
 }
 
 export function StaticSitesPage() {
   const [rows, setRows] = useState<StaticRow[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [projectId, setProjectId] = useState("");
-  const [name, setName] = useState("");
-  const [repo, setRepo] = useState("");
-  const [repos, setRepos] = useState<{ full_name: string }[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
-  const [showCreate, setShowCreate] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [progressContext, setProgressContext] =
+    useState<StaticSiteCreateResult | null>(null);
+  const [progressOpen, setProgressOpen] = useState(false);
 
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
       const { projects: ps } = await listProjects();
-      setProjects(ps);
       const collected: StaticRow[] = [];
       for (const p of ps) {
         const { services } = await listServices(p.id, "static_site");
@@ -79,17 +91,6 @@ export function StaticSitesPage() {
     void refresh();
   }, [refresh]);
 
-  useEffect(() => {
-    void (async () => {
-      try {
-        const { repos: r } = await listGitHubRepos();
-        setRepos(r);
-      } catch {
-        setRepos([]);
-      }
-    })();
-  }, []);
-
   const filtered = useMemo(
     () =>
       filterByQuery(rows, query, ({ project, service }) => [
@@ -107,109 +108,19 @@ export function StaticSitesPage() {
     ({ service }) => service.desired_state === "running",
   ).length;
   const projectCount = new Set(rows.map((r) => r.project.id)).size;
-
-  const countLabel =
-    filtered.length === rows.length
-      ? `${rows.length} total`
-      : `${filtered.length} of ${rows.length}`;
-
-  async function onCreate(e: React.FormEvent) {
-    e.preventDefault();
-    if (!projectId || !name.trim() || !repo.trim()) return;
-    try {
-      await createService({
-        project_id: projectId,
-        kind: "static_site",
-        name: name.trim(),
-        config: {
-          source: { type: "github", repo: repo.trim(), branch: "main" },
-          autoDeploy: true,
-          buildCmd: "npm ci && npm run build",
-          outputDir: "dist",
-        },
-      });
-      setName("");
-      setRepo("");
-      setShowCreate(false);
-      await refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Create failed");
-    }
-  }
-
-  async function onDeploy(serviceId: string) {
-    try {
-      await createDeployment(serviceId);
-      await refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Deploy failed");
-    }
-  }
-
-  const createForm = (
-    <form
-      onSubmit={onCreate}
-      className="grid gap-3 rounded-[20px] border p-4 md:grid-cols-2"
-      style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-    >
-      <SelectField
-        label="Project"
-        placeholder="Select project"
-        value={projectId}
-        onChange={setProjectId}
-        options={projects.map((p) => ({ value: p.id, label: p.name }))}
-      />
-      <label className="flex flex-col gap-1 text-sm">
-        <span
-          className="font-mono text-[11px] uppercase tracking-widest"
-          style={{ color: "var(--muted-text)" }}
-        >
-          Site name
-        </span>
-        <input
-          className="field-input"
-          value={name}
-          onChange={(ev) => setName(ev.target.value)}
-        />
-      </label>
-      <label className="flex flex-col gap-1 text-sm md:col-span-2">
-        <span
-          className="font-mono text-[11px] uppercase tracking-widest"
-          style={{ color: "var(--muted-text)" }}
-        >
-          GitHub repository
-        </span>
-        <input
-          list="github-repos"
-          className="field-input"
-          value={repo}
-          onChange={(ev) => setRepo(ev.target.value)}
-          placeholder="owner/repo"
-        />
-        <datalist id="github-repos">
-          {repos.map((r) => (
-            <option key={r.full_name} value={r.full_name} />
-          ))}
-        </datalist>
-      </label>
-      <div className="flex flex-wrap gap-2 md:col-span-2">
-        <Button type="submit">Create static site</Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => setShowCreate(false)}
-        >
-          Cancel
-        </Button>
-      </div>
-    </form>
-  );
+  const dash = loading ? "—" : undefined;
 
   return (
-    <DashboardShell title="Static sites">
+    <DashboardShell title="Static sites" breadcrumb="Projects">
       <PageHeader
+        eyebrow="All projects"
         title="Static sites"
-        subtitle="Git-backed static exports with zero-downtime releases."
+        subtitle="Built from a Git repo and served from your own server."
+        action={
+          <Button type="button" iconLeft={Plus} onClick={() => setCreateOpen(true)}>
+            Create static site
+          </Button>
+        }
       />
 
       {error ? (
@@ -222,14 +133,18 @@ export function StaticSitesPage() {
         aria-label="Summary"
         className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
       >
-        <StatCard label="Total" value={loading ? "—" : rows.length} />
-        <StatCard label="Live" value={loading ? "—" : live} />
-        <StatCard label="Projects" value={loading ? "—" : projectCount} />
         <StatCard
-          label="Auto deploy"
-          value={loading ? "—" : rows.length}
-          hint="On push to main"
+          label="Total"
+          value={dash ?? rows.length}
+          hint={loading ? undefined : `across ${projectCount} projects`}
         />
+        <StatCard
+          label="Live"
+          value={dash ?? live}
+          hint="all serving traffic"
+        />
+        <StatCard label="Requests" value={dash ?? "—"} hint="last 24 hours" />
+        <StatCard label="Bandwidth" value={dash ?? "—"} hint="last 24 hours" />
       </section>
 
       {loading ? (
@@ -237,39 +152,39 @@ export function StaticSitesPage() {
           Loading…
         </p>
       ) : rows.length === 0 ? (
-        <div className="mt-10 space-y-4">
-          {!showCreate ? (
-            <>
-              <EmptyState
-                title="No static sites yet"
-                description="Connect a GitHub repo and publish build output to the edge proxy."
-              />
-              <AddCard
-                title="Create static site"
-                description="Pick a project and repository."
-                onClick={() => setShowCreate(true)}
-              />
-            </>
-          ) : (
-            createForm
-          )}
-        </div>
+        <section
+          className="mt-10 rounded-[20px] border px-8 py-12 text-center"
+          style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+        >
+          <h2 className="text-xl font-semibold tracking-tight">
+            No static sites yet
+          </h2>
+          <p
+            className="mx-auto mt-2 max-w-md text-sm"
+            style={{ color: "var(--muted-text)" }}
+          >
+            Connect a GitHub repo and publish build output to the edge proxy.
+          </p>
+          <Button
+            type="button"
+            className="mt-6"
+            iconLeft={Plus}
+            onClick={() => setCreateOpen(true)}
+          >
+            Create static site
+          </Button>
+        </section>
       ) : (
         <ResourceListSection
           title="All static sites"
-          countLabel={countLabel}
+          countLabel={formatResourceCount(rows.length, "static site")}
           filterValue={query}
           onFilterChange={setQuery}
           footer={
-            showCreate ? (
-              createForm
-            ) : (
-              <AddCard
-                title="Create static site"
-                description="Add another site from GitHub."
-                onClick={() => setShowCreate(true)}
-              />
-            )
+            <ResourceListAddLink
+              label="Create static site"
+              onClick={() => setCreateOpen(true)}
+            />
           }
         >
           {filtered.length === 0 ? (
@@ -281,54 +196,53 @@ export function StaticSitesPage() {
             </p>
           ) : (
             filtered.map(({ project, service, deployments }) => {
-              const status = serviceStatusDisplay(service.desired_state);
+              const status = resourceStatusDisplay(
+                service.desired_state,
+                "static",
+              );
               const latest = deployments[0];
+              const deploy = deploymentSummary(latest);
+              const publicHost = staticSitePublicHost(service);
               return (
                 <ResourceRow
                   key={service.id}
                   name={service.name}
                   href={`/projects/${project.slug}`}
-                  meta={staticSiteMeta(service, project)}
-                  subMeta={
-                    latest
-                      ? `Latest deploy · ${latest.status}${latest.release_path ? ` · ${latest.release_path}` : ""}`
-                      : "No deployments yet"
-                  }
+                  meta={projectPathLabel(project.name)}
+                  url={publicHost}
+                  internalOnly={!publicHost}
                   statusLabel={status.label}
                   statusVariant={status.variant}
                   icon={Globe}
-                  trailing={
-                    <div className="flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={() => void onDeploy(service.id)}
-                        className="rounded-lg border px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide"
-                        style={{ borderColor: "var(--border)" }}
-                      >
-                        Deploy
-                      </button>
-                      {latest?.status === "success" && latest.release_path ? (
-                        <button
-                          type="button"
-                          className="rounded-lg border px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide"
-                          style={{ borderColor: "var(--border)" }}
-                          onClick={() =>
-                            void promoteDeployment(latest.id).then(() =>
-                              refresh(),
-                            )
-                          }
-                        >
-                          Promote
-                        </button>
-                      ) : null}
-                    </div>
-                  }
+                  sha={deploy.sha}
+                  commitMessage={deploy.message}
+                  timeAgo={deploy.timeAgo}
                 />
               );
             })
           )}
         </ResourceListSection>
       )}
+
+      <CreateStaticSiteWizard
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        onCreated={(result) => {
+          setProgressContext(result);
+          setProgressOpen(true);
+        }}
+      />
+
+      <StaticSiteCreateProgressModal
+        open={progressOpen}
+        context={progressContext}
+        onClose={() => setProgressOpen(false)}
+        onEditSettings={() => {
+          setProgressOpen(false);
+          setCreateOpen(true);
+        }}
+        onFinished={() => void refresh()}
+      />
     </DashboardShell>
   );
 }

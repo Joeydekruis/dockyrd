@@ -763,11 +763,31 @@ button.btn-text:disabled {
   word-break: break-all;
 }
 
+.wizard-stepper-item {
+  border-bottom: 3px solid transparent;
+}
+
+.wizard-stepper-item-active {
+  border-bottom-color: var(--link-blue);
+}
+
 .settings-page-body {
   width: 100%;
   max-width: 820px;
   margin-left: auto;
   margin-right: auto;
+}
+
+.create-progress-log {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.55;
+  color: #e8eef7;
+  background: #0b1f3a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 .dockyard-switch-track {

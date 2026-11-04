@@ -224,7 +224,8 @@ export function AnalyticsPage() {
       <div className="space-y-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-[var(--muted-foreground)]">
-            Host metrics sampled every minute.
+            Host metrics sampled every minute. Disk usage is for the Dockyard data
+            directory, not the whole server.
           </p>
           <div
             className="flex flex-wrap gap-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] p-1"

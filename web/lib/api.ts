@@ -200,6 +200,7 @@ export function listServices(projectId: string, kind?: string) {
 
 export function createService(input: {
   project_id: string;
+  environment?: string;
   kind: "app" | "static_site" | "postgres" | "redis" | "bucket";
   name: string;
   config?: Record<string, unknown>;
@@ -300,6 +301,24 @@ export function createDeployment(serviceId: string) {
     method: "POST",
     json: {},
   });
+}
+
+export async function fetchDeploymentLog(deploymentId: string): Promise<string> {
+  const res = await fetch(`/api/v1/deployments/${deploymentId}/log`, {
+    credentials: "same-origin",
+  });
+  if (!res.ok) {
+    return "";
+  }
+  return res.text();
+}
+
+export async function getDeploymentForService(
+  serviceId: string,
+  deploymentId: string,
+): Promise<Deployment | null> {
+  const { deployments } = await listDeployments(serviceId);
+  return deployments.find((d) => d.id === deploymentId) ?? null;
 }
 
 export function promoteDeployment(deploymentId: string) {
@@ -512,12 +531,15 @@ export type UpdatesStatus = {
   release_notes?: string;
   check_ok: boolean;
   check_error?: string;
+  checked_at?: number;
+  from_cache?: boolean;
   apply_supported: boolean;
   apply_unsupported_reason?: string;
 };
 
-export function getUpdatesStatus() {
-  return apiFetch<UpdatesStatus>("/api/v1/updates");
+export function getUpdatesStatus(options?: { refresh?: boolean }) {
+  const query = options?.refresh ? "?refresh=1" : "";
+  return apiFetch<UpdatesStatus>(`/api/v1/updates${query}`);
 }
 
 export function applyDockyardUpdate() {

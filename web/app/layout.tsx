@@ -6,6 +6,18 @@ import "@/styles/globals.css";
 export const metadata: Metadata = {
   title: "Dockyrd",
   description: "Self-hosted deployment platform",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "48x48" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
+  manifest: "/site.webmanifest",
+  themeColor: "#8EBEFF",
+  appleWebApp: {
+    title: "Dockyrd",
+  },
 };
 
 export default function RootLayout({

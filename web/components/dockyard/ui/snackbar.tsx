@@ -5,6 +5,8 @@ type SnackbarProps = {
   action?: React.ReactNode;
   onDismiss?: () => void;
   tone?: "info" | "warn" | "success";
+  /** Floating toasts use shadow; inline banners (e.g. update notice) do not. */
+  elevated?: boolean;
 };
 
 const toneStyles = {
@@ -30,12 +32,13 @@ export function Snackbar({
   action,
   onDismiss,
   tone = "info",
+  elevated = true,
 }: SnackbarProps) {
   const palette = toneStyles[tone];
   return (
     <div
       role="status"
-      className="flex flex-wrap items-center justify-between gap-3 rounded-lg border px-4 py-2 text-sm shadow-lg"
+      className={`flex flex-wrap items-center justify-between gap-3 rounded-lg border px-4 py-2 text-sm${elevated ? " shadow-lg" : ""}`}
       style={{
         borderColor: palette.border,
         background: palette.bg,

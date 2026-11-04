@@ -1,52 +1,63 @@
 "use client";
 
-import { Database } from "lucide-react";
+import { Database, Plus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { CreateDatabaseModal } from "@/components/dockyard/create-database-modal";
+import {
+  ResourceProvisioningModal,
+  type ResourceProvisionContext,
+} from "@/components/dockyard/resource-provisioning-modal";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
-import { AddCard } from "@/components/dockyard/ui/add-card";
 import { Button } from "@/components/dockyard/ui/button";
 import { Chip } from "@/components/dockyard/ui/chip";
-import { EmptyState } from "@/components/dockyard/ui/empty-state";
 import { PageHeader } from "@/components/dockyard/ui/page-header";
+import { ResourceListAddLink } from "@/components/dockyard/ui/resource-list-add-link";
 import { ResourceListSection } from "@/components/dockyard/ui/resource-list-section";
 import { ResourceRow } from "@/components/dockyard/ui/resource-row";
-import { SelectField } from "@/components/dockyard/ui/select-field";
 import { StatCard } from "@/components/dockyard/ui/stat-card";
+import { type DatabaseRow, listDatabases } from "@/lib/api";
 import {
-  createService,
-  type DatabaseRow,
-  getServiceConnection,
-  listDatabases,
-  listProjects,
-  type Project,
-} from "@/lib/api";
-import {
-  databaseEngineLabel,
-  filterByQuery,
-  serviceStatusDisplay,
-} from "@/lib/service-display";
+  formatResourceCount,
+  projectPathLabel,
+  resourceStatusDisplay,
+} from "@/lib/resource-dashboard";
+import { databaseEngineLabel, filterByQuery } from "@/lib/service-display";
+
+function databaseConnectionMeta(kind: string): string {
+  if (kind === "postgres") return "postgres · internal:5432";
+  if (kind === "redis") return "redis · internal:6379";
+  return kind;
+}
+
+function engineVersionChip(row: {
+  kind: string;
+  config: Record<string, unknown>;
+}): string {
+  const version = (row.config as { version?: number }).version;
+  if (row.kind === "postgres") {
+    return `PG ${version ?? 16}`;
+  }
+  if (row.kind === "redis") {
+    return `REDIS ${version ?? 7}`;
+  }
+  return databaseEngineLabel(row.kind).toUpperCase();
+}
 
 export function DatabasesPage() {
   const [rows, setRows] = useState<DatabaseRow[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [projectId, setProjectId] = useState("");
-  const [name, setName] = useState("");
-  const [kind, setKind] = useState<"postgres" | "redis">("postgres");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [connection, setConnection] = useState<string | null>(null);
   const [query, setQuery] = useState("");
-  const [showCreate, setShowCreate] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [provisionOpen, setProvisionOpen] = useState(false);
+  const [provisionContext, setProvisionContext] =
+    useState<ResourceProvisionContext | null>(null);
 
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      const [{ databases }, { projects: ps }] = await Promise.all([
-        listDatabases(),
-        listProjects(),
-      ]);
+      const { databases } = await listDatabases();
       setRows(databases);
-      setProjects(ps);
       setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load databases");
@@ -72,49 +83,20 @@ export function DatabasesPage() {
 
   const postgresCount = rows.filter((r) => r.kind === "postgres").length;
   const redisCount = rows.filter((r) => r.kind === "redis").length;
-  const running = rows.filter((r) => r.desired_state === "running").length;
-
-  const countLabel =
-    filtered.length === rows.length
-      ? `${rows.length} total`
-      : `${filtered.length} of ${rows.length}`;
-
-  async function onCreate(e: React.FormEvent) {
-    e.preventDefault();
-    if (!projectId || !name.trim()) return;
-    try {
-      await createService({
-        project_id: projectId,
-        kind,
-        name: name.trim(),
-        config: kind === "postgres" ? { version: 17 } : { version: 8 },
-      });
-      setName("");
-      setShowCreate(false);
-      await refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Create failed");
-    }
-  }
-
-  async function onReveal(id: string) {
-    try {
-      const { variables } = await getServiceConnection(id, true);
-      setConnection(
-        variables.DATABASE_URL ??
-          variables.REDIS_URL ??
-          JSON.stringify(variables),
-      );
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Reveal failed");
-    }
-  }
+  const projectCount = new Set(rows.map((r) => r.project_id)).size;
+  const dash = loading ? "—" : undefined;
 
   return (
-    <DashboardShell title="Databases">
+    <DashboardShell title="Databases" breadcrumb="Projects">
       <PageHeader
+        eyebrow="All projects"
         title="Databases"
-        subtitle="Managed Postgres and Redis instances with connection strings for your apps."
+        subtitle="Postgres and Redis, with backups you can restore."
+        action={
+          <Button type="button" iconLeft={Plus} onClick={() => setCreateOpen(true)}>
+            Create database
+          </Button>
+        }
       />
 
       {error ? (
@@ -127,159 +109,59 @@ export function DatabasesPage() {
         aria-label="Summary"
         className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
       >
-        <StatCard label="Total" value={loading ? "—" : rows.length} />
-        <StatCard label="Postgres" value={loading ? "—" : postgresCount} />
-        <StatCard label="Redis" value={loading ? "—" : redisCount} />
         <StatCard
-          label="Running"
-          value={loading ? "—" : running}
-          hint="Containers up"
+          label="Total"
+          value={dash ?? rows.length}
+          hint={loading ? undefined : `across ${projectCount} projects`}
         />
+        <StatCard
+          label="Postgres"
+          value={dash ?? postgresCount}
+          hint="managed on this server"
+        />
+        <StatCard label="Redis" value={dash ?? redisCount} hint="in memory" />
+        <StatCard label="Backups" value={dash ?? "—"} hint="last run —" />
       </section>
-
-      {connection ? (
-        <pre className="mt-6 overflow-x-auto rounded-[20px] border p-4 font-mono text-xs">
-          {connection}
-        </pre>
-      ) : null}
 
       {loading ? (
         <p className="mt-10 text-sm" style={{ color: "var(--muted-text)" }}>
           Loading…
         </p>
       ) : rows.length === 0 ? (
-        <div className="mt-10 space-y-4">
-          {!showCreate ? (
-            <>
-              <EmptyState
-                title="No databases yet"
-                description="Provision Postgres or Redis for a project. Connection strings stay encrypted until you reveal them."
-              />
-              <AddCard
-                title="Create database"
-                description="Pick a project, engine, and name."
-                onClick={() => setShowCreate(true)}
-              />
-            </>
-          ) : (
-            <form
-              onSubmit={onCreate}
-              className="grid gap-3 rounded-[20px] border p-4 md:grid-cols-2"
-              style={{
-                borderColor: "var(--border)",
-                background: "var(--surface)",
-              }}
-            >
-              <SelectField
-                label="Project"
-                placeholder="Select…"
-                value={projectId}
-                onChange={setProjectId}
-                options={projects.map((p) => ({ value: p.id, label: p.name }))}
-              />
-              <SelectField
-                label="Engine"
-                value={kind}
-                onChange={(v) => setKind(v as "postgres" | "redis")}
-                options={[
-                  { value: "postgres", label: "Postgres 17" },
-                  { value: "redis", label: "Redis (Valkey 8)" },
-                ]}
-              />
-              <label className="flex flex-col gap-1 text-sm md:col-span-2">
-                <span
-                  className="font-mono text-[11px] uppercase tracking-widest"
-                  style={{ color: "var(--muted-text)" }}
-                >
-                  Name
-                </span>
-                <input
-                  className="field-input"
-                  value={name}
-                  onChange={(ev) => setName(ev.target.value)}
-                  placeholder="Primary database"
-                />
-              </label>
-              <div className="flex flex-wrap gap-2 md:col-span-2">
-                <Button type="submit">Create database</Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setShowCreate(false)}
-                >
-                  Cancel
-                </Button>
-              </div>
-            </form>
-          )}
-        </div>
+        <section
+          className="mt-10 rounded-[20px] border px-8 py-12 text-center"
+          style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+        >
+          <h2 className="text-xl font-semibold tracking-tight">
+            No databases yet
+          </h2>
+          <p
+            className="mx-auto mt-2 max-w-md text-sm"
+            style={{ color: "var(--muted-text)" }}
+          >
+            Provision Postgres or Redis for a project. Connection strings stay
+            encrypted until you reveal them from the project.
+          </p>
+          <Button
+            type="button"
+            className="mt-6"
+            iconLeft={Plus}
+            onClick={() => setCreateOpen(true)}
+          >
+            Create database
+          </Button>
+        </section>
       ) : (
         <ResourceListSection
           title="All databases"
-          countLabel={countLabel}
+          countLabel={formatResourceCount(rows.length, "database")}
           filterValue={query}
           onFilterChange={setQuery}
           footer={
-            showCreate ? (
-              <form
-                onSubmit={onCreate}
-                className="grid gap-3 rounded-[20px] border p-4 md:grid-cols-2"
-                style={{
-                  borderColor: "var(--border)",
-                  background: "var(--surface)",
-                }}
-              >
-                <SelectField
-                  label="Project"
-                  placeholder="Select…"
-                  value={projectId}
-                  onChange={setProjectId}
-                  options={projects.map((p) => ({
-                    value: p.id,
-                    label: p.name,
-                  }))}
-                />
-                <SelectField
-                  label="Engine"
-                  value={kind}
-                  onChange={(v) => setKind(v as "postgres" | "redis")}
-                  options={[
-                    { value: "postgres", label: "Postgres 17" },
-                    { value: "redis", label: "Redis (Valkey 8)" },
-                  ]}
-                />
-                <label className="flex flex-col gap-1 text-sm md:col-span-2">
-                  <span
-                    className="font-mono text-[11px] uppercase tracking-widest"
-                    style={{ color: "var(--muted-text)" }}
-                  >
-                    Name
-                  </span>
-                  <input
-                    className="field-input"
-                    value={name}
-                    onChange={(ev) => setName(ev.target.value)}
-                    placeholder="Primary database"
-                  />
-                </label>
-                <div className="flex flex-wrap gap-2 md:col-span-2">
-                  <Button type="submit">Create database</Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setShowCreate(false)}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </form>
-            ) : (
-              <AddCard
-                title="Create database"
-                description="Add Postgres or Redis to a project."
-                onClick={() => setShowCreate(true)}
-              />
-            )
+            <ResourceListAddLink
+              label="Create database"
+              onClick={() => setCreateOpen(true)}
+            />
           }
         >
           {filtered.length === 0 ? (
@@ -291,34 +173,28 @@ export function DatabasesPage() {
             </p>
           ) : (
             filtered.map((row) => {
-              const status = serviceStatusDisplay(row.desired_state);
-              const version =
-                row.kind === "postgres"
-                  ? String((row.config as { version?: number }).version ?? 17)
-                  : String((row.config as { version?: number }).version ?? 8);
+              const status = resourceStatusDisplay(
+                row.desired_state,
+                "database",
+              );
               return (
                 <ResourceRow
                   key={row.id}
                   name={row.name}
                   href={`/projects/${row.project_slug}`}
-                  meta={`${row.project_name} · ${row.slug}`}
-                  subMeta={`Backups · managed on this server`}
+                  meta={projectPathLabel(row.project_name)}
+                  subMeta={databaseConnectionMeta(row.kind)}
                   statusLabel={status.label}
                   statusVariant={status.variant}
                   icon={Database}
                   trailing={
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Chip>
-                        {databaseEngineLabel(row.kind)} {version}
-                      </Chip>
-                      <button
-                        type="button"
-                        className="rounded-lg border px-3 py-1.5 font-mono text-[11px] uppercase tracking-wide"
-                        style={{ borderColor: "var(--border)" }}
-                        onClick={() => void onReveal(row.id)}
-                      >
-                        Connection
-                      </button>
+                    <div
+                      className="flex flex-col items-end gap-1 text-[13px]"
+                      style={{ color: "var(--muted-text)" }}
+                    >
+                      <Chip>{engineVersionChip(row)}</Chip>
+                      <span className="hidden lg:inline">daily backups</span>
+                      <span className="hidden lg:inline">Backup —</span>
                     </div>
                   }
                 />
@@ -327,6 +203,22 @@ export function DatabasesPage() {
           )}
         </ResourceListSection>
       )}
+
+      <CreateDatabaseModal
+        open={createOpen}
+        onClose={() => setCreateOpen(false)}
+        onCreated={(ctx) => {
+          setProvisionContext(ctx);
+          setProvisionOpen(true);
+        }}
+      />
+
+      <ResourceProvisioningModal
+        open={provisionOpen}
+        context={provisionContext}
+        onClose={() => setProvisionOpen(false)}
+        onFinished={() => void refresh()}
+      />
     </DashboardShell>
   );
 }

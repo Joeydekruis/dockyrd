@@ -6,6 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.32] - 2026-11-04
+
+_Finished: 2026-11-04_
+
+### Added
+
+- **Self-update UX** — full-screen backdrop + progress overlay on Settings → Updates apply; health polling until panel returns (`update-applying-overlay.tsx`, `wait-for-panel-health.ts`)
+- **GitHub release cache** — background check every 5 minutes; manual **Check again** capped at 40/hour without token; `GET /api/v1/updates?refresh=1`; server banner reads cache only (`internal/updater/release_cache.go`)
+- **`DOCKYARD_GITHUB_TOKEN`** — authenticated GitHub API for update checks and `install.sh` (`internal/updater/github_http.go`, `packaging/dockyard.env.example`)
+- **Resource catalogs** — create flows (applications, databases, buckets, static sites) with wizard/provisioning modals; hero promo cards and list add links
+- **Web icons** — favicon, PWA manifest, apple-touch-icon under `web/public/`
+- **Host metrics** — normalized CPU fraction helper for Linux analytics (`internal/metrics/cpu_fraction.go`)
+
+### Changed
+
+- **Settings → Updates** — copy explains cached vs manual checks; apply path uses forced refresh + cached apply
+- **Resource list rows / template cards / commit chips** — design-aligned catalog layout across Applications, Databases, Object storage, Static sites
+- **Modals & snackbars** — wizard shell, elevated snackbar tone for update banner
+
 ## [0.0.31] - 2026-11-04
 
 _Finished: 2026-11-04_

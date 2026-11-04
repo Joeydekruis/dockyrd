@@ -20,6 +20,8 @@ type updatesStatusResponse struct {
 	ReleaseNotes     string `json:"release_notes,omitempty"`
 	CheckOK          bool   `json:"check_ok"`
 	CheckError       string `json:"check_error,omitempty"`
+	CheckedAt        int64  `json:"checked_at,omitempty"`
+	FromCache        bool   `json:"from_cache"`
 	ApplySupported   bool   `json:"apply_supported"`
 	ApplyUnsupported string `json:"apply_unsupported_reason,omitempty"`
 }
@@ -40,7 +42,8 @@ func (d apiDeps) handleUpdatesGet(w http.ResponseWriter, r *http.Request) {
 	if _, ok := d.requireAdmin(w, r); !ok {
 		return
 	}
-	writeJSON(w, http.StatusOK, d.buildUpdatesStatus(r.Context()))
+	refresh := r.URL.Query().Get("refresh") == "1"
+	writeJSON(w, http.StatusOK, d.buildUpdatesStatus(r.Context(), refresh))
 }
 
 func (d apiDeps) handleUpdatesApply(w http.ResponseWriter, r *http.Request) {
@@ -66,6 +69,10 @@ func (d apiDeps) handleUpdatesApply(w http.ResponseWriter, r *http.Request) {
 		Repo:   os.Getenv("DOCKYARD_GITHUB_REPO"),
 		Quiet:  true,
 		DryRun: os.Getenv("DOCKYARD_UPDATE_DRY_RUN") == "1",
+	}
+	if err := updater.DefaultReleaseCache.RefreshForce(ctx, BuildVersion(), opts); err != nil {
+		// Apply still re-checks; continue with best-effort cache refresh.
+		_ = err
 	}
 	result, err := updater.Apply(ctx, d.cfg, BuildVersion(), opts)
 	if err != nil {
@@ -99,7 +106,7 @@ func (d apiDeps) handleUpdatesApply(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (d apiDeps) buildUpdatesStatus(ctx context.Context) updatesStatusResponse {
+func (d apiDeps) buildUpdatesStatus(ctx context.Context, manualRefresh bool) updatesStatusResponse {
 	resp := updatesStatusResponse{
 		Version:        BuildVersion(),
 		ApplySupported: updater.InstallSupported(),
@@ -109,16 +116,40 @@ func (d apiDeps) buildUpdatesStatus(ctx context.Context) updatesStatusResponse {
 	}
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
-	check, err := updater.Check(ctx, BuildVersion(), updater.Options{Repo: os.Getenv("DOCKYARD_GITHUB_REPO")})
-	if err != nil {
-		resp.CheckError = err.Error()
+
+	opts := updater.Options{Repo: os.Getenv("DOCKYARD_GITHUB_REPO")}
+	var snap updater.ReleaseSnapshot
+	if manualRefresh {
+		snap = updater.DefaultReleaseCache.RefreshManual(ctx, BuildVersion(), opts)
+	} else {
+		snap = updater.DefaultReleaseCache.Snapshot()
+		if !snap.HasData {
+			resp.CheckError = "Waiting for the first scheduled update check (every 5 minutes)."
+			return resp
+		}
+	}
+
+	resp.FromCache = snap.FromCache
+	if !snap.CheckedAt.IsZero() {
+		resp.CheckedAt = snap.CheckedAt.Unix()
+	}
+	if snap.Err != nil {
+		resp.CheckError = snap.Err.Error()
+		if snap.HasData && snap.Result.Latest.Tag != "" {
+			resp.CheckOK = true
+			resp.UpdateAvailable = snap.Result.Newer
+			if snap.Result.Newer {
+				resp.LatestTag = snap.Result.Latest.Tag
+				resp.ReleaseNotes = snap.Result.Latest.Notes
+			}
+		}
 		return resp
 	}
 	resp.CheckOK = true
-	resp.UpdateAvailable = check.Newer
-	if check.Newer {
-		resp.LatestTag = check.Latest.Tag
-		resp.ReleaseNotes = check.Latest.Notes
+	resp.UpdateAvailable = snap.Result.Newer
+	if snap.Result.Newer {
+		resp.LatestTag = snap.Result.Latest.Tag
+		resp.ReleaseNotes = snap.Result.Latest.Notes
 	}
 	return resp
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/dockyard/ui/button";
+import { Snackbar } from "@/components/dockyard/ui/snackbar";
 import { getServerInfo, type ServerInfo } from "@/lib/api";
 
 type Props = {
@@ -68,28 +69,31 @@ export function UpdateAvailableNotifier() {
 
   return (
     <>
-      <div className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-950 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-100">
-        <span>
-          Update <span className="font-mono">{info.latest_tag}</span> is
-          available.
-        </span>
-        <div className="flex gap-2">
-          <Button
-            href="/settings/updates"
-            variant="outline"
-            className="min-h-9 px-3 py-1 text-xs normal-case"
-          >
-            Update
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            className="min-h-9 px-3 py-1 text-xs normal-case"
-            onClick={() => setOpen(true)}
-          >
-            Release notes
-          </Button>
-        </div>
+      <div className="mb-4">
+        <Snackbar
+          tone="info"
+          elevated={false}
+          message={
+            <>
+              Update <span className="font-mono">{info.latest_tag}</span> is
+              available.
+            </>
+          }
+          action={
+            <>
+              <Button href="/settings/updates" variant="outline">
+                Update
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setOpen(true)}
+              >
+                Release notes
+              </Button>
+            </>
+          }
+        />
       </div>
       <UpdateAvailableModal
         open={open}

@@ -8,6 +8,7 @@ import (
 
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
 	"github.com/Joeydekruis/dockyrd/internal/eventlog"
+	"github.com/Joeydekruis/dockyrd/internal/metrics"
 )
 
 func registerServerRoutes(mux *http.ServeMux, deps apiDeps) {
@@ -53,9 +54,10 @@ func (d apiDeps) handleServerMetrics(w http.ResponseWriter, r *http.Request) {
 	}
 	points := make([]hostMetricPoint, 0, len(rows))
 	for _, row := range rows {
+		cpu := metrics.NormalizeHostCPUFraction(nullFloat64(row.Cpu))
 		points = append(points, hostMetricPoint{
 			TS:        nullInt64(row.Ts),
-			CPU:       nullFloat64(row.Cpu),
+			CPU:       cpu,
 			MemUsed:   nullInt64(row.MemUsed),
 			MemTotal:  nullInt64(row.MemTotal),
 			DiskUsed:  nullInt64(row.DiskUsed),

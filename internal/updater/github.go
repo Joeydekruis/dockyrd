@@ -41,8 +41,7 @@ func FetchLatest(ctx context.Context, repo, currentVersion string) (Release, boo
 	if err != nil {
 		return Release{}, false, err
 	}
-	req.Header.Set("Accept", "application/vnd.github+json")
-	req.Header.Set("User-Agent", "dockyard-updater")
+	applyGitHubAPIHeaders(req)
 
 	client := &http.Client{Timeout: 30 * time.Second}
 	res, err := client.Do(req)
@@ -52,7 +51,9 @@ func FetchLatest(ctx context.Context, repo, currentVersion string) (Release, boo
 	defer res.Body.Close()
 	if res.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(io.LimitReader(res.Body, 512))
-		return Release{}, false, fmt.Errorf("github releases: %s: %s", res.Status, strings.TrimSpace(string(body)))
+		bodyStr := strings.TrimSpace(string(body))
+		hint := githubRateLimitHint(res.StatusCode, bodyStr)
+		return Release{}, false, fmt.Errorf("github releases: %s: %s%s", res.Status, bodyStr, hint)
 	}
 	var payload ghRelease
 	if err := json.NewDecoder(res.Body).Decode(&payload); err != nil {

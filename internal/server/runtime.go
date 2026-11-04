@@ -16,6 +16,7 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/metrics"
 	"github.com/Joeydekruis/dockyrd/internal/proxy"
 	"github.com/Joeydekruis/dockyrd/internal/reconcile"
+	"github.com/Joeydekruis/dockyrd/internal/updater"
 )
 
 func startBackground(ctx context.Context, cfg config.Config, q *sqlc.Queries, hub *events.Hub) {
@@ -53,6 +54,12 @@ func startBackground(ctx context.Context, cfg config.Config, q *sqlc.Queries, hu
 
 	go worker.RunLoop(ctx, 2*time.Second)
 	go rec.Run(ctx, 30*time.Second)
+
+	updater.StartAutoRefresh(ctx, updater.AutoRefreshInterval, func() string {
+		return BuildVersion()
+	}, func() updater.Options {
+		return updater.Options{Repo: os.Getenv("DOCKYARD_GITHUB_REPO")}
+	})
 
 	_ = hub // reserved for deployment SSE fan-out from handlers
 }

@@ -157,9 +157,21 @@ install_binary() {
 	exit 1
 }
 
+github_api_curl() {
+	# shellcheck disable=SC2086
+	token="${DOCKYARD_GITHUB_TOKEN:-${GITHUB_TOKEN:-}}"
+	if [ -n "$token" ]; then
+		curl -sf -H "Authorization: Bearer $token" \
+			-H "Accept: application/vnd.github+json" \
+			"$@"
+	else
+		curl -sf -H "Accept: application/vnd.github+json" "$@"
+	fi
+}
+
 github_latest_tag() {
 	repo="$1"
-	curl -sf "https://api.github.com/repos/$repo/releases/latest" \
+	github_api_curl "https://api.github.com/repos/$repo/releases/latest" \
 		| sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p' | head -n1
 }
 
