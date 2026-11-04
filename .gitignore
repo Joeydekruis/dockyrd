@@ -6,6 +6,9 @@ bin/
 *.test
 web/tsconfig.tsbuildinfo
 
+# npm lockfile at repo root (web uses pnpm)
+/package-lock.json
+
 *storybook.log
 storybook-static
 
