@@ -3,6 +3,7 @@
 import { ChevronDown } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import { SettingsPageBody } from "@/components/dockyard/settings-page-body";
 import { Button } from "@/components/dockyard/ui/button";
 import { Modal } from "@/components/dockyard/ui/modal";
@@ -354,7 +355,7 @@ export function EmailSettingsPage() {
               ) : null}
             </>
           ) : loading ? (
-            <p className="text-sm text-[var(--muted-foreground)]">Loading…</p>
+            <DockyrdPageLoading className="py-2" cubeSize={28} />
           ) : (
             <p className="text-sm text-[var(--muted-foreground)]">
               Could not load instance settings (admin only).

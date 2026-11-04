@@ -9,6 +9,7 @@ import { CreateBucketModal } from "@/components/dockyard/create-bucket-modal";
 import { CreateDatabaseModal } from "@/components/dockyard/create-database-modal";
 import { CreateStaticSiteWizard } from "@/components/dockyard/create-static-site-wizard";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import { ProjectHardwareUsageSection } from "@/components/dockyard/project-hardware-usage-section";
 import {
   type ProjectResourceRow,
@@ -243,9 +244,7 @@ export function ProjectDetailPage() {
       ) : null}
 
       {showInitialLoading ? (
-        <p className="text-sm" style={{ color: "var(--muted-text)" }}>
-          Loading…
-        </p>
+        <DockyrdPageLoading />
       ) : !project ? (
         <p className="text-sm" style={{ color: "var(--muted-text)" }}>
           Project not found.

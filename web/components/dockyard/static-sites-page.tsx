@@ -4,6 +4,7 @@ import { Globe, Plus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CreateStaticSiteWizard } from "@/components/dockyard/create-static-site-wizard";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import {
   StaticSiteCreateProgressModal,
   type StaticSiteCreateResult,
@@ -180,9 +181,7 @@ export function StaticSitesPage() {
       </section>
 
       {showInitialLoading ? (
-        <p className="mt-10 text-sm" style={{ color: "var(--muted-text)" }}>
-          Loading…
-        </p>
+        <DockyrdPageLoading className="mt-2" />
       ) : rows.length === 0 ? (
         <section
           className="mt-10 rounded-[20px] border px-8 py-12 text-center"

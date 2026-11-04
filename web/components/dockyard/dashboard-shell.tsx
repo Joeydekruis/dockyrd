@@ -12,6 +12,7 @@ import { TopBar } from "@/components/dockyard/top-bar";
 import { UpdateAvailableNotifier } from "@/components/dockyard/update-available-modal";
 import { getMe, type MeResponse } from "@/lib/api";
 import { isAccountSettingsPath, isSettingsPath } from "@/lib/nav";
+import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import { UserLocaleProvider } from "@/lib/user-locale-context";
 
 type DashboardShellProps = {
@@ -56,14 +57,7 @@ export function DashboardShell({
   }, [router]);
 
   if (!ready || !user) {
-    return (
-      <div
-        className="flex min-h-dvh items-center justify-center text-sm"
-        style={{ color: "var(--muted-text)" }}
-      >
-        Loading…
-      </div>
-    );
+    return <DockyrdPageLoading layout="page" />;
   }
 
   return (

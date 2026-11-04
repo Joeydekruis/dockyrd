@@ -2,6 +2,7 @@
 
 import { Copy, Eye, EyeOff } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import { IconButton } from "@/components/dockyard/ui/icon-button";
 import { KeyValueRow } from "@/components/dockyard/ui/key-value-row";
 import { getServiceConnection } from "@/lib/api";
@@ -163,9 +164,7 @@ export function ServiceConnectionPanel({
           {error}
         </p>
       ) : loading ? (
-        <p className="mt-4 text-sm" style={{ color: "var(--muted-text)" }}>
-          Loading…
-        </p>
+        <DockyrdPageLoading className="py-2" cubeSize={28} />
       ) : (
         <dl className="mt-4">
           {keys.map((key) => (

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AddEnvVariableModal } from "@/components/dockyard/add-env-variable-modal";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import { ServiceDomainsTab } from "@/components/dockyard/service-domains-tab";
 import { ServiceLogsPanel } from "@/components/dockyard/service-logs-panel";
 import { Button } from "@/components/dockyard/ui/button";
@@ -243,9 +244,7 @@ export function ApplicationDetailPage() {
   return (
     <DashboardShell title={title} breadcrumb="Applications">
       {loading ? (
-        <p className="text-sm" style={{ color: "var(--muted-text)" }}>
-          Loading…
-        </p>
+        <DockyrdPageLoading />
       ) : error ? (
         <p className="text-sm text-red-600" role="alert">
           {error}

@@ -6,6 +6,7 @@ import {
   SettingsSection,
 } from "@/components/dockyard/account-settings-shared";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import { SettingsPageBody } from "@/components/dockyard/settings-page-body";
 import { Button } from "@/components/dockyard/ui/button";
 import {
@@ -51,7 +52,7 @@ export function AccountSecuritySettingsPage() {
         <SettingsErrorBanner message={error} />
         <SettingsSection title="Active sessions">
           {loading ? (
-            <p className="text-sm text-[var(--muted-foreground)]">Loading…</p>
+            <DockyrdPageLoading className="py-2" cubeSize={28} />
           ) : (
             <ul className="divide-y divide-[var(--border)] rounded-xl border border-[var(--border)] bg-[var(--surface)]">
               {sessions.length === 0 ? (

@@ -4,6 +4,7 @@ import { ExternalLink } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AddEnvVariableModal } from "@/components/dockyard/add-env-variable-modal";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import { ServiceDomainsTab } from "@/components/dockyard/service-domains-tab";
 import {
   ServiceAccessLogsPanel,
@@ -199,9 +200,7 @@ export function StaticSiteDetailPage() {
   return (
     <DashboardShell title={title} breadcrumb="Static sites">
       {loading ? (
-        <p className="text-sm" style={{ color: "var(--muted-text)" }}>
-          Loading…
-        </p>
+        <DockyrdPageLoading />
       ) : error ? (
         <p className="text-sm text-red-600" role="alert">
           {error}

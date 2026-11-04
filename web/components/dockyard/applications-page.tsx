@@ -4,6 +4,7 @@ import { Box, Plus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CreateApplicationModal } from "@/components/dockyard/create-application-modal";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import {
   type ResourceProvisionContext,
   ResourceProvisioningModal,
@@ -123,9 +124,7 @@ export function ApplicationsPage() {
       </section>
 
       {showInitialLoading ? (
-        <p className="mt-10 text-sm" style={{ color: "var(--muted-text)" }}>
-          Loading…
-        </p>
+        <DockyrdPageLoading className="mt-2" />
       ) : rows.length === 0 ? (
         <section
           className="mt-10 rounded-[20px] border px-8 py-12 text-center"

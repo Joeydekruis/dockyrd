@@ -3,6 +3,7 @@
 import { Plus } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import { InviteTeamMemberModal } from "@/components/dockyard/invite-team-member-modal";
 import { SettingsPageBody } from "@/components/dockyard/settings-page-body";
 import { Button } from "@/components/dockyard/ui/button";
@@ -71,7 +72,7 @@ export function TeamSettingsPage() {
             </Button>
           </div>
           {loading ? (
-            <p className="text-sm text-[var(--muted-foreground)]">Loading…</p>
+            <DockyrdPageLoading className="py-2" cubeSize={28} />
           ) : (
             <ul className="divide-y divide-[var(--border)] rounded-xl border border-[var(--border)] bg-[var(--surface)]">
               {users.map((u) => (

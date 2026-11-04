@@ -3,6 +3,7 @@
 import { Check } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import {
   groupNotificationsByDay,
   type InboxFilter,
@@ -129,12 +130,9 @@ export function NotificationsPage() {
         style={{ borderColor: "var(--border)", background: "var(--surface)" }}
       >
         {loading ? (
-          <p
-            className="px-6 py-12 text-center text-sm"
-            style={{ color: "var(--muted-text)" }}
-          >
-            Loading…
-          </p>
+          <div className="px-6 py-8">
+            <DockyrdPageLoading cubeSize={28} />
+          </div>
         ) : items.length === 0 ? (
           <p
             className="px-6 py-12 text-center text-sm"

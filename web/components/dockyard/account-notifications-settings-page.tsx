@@ -6,6 +6,7 @@ import {
   SettingsSection,
 } from "@/components/dockyard/account-settings-shared";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import { SettingsPageBody } from "@/components/dockyard/settings-page-body";
 import { Button } from "@/components/dockyard/ui/button";
 import {
@@ -97,7 +98,7 @@ export function AccountNotificationsSettingsPage() {
           description="Choose what Dockyard sends to your account email when SMTP is configured on the server."
         >
           {loading || !prefs ? (
-            <p className="text-sm text-[var(--muted-foreground)]">Loading…</p>
+            <DockyrdPageLoading className="py-2" cubeSize={28} />
           ) : (
             <form onSubmit={(e) => void onSave(e)} className="space-y-4">
               {toggles.map((item) => (

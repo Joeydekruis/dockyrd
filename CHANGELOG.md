@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.45] - 2026-11-04
+
+_Finished: 2026-11-04_
+
+### Added
+
+- **Dockyrd logo dobber** — inline SVG wordmark with hover wave + cube tilt on sidebar and auth surfaces (`web/components/dockyard/dockyrd-logo.tsx`, `globals.css`).
+- **Branded page loader** — five-cube staggered bob animation for dashboard shell and page fetch states (`DockyrdPageLoading`, `dockyrd-cube-icon.tsx`).
+
+### Changed
+
+- **Loading UX** — list, detail, and settings pages use the Dockyrd loader instead of plain “Loading…” text.
+
 ## [0.0.44] - 2026-11-04
 
 _Finished: 2026-11-04_

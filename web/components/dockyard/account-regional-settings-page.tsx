@@ -6,6 +6,7 @@ import {
   SettingsSection,
 } from "@/components/dockyard/account-settings-shared";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import { SettingsPageBody } from "@/components/dockyard/settings-page-body";
 import { Button } from "@/components/dockyard/ui/button";
 import {
@@ -87,7 +88,7 @@ export function AccountRegionalSettingsPage() {
           description="Timezone and clock format for analytics charts and timestamps in the dashboard."
         >
           {loading || !draft ? (
-            <p className="text-sm text-[var(--muted-foreground)]">Loading…</p>
+            <DockyrdPageLoading className="py-2" cubeSize={28} />
           ) : (
             <form onSubmit={(e) => void onSubmit(e)} className="space-y-6">
               <label className="flex flex-col gap-1 text-sm">

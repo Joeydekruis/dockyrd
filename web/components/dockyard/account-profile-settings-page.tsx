@@ -7,6 +7,7 @@ import {
   SettingsSection,
 } from "@/components/dockyard/account-settings-shared";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import { SettingsPageBody } from "@/components/dockyard/settings-page-body";
 import { Button } from "@/components/dockyard/ui/button";
 import { getMe, type MeResponse, patchAccount } from "@/lib/api";
@@ -66,7 +67,7 @@ export function AccountProfileSettingsPage() {
         ) : null}
         <SettingsSection title="Profile">
           {loading ? (
-            <p className="text-sm text-[var(--muted-foreground)]">Loading…</p>
+            <DockyrdPageLoading className="py-2" cubeSize={28} />
           ) : (
             <form onSubmit={(e) => void onSubmit(e)} className="space-y-4">
               <label className="flex flex-col gap-1 text-sm">

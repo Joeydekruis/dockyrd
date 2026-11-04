@@ -4,6 +4,7 @@ import { HardDrive, Plus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CreateBucketModal } from "@/components/dockyard/create-bucket-modal";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import {
   type ResourceProvisionContext,
   ResourceProvisioningModal,
@@ -152,9 +153,7 @@ export function ObjectStoragePage() {
       </section>
 
       {showInitialLoading ? (
-        <p className="mt-10 text-sm" style={{ color: "var(--muted-text)" }}>
-          Loading…
-        </p>
+        <DockyrdPageLoading className="mt-2" />
       ) : showGarageSetup ? (
         <div className="mt-10 space-y-6">
           <HeroPromoCard

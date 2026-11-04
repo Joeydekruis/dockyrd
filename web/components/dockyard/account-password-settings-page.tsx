@@ -7,6 +7,7 @@ import {
   SettingsSection,
 } from "@/components/dockyard/account-settings-shared";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import { SettingsPageBody } from "@/components/dockyard/settings-page-body";
 import { Button } from "@/components/dockyard/ui/button";
 import {
@@ -175,7 +176,7 @@ export function AccountPasswordSettingsPage() {
 
         <SettingsSection title="Two-factor authentication">
           {loading ? (
-            <p className="text-sm text-[var(--muted-foreground)]">Loading…</p>
+            <DockyrdPageLoading className="py-2" cubeSize={28} />
           ) : totpEnabled ? (
             <p className="text-sm text-green-700">
               Authenticator app is enabled for this account.

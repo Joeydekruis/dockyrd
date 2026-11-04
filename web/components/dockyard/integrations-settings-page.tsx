@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { ConnectGitHubWizard } from "@/components/dockyard/connect-github-wizard";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import { SettingsPageBody } from "@/components/dockyard/settings-page-body";
 import { Button } from "@/components/dockyard/ui/button";
 import { ConfirmDialog } from "@/components/dockyard/ui/confirm-dialog";
@@ -113,7 +114,7 @@ export function IntegrationsSettingsPage() {
         <section aria-label="Connected providers" className="mb-8 space-y-3">
           <h2 className="text-sm font-medium">Connected</h2>
           {loading ? (
-            <p className="text-sm text-[var(--muted-foreground)]">Loading…</p>
+            <DockyrdPageLoading className="py-2" cubeSize={28} />
           ) : connected && status ? (
             <ConnectedGitHubCard
               status={status}

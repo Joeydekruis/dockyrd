@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import { SettingsPageBody } from "@/components/dockyard/settings-page-body";
 import { Button } from "@/components/dockyard/ui/button";
 import { SnackbarViewport } from "@/components/dockyard/ui/snackbar";
@@ -155,7 +156,7 @@ export function InstanceSettingsPage() {
               <Button type="submit">Save URL settings</Button>
             </form>
           ) : loading ? (
-            <p className="text-sm text-[var(--muted-foreground)]">Loading…</p>
+            <DockyrdPageLoading className="py-2" cubeSize={28} />
           ) : (
             <p className="text-sm text-[var(--muted-foreground)]">
               Could not load instance settings (admin only).

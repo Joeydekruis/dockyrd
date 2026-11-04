@@ -4,6 +4,7 @@ import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import { Button } from "@/components/dockyard/ui/button";
 import {
   SettingsBranchPill,
@@ -118,9 +119,7 @@ export function StaticSiteDeploymentDetailPage() {
   return (
     <DashboardShell title={sha} breadcrumb="Deployment">
       {loading ? (
-        <p className="text-sm" style={{ color: "var(--muted-text)" }}>
-          Loading…
-        </p>
+        <DockyrdPageLoading />
       ) : error ? (
         <p className="text-sm text-red-600" role="alert">
           {error}

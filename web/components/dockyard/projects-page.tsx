@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CreateProjectModal } from "@/components/dockyard/create-project-modal";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import { ProjectsWelcomeHero } from "@/components/dockyard/projects-welcome-hero";
 import { Button } from "@/components/dockyard/ui/button";
 import { ProjectCard } from "@/components/dockyard/ui/project-card";
@@ -94,9 +95,7 @@ export function ProjectsPage() {
         </div>
 
         {loading ? (
-          <p className="text-sm" style={{ color: "var(--muted-text)" }}>
-            Loading…
-          </p>
+          <DockyrdPageLoading />
         ) : overviews.length === 0 ? (
           <section
             className="rounded-[20px] border px-8 py-12 text-center"

@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import type { ReactNode } from "react";
 import { DockyrdLogo } from "@/components/dockyard/dockyrd-logo";
+import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import {
   Alert,
   Avatar,
@@ -197,7 +198,10 @@ export const ShapeAndElevation: StoryObj = {
 export const Logo: StoryObj = {
   render: () => (
     <CatalogCanvas>
-      <Section title="Logo">
+      <Section
+        title="Logo"
+        description="Hover the mark for the dobber wave + tilt."
+      >
         <CatalogRow>
           <DockyrdLogo />
           <div
@@ -207,6 +211,16 @@ export const Logo: StoryObj = {
             <DockyrdLogo variant="dark" />
           </div>
         </CatalogRow>
+      </Section>
+    </CatalogCanvas>
+  ),
+};
+
+export const PageLoader: StoryObj = {
+  render: () => (
+    <CatalogCanvas>
+      <Section title="Page loader">
+        <DockyrdPageLoading />
       </Section>
     </CatalogCanvas>
   ),
