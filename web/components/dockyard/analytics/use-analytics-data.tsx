@@ -40,7 +40,7 @@ export type AnalyticsData = {
   isAdmin: boolean;
   loading: boolean;
   error: string | null;
-  refresh: () => Promise<void>;
+  refresh: (opts?: { silent?: boolean }) => Promise<void>;
   setRange: (r: TimeRange) => void;
   eventFilter: string;
   setEventFilter: (f: string) => void;
@@ -69,8 +69,11 @@ export function useAnalyticsData(): AnalyticsData {
   const [isAdmin, setIsAdmin] = useState(false);
   const [cleanupBusy, setCleanupBusy] = useState(false);
 
-  const refresh = useCallback(async () => {
-    setLoading(true);
+  const refresh = useCallback(async (opts?: { silent?: boolean }) => {
+    const silent = opts?.silent === true;
+    if (!silent) {
+      setLoading(true);
+    }
     try {
       const apiRange = metricRangeFromTimeRange(range);
       const [m, ev, info, cm] = await Promise.all([
@@ -105,14 +108,27 @@ export function useAnalyticsData(): AnalyticsData {
       }
       setError(null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load analytics");
+      if (!silent) {
+        setError(e instanceof Error ? e.message : "Failed to load analytics");
+      }
     } finally {
-      setLoading(false);
+      if (!silent) {
+        setLoading(false);
+      }
     }
   }, [range]);
 
   useEffect(() => {
     void refresh();
+  }, [refresh]);
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      if (document.visibilityState === "visible") {
+        void refresh({ silent: true });
+      }
+    }, 60_000);
+    return () => window.clearInterval(id);
   }, [refresh]);
 
   const filteredEvents = useMemo(() => {

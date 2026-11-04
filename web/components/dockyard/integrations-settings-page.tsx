@@ -147,39 +147,41 @@ export function IntegrationsSettingsPage() {
 
         <section aria-label="Add a provider" className="space-y-3">
           <h2 className="text-sm font-medium">Add a provider</h2>
-          <div className="relative rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6">
-            <span className="absolute top-4 right-4">
-              <StatusBadge label="Recommended" variant="info" />
-            </span>
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-              <div className="flex gap-4">
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6">
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+              <div className="flex min-w-0 flex-1 gap-4">
                 <span
                   className="flex size-12 shrink-0 items-center justify-center rounded-xl"
                   style={{ background: "#eceef1" }}
                 >
                   <GitBranch className="size-6" strokeWidth={1.8} aria-hidden />
                 </span>
-                <div className="pr-24">
-                  <h3 className="text-base font-semibold">GitHub</h3>
-                  <p className="mt-1 max-w-lg text-sm text-[var(--muted-foreground)]">
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="text-base font-semibold">GitHub</h3>
+                    <StatusBadge label="Recommended" variant="info" />
+                  </div>
+                  <p className="mt-1 max-w-2xl text-sm text-[var(--muted-foreground)]">
                     Deploy from github.com through a GitHub App. Auto-deploys on
                     push when enabled on a service.
                   </p>
                 </div>
               </div>
-              {!connected ? (
-                <Button type="button" onClick={() => openWizard(1)}>
-                  Connect GitHub
-                </Button>
-              ) : (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => openWizard(3)}
-                >
-                  Manage access
-                </Button>
-              )}
+              <div className="shrink-0 lg:pt-1">
+                {!connected ? (
+                  <Button type="button" onClick={() => openWizard(1)}>
+                    Connect GitHub
+                  </Button>
+                ) : (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => openWizard(3)}
+                  >
+                    Manage access
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </section>

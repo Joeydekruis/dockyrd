@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.34] - 2026-11-04
+
+_Finished: 2026-11-04_
+
+### Fixed
+
+- **GitHub App manifest** — register flow POSTs `manifest` to GitHub (GET `?manifest=` showed an empty form); `BuildManifestLaunch` + `postGitHubManifestLaunch` in the wizard (`internal/github/manifest.go`, `web/lib/open-external-url.ts`)
+
+### Changed
+
+- **Settings → Git providers** — content width ~1000px; **Recommended** badge beside title (no overlap with **Connect GitHub**)
+- **Analytics** — container metrics hook and overview tab polish
+
 ## [0.0.33] - 2026-11-04
 
 _Finished: 2026-11-04_

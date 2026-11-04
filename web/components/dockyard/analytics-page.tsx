@@ -73,7 +73,7 @@ export function AnalyticsPage() {
       {metaChips}
       <PageHeader
         title="Analytics"
-        subtitle="Monitor your server, from the key numbers to the detailed charts."
+        subtitle="Monitor your server, from the key numbers to the detailed charts. Refreshes every minute while you stay on this page."
         action={
           <TimeRangeToggle value={data.range} onChange={data.setRange} />
         }

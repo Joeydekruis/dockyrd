@@ -17,16 +17,25 @@ type ManifestParams struct {
 	SetupURL      string
 	WebhookURL    string
 	AppName       string
+	Organization  string
 }
 
-// CreateManifestURL returns the GitHub settings URL to create an app from manifest.
-func CreateManifestURL(p ManifestParams) (string, error) {
+// ManifestLaunch is submitted to GitHub as POST application/x-www-form-urlencoded.
+// GitHub requires POST with a form field named manifest — a GET ?manifest= query does not prefill.
+type ManifestLaunch struct {
+	Action   string `json:"action"`
+	State    string `json:"state"`
+	Manifest string `json:"manifest"`
+}
+
+// BuildManifestLaunch prepares the GitHub App manifest registration handshake.
+func BuildManifestLaunch(p ManifestParams, state string) (ManifestLaunch, error) {
 	base := strings.TrimRight(strings.TrimSpace(p.PublicBaseURL), "/")
 	if base == "" {
 		base = strings.TrimRight(os.Getenv("DOCKYARD_PUBLIC_URL"), "/")
 	}
 	if base == "" {
-		return "", fmt.Errorf("public base URL required for GitHub manifest")
+		return ManifestLaunch{}, fmt.Errorf("public base URL required for GitHub manifest")
 	}
 	if p.RedirectURL == "" {
 		p.RedirectURL = base + "/api/v1/github/app/callback"
@@ -47,21 +56,41 @@ func CreateManifestURL(p ManifestParams) (string, error) {
 		"hook_attributes": map[string]any{
 			"url": p.WebhookURL,
 		},
-		"redirect_url":          p.RedirectURL,
-		"setup_url":             p.SetupURL,
-		"public":                true,
+		"redirect_url": p.RedirectURL,
+		"setup_url":    p.SetupURL,
+		"public":       true,
 		"default_permissions": map[string]any{
-			"contents":        "read",
-			"metadata":        "read",
-			"pull_requests":   "read",
+			"contents":      "read",
+			"metadata":      "read",
+			"pull_requests": "read",
 		},
 		"default_events": []string{"push"},
 	}
 	raw, err := json.Marshal(manifest)
 	if err != nil {
+		return ManifestLaunch{}, err
+	}
+	action := "https://github.com/settings/apps/new"
+	if org := strings.TrimSpace(p.Organization); org != "" {
+		action = fmt.Sprintf("https://github.com/organizations/%s/settings/apps/new", url.PathEscape(org))
+	}
+	if strings.TrimSpace(state) != "" {
+		action += "?state=" + url.QueryEscape(state)
+	}
+	return ManifestLaunch{
+		Action:   action,
+		State:    state,
+		Manifest: string(raw),
+	}, nil
+}
+
+// CreateManifestURL is deprecated: GitHub ignores manifest on GET. Use BuildManifestLaunch + POST form.
+func CreateManifestURL(p ManifestParams) (string, error) {
+	launch, err := BuildManifestLaunch(p, "")
+	if err != nil {
 		return "", err
 	}
 	q := url.Values{}
-	q.Set("manifest", string(raw))
-	return "https://github.com/settings/apps/new?" + q.Encode(), nil
+	q.Set("manifest", launch.Manifest)
+	return launch.Action + "&" + q.Encode(), nil
 }

@@ -350,14 +350,21 @@ export function disconnectGitHub() {
   return apiFetch<void>("/api/v1/github/connection", { method: "DELETE" });
 }
 
+export type GitHubManifestLaunch = {
+  action: string;
+  state: string;
+  manifest: string;
+};
+
 export function startGitHubAppLink(opts?: {
   app_name?: string;
   public_url?: string;
+  organization?: string;
 }) {
-  return apiFetch<{ url: string; state: string }>(
-    "/api/v1/github/app/manifest",
-    { method: "POST", json: opts ?? {} },
-  );
+  return apiFetch<GitHubManifestLaunch>("/api/v1/github/app/manifest", {
+    method: "POST",
+    json: opts ?? {},
+  });
 }
 
 export type GitHubRepo = {

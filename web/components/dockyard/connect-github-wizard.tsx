@@ -8,7 +8,7 @@ import {
   getGitHubStatus,
   startGitHubAppLink,
 } from "@/lib/api";
-import { openExternalUrl } from "@/lib/open-external-url";
+import { openExternalUrl, postGitHubManifestLaunch } from "@/lib/open-external-url";
 
 const WIZARD_STORAGE_KEY = "dockyrd.githubWizard.v1";
 
@@ -134,11 +134,11 @@ export function ConnectGitHubWizard({
     setBusy(true);
     setError(null);
     try {
-      const { url } = await startGitHubAppLink({
+      const launch = await startGitHubAppLink({
         app_name: draft.appName.trim(),
         public_url: draft.instanceUrl.trim(),
       });
-      openExternalUrl(url);
+      postGitHubManifestLaunch(launch);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not start GitHub setup");
     } finally {

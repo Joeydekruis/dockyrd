@@ -62,21 +62,14 @@ func (d apiDeps) handleGitHubManifest(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var body struct {
-		AppName   string `json:"app_name"`
-		PublicURL string `json:"public_url"`
+		AppName      string `json:"app_name"`
+		PublicURL    string `json:"public_url"`
+		Organization string `json:"organization"`
 	}
 	_ = json.NewDecoder(r.Body).Decode(&body)
 	base := strings.TrimRight(strings.TrimSpace(body.PublicURL), "/")
 	if base == "" {
 		base = d.githubPublicBaseURL(r)
-	}
-	url, err := github.CreateManifestURL(github.ManifestParams{
-		PublicBaseURL: base,
-		AppName:       body.AppName,
-	})
-	if err != nil {
-		writeJSONError(w, http.StatusBadRequest, err.Error())
-		return
 	}
 	state := github.NewStateToken()
 	if d.q != nil {
@@ -86,7 +79,16 @@ func (d apiDeps) handleGitHubManifest(w http.ResponseWriter, r *http.Request) {
 			Value: val,
 		})
 	}
-	writeJSON(w, http.StatusOK, map[string]string{"url": url, "state": state})
+	launch, err := github.BuildManifestLaunch(github.ManifestParams{
+		PublicBaseURL: base,
+		AppName:       body.AppName,
+		Organization:  body.Organization,
+	}, state)
+	if err != nil {
+		writeJSONError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	writeJSON(w, http.StatusOK, launch)
 }
 
 func (d apiDeps) handleGitHubCallback(w http.ResponseWriter, r *http.Request) {
