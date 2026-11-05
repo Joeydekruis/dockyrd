@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.53] - 2026-11-05
+
+_Finished: 2026-11-05_
+
+### Added
+
+- **Notifications ops** — `scripts/verify-notify-smoke.sh` for notify/netsafe/watch gates; reconciler prunes notification deliveries (30d) and typed events (90d) in batches
+
 ## [0.0.52] - 2026-11-05
 
 _Finished: 2026-11-05_

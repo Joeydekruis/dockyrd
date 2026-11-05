@@ -2,18 +2,14 @@
 
 **Updated:** 2026-11-05
 
-## In progress
+## Notifications (#62–#66)
 
-None — notifications sprint (#62–#66) shipped **v0.0.52** on `development`; maintainer verify + issue close pending.
-
-**Note:** Docker Compose / preview / API-token v2 WIP was moved aside (untracked under `docs/project/wip/` and local-only paths) so notification sprint could land cleanly — pick up as separate Feature track.
+Shipped on `development` (see `CHANGELOG` 0.0.51–0.0.53). Issues labeled `status/ready-for-review`. Local compose/preview/API-token WIP lives under `docs/project/wip/` (not on branch).
 
 ## Last ship
 
-**Notifications F2–F4 + deploy-restart notify** (#64–#66, Refs #62–#63) @ **v0.0.52** on `development`.
-
-Prior: **Notifications F0–F1 + backup hardening** @ **v0.0.51**; build resilience follow-up @ **v0.0.50**.
+**Notifications polish** @ **v0.0.53** — delivery/event prune, `verify-notify-smoke.sh`, `docker/info` for disk watch.
 
 ## Previous
 
-**M6 · Resource links** (#58–#61) @ **v0.0.49** — merged to `main`, GitHub release tagged.
+**M6 · Resource links** @ **v0.0.49**; notifications F0–F4 @ **0.0.51–0.0.52** (commits `957ba45`, `0885170`).

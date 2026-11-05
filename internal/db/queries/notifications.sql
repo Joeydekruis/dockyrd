@@ -311,3 +311,14 @@ SELECT
 FROM events
 WHERE id = ?
 LIMIT 1;
+
+-- name: PruneNotificationDeliveriesBefore :exec
+DELETE FROM notification_deliveries
+WHERE created_at < ?
+LIMIT 500;
+
+-- name: PruneTypedEventsBefore :exec
+DELETE FROM events
+WHERE type IS NOT NULL
+  AND created_at < ?
+LIMIT 500;

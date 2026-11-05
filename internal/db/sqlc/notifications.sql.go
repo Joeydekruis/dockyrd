@@ -654,6 +654,29 @@ func (q *Queries) MarkDeliverySent(ctx context.Context, arg MarkDeliverySentPara
 	return err
 }
 
+const pruneNotificationDeliveriesBefore = `-- name: PruneNotificationDeliveriesBefore :exec
+DELETE FROM notification_deliveries
+WHERE created_at < ?
+LIMIT 500
+`
+
+func (q *Queries) PruneNotificationDeliveriesBefore(ctx context.Context, createdAt int64) error {
+	_, err := q.db.ExecContext(ctx, pruneNotificationDeliveriesBefore, createdAt)
+	return err
+}
+
+const pruneTypedEventsBefore = `-- name: PruneTypedEventsBefore :exec
+DELETE FROM events
+WHERE type IS NOT NULL
+  AND created_at < ?
+LIMIT 500
+`
+
+func (q *Queries) PruneTypedEventsBefore(ctx context.Context, createdAt sql.NullInt64) error {
+	_, err := q.db.ExecContext(ctx, pruneTypedEventsBefore, createdAt)
+	return err
+}
+
 const recoverExpiredDeliveryLeases = `-- name: RecoverExpiredDeliveryLeases :exec
 UPDATE notification_deliveries
 SET status = 'pending', lease_until = NULL

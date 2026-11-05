@@ -64,6 +64,12 @@ func (l *Loop) Tick(ctx context.Context) {
 	if l.Docker != nil && l.tickCount%10 == 0 {
 		prune.AllAppServiceImages(ctx, l.Q, l.Docker, 5)
 	}
+	if l.tickCount%10 == 0 && l.Q != nil {
+		now := time.Now()
+		cutoff := now.Add(-30 * 24 * time.Hour).Unix()
+		_ = l.Q.PruneNotificationDeliveriesBefore(ctx, cutoff)
+		_ = l.Q.PruneTypedEventsBefore(ctx, sql.NullInt64{Int64: now.Add(-90 * 24 * time.Hour).Unix(), Valid: true})
+	}
 }
 
 // Run starts the 30s reconcile ticker.
