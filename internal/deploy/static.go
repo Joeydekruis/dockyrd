@@ -67,6 +67,10 @@ func (rt *Runtime) RunStaticSiteDeployment(ctx context.Context, deploymentID str
 	if err := build.CheckDiskGuard(rt.Cfg.DataDir, rt.Cfg.MinFreeDiskPercent()); err != nil {
 		return rt.fail(ctx, deploymentID, err)
 	}
+	peak := build.ExpectedPeakHeuristic("static_site", false)
+	if _, err := rt.acquireBuildBudget(ctx, deploymentID, dep.ServiceID, peak); err != nil {
+		return err
+	}
 	buildCtx, cancel := context.WithTimeout(ctx, rt.Cfg.BuildTimeout())
 	defer cancel()
 

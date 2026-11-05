@@ -11,5 +11,5 @@ Tracked after milestone **M5** / release **v0.0.22+**. Create GitHub issues as y
 | Owner 2FA mandate | **Done** — owners blocked until TOTP enabled |
 | Require 2FA for all users | Instance setting `require_2fa_all` |
 | RSS targets | `scripts/measure-rss.sh`, doctor warn on Linux |
-| Caddy analytics / ECharts depth | Analytics page |
+| Build resilience (cgroup, budget, build elsewhere) | [`docs/project/build-resilience.md`](build-resilience.md) — issues #49–#57 |
 | Service detail tabs | Database/bucket detail vs design-index §17 |

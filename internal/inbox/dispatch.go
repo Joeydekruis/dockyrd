@@ -208,7 +208,7 @@ func (d *Dispatcher) insertForUser(ctx context.Context, p insertParams) error {
 	return nil
 }
 
-func deployBody(dep sqlc.Deployment, detail string) string {
+func deployBody(dep sqlc.GetDeploymentByIDRow, detail string) string {
 	var parts []string
 	if dep.CommitSha.Valid && dep.CommitSha.String != "" {
 		sha := dep.CommitSha.String

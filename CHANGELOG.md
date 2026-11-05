@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.46] - 2026-11-05
+
+_Finished: 2026-11-05_
+
+### Added
+
+- **#49–#51 / build resilience (foundation)** — product plan in `docs/project/build-resilience.md`; GitHub epic #49–#57; `internal/resources` (cgroup v2, slice limits via systemd D-Bus, freeze); build admission + `waiting` deployment status; migration `00005_build_resilience`; installer slice units, swap/zswap; `dy-buildkit` `buildkitd.toml` + data volume; Docker `CgroupParent`/OOM scores on managed containers — https://github.com/Joeydekruis/dockyrd/issues/50 https://github.com/Joeydekruis/dockyrd/issues/51
+
+### Changed
+
+- **`packaging/dockyard.service`** — `dy-system.slice`, `GOMEMLIMIT`, OOM score — #50
+
 ## [0.0.45] - 2026-11-04
 
 _Finished: 2026-11-04_

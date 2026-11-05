@@ -11,6 +11,7 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/docker"
 	"github.com/Joeydekruis/dockyrd/internal/prune"
 	"github.com/Joeydekruis/dockyrd/internal/proxy"
+	"github.com/Joeydekruis/dockyrd/internal/resources"
 )
 
 // Loop marks interrupted deploys and syncs proxy config periodically.
@@ -19,11 +20,19 @@ type Loop struct {
 	Q         *sqlc.Queries
 	Docker    *docker.Client
 	Log       *slog.Logger
+	Resources resources.Resources
 	tickCount int
+	thawed    bool
 }
 
 // Tick runs one reconcile pass.
 func (l *Loop) Tick(ctx context.Context) {
+	if !l.thawed && l.Resources != nil {
+		if err := l.Resources.FreezeBuild(ctx, false); err != nil && l.Log != nil {
+			l.Log.Warn("thaw build slice", "err", err)
+		}
+		l.thawed = true
+	}
 	now := time.Now().Unix()
 	if err := l.Q.MarkInterruptedDeployments(ctx, sql.NullInt64{Int64: now, Valid: true}); err != nil && l.Log != nil {
 		l.Log.Warn("mark interrupted deployments", "err", err)

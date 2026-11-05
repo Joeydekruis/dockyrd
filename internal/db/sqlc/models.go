@@ -8,6 +8,17 @@ import (
 	"database/sql"
 )
 
+type ApiToken struct {
+	ID         string
+	Name       sql.NullString
+	TokenHash  []byte
+	Scope      string
+	CreatedBy  sql.NullString
+	LastUsedAt sql.NullInt64
+	ExpiresAt  sql.NullInt64
+	CreatedAt  int64
+}
+
 type AuditLog struct {
 	ID         string
 	UserID     sql.NullString
@@ -31,6 +42,20 @@ type BackupTarget struct {
 	SecretKeyEnc []byte
 	CreatedAt    sql.NullInt64
 	UpdatedAt    sql.NullInt64
+}
+
+type Builder struct {
+	ID            string
+	Name          string
+	Kind          string
+	Endpoint      string
+	CaCertEnc     []byte
+	ClientCertEnc []byte
+	ClientKeyEnc  []byte
+	Platforms     sql.NullString
+	Status        sql.NullString
+	LastSeenAt    sql.NullInt64
+	CreatedAt     int64
 }
 
 type DatabaseBackupPolicy struct {
@@ -77,6 +102,14 @@ type Deployment struct {
 	QueuedAt      sql.NullInt64
 	StartedAt     sql.NullInt64
 	FinishedAt    sql.NullInt64
+	MemPeakBytes  sql.NullInt64
+	SwapPeakBytes sql.NullInt64
+	CpuSeconds    sql.NullFloat64
+	WaitedMs      int64
+	FrozenMs      int64
+	BudgetBytes   sql.NullInt64
+	Builder       string
+	FailureKind   sql.NullString
 }
 
 type Domain struct {

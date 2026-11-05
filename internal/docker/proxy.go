@@ -74,6 +74,15 @@ func (c *Client) EnsureProxy(ctx context.Context, cfg config.Config) error {
 	}
 
 	if errdefs.IsNotFound(err) {
+		hostCfg := &container.HostConfig{
+			NetworkMode:   "host",
+			RestartPolicy: container.RestartPolicy{Name: "always"},
+			Mounts: []mount.Mount{
+				{Type: mount.TypeBind, Source: caddyDir, Target: caddyDirInContainer},
+				{Type: mount.TypeBind, Source: cfg.SitesDir(), Target: "/srv/sites", ReadOnly: true},
+			},
+		}
+		applySystemCgroup(hostCfg)
 		_, err = c.moby.ContainerCreate(ctx, &container.Config{
 			Image: ProxyImage,
 			Cmd: []string{
@@ -85,14 +94,8 @@ func (c *Client) EnsureProxy(ctx context.Context, cfg config.Config) error {
 				LabelKind:      KindSystem,
 				proxySpecLabel: proxySpecHostV1,
 			},
-		}, &container.HostConfig{
-			NetworkMode:   "host",
-			RestartPolicy: container.RestartPolicy{Name: "always"},
-			Mounts: []mount.Mount{
-				{Type: mount.TypeBind, Source: caddyDir, Target: caddyDirInContainer},
-				{Type: mount.TypeBind, Source: cfg.SitesDir(), Target: "/srv/sites", ReadOnly: true},
-			},
-		}, nil, nil, ProxyContainerName)
+		}, hostCfg, nil, nil, ProxyContainerName)
+		// cgroup applied on create only; existing dy-proxy keeps prior placement until recreated
 		if err != nil {
 			return fmt.Errorf("create dy-proxy: %w", err)
 		}

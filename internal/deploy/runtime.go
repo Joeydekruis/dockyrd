@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"strings"
 	"time"
 
 	"github.com/Joeydekruis/dockyrd/internal/appconfig"
@@ -19,18 +20,20 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/github"
 	"github.com/Joeydekruis/dockyrd/internal/proxy"
 	"github.com/Joeydekruis/dockyrd/internal/refs"
+	"github.com/Joeydekruis/dockyrd/internal/resources"
 )
 
 const healthTimeout = 60 * time.Second
 
 // Runtime runs image deploy jobs against Docker.
 type Runtime struct {
-	Cfg    config.Config
-	Q      *sqlc.Queries
-	Docker *docker.Client
-	Log    *slog.Logger
-	Events *eventlog.Logger
-	Inbox  *inbox.Dispatcher
+	Cfg       config.Config
+	Q         *sqlc.Queries
+	Docker    *docker.Client
+	Log       *slog.Logger
+	Events    *eventlog.Logger
+	Inbox     *inbox.Dispatcher
+	Resources resources.Resources
 }
 
 // RunDeployment executes deploy for app or static_site services.
@@ -56,7 +59,7 @@ func (rt *Runtime) RunDeployment(ctx context.Context, deploymentID string) error
 	}
 }
 
-func (rt *Runtime) runAppDeployment(ctx context.Context, deploymentID string, dep sqlc.Deployment) error {
+func (rt *Runtime) runAppDeployment(ctx context.Context, deploymentID string, dep sqlc.GetDeploymentByIDRow) error {
 	ctxRow, err := rt.Q.GetServiceDeployContext(ctx, dep.ServiceID)
 	if err != nil {
 		return err
@@ -83,6 +86,15 @@ func (rt *Runtime) runAppDeployment(ctx context.Context, deploymentID string, de
 	}
 
 	if needsBuild {
+		builder := strings.TrimSpace(appCfg.Builder)
+		if builder == "" {
+			builder = appconfig.BuilderRailpack
+		}
+		isNext := strings.Contains(strings.ToLower(appCfg.Source.Repo+appCfg.Source.URL), "next")
+		peak := build.ExpectedPeakHeuristic(builder, isNext)
+		if _, err := rt.acquireBuildBudget(ctx, deploymentID, dep.ServiceID, peak); err != nil {
+			return err
+		}
 		if err := rt.Q.UpdateDeploymentStatus(ctx, sqlc.UpdateDeploymentStatusParams{
 			Status:    "building",
 			Error:     sql.NullString{},

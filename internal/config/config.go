@@ -180,3 +180,17 @@ func (c Config) MinFreeDiskPercent() int {
 	}
 	return 10
 }
+
+const envBuildIsolation = "DOCKYARD_BUILD_ISOLATION"
+
+// BuildIsolationEnabled is true on Linux unless DOCKYARD_BUILD_ISOLATION=0.
+func (c Config) BuildIsolationEnabled() bool {
+	if runtime.GOOS != "linux" {
+		return false
+	}
+	v := strings.TrimSpace(os.Getenv(envBuildIsolation))
+	if v == "0" || strings.EqualFold(v, "false") {
+		return false
+	}
+	return true
+}

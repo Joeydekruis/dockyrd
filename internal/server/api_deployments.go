@@ -283,7 +283,7 @@ func deploymentFromRow(row sqlc.ListDeploymentsForServiceRow) deploymentResponse
 	}
 }
 
-func deploymentFromFullRow(row sqlc.Deployment) deploymentResponse {
+func deploymentFromFullRow(row sqlc.GetDeploymentByIDRow) deploymentResponse {
 	return deploymentResponse{
 		ID:         row.ID,
 		ServiceID:  row.ServiceID,

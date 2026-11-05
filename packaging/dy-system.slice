@@ -1,0 +1,4 @@
+[Slice]
+MemoryMin=192M
+CPUWeight=500
+IOWeight=500

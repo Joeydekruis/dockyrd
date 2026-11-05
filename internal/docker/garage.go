@@ -43,6 +43,7 @@ func (c *Client) RunGarage(ctx context.Context, cfg config.Config, _ string) err
 			{Type: mount.TypeBind, Source: filepath.Join(dataRoot, "data"), Target: "/var/lib/garage/data"},
 		},
 	}
+	applyAppsCgroup(hostConfig)
 	identity := Identity{Kind: KindSystem, ServerID: "local"}
 	resp, err := c.moby.ContainerCreate(ctx, &container.Config{
 		Image:  "dxflrs/garage:v1.2.0",

@@ -17,6 +17,7 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/metrics"
 	"github.com/Joeydekruis/dockyrd/internal/proxy"
 	"github.com/Joeydekruis/dockyrd/internal/reconcile"
+	"github.com/Joeydekruis/dockyrd/internal/resources"
 	"github.com/Joeydekruis/dockyrd/internal/updater"
 )
 
@@ -34,9 +35,24 @@ func startBackground(ctx context.Context, cfg config.Config, q *sqlc.Queries, hu
 
 	eventLog := &eventlog.Logger{Q: q, Hub: hub}
 	inboxDispatch := &inbox.Dispatcher{Cfg: cfg, Q: q, Hub: hub, Log: log}
-	deployRT := &deploy.Runtime{Cfg: cfg, Q: q, Docker: dockerCli, Log: log, Events: eventLog, Inbox: inboxDispatch}
+	deployRT := &deploy.Runtime{
+		Cfg:       cfg,
+		Q:         q,
+		Docker:    dockerCli,
+		Log:       log,
+		Events:    eventLog,
+		Inbox:     inboxDispatch,
+		Resources: resources.New(cfg.BuildIsolationEnabled()),
+	}
+	rec := &reconcile.Loop{
+		Cfg:       cfg,
+		Q:         q,
+		Docker:    dockerCli,
+		Log:       log,
+		Resources: resources.New(cfg.BuildIsolationEnabled()),
+	}
+
 	worker := &jobs.Worker{Cfg: cfg, Q: q, Deploy: deployRT, Docker: dockerCli, Log: log}
-	rec := &reconcile.Loop{Cfg: cfg, Q: q, Docker: dockerCli, Log: log}
 
 	go metrics.RunHostCollector(ctx, cfg, q, log, 10*time.Second)
 	if dockerCli != nil {
@@ -47,7 +63,7 @@ func startBackground(ctx context.Context, cfg config.Config, q *sqlc.Queries, hu
 		if err := dockerCli.EnsureEdgeNetwork(ctx); err != nil && log != nil {
 			log.Warn("ensure dy-edge", "err", err)
 		}
-		if err := dockerCli.EnsureBuildkit(ctx); err != nil && log != nil {
+		if err := dockerCli.EnsureBuildkit(ctx, cfg.DataDir); err != nil && log != nil {
 			log.Warn("ensure dy-buildkit", "err", err)
 		}
 		if err := dockerCli.EnsureProxy(ctx, cfg); err != nil && log != nil {

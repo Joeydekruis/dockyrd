@@ -83,6 +83,7 @@ func (c *Client) RunDatabase(ctx context.Context, in RunDatabaseInput) (string, 
 			portKey: []nat.PortBinding{{HostIP: "0.0.0.0", HostPort: strconv.Itoa(in.PublicPort)}},
 		}
 	}
+	applyAppsCgroup(hostConfig)
 
 	labels := in.Identity.Labels()
 	exposed := nat.PortSet{portKey: struct{}{}}

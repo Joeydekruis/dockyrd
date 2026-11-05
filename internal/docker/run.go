@@ -62,6 +62,7 @@ func (c *Client) RunApp(ctx context.Context, in RunAppInput) (string, error) {
 			Memory: int64(in.MemLimitMB) * 1024 * 1024,
 		},
 	}
+	applyAppsCgroup(hostConfig)
 
 	portKey := nat.Port(fmt.Sprintf("%d/tcp", in.Port))
 	exposed := nat.PortSet{portKey: struct{}{}}

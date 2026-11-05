@@ -238,6 +238,7 @@ install_systemd() {
 	if [ "$SKIP_SYSTEMD" = "1" ]; then
 		return 0
 	fi
+	install_build_resilience
 	unit_src=$(resolve_unit_src) || {
 		log "Missing unit file (set DOCKYARD_UNIT_SRC or run from a git checkout)." >&2
 		exit 1
@@ -248,6 +249,55 @@ install_systemd() {
 	esac
 	systemctl daemon-reload
 	systemctl enable dockyard.service
+}
+
+install_build_resilience() {
+	if [ "$SKIP_ROOT" = "1" ]; then
+		return 0
+	fi
+	script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+	for unit in dy.slice dy-system.slice dy-apps.slice dy-build.slice; do
+		src="$script_dir/../packaging/$unit"
+		if [ -f "$src" ]; then
+			install -m 644 "$src" "/etc/systemd/system/$unit"
+		fi
+	done
+	if [ -f /sys/fs/cgroup/cgroup.controllers ]; then
+		log "✓ cgroup v2 detected"
+	else
+		log "Warning: cgroup v2 not detected; build isolation disabled until host is upgraded." >&2
+	fi
+	# Swap sizing when no swap configured (briefing build resilience)
+	if ! swapon --show 2>/dev/null | grep -q .; then
+		mem_kb=$(awk '/MemTotal:/ {print $2}' /proc/meminfo 2>/dev/null || echo 0)
+		swap_gb=2
+		if [ "$mem_kb" -gt 8388608 ] 2>/dev/null; then
+			swap_gb=0
+		fi
+		if [ "$swap_gb" -gt 0 ]; then
+			swapfile=/swapfile
+			if [ ! -f "$swapfile" ]; then
+				log "Creating ${swap_gb}G swapfile for build resilience…"
+				fallocate -l "${swap_gb}G" "$swapfile" 2>/dev/null || dd if=/dev/zero of="$swapfile" bs=1M count=$((swap_gb * 1024)) status=progress
+				chmod 600 "$swapfile"
+				mkswap "$swapfile" >/dev/null
+				swapon "$swapfile"
+				grep -q "$swapfile" /etc/fstab 2>/dev/null || echo "$swapfile none swap sw 0 0" >>/etc/fstab
+			fi
+		fi
+	fi
+	sysctl -w vm.swappiness=10 >/dev/null 2>&1 || true
+	grep -q '^vm.swappiness' /etc/sysctl.d/99-dockyard.conf 2>/dev/null || echo 'vm.swappiness=10' >/etc/sysctl.d/99-dockyard.conf
+	mem_kb=$(awk '/MemTotal:/ {print $2}' /proc/meminfo 2>/dev/null || echo 0)
+	if [ "$mem_kb" -lt 8388608 ] 2>/dev/null && [ -d /sys/module/zswap ]; then
+		cat >/etc/tmpfiles.d/dockyard-zswap.conf <<'EOF'
+w /sys/module/zswap/parameters/enabled          - - - - Y
+w /sys/module/zswap/parameters/compressor       - - - - zstd
+w /sys/module/zswap/parameters/max_pool_percent - - - - 20
+EOF
+		systemd-tmpfiles --create /etc/tmpfiles.d/dockyard-zswap.conf 2>/dev/null || true
+	fi
+	systemctl daemon-reload
 }
 
 run_init() {

@@ -488,7 +488,7 @@ CREATE TABLE services (
 
 CREATE TABLE deployments (
   id TEXT PRIMARY KEY, service_id TEXT NOT NULL REFERENCES services(id) ON DELETE CASCADE,
-  status TEXT NOT NULL,      -- queued|cloning|building|starting|healthchecking|live|failed|cancelled|superseded
+  status TEXT NOT NULL,      -- queued|waiting|cloning|building|starting|healthchecking|live|failed|cancelled|superseded
   trigger TEXT NOT NULL,     -- push|manual|redeploy|rollback|config
   triggered_by TEXT,         -- user_id of 'github'
   commit_sha TEXT, commit_message TEXT, commit_author TEXT, branch TEXT,
@@ -1105,10 +1105,12 @@ Afweging: als het risico dat een partij Dockyard als concurrerende gehoste diens
 ## Bijlage C — Deployment-statusmachine
 
 ```
-queued ──► cloning ──► building ──► starting ──► healthchecking ──► live
-   │          │           │            │              │               │
-   └──────────┴───────────┴────────────┴──────────────┴──► failed     └──► superseded (bij volgende live)
+queued ──► waiting ──► cloning ──► building ──► starting ──► healthchecking ──► live
+   │          │           │           │            │              │               │
+   └──────────┴───────────┴───────────┴────────────┴──────────────┴──► failed     └──► superseded (bij volgende live)
    └──► cancelled (door gebruiker of nieuwere push met "cancel older builds")
 ```
+
+`waiting` = admission control wacht op RAM-budget (build resilience). Zie [`docs/project/build-resilience.md`](project/build-resilience.md).
 
 Overgangen gebeuren alleen in `internal/deploy` in een DB-transactie; elke overgang publiceert een SSE-event `deployment.updated` en, bij `live`/`failed`, een `events`-record.

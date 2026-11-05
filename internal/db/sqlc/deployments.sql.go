@@ -68,9 +68,28 @@ WHERE id = ?
 LIMIT 1
 `
 
-func (q *Queries) GetDeploymentByID(ctx context.Context, id string) (Deployment, error) {
+type GetDeploymentByIDRow struct {
+	ID            string
+	ServiceID     string
+	Status        string
+	Trigger       string
+	TriggeredBy   sql.NullString
+	CommitSha     sql.NullString
+	CommitMessage sql.NullString
+	CommitAuthor  sql.NullString
+	Branch        sql.NullString
+	ImageRef      sql.NullString
+	ReleasePath   sql.NullString
+	Error         sql.NullString
+	BuildLogPath  sql.NullString
+	QueuedAt      sql.NullInt64
+	StartedAt     sql.NullInt64
+	FinishedAt    sql.NullInt64
+}
+
+func (q *Queries) GetDeploymentByID(ctx context.Context, id string) (GetDeploymentByIDRow, error) {
 	row := q.db.QueryRowContext(ctx, getDeploymentByID, id)
-	var i Deployment
+	var i GetDeploymentByIDRow
 	err := row.Scan(
 		&i.ID,
 		&i.ServiceID,

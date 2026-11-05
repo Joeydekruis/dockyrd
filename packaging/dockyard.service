@@ -6,6 +6,9 @@ Wants=network-online.target
 
 [Service]
 Type=simple
+Slice=dy-system.slice
+OOMScoreAdjust=-900
+Environment=GOMEMLIMIT=96MiB
 ExecStart=/usr/local/bin/dockyard serve
 Restart=always
 RestartSec=2
