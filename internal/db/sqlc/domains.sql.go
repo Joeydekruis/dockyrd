@@ -147,6 +147,55 @@ func (q *Queries) ListAppDomainsWithUpstream(ctx context.Context) ([]ListAppDoma
 	return items, nil
 }
 
+const listDomainsForCertWatch = `-- name: ListDomainsForCertWatch :many
+SELECT
+  d.id,
+  d.hostname,
+  d.dns_status,
+  d.service_id,
+  s.desired_state
+FROM domains d
+JOIN services s ON s.id = d.service_id
+WHERE d.is_platform = 0
+`
+
+type ListDomainsForCertWatchRow struct {
+	ID           string
+	Hostname     string
+	DnsStatus    sql.NullString
+	ServiceID    string
+	DesiredState string
+}
+
+func (q *Queries) ListDomainsForCertWatch(ctx context.Context) ([]ListDomainsForCertWatchRow, error) {
+	rows, err := q.db.QueryContext(ctx, listDomainsForCertWatch)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListDomainsForCertWatchRow
+	for rows.Next() {
+		var i ListDomainsForCertWatchRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Hostname,
+			&i.DnsStatus,
+			&i.ServiceID,
+			&i.DesiredState,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listDomainsForService = `-- name: ListDomainsForService :many
 SELECT
   id,
@@ -220,5 +269,22 @@ type SetDomainPrimaryForServiceParams struct {
 
 func (q *Queries) SetDomainPrimaryForService(ctx context.Context, arg SetDomainPrimaryForServiceParams) error {
 	_, err := q.db.ExecContext(ctx, setDomainPrimaryForService, arg.ID, arg.ServiceID)
+	return err
+}
+
+const updateDomainCertStatus = `-- name: UpdateDomainCertStatus :exec
+UPDATE domains
+SET cert_status = ?, cert_expires_at = ?
+WHERE id = ?
+`
+
+type UpdateDomainCertStatusParams struct {
+	CertStatus    sql.NullString
+	CertExpiresAt sql.NullInt64
+	ID            string
+}
+
+func (q *Queries) UpdateDomainCertStatus(ctx context.Context, arg UpdateDomainCertStatusParams) error {
+	_, err := q.db.ExecContext(ctx, updateDomainCertStatus, arg.CertStatus, arg.CertExpiresAt, arg.ID)
 	return err
 }

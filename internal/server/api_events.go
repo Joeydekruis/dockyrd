@@ -89,7 +89,7 @@ func (d apiDeps) handleAckEvent(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func eventFromRow(row sqlc.Event) eventResponse {
+func eventFromRow(row sqlc.ListRecentEventsRow) eventResponse {
 	ev := eventResponse{ID: row.ID}
 	if row.Level.Valid {
 		ev.Level = row.Level.String

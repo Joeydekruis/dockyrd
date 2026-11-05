@@ -8,6 +8,18 @@ import (
 	"database/sql"
 )
 
+type AlertState struct {
+	DedupKey       string
+	Type           string
+	State          string
+	Level          string
+	FirstFiredAt   int64
+	LastNotifiedAt int64
+	ResolvedAt     sql.NullInt64
+	Occurrences    int64
+	EventID        sql.NullString
+}
+
 type ApiToken struct {
 	ID         string
 	Name       sql.NullString
@@ -31,17 +43,20 @@ type AuditLog struct {
 }
 
 type BackupTarget struct {
-	ID           string
-	ServerID     string
-	Provider     string
-	Endpoint     string
-	Bucket       string
-	Prefix       string
-	Region       string
-	AccessKeyEnc []byte
-	SecretKeyEnc []byte
-	CreatedAt    sql.NullInt64
-	UpdatedAt    sql.NullInt64
+	ID            string
+	ServerID      string
+	Provider      string
+	Endpoint      string
+	Bucket        string
+	Prefix        string
+	Region        string
+	AccessKeyEnc  []byte
+	SecretKeyEnc  []byte
+	CreatedAt     sql.NullInt64
+	UpdatedAt     sql.NullInt64
+	ManagedGarage int64
+	LastTestAt    sql.NullInt64
+	LastTestError string
 }
 
 type Builder struct {
@@ -70,6 +85,8 @@ type DatabaseBackupPolicy struct {
 	NextRunAt     sql.NullInt64
 	CreatedAt     sql.NullInt64
 	UpdatedAt     sql.NullInt64
+	RunAtMinute   int64
+	RunWeekday    int64
 }
 
 type DatabaseBackupRun struct {
@@ -83,6 +100,24 @@ type DatabaseBackupRun struct {
 	StartedAt   sql.NullInt64
 	FinishedAt  sql.NullInt64
 	Error       string
+	Sha256      string
+	VerifiedAt  sql.NullInt64
+}
+
+type DatabaseRestoreRun struct {
+	ID               string
+	ServiceID        string
+	BackupRunID      string
+	Mode             string
+	Status           string
+	PreSnapshotRunID sql.NullString
+	TargetServiceID  sql.NullString
+	RequestedBy      sql.NullString
+	LogTail          string
+	Error            string
+	StartedAt        sql.NullInt64
+	FinishedAt       sql.NullInt64
+	CreatedAt        int64
 }
 
 type Deployment struct {
@@ -154,6 +189,10 @@ type Event struct {
 	DeploymentID   sql.NullString
 	AcknowledgedAt sql.NullInt64
 	CreatedAt      sql.NullInt64
+	Type           sql.NullString
+	State          sql.NullString
+	DedupKey       sql.NullString
+	Data           sql.NullString
 }
 
 type GitSource struct {
@@ -249,6 +288,43 @@ type MetricHttp struct {
 	P90       sql.NullFloat64
 	P95       sql.NullFloat64
 	P99       sql.NullFloat64
+}
+
+type NotificationChannel struct {
+	ID                  string
+	Kind                string
+	Name                string
+	Enabled             int64
+	Config              string
+	SecretEnc           []byte
+	MinLevel            string
+	EventTypes          string
+	ProjectID           sql.NullString
+	Status              string
+	DisabledReason      sql.NullString
+	ConsecutiveFailures int64
+	LastSuccessAt       sql.NullInt64
+	LastFailureAt       sql.NullInt64
+	LastError           sql.NullString
+	CreatedBy           sql.NullString
+	CreatedAt           int64
+	UpdatedAt           int64
+}
+
+type NotificationDelivery struct {
+	ID            string
+	EventID       string
+	ChannelID     string
+	Target        string
+	DedupKey      sql.NullString
+	Status        string
+	Attempts      int64
+	NextAttemptAt int64
+	LeaseUntil    sql.NullInt64
+	HttpStatus    sql.NullInt64
+	LastError     sql.NullString
+	CreatedAt     int64
+	SentAt        sql.NullInt64
 }
 
 type OauthIdentity struct {

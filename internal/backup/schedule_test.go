@@ -1,35 +1,35 @@
 package backup
 
 import (
-	"encoding/json"
 	"testing"
 	"time"
 )
 
 func TestNextRunAfter(t *testing.T) {
 	base := time.Date(2026, 1, 1, 12, 0, 0, 0, time.UTC)
-	if got := NextRunAfter(base, "hourly"); !got.Equal(base.Add(time.Hour)) {
+	if got := NextRunAfter(base, ScheduleParams{Interval: "hourly"}); !got.Equal(base.Add(time.Hour)) {
 		t.Fatalf("hourly: %v", got)
 	}
-	if got := NextRunAfter(base, "daily"); !got.Equal(base.Add(24 * time.Hour)) {
-		t.Fatalf("daily: %v", got)
+	daily := NextRunAfter(base, ScheduleParams{Interval: "daily", RunAtMinute: 180})
+	wantDaily := time.Date(2026, 1, 2, 3, 0, 0, 0, time.UTC)
+	if !daily.Equal(wantDaily) {
+		t.Fatalf("daily at 03:00: got %v want %v", daily, wantDaily)
 	}
-	if got := NextRunAfter(base, "weekly"); !got.Equal(base.Add(7 * 24 * time.Hour)) {
-		t.Fatalf("weekly: %v", got)
+	weeklyBase := time.Date(2026, 1, 5, 10, 0, 0, 0, time.UTC) // Monday
+	weekly := NextRunAfter(weeklyBase, ScheduleParams{
+		Interval: "weekly", RunAtMinute: 180, RunWeekday: 0,
+	})
+	wantWeekly := time.Date(2026, 1, 11, 3, 0, 0, 0, time.UTC) // next Sunday
+	if !weekly.Equal(wantWeekly) {
+		t.Fatalf("weekly: got %v want %v", weekly, wantWeekly)
 	}
 }
 
-func TestJobPayloadRoundTrip(t *testing.T) {
-	in := JobPayload{ServiceID: "01ABC", PolicyID: "01DEF"}
-	raw, err := json.Marshal(in)
-	if err != nil {
-		t.Fatal(err)
-	}
-	var out JobPayload
-	if err := json.Unmarshal(raw, &out); err != nil {
-		t.Fatal(err)
-	}
-	if out != in {
-		t.Fatalf("got %+v", out)
+func TestNextRunAfterSameDayDaily(t *testing.T) {
+	base := time.Date(2026, 1, 1, 2, 0, 0, 0, time.UTC)
+	got := NextRunAfter(base, ScheduleParams{Interval: "daily", RunAtMinute: 180})
+	want := time.Date(2026, 1, 1, 3, 0, 0, 0, time.UTC)
+	if !got.Equal(want) {
+		t.Fatalf("got %v want %v", got, want)
 	}
 }

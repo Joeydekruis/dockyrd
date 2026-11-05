@@ -116,7 +116,7 @@ export function AddConnectionModal({
         <>
           <Button
             type="button"
-            variant="secondary"
+            variant="outline"
             onClick={() => onOpenChange(false)}
           >
             Cancel

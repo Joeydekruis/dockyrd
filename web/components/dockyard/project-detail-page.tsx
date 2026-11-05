@@ -119,7 +119,7 @@ export function ProjectDetailPage() {
     <div className="flex flex-wrap items-center justify-end gap-2">
       <Button
         type="button"
-        variant="secondary"
+        variant="outline"
         onClick={() => setAddOpen(true)}
       >
         Add existing resource

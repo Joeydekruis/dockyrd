@@ -21,6 +21,9 @@ SELECT
   region,
   access_key_enc,
   secret_key_enc,
+  managed_garage,
+  last_test_at,
+  last_test_error,
   created_at,
   updated_at
 FROM backup_targets
@@ -28,9 +31,26 @@ WHERE server_id = ?
 LIMIT 1
 `
 
-func (q *Queries) GetBackupTargetForServer(ctx context.Context, serverID string) (BackupTarget, error) {
+type GetBackupTargetForServerRow struct {
+	ID            string
+	ServerID      string
+	Provider      string
+	Endpoint      string
+	Bucket        string
+	Prefix        string
+	Region        string
+	AccessKeyEnc  []byte
+	SecretKeyEnc  []byte
+	ManagedGarage int64
+	LastTestAt    sql.NullInt64
+	LastTestError string
+	CreatedAt     sql.NullInt64
+	UpdatedAt     sql.NullInt64
+}
+
+func (q *Queries) GetBackupTargetForServer(ctx context.Context, serverID string) (GetBackupTargetForServerRow, error) {
 	row := q.db.QueryRowContext(ctx, getBackupTargetForServer, serverID)
-	var i BackupTarget
+	var i GetBackupTargetForServerRow
 	err := row.Scan(
 		&i.ID,
 		&i.ServerID,
@@ -41,6 +61,9 @@ func (q *Queries) GetBackupTargetForServer(ctx context.Context, serverID string)
 		&i.Region,
 		&i.AccessKeyEnc,
 		&i.SecretKeyEnc,
+		&i.ManagedGarage,
+		&i.LastTestAt,
+		&i.LastTestError,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -56,6 +79,8 @@ SELECT
   retention_days,
   local_enabled,
   remote_enabled,
+  run_at_minute,
+  run_weekday,
   last_run_at,
   next_run_at,
   created_at,
@@ -65,9 +90,25 @@ WHERE service_id = ?
 LIMIT 1
 `
 
-func (q *Queries) GetDatabaseBackupPolicy(ctx context.Context, serviceID string) (DatabaseBackupPolicy, error) {
+type GetDatabaseBackupPolicyRow struct {
+	ID            string
+	ServiceID     string
+	Enabled       int64
+	IntervalKind  string
+	RetentionDays int64
+	LocalEnabled  int64
+	RemoteEnabled int64
+	RunAtMinute   int64
+	RunWeekday    int64
+	LastRunAt     sql.NullInt64
+	NextRunAt     sql.NullInt64
+	CreatedAt     sql.NullInt64
+	UpdatedAt     sql.NullInt64
+}
+
+func (q *Queries) GetDatabaseBackupPolicy(ctx context.Context, serviceID string) (GetDatabaseBackupPolicyRow, error) {
 	row := q.db.QueryRowContext(ctx, getDatabaseBackupPolicy, serviceID)
-	var i DatabaseBackupPolicy
+	var i GetDatabaseBackupPolicyRow
 	err := row.Scan(
 		&i.ID,
 		&i.ServiceID,
@@ -76,6 +117,8 @@ func (q *Queries) GetDatabaseBackupPolicy(ctx context.Context, serviceID string)
 		&i.RetentionDays,
 		&i.LocalEnabled,
 		&i.RemoteEnabled,
+		&i.RunAtMinute,
+		&i.RunWeekday,
 		&i.LastRunAt,
 		&i.NextRunAt,
 		&i.CreatedAt,
@@ -93,6 +136,8 @@ SELECT
   destination,
   object_key,
   size_bytes,
+  sha256,
+  verified_at,
   started_at,
   finished_at,
   error
@@ -101,9 +146,24 @@ WHERE id = ?
 LIMIT 1
 `
 
-func (q *Queries) GetDatabaseBackupRun(ctx context.Context, id string) (DatabaseBackupRun, error) {
+type GetDatabaseBackupRunRow struct {
+	ID          string
+	ServiceID   string
+	PolicyID    sql.NullString
+	Status      string
+	Destination string
+	ObjectKey   string
+	SizeBytes   int64
+	Sha256      string
+	VerifiedAt  sql.NullInt64
+	StartedAt   sql.NullInt64
+	FinishedAt  sql.NullInt64
+	Error       string
+}
+
+func (q *Queries) GetDatabaseBackupRun(ctx context.Context, id string) (GetDatabaseBackupRunRow, error) {
 	row := q.db.QueryRowContext(ctx, getDatabaseBackupRun, id)
-	var i DatabaseBackupRun
+	var i GetDatabaseBackupRunRow
 	err := row.Scan(
 		&i.ID,
 		&i.ServiceID,
@@ -112,11 +172,69 @@ func (q *Queries) GetDatabaseBackupRun(ctx context.Context, id string) (Database
 		&i.Destination,
 		&i.ObjectKey,
 		&i.SizeBytes,
+		&i.Sha256,
+		&i.VerifiedAt,
 		&i.StartedAt,
 		&i.FinishedAt,
 		&i.Error,
 	)
 	return i, err
+}
+
+const getDatabaseRestoreRun = `-- name: GetDatabaseRestoreRun :one
+SELECT
+  id,
+  service_id,
+  backup_run_id,
+  mode,
+  status,
+  pre_snapshot_run_id,
+  target_service_id,
+  requested_by,
+  log_tail,
+  error,
+  started_at,
+  finished_at,
+  created_at
+FROM database_restore_runs
+WHERE id = ?
+LIMIT 1
+`
+
+func (q *Queries) GetDatabaseRestoreRun(ctx context.Context, id string) (DatabaseRestoreRun, error) {
+	row := q.db.QueryRowContext(ctx, getDatabaseRestoreRun, id)
+	var i DatabaseRestoreRun
+	err := row.Scan(
+		&i.ID,
+		&i.ServiceID,
+		&i.BackupRunID,
+		&i.Mode,
+		&i.Status,
+		&i.PreSnapshotRunID,
+		&i.TargetServiceID,
+		&i.RequestedBy,
+		&i.LogTail,
+		&i.Error,
+		&i.StartedAt,
+		&i.FinishedAt,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const getLatestSuccessfulBackupRun = `-- name: GetLatestSuccessfulBackupRun :one
+SELECT finished_at
+FROM database_backup_runs
+WHERE service_id = ? AND status = 'succeeded'
+ORDER BY finished_at DESC
+LIMIT 1
+`
+
+func (q *Queries) GetLatestSuccessfulBackupRun(ctx context.Context, serviceID string) (sql.NullInt64, error) {
+	row := q.db.QueryRowContext(ctx, getLatestSuccessfulBackupRun, serviceID)
+	var finished_at sql.NullInt64
+	err := row.Scan(&finished_at)
+	return finished_at, err
 }
 
 const insertDatabaseBackupRun = `-- name: InsertDatabaseBackupRun :exec
@@ -128,10 +246,12 @@ INSERT INTO database_backup_runs (
   destination,
   object_key,
   size_bytes,
+  sha256,
+  verified_at,
   started_at,
   finished_at,
   error
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `
 
 type InsertDatabaseBackupRunParams struct {
@@ -142,6 +262,8 @@ type InsertDatabaseBackupRunParams struct {
 	Destination string
 	ObjectKey   string
 	SizeBytes   int64
+	Sha256      string
+	VerifiedAt  sql.NullInt64
 	StartedAt   sql.NullInt64
 	FinishedAt  sql.NullInt64
 	Error       string
@@ -156,9 +278,64 @@ func (q *Queries) InsertDatabaseBackupRun(ctx context.Context, arg InsertDatabas
 		arg.Destination,
 		arg.ObjectKey,
 		arg.SizeBytes,
+		arg.Sha256,
+		arg.VerifiedAt,
 		arg.StartedAt,
 		arg.FinishedAt,
 		arg.Error,
+	)
+	return err
+}
+
+const insertDatabaseRestoreRun = `-- name: InsertDatabaseRestoreRun :exec
+INSERT INTO database_restore_runs (
+  id,
+  service_id,
+  backup_run_id,
+  mode,
+  status,
+  pre_snapshot_run_id,
+  target_service_id,
+  requested_by,
+  log_tail,
+  error,
+  started_at,
+  finished_at,
+  created_at
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+`
+
+type InsertDatabaseRestoreRunParams struct {
+	ID               string
+	ServiceID        string
+	BackupRunID      string
+	Mode             string
+	Status           string
+	PreSnapshotRunID sql.NullString
+	TargetServiceID  sql.NullString
+	RequestedBy      sql.NullString
+	LogTail          string
+	Error            string
+	StartedAt        sql.NullInt64
+	FinishedAt       sql.NullInt64
+	CreatedAt        int64
+}
+
+func (q *Queries) InsertDatabaseRestoreRun(ctx context.Context, arg InsertDatabaseRestoreRunParams) error {
+	_, err := q.db.ExecContext(ctx, insertDatabaseRestoreRun,
+		arg.ID,
+		arg.ServiceID,
+		arg.BackupRunID,
+		arg.Mode,
+		arg.Status,
+		arg.PreSnapshotRunID,
+		arg.TargetServiceID,
+		arg.RequestedBy,
+		arg.LogTail,
+		arg.Error,
+		arg.StartedAt,
+		arg.FinishedAt,
+		arg.CreatedAt,
 	)
 	return err
 }
@@ -172,6 +349,8 @@ SELECT
   destination,
   object_key,
   size_bytes,
+  sha256,
+  verified_at,
   started_at,
   finished_at,
   error
@@ -186,15 +365,30 @@ type ListDatabaseBackupRunsParams struct {
 	Limit     int64
 }
 
-func (q *Queries) ListDatabaseBackupRuns(ctx context.Context, arg ListDatabaseBackupRunsParams) ([]DatabaseBackupRun, error) {
+type ListDatabaseBackupRunsRow struct {
+	ID          string
+	ServiceID   string
+	PolicyID    sql.NullString
+	Status      string
+	Destination string
+	ObjectKey   string
+	SizeBytes   int64
+	Sha256      string
+	VerifiedAt  sql.NullInt64
+	StartedAt   sql.NullInt64
+	FinishedAt  sql.NullInt64
+	Error       string
+}
+
+func (q *Queries) ListDatabaseBackupRuns(ctx context.Context, arg ListDatabaseBackupRunsParams) ([]ListDatabaseBackupRunsRow, error) {
 	rows, err := q.db.QueryContext(ctx, listDatabaseBackupRuns, arg.ServiceID, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []DatabaseBackupRun
+	var items []ListDatabaseBackupRunsRow
 	for rows.Next() {
-		var i DatabaseBackupRun
+		var i ListDatabaseBackupRunsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.ServiceID,
@@ -203,6 +397,8 @@ func (q *Queries) ListDatabaseBackupRuns(ctx context.Context, arg ListDatabaseBa
 			&i.Destination,
 			&i.ObjectKey,
 			&i.SizeBytes,
+			&i.Sha256,
+			&i.VerifiedAt,
 			&i.StartedAt,
 			&i.FinishedAt,
 			&i.Error,
@@ -266,6 +462,69 @@ func (q *Queries) ListDatabaseBackupRunsForPrune(ctx context.Context, arg ListDa
 	return items, nil
 }
 
+const listDatabaseRestoreRuns = `-- name: ListDatabaseRestoreRuns :many
+SELECT
+  id,
+  service_id,
+  backup_run_id,
+  mode,
+  status,
+  pre_snapshot_run_id,
+  target_service_id,
+  requested_by,
+  log_tail,
+  error,
+  started_at,
+  finished_at,
+  created_at
+FROM database_restore_runs
+WHERE service_id = ?
+ORDER BY created_at DESC
+LIMIT ?
+`
+
+type ListDatabaseRestoreRunsParams struct {
+	ServiceID string
+	Limit     int64
+}
+
+func (q *Queries) ListDatabaseRestoreRuns(ctx context.Context, arg ListDatabaseRestoreRunsParams) ([]DatabaseRestoreRun, error) {
+	rows, err := q.db.QueryContext(ctx, listDatabaseRestoreRuns, arg.ServiceID, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []DatabaseRestoreRun
+	for rows.Next() {
+		var i DatabaseRestoreRun
+		if err := rows.Scan(
+			&i.ID,
+			&i.ServiceID,
+			&i.BackupRunID,
+			&i.Mode,
+			&i.Status,
+			&i.PreSnapshotRunID,
+			&i.TargetServiceID,
+			&i.RequestedBy,
+			&i.LogTail,
+			&i.Error,
+			&i.StartedAt,
+			&i.FinishedAt,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listDueDatabaseBackupPolicies = `-- name: ListDueDatabaseBackupPolicies :many
 SELECT
   p.id,
@@ -275,6 +534,8 @@ SELECT
   p.retention_days,
   p.local_enabled,
   p.remote_enabled,
+  p.run_at_minute,
+  p.run_weekday,
   p.last_run_at,
   p.next_run_at,
   p.created_at,
@@ -299,6 +560,8 @@ type ListDueDatabaseBackupPoliciesRow struct {
 	RetentionDays int64
 	LocalEnabled  int64
 	RemoteEnabled int64
+	RunAtMinute   int64
+	RunWeekday    int64
 	LastRunAt     sql.NullInt64
 	NextRunAt     sql.NullInt64
 	CreatedAt     sql.NullInt64
@@ -326,6 +589,8 @@ func (q *Queries) ListDueDatabaseBackupPolicies(ctx context.Context, nextRunAt s
 			&i.RetentionDays,
 			&i.LocalEnabled,
 			&i.RemoteEnabled,
+			&i.RunAtMinute,
+			&i.RunWeekday,
 			&i.LastRunAt,
 			&i.NextRunAt,
 			&i.CreatedAt,
@@ -346,6 +611,64 @@ func (q *Queries) ListDueDatabaseBackupPolicies(ctx context.Context, nextRunAt s
 		return nil, err
 	}
 	return items, nil
+}
+
+const listEnabledDatabaseBackupPolicies = `-- name: ListEnabledDatabaseBackupPolicies :many
+SELECT id, service_id, interval_kind
+FROM database_backup_policies
+WHERE enabled = 1
+`
+
+type ListEnabledDatabaseBackupPoliciesRow struct {
+	ID           string
+	ServiceID    string
+	IntervalKind string
+}
+
+func (q *Queries) ListEnabledDatabaseBackupPolicies(ctx context.Context) ([]ListEnabledDatabaseBackupPoliciesRow, error) {
+	rows, err := q.db.QueryContext(ctx, listEnabledDatabaseBackupPolicies)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListEnabledDatabaseBackupPoliciesRow
+	for rows.Next() {
+		var i ListEnabledDatabaseBackupPoliciesRow
+		if err := rows.Scan(&i.ID, &i.ServiceID, &i.IntervalKind); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateBackupTargetTestResult = `-- name: UpdateBackupTargetTestResult :exec
+UPDATE backup_targets
+SET last_test_at = ?, last_test_error = ?, updated_at = ?
+WHERE server_id = ?
+`
+
+type UpdateBackupTargetTestResultParams struct {
+	LastTestAt    sql.NullInt64
+	LastTestError string
+	UpdatedAt     sql.NullInt64
+	ServerID      string
+}
+
+func (q *Queries) UpdateBackupTargetTestResult(ctx context.Context, arg UpdateBackupTargetTestResultParams) error {
+	_, err := q.db.ExecContext(ctx, updateBackupTargetTestResult,
+		arg.LastTestAt,
+		arg.LastTestError,
+		arg.UpdatedAt,
+		arg.ServerID,
+	)
+	return err
 }
 
 const updateDatabaseBackupPolicySchedule = `-- name: UpdateDatabaseBackupPolicySchedule :exec
@@ -377,6 +700,8 @@ SET
   status = ?,
   object_key = ?,
   size_bytes = ?,
+  sha256 = ?,
+  verified_at = ?,
   finished_at = ?,
   error = ?
 WHERE id = ?
@@ -386,6 +711,8 @@ type UpdateDatabaseBackupRunParams struct {
 	Status     string
 	ObjectKey  string
 	SizeBytes  int64
+	Sha256     string
+	VerifiedAt sql.NullInt64
 	FinishedAt sql.NullInt64
 	Error      string
 	ID         string
@@ -396,8 +723,45 @@ func (q *Queries) UpdateDatabaseBackupRun(ctx context.Context, arg UpdateDatabas
 		arg.Status,
 		arg.ObjectKey,
 		arg.SizeBytes,
+		arg.Sha256,
+		arg.VerifiedAt,
 		arg.FinishedAt,
 		arg.Error,
+		arg.ID,
+	)
+	return err
+}
+
+const updateDatabaseRestoreRun = `-- name: UpdateDatabaseRestoreRun :exec
+UPDATE database_restore_runs
+SET
+  status = ?,
+  pre_snapshot_run_id = ?,
+  log_tail = ?,
+  error = ?,
+  started_at = ?,
+  finished_at = ?
+WHERE id = ?
+`
+
+type UpdateDatabaseRestoreRunParams struct {
+	Status           string
+	PreSnapshotRunID sql.NullString
+	LogTail          string
+	Error            string
+	StartedAt        sql.NullInt64
+	FinishedAt       sql.NullInt64
+	ID               string
+}
+
+func (q *Queries) UpdateDatabaseRestoreRun(ctx context.Context, arg UpdateDatabaseRestoreRunParams) error {
+	_, err := q.db.ExecContext(ctx, updateDatabaseRestoreRun,
+		arg.Status,
+		arg.PreSnapshotRunID,
+		arg.LogTail,
+		arg.Error,
+		arg.StartedAt,
+		arg.FinishedAt,
 		arg.ID,
 	)
 	return err
@@ -414,9 +778,12 @@ INSERT INTO backup_targets (
   region,
   access_key_enc,
   secret_key_enc,
+  managed_garage,
+  last_test_at,
+  last_test_error,
   created_at,
   updated_at
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ON CONFLICT(server_id) DO UPDATE SET
   provider = excluded.provider,
   endpoint = excluded.endpoint,
@@ -425,21 +792,27 @@ ON CONFLICT(server_id) DO UPDATE SET
   region = excluded.region,
   access_key_enc = excluded.access_key_enc,
   secret_key_enc = excluded.secret_key_enc,
+  managed_garage = excluded.managed_garage,
+  last_test_at = excluded.last_test_at,
+  last_test_error = excluded.last_test_error,
   updated_at = excluded.updated_at
 `
 
 type UpsertBackupTargetParams struct {
-	ID           string
-	ServerID     string
-	Provider     string
-	Endpoint     string
-	Bucket       string
-	Prefix       string
-	Region       string
-	AccessKeyEnc []byte
-	SecretKeyEnc []byte
-	CreatedAt    sql.NullInt64
-	UpdatedAt    sql.NullInt64
+	ID            string
+	ServerID      string
+	Provider      string
+	Endpoint      string
+	Bucket        string
+	Prefix        string
+	Region        string
+	AccessKeyEnc  []byte
+	SecretKeyEnc  []byte
+	ManagedGarage int64
+	LastTestAt    sql.NullInt64
+	LastTestError string
+	CreatedAt     sql.NullInt64
+	UpdatedAt     sql.NullInt64
 }
 
 func (q *Queries) UpsertBackupTarget(ctx context.Context, arg UpsertBackupTargetParams) error {
@@ -453,6 +826,9 @@ func (q *Queries) UpsertBackupTarget(ctx context.Context, arg UpsertBackupTarget
 		arg.Region,
 		arg.AccessKeyEnc,
 		arg.SecretKeyEnc,
+		arg.ManagedGarage,
+		arg.LastTestAt,
+		arg.LastTestError,
 		arg.CreatedAt,
 		arg.UpdatedAt,
 	)
@@ -468,17 +844,21 @@ INSERT INTO database_backup_policies (
   retention_days,
   local_enabled,
   remote_enabled,
+  run_at_minute,
+  run_weekday,
   last_run_at,
   next_run_at,
   created_at,
   updated_at
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ON CONFLICT(service_id) DO UPDATE SET
   enabled = excluded.enabled,
   interval_kind = excluded.interval_kind,
   retention_days = excluded.retention_days,
   local_enabled = excluded.local_enabled,
   remote_enabled = excluded.remote_enabled,
+  run_at_minute = excluded.run_at_minute,
+  run_weekday = excluded.run_weekday,
   updated_at = excluded.updated_at
 `
 
@@ -490,6 +870,8 @@ type UpsertDatabaseBackupPolicyParams struct {
 	RetentionDays int64
 	LocalEnabled  int64
 	RemoteEnabled int64
+	RunAtMinute   int64
+	RunWeekday    int64
 	LastRunAt     sql.NullInt64
 	NextRunAt     sql.NullInt64
 	CreatedAt     sql.NullInt64
@@ -505,6 +887,8 @@ func (q *Queries) UpsertDatabaseBackupPolicy(ctx context.Context, arg UpsertData
 		arg.RetentionDays,
 		arg.LocalEnabled,
 		arg.RemoteEnabled,
+		arg.RunAtMinute,
+		arg.RunWeekday,
 		arg.LastRunAt,
 		arg.NextRunAt,
 		arg.CreatedAt,

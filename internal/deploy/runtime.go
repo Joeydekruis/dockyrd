@@ -16,9 +16,9 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
 	"github.com/Joeydekruis/dockyrd/internal/docker"
 	"github.com/Joeydekruis/dockyrd/internal/eventlog"
+	"github.com/Joeydekruis/dockyrd/internal/github"
 	"github.com/Joeydekruis/dockyrd/internal/inbox"
 	"github.com/Joeydekruis/dockyrd/internal/notify"
-	"github.com/Joeydekruis/dockyrd/internal/github"
 	"github.com/Joeydekruis/dockyrd/internal/proxy"
 	"github.com/Joeydekruis/dockyrd/internal/refs"
 	"github.com/Joeydekruis/dockyrd/internal/resources"
@@ -87,11 +87,11 @@ func (rt *Runtime) runAppDeployment(ctx context.Context, deploymentID string, de
 
 	now := time.Now().Unix()
 	if err := rt.Q.UpdateDeploymentStatus(ctx, sqlc.UpdateDeploymentStatusParams{
-		Status:    "starting",
-		Error:     sql.NullString{},
-		StartedAt: sql.NullInt64{Int64: now, Valid: true},
+		Status:     "starting",
+		Error:      sql.NullString{},
+		StartedAt:  sql.NullInt64{Int64: now, Valid: true},
 		FinishedAt: sql.NullInt64{},
-		ID:        deploymentID,
+		ID:         deploymentID,
 	}); err != nil {
 		return err
 	}
@@ -119,11 +119,11 @@ func (rt *Runtime) runAppDeployment(ctx context.Context, deploymentID string, de
 			}
 		}
 		if err := rt.Q.UpdateDeploymentStatus(ctx, sqlc.UpdateDeploymentStatusParams{
-			Status:    "building",
-			Error:     sql.NullString{},
-			StartedAt: sql.NullInt64{},
+			Status:     "building",
+			Error:      sql.NullString{},
+			StartedAt:  sql.NullInt64{},
 			FinishedAt: sql.NullInt64{},
-			ID:        deploymentID,
+			ID:         deploymentID,
 		}); err != nil {
 			return err
 		}
@@ -163,11 +163,11 @@ func (rt *Runtime) runAppDeployment(ctx context.Context, deploymentID string, de
 		}
 		rt.recordBuildMetrics(ctx, deploymentID, budget, builderLabel, sampler, waitedMs, atomicFrozenMs(frozenAcc))
 		if err := rt.Q.UpdateDeploymentStatus(ctx, sqlc.UpdateDeploymentStatusParams{
-			Status:    "starting",
-			Error:     sql.NullString{},
-			StartedAt: sql.NullInt64{},
+			Status:     "starting",
+			Error:      sql.NullString{},
+			StartedAt:  sql.NullInt64{},
 			FinishedAt: sql.NullInt64{},
-			ID:        deploymentID,
+			ID:         deploymentID,
 		}); err != nil {
 			return err
 		}
@@ -227,11 +227,11 @@ func (rt *Runtime) runAppDeployment(ctx context.Context, deploymentID string, de
 	}
 
 	if err := rt.Q.UpdateDeploymentStatus(ctx, sqlc.UpdateDeploymentStatusParams{
-		Status:    "healthchecking",
-		Error:     sql.NullString{},
-		StartedAt: sql.NullInt64{},
+		Status:     "healthchecking",
+		Error:      sql.NullString{},
+		StartedAt:  sql.NullInt64{},
 		FinishedAt: sql.NullInt64{},
-		ID:        deploymentID,
+		ID:         deploymentID,
 	}); err != nil {
 		return err
 	}
@@ -250,11 +250,11 @@ func (rt *Runtime) runAppDeployment(ctx context.Context, deploymentID string, de
 		return err
 	}
 	if err := rt.Q.UpdateDeploymentStatus(ctx, sqlc.UpdateDeploymentStatusParams{
-		Status:    "live",
-		Error:     sql.NullString{},
-		StartedAt: sql.NullInt64{},
+		Status:     "live",
+		Error:      sql.NullString{},
+		StartedAt:  sql.NullInt64{},
 		FinishedAt: sql.NullInt64{Int64: finished, Valid: true},
-		ID:        deploymentID,
+		ID:         deploymentID,
 	}); err != nil {
 		return err
 	}
@@ -390,11 +390,11 @@ func (rt *Runtime) fail(ctx context.Context, deploymentID string, err error) err
 	finished := time.Now().Unix()
 	dep, _ := rt.Q.GetDeploymentByID(ctx, deploymentID)
 	_ = rt.Q.UpdateDeploymentStatus(ctx, sqlc.UpdateDeploymentStatusParams{
-		Status:    "failed",
-		Error:     sql.NullString{String: msg, Valid: true},
-		StartedAt: sql.NullInt64{},
+		Status:     "failed",
+		Error:      sql.NullString{String: msg, Valid: true},
+		StartedAt:  sql.NullInt64{},
 		FinishedAt: sql.NullInt64{Int64: finished, Valid: true},
-		ID:        deploymentID,
+		ID:         deploymentID,
 	})
 	if kind != "" {
 		_ = rt.Q.SetDeploymentFailureKind(ctx, sqlc.SetDeploymentFailureKindParams{

@@ -91,7 +91,7 @@ type discardWriter struct{}
 
 func (discardWriter) Write(p []byte) (int, error) { return len(p), nil }
 
-func resolveDumpPath(ctx context.Context, cfg config.Config, q *sqlc.Queries, run sqlc.DatabaseBackupRun) (path string, cleanup func(), err error) {
+func resolveDumpPath(ctx context.Context, cfg config.Config, q *sqlc.Queries, run sqlc.GetDatabaseBackupRunRow) (path string, cleanup func(), err error) {
 	if run.Destination == "local" {
 		if run.ObjectKey == "" {
 			return "", nil, fmt.Errorf("missing backup file path")

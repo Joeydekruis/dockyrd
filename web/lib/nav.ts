@@ -101,6 +101,12 @@ export const serverSettingsSidebarNav: SettingsNavItem[] = [
   { label: "Team", href: "/settings/server/team", icon: Users },
   { label: "Email", href: "/settings/server/email", icon: Mail },
   {
+    label: "Channels",
+    href: "/settings/server/channels",
+    icon: Bell,
+  },
+  { label: "Channels", href: "/settings/server/channels", icon: Bell },
+  {
     label: "Backups",
     href: "/settings/server/backups",
     icon: HardDrive,

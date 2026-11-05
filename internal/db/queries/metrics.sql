@@ -12,6 +12,13 @@ INSERT OR REPLACE INTO metric_host (
   load1
 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
+-- name: GetLatestMetricHost :one
+SELECT disk_used, disk_total
+FROM metric_host
+WHERE res = ?
+ORDER BY ts DESC
+LIMIT 1;
+
 -- name: ListMetricHostSince :many
 SELECT
   ts,

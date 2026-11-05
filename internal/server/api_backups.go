@@ -13,28 +13,37 @@ import (
 
 	"github.com/Joeydekruis/dockyrd/internal/audit"
 	"github.com/Joeydekruis/dockyrd/internal/backup"
+	"github.com/Joeydekruis/dockyrd/internal/config"
 	"github.com/Joeydekruis/dockyrd/internal/crypto"
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
+	"github.com/Joeydekruis/dockyrd/internal/dbkind"
 )
 
 func registerBackupRoutes(mux *http.ServeMux, deps apiDeps) {
 	mux.HandleFunc("GET /api/v1/settings/server/backup-target", deps.handleGetBackupTarget)
 	mux.HandleFunc("PATCH /api/v1/settings/server/backup-target", deps.handlePatchBackupTarget)
+	mux.HandleFunc("POST /api/v1/settings/server/backup-target/garage", deps.handlePostGarageBackupTarget)
+	mux.HandleFunc("POST /api/v1/settings/server/backup-target/test", deps.handlePostTestBackupTarget)
 	mux.HandleFunc("GET /api/v1/services/{id}/backup-policy", deps.handleGetDatabaseBackupPolicy)
 	mux.HandleFunc("PATCH /api/v1/services/{id}/backup-policy", deps.handlePatchDatabaseBackupPolicy)
 	mux.HandleFunc("GET /api/v1/services/{id}/backup-runs", deps.handleListDatabaseBackupRuns)
 	mux.HandleFunc("POST /api/v1/services/{id}/backup-runs", deps.handleCreateDatabaseBackupRun)
 	mux.HandleFunc("POST /api/v1/services/{id}/backup-runs/{runId}/restore", deps.handleRestoreDatabaseBackup)
+	mux.HandleFunc("GET /api/v1/services/{id}/restore-runs", deps.handleListDatabaseRestoreRuns)
+	mux.HandleFunc("GET /api/v1/services/{id}/restore-runs/{restoreId}", deps.handleGetDatabaseRestoreRun)
 }
 
 type backupTargetResponse struct {
-	Configured bool   `json:"configured"`
-	Provider   string `json:"provider"`
-	Endpoint   string `json:"endpoint"`
-	Bucket     string `json:"bucket"`
-	Prefix     string `json:"prefix"`
-	Region     string `json:"region"`
-	HasKeys    bool   `json:"has_keys"`
+	Configured    bool   `json:"configured"`
+	Provider      string `json:"provider"`
+	Endpoint      string `json:"endpoint"`
+	Bucket        string `json:"bucket"`
+	Prefix        string `json:"prefix"`
+	Region        string `json:"region"`
+	HasKeys       bool   `json:"has_keys"`
+	ManagedGarage bool   `json:"managed_garage"`
+	LastTestAt    *int64 `json:"last_test_at,omitempty"`
+	LastTestError string `json:"last_test_error,omitempty"`
 }
 
 type databaseBackupPolicyResponse struct {
@@ -43,8 +52,29 @@ type databaseBackupPolicyResponse struct {
 	RetentionDays int64  `json:"retention_days"`
 	LocalEnabled  bool   `json:"local_enabled"`
 	RemoteEnabled bool   `json:"remote_enabled"`
+	RunAtMinute   int64  `json:"run_at_minute"`
+	RunWeekday    int64  `json:"run_weekday"`
 	LastRunAt     *int64 `json:"last_run_at,omitempty"`
 	NextRunAt     *int64 `json:"next_run_at,omitempty"`
+}
+
+func backupTargetFromRow(row sqlc.GetBackupTargetForServerRow) backupTargetResponse {
+	resp := backupTargetResponse{
+		Configured:    row.Bucket != "",
+		Provider:      row.Provider,
+		Endpoint:      row.Endpoint,
+		Bucket:        row.Bucket,
+		Prefix:        row.Prefix,
+		Region:        row.Region,
+		HasKeys:       len(row.AccessKeyEnc) > 0 && len(row.SecretKeyEnc) > 0,
+		ManagedGarage: row.ManagedGarage == 1,
+		LastTestError: row.LastTestError,
+	}
+	if row.LastTestAt.Valid {
+		v := row.LastTestAt.Int64
+		resp.LastTestAt = &v
+	}
+	return resp
 }
 
 func (d apiDeps) handleGetBackupTarget(w http.ResponseWriter, r *http.Request) {
@@ -65,15 +95,7 @@ func (d apiDeps) handleGetBackupTarget(w http.ResponseWriter, r *http.Request) {
 		writeJSONError(w, http.StatusInternalServerError, "database error")
 		return
 	}
-	writeJSON(w, http.StatusOK, backupTargetResponse{
-		Configured: row.Bucket != "",
-		Provider:   row.Provider,
-		Endpoint:   row.Endpoint,
-		Bucket:     row.Bucket,
-		Prefix:     row.Prefix,
-		Region:     row.Region,
-		HasKeys:    len(row.AccessKeyEnc) > 0 && len(row.SecretKeyEnc) > 0,
-	})
+	writeJSON(w, http.StatusOK, backupTargetFromRow(row))
 }
 
 func (d apiDeps) handlePatchBackupTarget(w http.ResponseWriter, r *http.Request) {
@@ -81,12 +103,12 @@ func (d apiDeps) handlePatchBackupTarget(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	var body struct {
-		Endpoint   string `json:"endpoint"`
-		Bucket     string `json:"bucket"`
-		Prefix     string `json:"prefix"`
-		Region     string `json:"region"`
-		AccessKey  string `json:"access_key"`
-		SecretKey  string `json:"secret_key"`
+		Endpoint  string `json:"endpoint"`
+		Bucket    string `json:"bucket"`
+		Prefix    string `json:"prefix"`
+		Region    string `json:"region"`
+		AccessKey string `json:"access_key"`
+		SecretKey string `json:"secret_key"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		writeJSONError(w, http.StatusBadRequest, "invalid json")
@@ -111,10 +133,14 @@ func (d apiDeps) handlePatchBackupTarget(w http.ResponseWriter, r *http.Request)
 	existing, existingErr := d.q.GetBackupTargetForServer(ctx, server.ID)
 	var accessEnc, secretEnc []byte
 	targetID := ulid.Make().String()
+	var lastTest sql.NullInt64
+	lastTestErr := ""
 	if existingErr == nil {
 		targetID = existing.ID
 		accessEnc = existing.AccessKeyEnc
 		secretEnc = existing.SecretKeyEnc
+		lastTest = existing.LastTestAt
+		lastTestErr = existing.LastTestError
 	} else if !errors.Is(existingErr, sql.ErrNoRows) {
 		writeJSONError(w, http.StatusInternalServerError, "database error")
 		return
@@ -135,19 +161,55 @@ func (d apiDeps) handlePatchBackupTarget(w http.ResponseWriter, r *http.Request)
 	}
 	now := time.Now().Unix()
 	if err := d.q.UpsertBackupTarget(ctx, sqlc.UpsertBackupTargetParams{
-		ID:           targetID,
-		ServerID:     server.ID,
-		Provider:     "s3",
-		Endpoint:     strings.TrimSpace(body.Endpoint),
-		Bucket:       body.Bucket,
-		Prefix:       strings.TrimSpace(body.Prefix),
-		Region:       strings.TrimSpace(body.Region),
-		AccessKeyEnc: accessEnc,
-		SecretKeyEnc: secretEnc,
-		CreatedAt:    sql.NullInt64{Int64: now, Valid: true},
-		UpdatedAt:    sql.NullInt64{Int64: now, Valid: true},
+		ID:            targetID,
+		ServerID:      server.ID,
+		Provider:      "s3",
+		Endpoint:      strings.TrimSpace(body.Endpoint),
+		Bucket:        body.Bucket,
+		Prefix:        strings.TrimSpace(body.Prefix),
+		Region:        strings.TrimSpace(body.Region),
+		AccessKeyEnc:  accessEnc,
+		SecretKeyEnc:  secretEnc,
+		ManagedGarage: 0,
+		LastTestAt:    lastTest,
+		LastTestError: lastTestErr,
+		CreatedAt:     sql.NullInt64{Int64: now, Valid: true},
+		UpdatedAt:     sql.NullInt64{Int64: now, Valid: true},
 	}); err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "save error")
+		return
+	}
+	d.handleGetBackupTarget(w, r)
+}
+
+func (d apiDeps) handlePostGarageBackupTarget(w http.ResponseWriter, r *http.Request) {
+	if _, ok := d.requireAdmin(w, r); !ok {
+		return
+	}
+	if d.docker == nil {
+		writeJSONError(w, http.StatusServiceUnavailable, "docker unavailable")
+		return
+	}
+	if err := backup.ConfigureGarageBackupTarget(r.Context(), d.cfg, d.q, d.docker); err != nil {
+		writeJSONError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	d.handleGetBackupTarget(w, r)
+}
+
+func (d apiDeps) handlePostTestBackupTarget(w http.ResponseWriter, r *http.Request) {
+	if _, ok := d.requireAdmin(w, r); !ok {
+		return
+	}
+	ctx := r.Context()
+	server, err := d.q.GetLocalServer(ctx)
+	if err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "database error")
+		return
+	}
+	if err := backup.TestBackupTarget(ctx, d.cfg, d.q); err != nil {
+		backup.RecordBackupTargetTestFailure(ctx, d.q, server.ID, err)
+		writeJSONError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 	d.handleGetBackupTarget(w, r)
@@ -170,6 +232,8 @@ func (d apiDeps) handleGetDatabaseBackupPolicy(w http.ResponseWriter, r *http.Re
 			RetentionDays: 30,
 			LocalEnabled:  true,
 			RemoteEnabled: false,
+			RunAtMinute:   180,
+			RunWeekday:    0,
 		})
 		return
 	}
@@ -196,6 +260,8 @@ func (d apiDeps) handlePatchDatabaseBackupPolicy(w http.ResponseWriter, r *http.
 		RetentionDays *int64 `json:"retention_days"`
 		LocalEnabled  *bool  `json:"local_enabled"`
 		RemoteEnabled *bool  `json:"remote_enabled"`
+		RunAtMinute   *int64 `json:"run_at_minute"`
+		RunWeekday    *int64 `json:"run_weekday"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		writeJSONError(w, http.StatusBadRequest, "invalid json")
@@ -229,6 +295,8 @@ func (d apiDeps) handlePatchDatabaseBackupPolicy(w http.ResponseWriter, r *http.
 		writeJSONError(w, http.StatusBadRequest, "enable at least one of local or remote backup")
 		return
 	}
+	runAtMinute := int64(180)
+	runWeekday := int64(0)
 	existing, err := d.q.GetDatabaseBackupPolicy(ctx, serviceID)
 	policyID := ulid.Make().String()
 	var lastRun, nextRun sql.NullInt64
@@ -236,15 +304,31 @@ func (d apiDeps) handlePatchDatabaseBackupPolicy(w http.ResponseWriter, r *http.
 		policyID = existing.ID
 		lastRun = existing.LastRunAt
 		nextRun = existing.NextRunAt
+		runAtMinute = existing.RunAtMinute
+		runWeekday = existing.RunWeekday
 	} else if !errors.Is(err, sql.ErrNoRows) {
 		writeJSONError(w, http.StatusInternalServerError, "database error")
 		return
 	}
-	now := time.Now().Unix()
-	if enabled && (!nextRun.Valid || nextRun.Int64 == 0) {
-		nextRun = sql.NullInt64{Int64: now, Valid: true}
+	if body.RunAtMinute != nil {
+		runAtMinute = *body.RunAtMinute
 	}
-	if !enabled {
+	if runAtMinute < 0 || runAtMinute > 1439 {
+		writeJSONError(w, http.StatusBadRequest, "run_at_minute must be 0–1439")
+		return
+	}
+	if body.RunWeekday != nil {
+		runWeekday = *body.RunWeekday
+	}
+	if runWeekday < 0 || runWeekday > 6 {
+		writeJSONError(w, http.StatusBadRequest, "run_weekday must be 0–6")
+		return
+	}
+	now := time.Now().Unix()
+	sched := backup.ScheduleParams{Interval: interval, RunAtMinute: runAtMinute, RunWeekday: runWeekday}
+	if enabled {
+		nextRun = sql.NullInt64{Int64: backup.NextRunAfter(time.Unix(now, 0), sched).Unix(), Valid: true}
+	} else {
 		nextRun = sql.NullInt64{}
 	}
 	if err := d.q.UpsertDatabaseBackupPolicy(ctx, sqlc.UpsertDatabaseBackupPolicyParams{
@@ -255,6 +339,8 @@ func (d apiDeps) handlePatchDatabaseBackupPolicy(w http.ResponseWriter, r *http.
 		RetentionDays: retention,
 		LocalEnabled:  boolToInt64(local),
 		RemoteEnabled: boolToInt64(remote),
+		RunAtMinute:   runAtMinute,
+		RunWeekday:    runWeekday,
 		LastRunAt:     lastRun,
 		NextRunAt:     nextRun,
 		CreatedAt:     sql.NullInt64{Int64: now, Valid: true},
@@ -291,7 +377,12 @@ func (d apiDeps) handleListDatabaseBackupRuns(w http.ResponseWriter, r *http.Req
 			"destination": row.Destination,
 			"object_key":  row.ObjectKey,
 			"size_bytes":  row.SizeBytes,
+			"sha256":      row.Sha256,
 			"error":       row.Error,
+		}
+		if row.VerifiedAt.Valid {
+			item["verified_at"] = row.VerifiedAt.Int64
+			item["verified"] = true
 		}
 		if row.StartedAt.Valid {
 			item["started_at"] = row.StartedAt.Int64
@@ -342,12 +433,61 @@ func (d apiDeps) handleRestoreDatabaseBackup(w http.ResponseWriter, r *http.Requ
 	serviceID := r.PathValue("id")
 	runID := r.PathValue("runId")
 	ctx := r.Context()
-	if err := d.requireDatabaseService(ctx, serviceID); err != nil {
-		writeServiceKindError(w, err)
+	svc, err := d.q.GetServiceByID(ctx, serviceID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeJSONError(w, http.StatusNotFound, "service not found")
+			return
+		}
+		writeJSONError(w, http.StatusInternalServerError, "database error")
 		return
 	}
-	if err := backup.RestoreRun(ctx, d.cfg, d.q, d.docker, serviceID, runID); err != nil {
-		writeJSONError(w, http.StatusBadRequest, err.Error())
+	if svc.Kind == "redis" {
+		writeJSONError(w, http.StatusUnprocessableEntity, restoreUnsupportedRedisMessage)
+		return
+	}
+	if svc.Kind != "postgres" {
+		writeJSONError(w, http.StatusBadRequest, "backup policy applies to postgres and redis only")
+		return
+	}
+	var body struct {
+		Mode    string `json:"mode"`
+		Confirm string `json:"confirm"`
+	}
+	_ = json.NewDecoder(r.Body).Decode(&body)
+	body.Mode = strings.TrimSpace(body.Mode)
+	if body.Mode == "" {
+		body.Mode = "in_place"
+	}
+	if body.Mode == "new_database" {
+		writeJSONError(w, http.StatusUnprocessableEntity, "Restore to a new database is not available yet")
+		return
+	}
+	if body.Mode != "in_place" {
+		writeJSONError(w, http.StatusBadRequest, "mode must be in_place")
+		return
+	}
+	dbName, err := postgresDatabaseName(ctx, d.cfg, svc)
+	if err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "database error")
+		return
+	}
+	if strings.TrimSpace(body.Confirm) != dbName {
+		writeJSONError(w, http.StatusBadRequest, "type the database name to confirm restore")
+		return
+	}
+	run, err := d.q.GetDatabaseBackupRun(ctx, runID)
+	if err != nil || run.ServiceID != serviceID || run.Status != "succeeded" {
+		writeJSONError(w, http.StatusBadRequest, "backup run not available for restore")
+		return
+	}
+	restoreID, err := backup.CreateRestoreRun(ctx, d.q, serviceID, runID, body.Mode, user.ID)
+	if err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "restore error")
+		return
+	}
+	if err := backup.EnqueueRestore(ctx, d.q, restoreID); err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "enqueue error")
 		return
 	}
 	_ = d.audit.Record(ctx, audit.Entry{
@@ -355,9 +495,87 @@ func (d apiDeps) handleRestoreDatabaseBackup(w http.ResponseWriter, r *http.Requ
 		Action:     "database.restore",
 		TargetKind: "service",
 		TargetID:   serviceID,
-		Meta:       map[string]any{"run_id": runID},
+		Meta:       map[string]any{"run_id": runID, "restore_id": restoreID},
 	})
-	writeJSON(w, http.StatusOK, map[string]any{"restored": true})
+	writeJSON(w, http.StatusAccepted, map[string]any{"restore_id": restoreID})
+}
+
+func postgresDatabaseName(ctx context.Context, cfg config.Config, svc sqlc.Service) (string, error) {
+	key, err := crypto.LoadMasterKey(cfg.SecretKeyPath())
+	if err != nil {
+		return "", err
+	}
+	pg, _, err := dbkind.ParsePostgres(serviceConfigJSON(svc.Config), key)
+	if err != nil {
+		return "", err
+	}
+	return pg.Database, nil
+}
+
+const restoreUnsupportedRedisMessage = "Restore is not supported for Redis databases. Copy the RDB snapshot manually after stopping Valkey."
+
+func (d apiDeps) handleListDatabaseRestoreRuns(w http.ResponseWriter, r *http.Request) {
+	if _, ok := d.requireUser(w, r); !ok {
+		return
+	}
+	serviceID := r.PathValue("id")
+	if err := d.requireDatabaseService(r.Context(), serviceID); err != nil {
+		writeServiceKindError(w, err)
+		return
+	}
+	rows, err := d.q.ListDatabaseRestoreRuns(r.Context(), sqlc.ListDatabaseRestoreRunsParams{
+		ServiceID: serviceID,
+		Limit:     20,
+	})
+	if err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "database error")
+		return
+	}
+	out := make([]map[string]any, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, restoreRunJSON(row))
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"runs": out})
+}
+
+func (d apiDeps) handleGetDatabaseRestoreRun(w http.ResponseWriter, r *http.Request) {
+	if _, ok := d.requireUser(w, r); !ok {
+		return
+	}
+	serviceID := r.PathValue("id")
+	restoreID := r.PathValue("restoreId")
+	row, err := d.q.GetDatabaseRestoreRun(r.Context(), restoreID)
+	if err != nil {
+		writeJSONError(w, http.StatusNotFound, "restore run not found")
+		return
+	}
+	if row.ServiceID != serviceID {
+		writeJSONError(w, http.StatusNotFound, "restore run not found")
+		return
+	}
+	writeJSON(w, http.StatusOK, restoreRunJSON(row))
+}
+
+func restoreRunJSON(row sqlc.DatabaseRestoreRun) map[string]any {
+	item := map[string]any{
+		"id":            row.ID,
+		"backup_run_id": row.BackupRunID,
+		"mode":          row.Mode,
+		"status":        row.Status,
+		"log_tail":      row.LogTail,
+		"error":         row.Error,
+		"created_at":    row.CreatedAt,
+	}
+	if row.PreSnapshotRunID.Valid {
+		item["pre_snapshot_run_id"] = row.PreSnapshotRunID.String
+	}
+	if row.StartedAt.Valid {
+		item["started_at"] = row.StartedAt.Int64
+	}
+	if row.FinishedAt.Valid {
+		item["finished_at"] = row.FinishedAt.Int64
+	}
+	return item
 }
 
 func (d apiDeps) requireDatabaseService(ctx context.Context, serviceID string) error {
@@ -375,9 +593,9 @@ func (d apiDeps) requireDatabaseService(ctx context.Context, serviceID string) e
 }
 
 var (
-	errServiceNotFound   = errors.New("service not found")
+	errServiceNotFound    = errors.New("service not found")
 	errNotDatabaseService = errors.New("not a database service")
-	errDatabase          = errors.New("database error")
+	errDatabase           = errors.New("database error")
 )
 
 func writeServiceKindError(w http.ResponseWriter, err error) {
@@ -391,13 +609,15 @@ func writeServiceKindError(w http.ResponseWriter, err error) {
 	}
 }
 
-func policyFromRow(row sqlc.DatabaseBackupPolicy) databaseBackupPolicyResponse {
+func policyFromRow(row sqlc.GetDatabaseBackupPolicyRow) databaseBackupPolicyResponse {
 	resp := databaseBackupPolicyResponse{
 		Enabled:       row.Enabled == 1,
 		Interval:      row.IntervalKind,
 		RetentionDays: row.RetentionDays,
 		LocalEnabled:  row.LocalEnabled == 1,
 		RemoteEnabled: row.RemoteEnabled == 1,
+		RunAtMinute:   row.RunAtMinute,
+		RunWeekday:    row.RunWeekday,
 	}
 	if row.LastRunAt.Valid {
 		v := row.LastRunAt.Int64

@@ -27,13 +27,17 @@ import {
 } from "@/lib/api";
 import {
   deploymentAuthorLabel,
+  deploymentCommitDescription,
   deploymentCommitShaShort,
+  deploymentDisplayName,
   deploymentDurationSec,
+  deploymentReleaseTag,
   deploymentTriggerLabel,
   formatDeploymentStartedAt,
   formatDurationSec,
   primaryDomainHost,
   staticSiteDeploymentStatusDisplay,
+  truncateDeploymentTitle,
   visitSiteHref,
 } from "@/lib/static-site-display";
 import { useRouteParam } from "@/lib/use-route-param";
@@ -116,9 +120,17 @@ export function StaticSiteDeploymentDetailPage() {
   const branch = row?.deployment.branch?.trim() || "main";
   const startedAt = row?.deployment.started_at ?? row?.deployment.queued_at;
   const commitMessage = row?.deployment.commit_message?.trim();
+  const deploymentName = row
+    ? deploymentDisplayName(row.deployment)
+    : "Deployment";
+  const shellTitle = truncateDeploymentTitle(deploymentName);
+  const commitDescription = row
+    ? deploymentCommitDescription(row.deployment)
+    : undefined;
+  const releaseTag = row ? deploymentReleaseTag(row.deployment) : undefined;
 
   return (
-    <DashboardShell title={sha} breadcrumb="Deployment">
+    <DashboardShell title={shellTitle} breadcrumb="Deployment">
       {loading ? (
         <DockyrdPageLoading />
       ) : error ? (
@@ -150,7 +162,39 @@ export function StaticSiteDeploymentDetailPage() {
             aria-label="Deployment summary"
           >
             <div className="flex flex-wrap items-start justify-between gap-4">
-              <div className="space-y-3">
+              <div className="min-w-0 space-y-3">
+                <div>
+                  <h1 className="text-2xl font-semibold tracking-tight">
+                    {deploymentName}
+                  </h1>
+                  {commitDescription ? (
+                    <p
+                      className="mt-2 whitespace-pre-wrap text-sm leading-relaxed"
+                      style={{ color: "var(--muted-text)" }}
+                    >
+                      {commitDescription}
+                    </p>
+                  ) : null}
+                  <p
+                    className="mt-2 flex flex-wrap items-center gap-2 font-mono text-[12px] uppercase tracking-wide"
+                    style={{ color: "var(--muted-text)" }}
+                  >
+                    {sha !== "—" ? (
+                      <SettingsCopyPill value={sha} />
+                    ) : null}
+                    {releaseTag ? (
+                      <>
+                        {sha !== "—" ? <span aria-hidden>·</span> : null}
+                        <span>
+                          Release{" "}
+                          <span style={{ color: "var(--ink-navy)" }}>
+                            {releaseTag}
+                          </span>
+                        </span>
+                      </>
+                    ) : null}
+                  </p>
+                </div>
                 <div className="flex flex-wrap items-center gap-2">
                   {status ? (
                     <StatusBadge
@@ -211,12 +255,15 @@ export function StaticSiteDeploymentDetailPage() {
                 label="Trigger"
                 value={deploymentTriggerLabel(row.deployment.trigger)}
               />
+              {releaseTag ? (
+                <SettingsMetaField label="Release" value={releaseTag} />
+              ) : null}
               <SettingsMetaField
                 label="Started at"
                 value={formatDeploymentStartedAt(startedAt)}
               />
             </SettingsMetaGrid>
-            {commitMessage ? (
+            {commitMessage && !commitDescription ? (
               <div
                 className="mt-8 border-t pt-6"
                 style={{ borderColor: "var(--border)" }}

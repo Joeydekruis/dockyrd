@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"database/sql"
 	"log/slog"
 	"os"
 	"time"
@@ -11,18 +12,20 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/deploy"
 	"github.com/Joeydekruis/dockyrd/internal/docker"
 	"github.com/Joeydekruis/dockyrd/internal/eventlog"
-	"github.com/Joeydekruis/dockyrd/internal/inbox"
 	"github.com/Joeydekruis/dockyrd/internal/events"
+	"github.com/Joeydekruis/dockyrd/internal/inbox"
 	"github.com/Joeydekruis/dockyrd/internal/jobs"
 	"github.com/Joeydekruis/dockyrd/internal/links"
 	"github.com/Joeydekruis/dockyrd/internal/metrics"
+	"github.com/Joeydekruis/dockyrd/internal/notify"
 	"github.com/Joeydekruis/dockyrd/internal/proxy"
 	"github.com/Joeydekruis/dockyrd/internal/reconcile"
 	"github.com/Joeydekruis/dockyrd/internal/resources"
 	"github.com/Joeydekruis/dockyrd/internal/updater"
+	"github.com/Joeydekruis/dockyrd/internal/watch"
 )
 
-func startBackground(ctx context.Context, cfg config.Config, q *sqlc.Queries, hub *events.Hub) {
+func startBackground(ctx context.Context, cfg config.Config, db *sql.DB, q *sqlc.Queries, hub *events.Hub, notifier *notify.Notifier, dispatcher *notify.Dispatcher) {
 	log := slog.New(slog.NewJSONHandler(os.Stderr, nil))
 	var dockerCli *docker.Client
 	cli, err := docker.NewClient()
@@ -43,6 +46,7 @@ func startBackground(ctx context.Context, cfg config.Config, q *sqlc.Queries, hu
 		Log:       log,
 		Events:    eventLog,
 		Inbox:     inboxDispatch,
+		Notify:    notifier,
 		Resources: resources.New(cfg.BuildIsolationEnabled()),
 	}
 	rec := &reconcile.Loop{
@@ -53,7 +57,7 @@ func startBackground(ctx context.Context, cfg config.Config, q *sqlc.Queries, hu
 		Resources: resources.New(cfg.BuildIsolationEnabled()),
 	}
 
-	worker := &jobs.Worker{Cfg: cfg, Q: q, Deploy: deployRT, Docker: dockerCli, Log: log}
+	worker := &jobs.Worker{Cfg: cfg, Q: q, Deploy: deployRT, Docker: dockerCli, Log: log, Notify: notifier, Events: eventLog}
 
 	go metrics.RunHostCollector(ctx, cfg, q, log, 10*time.Second)
 	if dockerCli != nil {
@@ -76,6 +80,14 @@ func startBackground(ctx context.Context, cfg config.Config, q *sqlc.Queries, hu
 
 	go worker.RunLoop(ctx, 2*time.Second)
 	go rec.Run(ctx, 30*time.Second)
+	if dispatcher != nil {
+		go dispatcher.Run(ctx, 2*time.Second)
+	}
+	if notifier != nil {
+		go watch.RunDisk(ctx, cfg, q, notifier, log, 60*time.Second)
+		go watch.RunBackupsOverdue(ctx, q, notifier, log, 10*time.Minute)
+		go watch.RunCerts(ctx, cfg, q, notifier, log, 6*time.Hour)
+	}
 
 	go links.BackfillAllProjects(ctx, q, cfg.SecretKeyPath(), log)
 
@@ -85,5 +97,6 @@ func startBackground(ctx context.Context, cfg config.Config, q *sqlc.Queries, hu
 		return updater.Options{Repo: os.Getenv("DOCKYARD_GITHUB_REPO")}
 	})
 
-	_ = hub // reserved for deployment SSE fan-out from handlers
+	_ = hub
+	_ = db
 }

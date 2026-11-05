@@ -9,6 +9,9 @@ SELECT
   region,
   access_key_enc,
   secret_key_enc,
+  managed_garage,
+  last_test_at,
+  last_test_error,
   created_at,
   updated_at
 FROM backup_targets
@@ -26,9 +29,12 @@ INSERT INTO backup_targets (
   region,
   access_key_enc,
   secret_key_enc,
+  managed_garage,
+  last_test_at,
+  last_test_error,
   created_at,
   updated_at
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ON CONFLICT(server_id) DO UPDATE SET
   provider = excluded.provider,
   endpoint = excluded.endpoint,
@@ -37,7 +43,15 @@ ON CONFLICT(server_id) DO UPDATE SET
   region = excluded.region,
   access_key_enc = excluded.access_key_enc,
   secret_key_enc = excluded.secret_key_enc,
+  managed_garage = excluded.managed_garage,
+  last_test_at = excluded.last_test_at,
+  last_test_error = excluded.last_test_error,
   updated_at = excluded.updated_at;
+
+-- name: UpdateBackupTargetTestResult :exec
+UPDATE backup_targets
+SET last_test_at = ?, last_test_error = ?, updated_at = ?
+WHERE server_id = ?;
 
 -- name: GetDatabaseBackupPolicy :one
 SELECT
@@ -48,6 +62,8 @@ SELECT
   retention_days,
   local_enabled,
   remote_enabled,
+  run_at_minute,
+  run_weekday,
   last_run_at,
   next_run_at,
   created_at,
@@ -65,18 +81,34 @@ INSERT INTO database_backup_policies (
   retention_days,
   local_enabled,
   remote_enabled,
+  run_at_minute,
+  run_weekday,
   last_run_at,
   next_run_at,
   created_at,
   updated_at
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ON CONFLICT(service_id) DO UPDATE SET
   enabled = excluded.enabled,
   interval_kind = excluded.interval_kind,
   retention_days = excluded.retention_days,
   local_enabled = excluded.local_enabled,
   remote_enabled = excluded.remote_enabled,
+  run_at_minute = excluded.run_at_minute,
+  run_weekday = excluded.run_weekday,
   updated_at = excluded.updated_at;
+
+-- name: ListEnabledDatabaseBackupPolicies :many
+SELECT id, service_id, interval_kind
+FROM database_backup_policies
+WHERE enabled = 1;
+
+-- name: GetLatestSuccessfulBackupRun :one
+SELECT finished_at
+FROM database_backup_runs
+WHERE service_id = ? AND status = 'succeeded'
+ORDER BY finished_at DESC
+LIMIT 1;
 
 -- name: ListDatabaseBackupRuns :many
 SELECT
@@ -87,6 +119,8 @@ SELECT
   destination,
   object_key,
   size_bytes,
+  sha256,
+  verified_at,
   started_at,
   finished_at,
   error
@@ -104,6 +138,8 @@ SELECT
   destination,
   object_key,
   size_bytes,
+  sha256,
+  verified_at,
   started_at,
   finished_at,
   error
@@ -120,10 +156,12 @@ INSERT INTO database_backup_runs (
   destination,
   object_key,
   size_bytes,
+  sha256,
+  verified_at,
   started_at,
   finished_at,
   error
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 -- name: UpdateDatabaseBackupRun :exec
 UPDATE database_backup_runs
@@ -131,6 +169,8 @@ SET
   status = ?,
   object_key = ?,
   size_bytes = ?,
+  sha256 = ?,
+  verified_at = ?,
   finished_at = ?,
   error = ?
 WHERE id = ?;
@@ -144,6 +184,8 @@ SELECT
   p.retention_days,
   p.local_enabled,
   p.remote_enabled,
+  p.run_at_minute,
+  p.run_weekday,
   p.last_run_at,
   p.next_run_at,
   p.created_at,
@@ -173,3 +215,70 @@ WHERE service_id = ?
   AND started_at IS NOT NULL
   AND started_at < ?
 ORDER BY started_at ASC;
+
+-- name: InsertDatabaseRestoreRun :exec
+INSERT INTO database_restore_runs (
+  id,
+  service_id,
+  backup_run_id,
+  mode,
+  status,
+  pre_snapshot_run_id,
+  target_service_id,
+  requested_by,
+  log_tail,
+  error,
+  started_at,
+  finished_at,
+  created_at
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+-- name: GetDatabaseRestoreRun :one
+SELECT
+  id,
+  service_id,
+  backup_run_id,
+  mode,
+  status,
+  pre_snapshot_run_id,
+  target_service_id,
+  requested_by,
+  log_tail,
+  error,
+  started_at,
+  finished_at,
+  created_at
+FROM database_restore_runs
+WHERE id = ?
+LIMIT 1;
+
+-- name: ListDatabaseRestoreRuns :many
+SELECT
+  id,
+  service_id,
+  backup_run_id,
+  mode,
+  status,
+  pre_snapshot_run_id,
+  target_service_id,
+  requested_by,
+  log_tail,
+  error,
+  started_at,
+  finished_at,
+  created_at
+FROM database_restore_runs
+WHERE service_id = ?
+ORDER BY created_at DESC
+LIMIT ?;
+
+-- name: UpdateDatabaseRestoreRun :exec
+UPDATE database_restore_runs
+SET
+  status = ?,
+  pre_snapshot_run_id = ?,
+  log_tail = ?,
+  error = ?,
+  started_at = ?,
+  finished_at = ?
+WHERE id = ?;

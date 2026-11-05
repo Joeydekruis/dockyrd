@@ -2,7 +2,6 @@ package backup
 
 import (
 	"context"
-	"net/url"
 	"strings"
 	"time"
 
@@ -86,14 +85,10 @@ func newMinioClient(opt s3Options) (*minio.Client, error) {
 	})
 }
 
-func normalizeEndpoint(raw string) (host string, secure bool) {
-	raw = strings.TrimSpace(raw)
-	if raw == "" {
-		return "s3.amazonaws.com", true
+func removeObject(ctx context.Context, opt s3Options, objectKey string) error {
+	cli, err := newMinioClient(opt)
+	if err != nil {
+		return err
 	}
-	u, err := url.Parse(raw)
-	if err != nil || u.Host == "" {
-		return strings.TrimPrefix(strings.TrimPrefix(raw, "https://"), "http://"), strings.HasPrefix(raw, "https://")
-	}
-	return u.Host, u.Scheme != "http"
+	return cli.RemoveObject(ctx, opt.Bucket, objectKey, minio.RemoveObjectOptions{})
 }

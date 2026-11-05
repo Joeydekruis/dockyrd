@@ -5,9 +5,10 @@ const baseURL = process.env.E2E_BASE_URL ?? `http://127.0.0.1:${port}`;
 
 export default defineConfig({
   testDir: "./tests",
-  fullyParallel: true,
+  fullyParallel: !process.env.CI,
+  workers: process.env.CI ? 1 : undefined,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 1 : 0,
+  retries: 0,
   use: {
     ...devices["Desktop Chrome"],
     baseURL,

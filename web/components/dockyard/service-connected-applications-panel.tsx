@@ -66,7 +66,7 @@ export function ServiceConnectedApplicationsPanel({
         </h2>
         <Button
           type="button"
-          variant="secondary"
+          variant="outline"
           onClick={() => setModalOpen(true)}
         >
           Connect application

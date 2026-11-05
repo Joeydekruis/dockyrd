@@ -8,27 +8,33 @@ alwaysApply: false
 
 Overlaps `.cursor/rules/testing.mdc`; pair with **`.cursor/rules/typescript/testing`** for unit/spec files next to UI code.
 
-## Priority ladder
+## CI vs manual / harness
 
-### 1. Visual regression
+**GitHub Actions (default):** `go test`, `tsc --noEmit`, web build, no-Radix, lean **`e2e/`** smoke (health, setup+login API, one sign-in heading). No layout screenshots, axe, or Lighthouse in CI unless a Feature rubric explicitly requires it.
 
-Playwright screenshots at **320, 768, 1024, 1440** (extend as needed) for hero/editorial states; dual themes **if shipped**.
+**Manual / Feature harness:** visual, a11y, perf, and breakpoint checks below — when product risk warrants it, not on every push.
 
-### 2. Accessibility
+## Priority ladder (manual / harness — not default CI)
 
-Automated axe (or equiv.) plus **manual keyboard**, **`:prefers-reduced-motion`**, **contrast**.
+### 1. Critical journeys
 
-### 3. Performance smoke
+Auth, setup, API contracts — covered by unit tests + lean Playwright API smoke.
 
-Meaningful pages vs targets in **`web/performance`** (Lighthouse/class CI perf).
+### 2. Visual regression (optional)
 
-### 4. Cross-browser spot checks
+Playwright screenshots at **320, 768, 1024, 1440** only when a wireframe or design HTML is the AC — not a standing gate on every PR.
 
-Chrome + Firefox (+ Safari/macOS viewport when feasible)-scroll + motion sane.
+### 3. Accessibility
 
-### 5. Responsive
+Automated axe plus **manual keyboard** when UI ships materially new surfaces.
 
-320 → 1920 ladders; overflow + touch taps.
+### 4. Performance smoke
+
+Meaningful pages vs targets in **`web/performance`** when rubric requires it.
+
+### 5. Cross-browser / responsive
+
+Spot checks before release — not CI matrix by default.
 
 ## E2E example (deterministic waits)
 

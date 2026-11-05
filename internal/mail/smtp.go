@@ -1,13 +1,23 @@
 package mail
 
 import (
+	"crypto/rand"
 	"crypto/tls"
+	"encoding/hex"
 	"fmt"
+	"mime"
 	"net"
+	"net/mail"
 	"net/smtp"
 	"strings"
+	"time"
 
 	"github.com/Joeydekruis/dockyrd/internal/instance"
+)
+
+const (
+	dialTimeout  = 10 * time.Second
+	sessionLimit = 30 * time.Second
 )
 
 // SendPlain sends a UTF-8 plain-text message.
@@ -16,36 +26,90 @@ func SendPlain(cfg instance.SMTPConfig, to, subject, body string) error {
 	if to == "" {
 		return fmt.Errorf("recipient required")
 	}
+	toAddr, err := mailParseAddress(to)
+	if err != nil {
+		return fmt.Errorf("invalid recipient: %w", err)
+	}
 	from := cfg.From
 	if from == "" {
 		from = cfg.Username
 	}
-	msg := strings.Builder{}
-	msg.WriteString("From: " + from + "\r\n")
-	msg.WriteString("To: " + to + "\r\n")
-	msg.WriteString("Subject: " + subject + "\r\n")
-	msg.WriteString("MIME-Version: 1.0\r\n")
-	msg.WriteString("Content-Type: text/plain; charset=UTF-8\r\n")
-	msg.WriteString("\r\n")
-	msg.WriteString(body)
-	addr := smtpAddr(cfg)
-	auth := smtp.PlainAuth("", cfg.Username, cfg.Password, cfg.Host)
-	if cfg.UseTLS && cfg.Port == 465 {
-		return sendTLS(addr, cfg.Host, auth, from, []string{to}, []byte(msg.String()))
-	}
-	return smtp.SendMail(addr, auth, extractEmail(from), []string{to}, []byte(msg.String()))
+	from = sanitizeHeaderValue(from)
+	subject = sanitizeHeaderValue(subject)
+	encodedSubject := mime.QEncoding.Encode("utf-8", subject)
+	msgID := messageID(cfg.Host)
+	msg := buildPlainMessage(from, to, encodedSubject, msgID, body)
+	return sendMessage(cfg, from, []string{toAddr}, msg)
 }
 
-func sendTLS(addr, host string, auth smtp.Auth, from string, to []string, msg []byte) error {
-	conn, err := tls.Dial("tcp", addr, &tls.Config{ServerName: host})
+func buildPlainMessage(from, to, encodedSubject, messageID, body string) []byte {
+	var b strings.Builder
+	b.WriteString("From: " + from + "\r\n")
+	b.WriteString("To: " + sanitizeHeaderValue(to) + "\r\n")
+	b.WriteString("Subject: " + encodedSubject + "\r\n")
+	b.WriteString("Date: " + time.Now().UTC().Format(time.RFC1123Z) + "\r\n")
+	b.WriteString("Message-ID: " + messageID + "\r\n")
+	b.WriteString("MIME-Version: 1.0\r\n")
+	b.WriteString("Content-Type: text/plain; charset=UTF-8\r\n")
+	b.WriteString("Content-Transfer-Encoding: 8bit\r\n")
+	b.WriteString("\r\n")
+	b.WriteString(body)
+	return []byte(b.String())
+}
+
+func messageID(host string) string {
+	host = strings.TrimSpace(host)
+	if host == "" {
+		host = "dockyard.local"
+	}
+	var rnd [12]byte
+	_, _ = rand.Read(rnd[:])
+	return "<" + hex.EncodeToString(rnd[:]) + "@" + host + ">"
+}
+
+func sanitizeHeaderValue(s string) string {
+	s = strings.ReplaceAll(s, "\r", "")
+	s = strings.ReplaceAll(s, "\n", "")
+	return strings.TrimSpace(s)
+}
+
+func mailParseAddress(s string) (string, error) {
+	addr, err := mail.ParseAddress(s)
+	if err != nil {
+		return "", err
+	}
+	return addr.Address, nil
+}
+
+func sendMessage(cfg instance.SMTPConfig, from string, to []string, msg []byte) error {
+	addr := smtpAddr(cfg)
+	if cfg.UseTLS && cfg.Port == 465 {
+		return sendTLS(addr, cfg.Host, cfg, from, to, msg)
+	}
+	dialer := net.Dialer{Timeout: dialTimeout}
+	conn, err := dialer.Dial("tcp", addr)
 	if err != nil {
 		return err
 	}
-	client, err := smtp.NewClient(conn, host)
+	defer conn.Close()
+	deadline := time.Now().Add(sessionLimit)
+	_ = conn.SetDeadline(deadline)
+
+	client, err := smtp.NewClient(conn, cfg.Host)
 	if err != nil {
 		return err
 	}
 	defer client.Close()
+
+	if cfg.UseTLS && cfg.Port != 465 {
+		if ok, _ := client.Extension("STARTTLS"); ok {
+			if err := client.StartTLS(&tls.Config{ServerName: cfg.Host}); err != nil {
+				return err
+			}
+		}
+	}
+
+	auth := smtpAuth(cfg)
 	if auth != nil {
 		if err := client.Auth(auth); err != nil {
 			return err
@@ -55,7 +119,56 @@ func sendTLS(addr, host string, auth smtp.Auth, from string, to []string, msg []
 		return err
 	}
 	for _, rcpt := range to {
-		if err := client.Rcpt(rcpt); err != nil {
+		if err := client.Rcpt(extractEmail(rcpt)); err != nil {
+			return err
+		}
+	}
+	w, err := client.Data()
+	if err != nil {
+		return err
+	}
+	if _, err := w.Write(msg); err != nil {
+		return err
+	}
+	if err := w.Close(); err != nil {
+		return err
+	}
+	return client.Quit()
+}
+
+func smtpAuth(cfg instance.SMTPConfig) smtp.Auth {
+	if strings.TrimSpace(cfg.Username) == "" {
+		return nil
+	}
+	return smtp.PlainAuth("", cfg.Username, cfg.Password, cfg.Host)
+}
+
+func sendTLS(addr, host string, cfg instance.SMTPConfig, from string, to []string, msg []byte) error {
+	dialer := net.Dialer{Timeout: dialTimeout}
+	conn, err := tls.DialWithDialer(&dialer, "tcp", addr, &tls.Config{ServerName: host})
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+	_ = conn.SetDeadline(time.Now().Add(sessionLimit))
+
+	client, err := smtp.NewClient(conn, host)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	auth := smtpAuth(cfg)
+	if auth != nil {
+		if err := client.Auth(auth); err != nil {
+			return err
+		}
+	}
+	if err := client.Mail(extractEmail(from)); err != nil {
+		return err
+	}
+	for _, rcpt := range to {
+		if err := client.Rcpt(extractEmail(rcpt)); err != nil {
 			return err
 		}
 	}
@@ -83,7 +196,8 @@ func extractEmail(from string) string {
 
 // VerifyConnection checks TCP reachability to the SMTP host.
 func VerifyConnection(cfg instance.SMTPConfig) error {
-	conn, err := net.Dial("tcp", smtpAddr(cfg))
+	dialer := net.Dialer{Timeout: dialTimeout}
+	conn, err := dialer.Dial("tcp", smtpAddr(cfg))
 	if err != nil {
 		return err
 	}

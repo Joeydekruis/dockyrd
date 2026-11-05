@@ -10,6 +10,26 @@ import (
 	"database/sql"
 )
 
+const getLatestMetricHost = `-- name: GetLatestMetricHost :one
+SELECT disk_used, disk_total
+FROM metric_host
+WHERE res = ?
+ORDER BY ts DESC
+LIMIT 1
+`
+
+type GetLatestMetricHostRow struct {
+	DiskUsed  sql.NullInt64
+	DiskTotal sql.NullInt64
+}
+
+func (q *Queries) GetLatestMetricHost(ctx context.Context, res sql.NullInt64) (GetLatestMetricHostRow, error) {
+	row := q.db.QueryRowContext(ctx, getLatestMetricHost, res)
+	var i GetLatestMetricHostRow
+	err := row.Scan(&i.DiskUsed, &i.DiskTotal)
+	return i, err
+}
+
 const insertMetricContainer = `-- name: InsertMetricContainer :exec
 INSERT OR REPLACE INTO metric_container (
   ts,

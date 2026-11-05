@@ -237,6 +237,37 @@ func deployCTA(serviceKind, serviceSlug, deploymentID string) (string, string) {
 	}
 }
 
+// InboxEmailRecipientsForDeployFailed returns lowercase emails that receive synchronous inbox mail for deploy.failed.
+func (d *Dispatcher) InboxEmailRecipientsForDeployFailed(ctx context.Context) map[string]struct{} {
+	out := map[string]struct{}{}
+	if d == nil || d.Q == nil {
+		return out
+	}
+	smtpCfg, _, _, smtpOK := d.smtpReady(ctx)
+	if !smtpOK || smtpCfg.Host == "" {
+		return out
+	}
+	users, err := d.Q.ListUsers(ctx)
+	if err != nil {
+		return out
+	}
+	for _, u := range users {
+		if u.DisabledAt.Valid {
+			continue
+		}
+		prefs := loadUserPrefs(ctx, d.Q, u.ID)
+		if !prefs.Deployments {
+			continue
+		}
+		email := strings.ToLower(strings.TrimSpace(u.Email))
+		if email == "" {
+			continue
+		}
+		out[email] = struct{}{}
+	}
+	return out
+}
+
 func (d *Dispatcher) smtpReady(ctx context.Context) (instance.SMTPConfig, instance.Panel, string, bool) {
 	panel, _ := instance.LoadPanel(ctx, d.Q)
 	base := instance.PublicBaseURL(d.Cfg, panel)

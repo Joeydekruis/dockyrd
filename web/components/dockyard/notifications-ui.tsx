@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  AlertTriangle,
-  ArrowRight,
-  Check,
-  Info,
-  X,
-  XCircle,
-} from "lucide-react";
+import { AlertTriangle, Check, Info, Tag, X, XCircle } from "lucide-react";
 import Link from "next/link";
 import type { InboxNotification } from "@/lib/api";
 import { formatTimeAgo } from "@/lib/resource-dashboard";
@@ -48,7 +41,7 @@ export function NotificationRow({
 
   return (
     <article
-      className="flex gap-3 border-b px-4 py-4 last:border-b-0"
+      className={`flex gap-3 border-b py-4 last:border-b-0 ${compact ? "px-5" : "px-4"}`}
       style={{ borderColor: "var(--border)" }}
     >
       <div className="flex w-3 shrink-0 justify-center pt-2">
@@ -82,12 +75,13 @@ export function NotificationRow({
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-start justify-between gap-3">
-          <p
-            className="font-mono text-[10px] uppercase tracking-widest"
-            style={{ color: "var(--muted-text)" }}
+          <span
+            className="inline-flex max-w-[min(100%,14rem)] min-w-0 items-center gap-1 rounded-md border px-2 py-0.5 text-[11px] leading-snug"
+            style={{ borderColor: "var(--border)", color: "var(--muted-text)" }}
           >
-            {item.source_label}
-          </p>
+            <Tag className="size-3 shrink-0" strokeWidth={1.8} aria-hidden />
+            <span className="truncate">{item.source_label}</span>
+          </span>
           <time
             className="shrink-0 text-xs whitespace-nowrap"
             style={{ color: "var(--muted-text)" }}
@@ -96,8 +90,10 @@ export function NotificationRow({
             {time}
           </time>
         </div>
-        <h3 className="mt-1 text-sm font-semibold">{item.title}</h3>
-        {!compact ? (
+        <h3 className="mt-2 text-base font-semibold tracking-tight">
+          {item.title}
+        </h3>
+        {item.body ? (
           <p
             className="mt-1 text-sm leading-relaxed"
             style={{ color: "var(--muted-text)" }}
@@ -106,16 +102,13 @@ export function NotificationRow({
           </p>
         ) : null}
         {item.cta_label && item.cta_href ? (
-          <div className="mt-3 flex justify-end">
-            <Link
-              href={item.cta_href}
-              className="btn-link inline-flex items-center gap-1 text-sm font-medium"
-              onClick={() => void handleCtaClick()}
-            >
-              {item.cta_label}
-              <ArrowRight className="size-4" strokeWidth={1.8} aria-hidden />
-            </Link>
-          </div>
+          <Link
+            href={item.cta_href}
+            className="btn-link mt-2 inline-block text-sm font-medium"
+            onClick={() => void handleCtaClick()}
+          >
+            {item.cta_label} →
+          </Link>
         ) : null}
       </div>
     </article>
@@ -215,10 +208,10 @@ export function NotificationsPanelHeader({
 }) {
   return (
     <div
-      className="flex items-start justify-between gap-3 border-b px-5 py-4"
+      className="flex items-start justify-between gap-3 border-b px-6 py-5"
       style={{ borderColor: "var(--border)" }}
     >
-      <h2 className="text-base font-semibold">{title}</h2>
+      <h2 className="text-xl font-semibold tracking-tight">{title}</h2>
       <div className="flex items-center gap-3">
         {onMarkAllRead ? (
           <button

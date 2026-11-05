@@ -152,7 +152,7 @@ export function NotificationsBell({ className }: NotificationsBellProps) {
                 role="dialog"
                 aria-modal="true"
                 aria-label="Notifications"
-                className="absolute top-[calc(var(--dockyard-announcement-height,44px)+4.5rem)] right-8 z-10 flex max-h-[min(640px,calc(100dvh-7rem))] w-[min(420px,calc(100vw-2rem))] flex-col overflow-hidden rounded-[20px] border shadow-lg"
+                className="absolute top-[calc(var(--dockyard-announcement-height,44px)+4.5rem)] right-8 z-10 flex max-h-[min(680px,calc(100dvh-7rem))] w-[min(500px,calc(100vw-2rem))] flex-col overflow-hidden rounded-[20px] border shadow-lg"
                 style={{
                   background: "var(--surface)",
                   borderColor: "var(--border)",
@@ -165,7 +165,7 @@ export function NotificationsBell({ className }: NotificationsBellProps) {
                   markAllDisabled={unread === 0}
                 />
                 <div
-                  className="border-b px-5 py-3"
+                  className="border-b px-6 py-3.5"
                   style={{ borderColor: "var(--border)" }}
                 >
                   <NotificationFilterPills
@@ -177,14 +177,14 @@ export function NotificationsBell({ className }: NotificationsBellProps) {
                 <div className="min-h-0 flex-1 overflow-y-auto">
                   {loading ? (
                     <p
-                      className="px-5 py-8 text-center text-sm"
+                      className="px-6 py-10 text-center text-sm"
                       style={{ color: "var(--muted-text)" }}
                     >
                       Loading…
                     </p>
                   ) : items.length === 0 ? (
                     <p
-                      className="px-5 py-8 text-center text-sm"
+                      className="px-6 py-10 text-center text-sm"
                       style={{ color: "var(--muted-text)" }}
                     >
                       No notifications yet.
@@ -202,7 +202,7 @@ export function NotificationsBell({ className }: NotificationsBellProps) {
                   )}
                 </div>
                 <div
-                  className="border-t px-5 py-3 text-center"
+                  className="border-t px-6 py-4 text-center"
                   style={{ borderColor: "var(--border)" }}
                 >
                   <Link

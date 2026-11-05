@@ -15,13 +15,16 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/deploy"
 	"github.com/Joeydekruis/dockyrd/internal/docker"
 	"github.com/Joeydekruis/dockyrd/internal/backup"
+	"github.com/Joeydekruis/dockyrd/internal/eventlog"
+	"github.com/Joeydekruis/dockyrd/internal/notify"
 )
 
 const (
-	KindDeploy         = "deploy"
-	KindPrune          = "prune"
-	KindDatabaseBackup = "database_backup"
-	lockSeconds        = 120
+	KindDeploy          = "deploy"
+	KindPrune           = "prune"
+	KindDatabaseBackup  = "database_backup"
+	KindDatabaseRestore = "database_restore"
+	lockSeconds         = 120
 )
 
 // DeployPayload is stored on deploy jobs.
@@ -36,6 +39,8 @@ type Worker struct {
 	Deploy  *deploy.Runtime
 	Docker  *docker.Client
 	Log     *slog.Logger
+	Notify  *notify.Notifier
+	Events  *eventlog.Logger
 }
 
 // EnqueueDeploy schedules a deploy job.
@@ -112,8 +117,19 @@ func (w *Worker) ProcessOnce(ctx context.Context) (bool, error) {
 		} else if err := json.Unmarshal(raw, &payload); err != nil {
 			runErr = err
 		} else {
-			runner := &backup.Runner{Cfg: w.Cfg, Q: w.Q, Docker: w.Docker, Log: w.Log}
+			runner := &backup.Runner{Cfg: w.Cfg, Q: w.Q, Docker: w.Docker, Log: w.Log, Notify: w.Notify, Events: w.Events}
 			runErr = runner.RunJob(ctx, payload)
+		}
+	case row.Kind.Valid && row.Kind.String == KindDatabaseRestore:
+		var payload backup.RestoreJobPayload
+		raw, err := payloadBytes(row.Payload)
+		if err != nil {
+			runErr = err
+		} else if err := json.Unmarshal(raw, &payload); err != nil {
+			runErr = err
+		} else {
+			restorer := &backup.RestoreRunner{Cfg: w.Cfg, Q: w.Q, Docker: w.Docker, Log: w.Log, Notify: w.Notify, Events: w.Events}
+			runErr = restorer.RunJob(ctx, payload)
 		}
 	default:
 		runErr = errors.New("unknown job kind")

@@ -11,6 +11,14 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
 )
 
+func scheduleFromRow(row sqlc.ListDueDatabaseBackupPoliciesRow) ScheduleParams {
+	return ScheduleParams{
+		Interval:    row.IntervalKind,
+		RunAtMinute: row.RunAtMinute,
+		RunWeekday:  row.RunWeekday,
+	}
+}
+
 // EnqueueDuePolicies schedules backup jobs for policies whose next_run_at has passed.
 func EnqueueDuePolicies(ctx context.Context, q *sqlc.Queries, now int64) error {
 	if q == nil {
@@ -37,7 +45,7 @@ func EnqueueDuePolicies(ctx context.Context, q *sqlc.Queries, now int64) error {
 		}); err != nil {
 			return err
 		}
-		next := NextRunAfter(time.Unix(now, 0), row.IntervalKind).Unix()
+		next := NextRunAfter(time.Unix(now, 0), scheduleFromRow(row)).Unix()
 		if err := q.UpdateDatabaseBackupPolicySchedule(ctx, sqlc.UpdateDatabaseBackupPolicyScheduleParams{
 			LastRunAt: sql.NullInt64{Int64: row.LastRunAt.Int64, Valid: row.LastRunAt.Valid},
 			NextRunAt: sql.NullInt64{Int64: next, Valid: true},

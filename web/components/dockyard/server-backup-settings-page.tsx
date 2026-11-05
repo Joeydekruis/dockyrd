@@ -9,8 +9,10 @@ import {
   SettingsEnabledStatus,
 } from "@/components/dockyard/ui/settings-detail-block";
 import {
+  configureGarageBackupTarget,
   getServerBackupTarget,
   patchServerBackupTarget,
+  testServerBackupTarget,
   type ServerBackupTarget,
 } from "@/lib/api";
 import {
@@ -29,6 +31,8 @@ export function ServerBackupSettingsPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [garageBusy, setGarageBusy] = useState(false);
+  const [testBusy, setTestBusy] = useState(false);
 
   useEffect(() => {
     void getServerBackupTarget()
@@ -69,6 +73,36 @@ export function ServerBackupSettingsPage() {
     }
   }
 
+  async function onUseGarage() {
+    setGarageBusy(true);
+    setError(null);
+    try {
+      const t = await configureGarageBackupTarget();
+      setTarget(t);
+      setEndpoint(t.endpoint);
+      setBucket(t.bucket);
+      setPrefix(t.prefix);
+      setRegion(t.region);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Garage setup failed");
+    } finally {
+      setGarageBusy(false);
+    }
+  }
+
+  async function onTestTarget() {
+    setTestBusy(true);
+    setError(null);
+    try {
+      const t = await testServerBackupTarget();
+      setTarget(t);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Test failed");
+    } finally {
+      setTestBusy(false);
+    }
+  }
+
   return (
     <DashboardShell title="Backups" breadcrumb="Server settings">
       <section
@@ -97,11 +131,53 @@ export function ServerBackupSettingsPage() {
                   label: "Keys stored",
                   value: <SettingsEnabledStatus enabled={target.has_keys} />,
                 },
+                ...(target.managed_garage
+                  ? [
+                      {
+                        label: "Location",
+                        value: "Same server (Garage)",
+                      },
+                    ]
+                  : []),
+                ...(target.last_test_at
+                  ? [
+                      {
+                        label: "Last test",
+                        value: new Date(target.last_test_at * 1000).toLocaleString(),
+                      },
+                    ]
+                  : []),
+                ...(target.last_test_error
+                  ? [
+                      {
+                        label: "Last test error",
+                        value: target.last_test_error,
+                      },
+                    ]
+                  : []),
               ]}
               actionDisabled
             />
           </div>
         ) : null}
+        <div className="mt-6 flex flex-wrap gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            disabled={garageBusy}
+            onClick={() => void onUseGarage()}
+          >
+            {garageBusy ? "Configuring…" : "Use built-in Garage"}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={testBusy || !target?.configured}
+            onClick={() => void onTestTarget()}
+          >
+            {testBusy ? "Testing…" : "Test connection"}
+          </Button>
+        </div>
         <form
           className="mt-8 max-w-lg space-y-4"
           onSubmit={(e) => void onSave(e)}

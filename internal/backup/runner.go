@@ -19,6 +19,8 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
 	"github.com/Joeydekruis/dockyrd/internal/dbkind"
 	"github.com/Joeydekruis/dockyrd/internal/docker"
+	"github.com/Joeydekruis/dockyrd/internal/eventlog"
+	"github.com/Joeydekruis/dockyrd/internal/notify"
 	"github.com/Joeydekruis/dockyrd/internal/serviceops"
 )
 
@@ -34,7 +36,18 @@ type Runner struct {
 	Q      *sqlc.Queries
 	Docker *docker.Client
 	Log    *slog.Logger
+	Notify *notify.Notifier
+	Events *eventlog.Logger
 }
+
+func scheduleFromPolicy(p sqlc.GetDatabaseBackupPolicyRow) ScheduleParams {
+	return ScheduleParams{
+		Interval:    p.IntervalKind,
+		RunAtMinute: p.RunAtMinute,
+		RunWeekday:  p.RunWeekday,
+	}
+}
+
 
 // RunJob performs local and/or remote backup per policy flags.
 func (r *Runner) RunJob(ctx context.Context, payload JobPayload) error {
@@ -85,7 +98,10 @@ func (r *Runner) RunJob(ctx context.Context, payload JobPayload) error {
 	if runErr == nil {
 		_ = r.Q.UpdateDatabaseBackupPolicySchedule(ctx, sqlc.UpdateDatabaseBackupPolicyScheduleParams{
 			LastRunAt: sql.NullInt64{Int64: finished, Valid: true},
-			NextRunAt: sql.NullInt64{Int64: NextRunAfter(time.Unix(finished, 0), policy.IntervalKind).Unix(), Valid: true},
+			NextRunAt: sql.NullInt64{
+				Int64: NextRunAfter(time.Unix(finished, 0), scheduleFromPolicy(policy)).Unix(),
+				Valid: true,
+			},
 			UpdatedAt: sql.NullInt64{Int64: finished, Valid: true},
 			ID:        policy.ID,
 		})
@@ -96,34 +112,92 @@ func (r *Runner) RunJob(ctx context.Context, payload JobPayload) error {
 	return runErr
 }
 
+// RunLocalSnapshot writes a one-off local backup run (pre-restore snapshot).
+func (r *Runner) RunLocalSnapshot(ctx context.Context, svc sqlc.Service, policy sqlc.GetDatabaseBackupPolicyRow) (runID string, err error) {
+	containerID, err := serviceops.FindDatabaseContainerID(ctx, r.Docker, svc.ID)
+	if err != nil {
+		return "", err
+	}
+	key, err := crypto.LoadMasterKey(r.Cfg.SecretKeyPath())
+	if err != nil {
+		return "", err
+	}
+	raw, err := serviceConfigJSON(svc.Config)
+	if err != nil {
+		return "", err
+	}
+	now := time.Now()
+	stamp := now.UTC().Format("20060102T150405Z") + "-presnap"
+	runID = ulid.Make().String()
+	in := runInput{
+		svc: svc, policy: policy, containerID: containerID, raw: raw, key: key,
+		destination: "local", stamp: stamp, now: now, forcedRunID: runID,
+	}
+	if err := r.runDestination(ctx, in); err != nil {
+		return runID, err
+	}
+	return runID, nil
+}
+
 type runInput struct {
 	svc         sqlc.Service
-	policy      sqlc.DatabaseBackupPolicy
+	policy      sqlc.GetDatabaseBackupPolicyRow
 	containerID string
 	raw         json.RawMessage
 	key         []byte
 	destination string
 	stamp       string
 	now         time.Time
+	forcedRunID string
 }
 
 func (r *Runner) runDestination(ctx context.Context, in runInput) error {
-	runID := ulid.Make().String()
+	runID := in.forcedRunID
+	if runID == "" {
+		runID = ulid.Make().String()
+	}
 	started := in.now.Unix()
 	_ = r.Q.InsertDatabaseBackupRun(ctx, sqlc.InsertDatabaseBackupRunParams{
-		ID:        runID,
-		ServiceID: in.svc.ID,
-		PolicyID:  sql.NullString{String: in.policy.ID, Valid: true},
-		Status:    "running",
+		ID:          runID,
+		ServiceID:   in.svc.ID,
+		PolicyID:    sql.NullString{String: in.policy.ID, Valid: in.policy.ID != ""},
+		Status:      "running",
 		Destination: in.destination,
-		StartedAt: sql.NullInt64{Int64: started, Valid: true},
+		StartedAt:   sql.NullInt64{Int64: started, Valid: true},
 	})
+
+	if err := CheckDiskGuard(r.Cfg.DataDir, r.Cfg.MinFreeDiskPercent()); err != nil {
+		return r.failRun(ctx, in, runID, started, "", 0, "", err)
+	}
 
 	tmpFile, objectKey, size, dumpErr := r.writeDump(ctx, in)
 	finished := time.Now().Unix()
 	errMsg := ""
+	sha := ""
+	var verifiedAt sql.NullInt64
 	if dumpErr != nil {
 		errMsg = dumpErr.Error()
+	}
+	if dumpErr == nil && in.svc.Kind == "postgres" {
+		var verifyErr error
+		sha, verifyErr = DigestFile(tmpFile)
+		if verifyErr != nil {
+			dumpErr = verifyErr
+			errMsg = verifyErr.Error()
+		} else if verifyErr = VerifyPostgresDump(ctx, r.Docker, in.containerID, tmpFile); verifyErr != nil {
+			dumpErr = verifyErr
+			errMsg = verifyErr.Error()
+		} else {
+			verifiedAt = sql.NullInt64{Int64: finished, Valid: true}
+		}
+	}
+	if dumpErr == nil && in.svc.Kind == "redis" {
+		var verifyErr error
+		sha, verifyErr = DigestFile(tmpFile)
+		if verifyErr != nil {
+			dumpErr = verifyErr
+			errMsg = verifyErr.Error()
+		}
 	}
 	if dumpErr == nil && in.destination == "remote" {
 		if err := r.uploadRemote(ctx, objectKey, tmpFile); err != nil {
@@ -144,6 +218,8 @@ func (r *Runner) runDestination(ctx context.Context, in runInput) error {
 		Status:     status,
 		ObjectKey:  objectKey,
 		SizeBytes:  size,
+		Sha256:     sha,
+		VerifiedAt: verifiedAt,
 		FinishedAt: sql.NullInt64{Int64: finished, Valid: true},
 		Error:      errMsg,
 		ID:         runID,
@@ -151,7 +227,62 @@ func (r *Runner) runDestination(ctx context.Context, in runInput) error {
 	if in.destination == "remote" && in.policy.LocalEnabled != 1 && tmpFile != "" {
 		_ = os.Remove(tmpFile)
 	}
+	r.emitBackupNotify(ctx, in, status, errMsg, runID)
+	if status == "failed" {
+		r.recordBackupEvent(ctx, in.svc, errMsg)
+	}
 	return dumpErr
+}
+
+func (r *Runner) failRun(ctx context.Context, in runInput, runID string, started int64, objectKey string, size int64, sha string, err error) error {
+	finished := time.Now().Unix()
+	errMsg := err.Error()
+	_ = r.Q.UpdateDatabaseBackupRun(ctx, sqlc.UpdateDatabaseBackupRunParams{
+		Status:     "failed",
+		ObjectKey:  objectKey,
+		SizeBytes:  size,
+		Sha256:     sha,
+		FinishedAt: sql.NullInt64{Int64: finished, Valid: true},
+		Error:      errMsg,
+		ID:         runID,
+	})
+	r.emitBackupNotify(ctx, in, "failed", errMsg, runID)
+	r.recordBackupEvent(ctx, in.svc, errMsg)
+	return err
+}
+
+func (r *Runner) recordBackupEvent(ctx context.Context, svc sqlc.Service, detail string) {
+	if r.Events == nil {
+		return
+	}
+	_ = r.Events.Record(ctx, eventlog.RecordInput{
+		Level:     "error",
+		Category:  "backups",
+		Title:     "Backup failed · " + svc.Name,
+		Detail:    detail,
+		ServiceID: svc.ID,
+	})
+}
+
+func (r *Runner) emitBackupNotify(ctx context.Context, in runInput, status, errMsg, runID string) {
+	if r.Notify == nil {
+		return
+	}
+	dedup := fmt.Sprintf("backup:%s:%s", in.svc.ID, in.destination)
+	if status == "failed" {
+		scrubbed := notify.ScrubDetailForEmit(errMsg)
+		_ = r.Notify.Emit(ctx, notify.Event{
+			Type: notify.TypeBackupFailed, Level: notify.LevelError, State: notify.StateFiring,
+			DedupKey: dedup, Title: "Backup failed · " + in.svc.Name, Detail: scrubbed,
+			ServiceID: in.svc.ID, Href: "/databases/" + in.svc.Slug,
+			Data: map[string]any{"service_id": in.svc.ID, "destination": in.destination, "run_id": runID, "error": scrubbed},
+		})
+		return
+	}
+	_ = r.Notify.Emit(ctx, notify.Event{
+		Type: notify.TypeBackupSucceeded, Level: notify.LevelSuccess, State: notify.StateResolved,
+		DedupKey: dedup, Title: "Backup succeeded · " + in.svc.Name, ServiceID: in.svc.ID,
+	})
 }
 
 func (r *Runner) writeDump(ctx context.Context, in runInput) (localPath, objectKey string, size int64, err error) {

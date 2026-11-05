@@ -140,7 +140,7 @@ export function ServerBuildersSettingsPage() {
                     />
                     <Button
                       type="button"
-                      variant="secondary"
+                      variant="outline"
                       onClick={() =>
                         void testRemoteBuilder(b.id)
                           .then(refresh)

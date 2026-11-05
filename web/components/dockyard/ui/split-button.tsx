@@ -9,6 +9,7 @@ import {
   useState,
 } from "react";
 
+/** `secondary` = inverse (white) — use only on gradient/dark backgrounds; prefer `outline` on cards and page chrome. */
 export type SplitButtonVariant = "primary" | "outline" | "secondary";
 
 export type SplitButtonMenuItem = {

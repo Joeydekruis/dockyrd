@@ -138,6 +138,57 @@ export function deploymentSourceTitle(d: Deployment): string {
   return deploymentTriggerLabel(d.trigger);
 }
 
+/** Page title / list row primary label for a deployment. */
+export function deploymentDisplayName(d: Deployment): string {
+  return deploymentSourceTitle(d);
+}
+
+/** Commit body (lines after subject) when present. */
+export function deploymentCommitDescription(
+  d: Deployment,
+): string | undefined {
+  const msg = d.commit_message?.trim();
+  if (!msg) return undefined;
+  const lines = msg
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean);
+  if (lines.length > 1) return lines.slice(1).join("\n");
+  return undefined;
+}
+
+function dockerImageTag(imageRef: string): string | undefined {
+  const ref = imageRef.trim();
+  if (!ref || ref.includes("@sha256:")) return undefined;
+  const namePart = ref.includes("/") ? ref.slice(ref.lastIndexOf("/") + 1) : ref;
+  const colon = namePart.lastIndexOf(":");
+  if (colon <= 0) return undefined;
+  return namePart.slice(colon + 1) || undefined;
+}
+
+function branchReleaseTag(branch: string): string | undefined {
+  const b = branch.trim();
+  if (!b) return undefined;
+  if (b.startsWith("refs/tags/")) return b.slice("refs/tags/".length) || undefined;
+  if (/^v\d+\.\d+/.test(b)) return b;
+  return undefined;
+}
+
+/** Git tag or image tag when stored on the deployment. */
+export function deploymentReleaseTag(d: Deployment): string | undefined {
+  const fromBranch = d.branch ? branchReleaseTag(d.branch) : undefined;
+  if (fromBranch) return fromBranch;
+  const fromImage = d.image_ref ? dockerImageTag(d.image_ref) : undefined;
+  if (fromImage) return fromImage;
+  return undefined;
+}
+
+export function truncateDeploymentTitle(title: string, max = 48): string {
+  const t = title.trim();
+  if (t.length <= max) return t;
+  return `${t.slice(0, max - 1)}…`;
+}
+
 export function deploymentAuthorLabel(d: Deployment): string {
   const author = d.commit_author?.trim();
   return author || "—";

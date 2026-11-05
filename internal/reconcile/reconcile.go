@@ -21,8 +21,9 @@ type Loop struct {
 	Docker    *docker.Client
 	Log       *slog.Logger
 	Resources resources.Resources
-	tickCount int
-	thawed    bool
+	tickCount         int
+	thawed            bool
+	interruptedMarked bool
 }
 
 // Tick runs one reconcile pass.
@@ -33,9 +34,12 @@ func (l *Loop) Tick(ctx context.Context) {
 		}
 		l.thawed = true
 	}
-	now := time.Now().Unix()
-	if err := l.Q.MarkInterruptedDeployments(ctx, sql.NullInt64{Int64: now, Valid: true}); err != nil && l.Log != nil {
-		l.Log.Warn("mark interrupted deployments", "err", err)
+	if !l.interruptedMarked {
+		now := time.Now().Unix()
+		if err := l.Q.MarkInterruptedDeployments(ctx, sql.NullInt64{Int64: now, Valid: true}); err != nil && l.Log != nil {
+			l.Log.Warn("mark interrupted deployments", "err", err)
+		}
+		l.interruptedMarked = true
 	}
 	if l.Docker != nil {
 		if err := l.Docker.Ping(ctx); err != nil {

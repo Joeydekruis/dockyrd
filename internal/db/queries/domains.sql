@@ -1,3 +1,19 @@
+-- name: UpdateDomainCertStatus :exec
+UPDATE domains
+SET cert_status = ?, cert_expires_at = ?
+WHERE id = ?;
+
+-- name: ListDomainsForCertWatch :many
+SELECT
+  d.id,
+  d.hostname,
+  d.dns_status,
+  d.service_id,
+  s.desired_state
+FROM domains d
+JOIN services s ON s.id = d.service_id
+WHERE d.is_platform = 0;
+
 -- name: ListDomainsForService :many
 SELECT
   id,

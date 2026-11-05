@@ -2,8 +2,10 @@ package server
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
 	"io/fs"
+	"log/slog"
 	"net/http"
 	"os"
 	"path"
@@ -15,6 +17,8 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
 	"github.com/Joeydekruis/dockyrd/internal/docker"
 	"github.com/Joeydekruis/dockyrd/internal/events"
+	"github.com/Joeydekruis/dockyrd/internal/inbox"
+	"github.com/Joeydekruis/dockyrd/internal/notify"
 	"github.com/Joeydekruis/dockyrd/internal/setup"
 	"github.com/Joeydekruis/dockyrd/web"
 )
@@ -37,6 +41,7 @@ func Serve(cfg config.Config) error {
 	hub := events.NewHub()
 
 	var q *sqlc.Queries
+	var sqlConn *sql.DB
 	if _, err := os.Stat(cfg.DatabasePath()); err == nil {
 		conn, queries, err := db.Open(cfg.DatabasePath())
 		if err != nil {
@@ -44,6 +49,7 @@ func Serve(cfg config.Config) error {
 		}
 		defer conn.Close()
 		q = queries
+		sqlConn = conn
 	}
 	var dockerCli *docker.Client
 	if cli, err := docker.NewClient(); err == nil {
@@ -53,14 +59,25 @@ func Serve(cfg config.Config) error {
 			_ = cli.Close()
 		}
 	}
-	deps := apiDeps{cfg: cfg, q: q, events: hub, audit: audit.Logger{Q: q}, docker: dockerCli}
+	var notifier *notify.Notifier
+	var dispatcher *notify.Dispatcher
+	var notifyReg notify.Registry
+	if q != nil && sqlConn != nil {
+		wake := make(chan struct{}, 1)
+		log := slog.New(slog.NewJSONHandler(os.Stderr, nil))
+		inboxDispatch := &inbox.Dispatcher{Cfg: cfg, Q: q, Hub: hub, Log: log}
+		notifier = notify.NewNotifier(sqlConn, q, cfg, hub, inboxDispatch, log, wake)
+		notifyReg = notify.BuildRegistry(cfg, q, BuildVersion())
+		dispatcher = notify.NewDispatcher(q, cfg, log, notifyReg, notifier, BuildVersion(), wake)
+	}
+	deps := apiDeps{cfg: cfg, q: q, events: hub, audit: audit.Logger{Q: q}, docker: dockerCli, notifier: notifier, notifyReg: notifyReg}
 	registerAPIRoutes(mux, deps)
 	mux.HandleFunc("GET /api/v1/setup/status", func(w http.ResponseWriter, r *http.Request) {
 		handleSetupStatus(w, r, q)
 	})
 
 	if q != nil {
-		startBackground(ctx, cfg, q, hub)
+		startBackground(ctx, cfg, sqlConn, q, hub, notifier, dispatcher)
 	}
 
 	ui, err := web.Assets()
@@ -97,6 +114,8 @@ func spaExportFallback(rel string) string {
 	switch {
 	case strings.HasPrefix(rel, "settings/server/email"):
 		return "settings/server/email/index.html"
+	case strings.HasPrefix(rel, "settings/server/channels"):
+		return "settings/server/channels/index.html"
 	case strings.HasPrefix(rel, "settings/server/backups"):
 		return "settings/server/backups/index.html"
 	case strings.HasPrefix(rel, "settings/server/"):

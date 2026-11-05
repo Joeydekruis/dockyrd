@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.51] - 2026-11-05
+
+_Finished: 2026-11-05_
+
+### Added
+
+- **#62 / Notifications F0** — SMTP hardening (timeouts, header sanitization, tests); `internal/netsafe` SSRF-safe HTTP client; reconcile marks interrupted deploys **once** at startup — https://github.com/Joeydekruis/dockyrd/issues/62
+- **#63 / Notifications F1** — migration `00007_notifications.sql`, `internal/notify` outbox + dispatcher; deploy/backup/disk/cert alerts; admin API + **Settings → Server → Channels** UI; inbox notification prefs; `docs/user/notifications.md` — https://github.com/Joeydekruis/dockyrd/issues/63
+- **Backup hardening** — migration `00008_backups_hardening.sql`, restore jobs, SHA256 verify, Garage target, overdue watcher (`internal/watch/backups.go`)
+
+### Changed
+
+- **Backups API/UI** — schedule fields, target test status, restore flow hooks
+- **CI / e2e** — webserver and Playwright config updates for notification surfaces
+
 ## [0.0.50] - 2026-11-05
 
 _Finished: 2026-11-05_

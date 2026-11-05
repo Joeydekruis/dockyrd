@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 
+/** `outline` = bordered secondary action on light surfaces (design-index “secondary”). `secondary` = white inverse — gradient/dark backgrounds only. */
 export type ButtonVariant =
   | "primary"
   | "outline"

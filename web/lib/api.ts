@@ -369,6 +369,8 @@ export type DatabaseBackupPolicy = {
   retention_days: number;
   local_enabled: boolean;
   remote_enabled: boolean;
+  run_at_minute?: number;
+  run_weekday?: number;
   last_run_at?: number;
   next_run_at?: number;
 };
@@ -408,9 +410,25 @@ export type DatabaseBackupRun = {
   destination: string;
   object_key?: string;
   size_bytes?: number;
+  sha256?: string;
+  verified?: boolean;
+  verified_at?: number;
   started_at?: number;
   finished_at?: number;
   error?: string;
+};
+
+export type DatabaseRestoreRun = {
+  id: string;
+  backup_run_id: string;
+  mode: string;
+  status: string;
+  pre_snapshot_run_id?: string;
+  log_tail?: string;
+  error?: string;
+  created_at: number;
+  started_at?: number;
+  finished_at?: number;
 };
 
 export type DatabaseQueryResult = {
@@ -444,10 +462,26 @@ export function getDatabaseSchema(serviceId: string) {
   );
 }
 
-export function restoreDatabaseBackup(serviceId: string, runId: string) {
-  return apiFetch<{ restored: boolean }>(
+export function restoreDatabaseBackup(
+  serviceId: string,
+  runId: string,
+  input: { mode?: "in_place"; confirm: string },
+) {
+  return apiFetch<{ restore_id: string }>(
     `/api/v1/services/${serviceId}/backup-runs/${runId}/restore`,
-    { method: "POST" },
+    { method: "POST", json: { mode: input.mode ?? "in_place", confirm: input.confirm } },
+  );
+}
+
+export function listDatabaseRestoreRuns(serviceId: string) {
+  return apiFetch<{ runs: DatabaseRestoreRun[] }>(
+    `/api/v1/services/${serviceId}/restore-runs`,
+  );
+}
+
+export function getDatabaseRestoreRun(serviceId: string, restoreId: string) {
+  return apiFetch<DatabaseRestoreRun>(
+    `/api/v1/services/${serviceId}/restore-runs/${restoreId}`,
   );
 }
 
@@ -459,6 +493,9 @@ export type ServerBackupTarget = {
   prefix: string;
   region: string;
   has_keys: boolean;
+  managed_garage?: boolean;
+  last_test_at?: number;
+  last_test_error?: string;
 };
 
 export function getServerBackupTarget() {
@@ -477,6 +514,20 @@ export function patchServerBackupTarget(input: {
     method: "PATCH",
     json: input,
   });
+}
+
+export function configureGarageBackupTarget() {
+  return apiFetch<ServerBackupTarget>(
+    "/api/v1/settings/server/backup-target/garage",
+    { method: "POST" },
+  );
+}
+
+export function testServerBackupTarget() {
+  return apiFetch<ServerBackupTarget>(
+    "/api/v1/settings/server/backup-target/test",
+    { method: "POST" },
+  );
 }
 
 export async function fetchServiceLogs(
@@ -1289,4 +1340,138 @@ export function markAllInboxNotificationsRead() {
   return apiFetch<void>("/api/v1/inbox/notifications/read-all", {
     method: "POST",
   });
+}
+
+export type NotificationChannel = {
+  id: string;
+  kind: "slack" | "discord" | "email" | "webhook";
+  name: string;
+  enabled: boolean;
+  config: Record<string, unknown>;
+  secret_set: boolean;
+  secret_hint?: string;
+  min_level: string;
+  event_types: string[];
+  project_id?: string | null;
+  status: string;
+  disabled_reason?: string;
+  consecutive_failures: number;
+  last_success_at?: number;
+  last_failure_at?: number;
+  last_error?: string;
+  created_at: number;
+};
+
+export type NotificationSettingsPayload = {
+  settings: {
+    disk_warn_pct: number;
+    disk_crit_pct: number;
+    cert_warn_pct: number;
+    reminder_hours: number;
+    instance_name: string;
+    allow_private_targets: boolean;
+  };
+  event_types: string[];
+  smtp_configured: boolean;
+};
+
+export function getNotificationSettings() {
+  return apiFetch<NotificationSettingsPayload>(
+    "/api/v1/settings/notifications",
+  );
+}
+
+export function patchNotificationSettings(body: {
+  disk_warn_pct?: number;
+  disk_crit_pct?: number;
+  cert_warn_pct?: number;
+  reminder_hours?: number;
+  instance_name?: string;
+  allow_private_targets?: boolean;
+}) {
+  return apiFetch<NotificationSettingsPayload>(
+    "/api/v1/settings/notifications",
+    { method: "PATCH", json: body },
+  );
+}
+
+export function listNotificationChannels() {
+  return apiFetch<{ channels: NotificationChannel[] }>(
+    "/api/v1/settings/notifications/channels",
+  );
+}
+
+export function createNotificationChannel(body: {
+  kind: string;
+  name: string;
+  enabled?: boolean;
+  config?: Record<string, unknown>;
+  secret?: Record<string, unknown>;
+  min_level?: string;
+  event_types?: string[];
+  project_id?: string;
+}) {
+  return apiFetch<NotificationChannel>(
+    "/api/v1/settings/notifications/channels",
+    { method: "POST", json: body },
+  );
+}
+
+export function patchNotificationChannel(
+  id: string,
+  body: {
+    name?: string;
+    enabled?: boolean;
+    config?: Record<string, unknown>;
+    secret?: Record<string, unknown>;
+    min_level?: string;
+    event_types?: string[];
+    project_id?: string | null;
+  },
+) {
+  return apiFetch<NotificationChannel>(
+    `/api/v1/settings/notifications/channels/${id}`,
+    { method: "PATCH", json: body },
+  );
+}
+
+export function deleteNotificationChannel(id: string) {
+  return apiFetch<void>(`/api/v1/settings/notifications/channels/${id}`, {
+    method: "DELETE",
+  });
+}
+
+export function testNotificationChannel(id: string) {
+  return apiFetch<{
+    ok: boolean;
+    http_status?: number;
+    latency_ms?: number;
+    error?: string;
+  }>(`/api/v1/settings/notifications/channels/${id}/test`, {
+    method: "POST",
+  });
+}
+
+export type NotificationDelivery = {
+  id: string;
+  event_id: string;
+  status: string;
+  attempts: number;
+  http_status?: number;
+  last_error?: string;
+  created_at: number;
+  sent_at?: number;
+};
+
+export function listNotificationDeliveries(id: string, limit = 50) {
+  return apiFetch<{ deliveries: NotificationDelivery[] }>(
+    `/api/v1/settings/notifications/channels/${id}/deliveries?limit=${limit}`,
+  );
+}
+
+export function retryNotificationDelivery(id: string) {
+  return apiFetch<{ ok: boolean }>(
+    `/api/v1/settings/notifications/deliveries/${id}/retry`,
+    { method: "POST" },
+  );
 }

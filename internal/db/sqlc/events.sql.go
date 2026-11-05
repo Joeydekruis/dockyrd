@@ -43,9 +43,22 @@ WHERE id = ?
 LIMIT 1
 `
 
-func (q *Queries) GetEventByID(ctx context.Context, id string) (Event, error) {
+type GetEventByIDRow struct {
+	ID             string
+	Level          sql.NullString
+	Category       sql.NullString
+	Title          sql.NullString
+	Detail         sql.NullString
+	ProjectID      sql.NullString
+	ServiceID      sql.NullString
+	DeploymentID   sql.NullString
+	AcknowledgedAt sql.NullInt64
+	CreatedAt      sql.NullInt64
+}
+
+func (q *Queries) GetEventByID(ctx context.Context, id string) (GetEventByIDRow, error) {
 	row := q.db.QueryRowContext(ctx, getEventByID, id)
-	var i Event
+	var i GetEventByIDRow
 	err := row.Scan(
 		&i.ID,
 		&i.Level,
@@ -122,15 +135,28 @@ ORDER BY created_at DESC
 LIMIT ?
 `
 
-func (q *Queries) ListRecentEvents(ctx context.Context, limit int64) ([]Event, error) {
+type ListRecentEventsRow struct {
+	ID             string
+	Level          sql.NullString
+	Category       sql.NullString
+	Title          sql.NullString
+	Detail         sql.NullString
+	ProjectID      sql.NullString
+	ServiceID      sql.NullString
+	DeploymentID   sql.NullString
+	AcknowledgedAt sql.NullInt64
+	CreatedAt      sql.NullInt64
+}
+
+func (q *Queries) ListRecentEvents(ctx context.Context, limit int64) ([]ListRecentEventsRow, error) {
 	rows, err := q.db.QueryContext(ctx, listRecentEvents, limit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Event
+	var items []ListRecentEventsRow
 	for rows.Next() {
-		var i Event
+		var i ListRecentEventsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Level,

@@ -100,7 +100,7 @@ export function ServiceConnectionsPanel({
         </div>
         <Button
           type="button"
-          variant="secondary"
+          variant="outline"
           onClick={() => setModalOpen(true)}
         >
           Add connection

@@ -35,6 +35,7 @@ jobs:
       - name: Install and build
         run: |
           pnpm --dir web install --frozen-lockfile
+          pnpm --dir web exec tsc --noEmit
           pnpm --dir web build
       - name: No Radix UI
         run: ./scripts/check-no-radix.sh

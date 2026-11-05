@@ -20,6 +20,7 @@ import {
   type DatabaseRow,
   deleteDatabaseService,
   getDatabaseBackupPolicy,
+  getServiceConnection,
   listDatabaseBackupRuns,
   patchDatabaseBackupPolicy,
   restoreDatabaseBackup,
@@ -30,6 +31,26 @@ import {
   resourceDetailCardStyle,
 } from "@/lib/resource-detail-page";
 import { databaseEngineLabel } from "@/lib/service-display";
+
+function formatUtcRunTime(runAtMinute: number) {
+  const h = Math.floor(runAtMinute / 60);
+  const m = runAtMinute % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")} UTC`;
+}
+
+function dbNameFromConnection(vars: Record<string, string>): string | null {
+  const url = vars.DATABASE_URL;
+  if (!url) {
+    return null;
+  }
+  try {
+    const u = new URL(url);
+    const name = u.pathname.replace(/^\//, "");
+    return name || null;
+  } catch {
+    return null;
+  }
+}
 
 type DatabaseDetailSettingsProps = {
   row: DatabaseRow;
@@ -45,12 +66,18 @@ export function DatabaseDetailSettings({ row }: DatabaseDetailSettingsProps) {
     retention_days: 30,
     local_enabled: true,
     remote_enabled: false,
+    run_at_minute: 180,
+    run_weekday: 0,
   });
   const [backupBusy, setBackupBusy] = useState(false);
   const [backupError, setBackupError] = useState<string | null>(null);
   const [runs, setRuns] = useState<DatabaseBackupRun[]>([]);
   const [runNowBusy, setRunNowBusy] = useState(false);
-  const [restoreBusy, setRestoreBusy] = useState<string | null>(null);
+  const [restoreOpen, setRestoreOpen] = useState(false);
+  const [restoreRunId, setRestoreRunId] = useState<string | null>(null);
+  const [restoreConfirm, setRestoreConfirm] = useState("");
+  const [restoreDbNameHint, setRestoreDbNameHint] = useState<string | null>(null);
+  const [restoreBusy, setRestoreBusy] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteBusy, setDeleteBusy] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -82,22 +109,46 @@ export function DatabaseDetailSettings({ row }: DatabaseDetailSettingsProps) {
         retention_days: policy.retention_days,
         local_enabled: policy.local_enabled,
         remote_enabled: policy.remote_enabled,
+        run_at_minute: policy.run_at_minute ?? 180,
+        run_weekday: policy.run_weekday ?? 0,
       });
     }
     setBackupError(null);
     setBackupModal(true);
   }
 
-  async function onRestore(runId: string) {
-    setRestoreBusy(runId);
+  async function openRestoreModal(runId: string) {
+    setRestoreRunId(runId);
+    setRestoreConfirm("");
+    setRestoreDbNameHint(null);
+    setBackupError(null);
+    if (row.kind === "postgres") {
+      try {
+        const conn = await getServiceConnection(row.id, true);
+        setRestoreDbNameHint(dbNameFromConnection(conn.variables));
+      } catch {
+        setRestoreDbNameHint(null);
+      }
+    }
+    setRestoreOpen(true);
+  }
+
+  async function confirmRestore() {
+    if (!restoreRunId) {
+      return;
+    }
+    setRestoreBusy(true);
     setBackupError(null);
     try {
-      await restoreDatabaseBackup(row.id, runId);
+      await restoreDatabaseBackup(row.id, restoreRunId, {
+        confirm: restoreConfirm.trim(),
+      });
+      setRestoreOpen(false);
       await loadPolicy();
     } catch (e) {
       setBackupError(e instanceof Error ? e.message : "Restore failed");
     } finally {
-      setRestoreBusy(null);
+      setRestoreBusy(false);
     }
   }
 
@@ -152,8 +203,10 @@ export function DatabaseDetailSettings({ row }: DatabaseDetailSettingsProps) {
     policy?.interval === "hourly"
       ? "Every hour"
       : policy?.interval === "weekly"
-        ? "Every week"
-        : "Every day";
+        ? `Weekly · ${formatUtcRunTime(policy.run_at_minute ?? 180)}`
+        : policy?.enabled
+          ? `Daily · ${formatUtcRunTime(policy.run_at_minute ?? 180)}`
+          : "Every day";
 
   return (
     <>
@@ -231,6 +284,7 @@ export function DatabaseDetailSettings({ row }: DatabaseDetailSettingsProps) {
               >
                 <span>
                   {run.status} · {run.destination}
+                  {run.verified ? " · verified" : ""}
                   {run.started_at
                     ? ` · ${new Date(run.started_at * 1000).toLocaleString()}`
                     : ""}
@@ -240,11 +294,14 @@ export function DatabaseDetailSettings({ row }: DatabaseDetailSettingsProps) {
                     type="button"
                     variant="outline"
                     className="text-[11px]"
-                    disabled={restoreBusy === run.id}
-                    onClick={() => void onRestore(run.id)}
+                    disabled={restoreBusy}
+                    onClick={() => void openRestoreModal(run.id)}
                   >
-                    {restoreBusy === run.id ? "Restoring…" : "Restore"}
+                    Restore
                   </Button>
+                ) : null}
+                {run.status === "succeeded" && row.kind === "redis" ? (
+                  <span className="text-[11px]">Restore not available</span>
                 ) : null}
               </li>
             ))}
@@ -350,6 +407,40 @@ export function DatabaseDetailSettings({ row }: DatabaseDetailSettingsProps) {
             ]}
           />
           <Field
+            label="Run at (UTC, minutes from midnight)"
+            type="number"
+            min={0}
+            max={1439}
+            value={String(backupForm.run_at_minute)}
+            onChange={(e) =>
+              setBackupForm((f) => ({
+                ...f,
+                run_at_minute: Number.parseInt(e.target.value, 10) || 0,
+              }))
+            }
+          />
+          {backupForm.interval === "weekly" ? (
+            <SelectField
+              label="Weekday (UTC)"
+              value={String(backupForm.run_weekday)}
+              onChange={(value) =>
+                setBackupForm((f) => ({
+                  ...f,
+                  run_weekday: Number.parseInt(value, 10) || 0,
+                }))
+              }
+              options={[
+                { value: "0", label: "Sunday" },
+                { value: "1", label: "Monday" },
+                { value: "2", label: "Tuesday" },
+                { value: "3", label: "Wednesday" },
+                { value: "4", label: "Thursday" },
+                { value: "5", label: "Friday" },
+                { value: "6", label: "Saturday" },
+              ]}
+            />
+          ) : null}
+          <Field
             label="Retention (days)"
             type="number"
             min={1}
@@ -388,6 +479,49 @@ export function DatabaseDetailSettings({ row }: DatabaseDetailSettingsProps) {
             Upload to server S3 target
           </label>
         </div>
+      </Modal>
+
+      <Modal
+        open={restoreOpen}
+        title="Restore backup"
+        description="This replaces the live database. A local snapshot is taken immediately before restore."
+        onClose={() => setRestoreOpen(false)}
+        footer={
+          <>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setRestoreOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="danger"
+              disabled={restoreBusy || !restoreConfirm.trim()}
+              onClick={() => void confirmRestore()}
+            >
+              {restoreBusy ? "Queuing…" : "Restore"}
+            </Button>
+          </>
+        }
+      >
+        <p className="mb-4 text-sm" style={{ color: "var(--muted-text)" }}>
+          Type the Postgres database name to confirm
+          {restoreDbNameHint ? (
+            <>
+              {" "}
+              (<span className="font-mono">{restoreDbNameHint}</span>)
+            </>
+          ) : null}
+          .
+        </p>
+        <Field
+          label="Database name"
+          value={restoreConfirm}
+          onChange={(e) => setRestoreConfirm(e.target.value)}
+          autoFocus
+        />
       </Modal>
 
       <Modal
