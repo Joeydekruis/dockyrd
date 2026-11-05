@@ -42,7 +42,7 @@ func (rt *Runtime) RunDeployment(ctx context.Context, deploymentID string) error
 	if err != nil {
 		return err
 	}
-	if dep.Status != "queued" && dep.Status != "starting" {
+	if dep.Status != "queued" && dep.Status != "starting" && dep.Status != "waiting" {
 		return nil
 	}
 	svc, err := rt.Q.GetServiceByID(ctx, dep.ServiceID)
@@ -73,6 +73,15 @@ func (rt *Runtime) runAppDeployment(ctx context.Context, deploymentID string, de
 	if err != nil {
 		return rt.fail(ctx, deploymentID, err)
 	}
+	if dep.ImageRef.Valid && strings.TrimSpace(dep.ImageRef.String) != "" {
+		imageRef = strings.TrimSpace(dep.ImageRef.String)
+		needsBuild = false
+	}
+	if appCfg.UsesGitHubActionsBuild() && needsBuild {
+		if dep.Status == "waiting" {
+			return nil
+		}
+	}
 
 	now := time.Now().Unix()
 	if err := rt.Q.UpdateDeploymentStatus(ctx, sqlc.UpdateDeploymentStatusParams{
@@ -92,7 +101,8 @@ func (rt *Runtime) runAppDeployment(ctx context.Context, deploymentID string, de
 		}
 		isNext := strings.Contains(strings.ToLower(appCfg.Source.Repo+appCfg.Source.URL), "next")
 		peak := build.ExpectedPeakHeuristic(builder, isNext)
-		if _, err := rt.acquireBuildBudget(ctx, deploymentID, dep.ServiceID, peak); err != nil {
+		budget, err := rt.acquireBuildBudget(ctx, deploymentID, dep.ServiceID, peak)
+		if err != nil {
 			return err
 		}
 		if err := rt.Q.UpdateDeploymentStatus(ctx, sqlc.UpdateDeploymentStatusParams{
@@ -108,12 +118,15 @@ func (rt *Runtime) runAppDeployment(ctx context.Context, deploymentID string, de
 		if err != nil {
 			return rt.fail(ctx, deploymentID, err)
 		}
+		buildArgs = build.MergeBuildArgs(buildArgs, budget.RAMBytes, budget.SwapBytes)
 		cloneURL, _, cloneErr := github.ResolveClone(ctx, rt.Q, rt.Cfg.SecretKeyPath(), appCfg.Source)
 		if cloneErr != nil {
 			return rt.fail(ctx, deploymentID, cloneErr)
 		}
 		buildCtx, cancel := context.WithTimeout(ctx, rt.Cfg.BuildTimeout())
 		defer cancel()
+		stopWatch := rt.startBuildWatchdog(buildCtx, dep.ServiceID, deploymentID, cancel)
+		defer stopWatch()
 		logPath, buildErr := build.RunGitAppBuild(buildCtx, build.GitAppBuildInput{
 			WorkDir:            rt.Cfg.BuildsDir(),
 			DataDir:            rt.Cfg.DataDir,

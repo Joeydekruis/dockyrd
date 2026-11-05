@@ -68,11 +68,14 @@ func (rt *Runtime) RunStaticSiteDeployment(ctx context.Context, deploymentID str
 		return rt.fail(ctx, deploymentID, err)
 	}
 	peak := build.ExpectedPeakHeuristic("static_site", false)
-	if _, err := rt.acquireBuildBudget(ctx, deploymentID, dep.ServiceID, peak); err != nil {
+	budget, err := rt.acquireBuildBudget(ctx, deploymentID, dep.ServiceID, peak)
+	if err != nil {
 		return err
 	}
 	buildCtx, cancel := context.WithTimeout(ctx, rt.Cfg.BuildTimeout())
 	defer cancel()
+	stopWatch := rt.startBuildWatchdog(buildCtx, dep.ServiceID, deploymentID, cancel)
+	defer stopWatch()
 
 	outputDir, buildErr := staticsite.Build(buildCtx, "docker", staticsite.BuildInput{
 		CloneURL:     cloneURL,
@@ -86,6 +89,8 @@ func (rt *Runtime) RunStaticSiteDeployment(ctx context.Context, deploymentID str
 		DeploymentID: deploymentID,
 		LogPath:      logPath,
 		OutputDir:    cfg.OutputDir,
+		RamBudget:    budget.RAMBytes,
+		SwapBudget:   budget.SwapBytes,
 	})
 	_ = rt.Q.SetDeploymentBuildLogPath(ctx, sqlc.SetDeploymentBuildLogPathParams{
 		BuildLogPath: sql.NullString{String: logPath, Valid: true},

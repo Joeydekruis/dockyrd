@@ -82,6 +82,7 @@ func registerAPIRoutes(mux *http.ServeMux, deps apiDeps) {
 	registerEmailLogRoutes(mux, deps)
 	registerUpdatesRoutes(mux, deps)
 	registerInboxRoutes(mux, deps)
+	registerBuildResilienceRoutes(mux, deps)
 }
 
 func (d apiDeps) handleLogin(w http.ResponseWriter, r *http.Request) {

@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.47] - 2026-11-05
+
+_Finished: 2026-11-05_
+
+### Added
+
+- **#52** — Static site builds via BuildKit (`Dockerfile.dockyard` + `buildx --output type=local`) under `dy-buildkit` limits
+- **#53** — PSI build watchdog (freeze/thaw build slice) during app and static builds
+- **#54** — `MergeBuildArgs` / `InjectBuildEnv` wired into Railpack and Dockerfile deploy builds
+- **#55** — GitHub Actions workflow generator, deploy hook token + `POST /api/v1/hooks/deploy/{service_id}`, push webhook skips server build when `buildLocation=github_actions` — https://github.com/Joeydekruis/dockyrd/issues/55
+
+### Changed
+
+- **GET `/api/v1/server/build-budget`** — RAM/swap budget snapshot for admins (#55 API slice)
+
 ## [0.0.46] - 2026-11-05
 
 _Finished: 2026-11-05_

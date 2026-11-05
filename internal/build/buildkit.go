@@ -16,6 +16,11 @@ func BuildxBuilder() string {
 }
 
 func appendBuilderArgs(args []string) []string {
+	return AppendBuilderArgsPublic(args)
+}
+
+// AppendBuilderArgsPublic adds --builder when configured.
+func AppendBuilderArgsPublic(args []string) []string {
 	if b := BuildxBuilder(); b != "" {
 		args = append(args, "--builder", b)
 	}

@@ -238,6 +238,14 @@ func (d apiDeps) handleGitHubWebhook(w http.ResponseWriter, r *http.Request) {
 		Branch:        branch,
 	}
 	for _, id := range serviceIDs {
+		raw, err := github.LoadServiceConfig(r.Context(), d.q, id)
+		if err == nil && github.ServiceUsesGitHubActions(raw) {
+			deploymentID, err := jobs.RecordGitHubActionsPush(r.Context(), d.q, id, meta)
+			if err == nil && d.events != nil {
+				d.events.Publish("deployments:"+deploymentID, map[string]string{"status": "waiting"})
+			}
+			continue
+		}
 		deploymentID, err := jobs.EnqueueServiceDeploy(r.Context(), d.q, id, "github_push", "", meta)
 		if err == nil && d.events != nil {
 			d.events.Publish("deployments:"+deploymentID, map[string]string{"status": "queued"})

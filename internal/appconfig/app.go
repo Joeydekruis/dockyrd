@@ -13,7 +13,8 @@ type AppConfig struct {
 	Source     Source `json:"source"`
 	Builder    string `json:"builder"`
 	Dockerfile string `json:"dockerfile"`
-	AutoDeploy bool   `json:"autoDeploy"`
+	AutoDeploy   bool   `json:"autoDeploy"`
+	BuildLocation string `json:"buildLocation"` // local | github_actions | auto | remote:<id>
 	Port       int    `json:"port"`
 	HealthPath string `json:"healthPath"`
 	MemLimitMB int    `json:"memLimitMB"`
@@ -118,4 +119,9 @@ func (c AppConfig) DockerfilePath() string {
 		return "Dockerfile"
 	}
 	return path.Clean(c.Dockerfile)
+}
+
+// UsesGitHubActionsBuild is true when CI builds images and deploys via hook.
+func (c AppConfig) UsesGitHubActionsBuild() bool {
+	return strings.EqualFold(strings.TrimSpace(c.BuildLocation), "github_actions")
 }

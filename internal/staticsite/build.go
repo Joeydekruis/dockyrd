@@ -4,14 +4,11 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 
 	"github.com/Joeydekruis/dockyrd/internal/build"
 )
-
-// BuildInput runs install/build inside a disposable Node container.
 type BuildInput struct {
 	CloneURL     string
 	Branch       string
@@ -24,6 +21,8 @@ type BuildInput struct {
 	DeploymentID string
 	LogPath      string
 	OutputDir    string
+	RamBudget    int64
+	SwapBudget   int64
 }
 
 // Build clones and runs the build command in Docker.
@@ -53,29 +52,9 @@ func Build(ctx context.Context, dockerBin string, in BuildInput) (outputDir stri
 	if strings.TrimSpace(shellCmd) == "" {
 		return DetectOutputDir(workDir, in.OutputDir)
 	}
-	if err := os.MkdirAll(filepath.Dir(logPath), 0o750); err != nil {
-		return "", err
-	}
-	logFile, err := os.Create(logPath)
-	if err != nil {
-		return "", err
-	}
-	defer logFile.Close()
 
-	args := []string{
-		"run", "--rm",
-		"-v", workDir + ":/src",
-		"-w", "/src",
-		in.NodeImage,
-		"sh", "-lc", shellCmd,
-	}
-	cmd := exec.CommandContext(ctx, dockerBin, args...)
-	cmd.Stdout = logFile
-	cmd.Stderr = logFile
-	if err := cmd.Run(); err != nil {
-		return "", fmt.Errorf("static build: %w", err)
-	}
-	return DetectOutputDir(workDir, in.OutputDir)
+	buildEnv := build.InjectBuildEnv(nil, in.RamBudget, in.SwapBudget)
+	return exportWithBuildkit(ctx, dockerBin, in, workDir, shellCmd, buildEnv)
 }
 
 // resolveStaticWorkDir picks the build/output directory inside a fresh clone.
