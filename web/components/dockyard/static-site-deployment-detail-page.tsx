@@ -4,6 +4,7 @@ import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { DeploymentResourceStrip } from "@/components/dockyard/deployment-resource-strip";
 import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import { Button } from "@/components/dockyard/ui/button";
 import {
@@ -13,7 +14,6 @@ import {
   SettingsMetaGrid,
 } from "@/components/dockyard/ui/settings-detail-block";
 import { StatusBadge } from "@/components/dockyard/ui/status-badge";
-import { DeploymentResourceStrip } from "@/components/dockyard/deployment-resource-strip";
 import {
   type Deployment,
   fetchDeploymentLog,

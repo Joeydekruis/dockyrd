@@ -149,3 +149,16 @@ Issue numbers may differ after creation — update this table and rename `docs/p
 ```bash
 gh issue list --milestone "M0 · Sprint 1 — Monorepo & CI" --state open
 ```
+
+## M6 · Resource links — in progress (2026-11-05)
+
+Milestone: **M6 · Resource links** — #58–#61
+
+| Issue | Phase |
+|-------|--------|
+| #58 | Network prerequisites (dy-edge, doctor) |
+| #59 | Links + API + UI (open mode) |
+| #60 | Per-link Docker enforcement |
+| #61 | Project map + ⌘K |
+
+Briefing: `docs/project/briefings/resource-linking.md`

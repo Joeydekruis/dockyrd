@@ -71,15 +71,20 @@ func (rt *Runtime) promoteAppRelease(ctx context.Context, svc sqlc.Service, depl
 	if err != nil {
 		return err
 	}
+	skipProjectNet, err := rt.skipProjectNetwork(ctx, ctxRow.ProjectID)
+	if err != nil {
+		return err
+	}
 	containerID, err := rt.Docker.RunApp(ctx, docker.RunAppInput{
-		Name:        containerName,
-		Image:       imageRef,
-		Port:        appCfg.Port,
-		Env:         env,
-		Identity:    identity,
-		ProjectSlug: ctxRow.ProjectSlug,
-		MemLimitMB:  appCfg.MemLimitMB,
-		AttachEdge:  attachEdge,
+		Name:               containerName,
+		Image:              imageRef,
+		Port:               appCfg.Port,
+		Env:                env,
+		Identity:           identity,
+		ProjectSlug:        ctxRow.ProjectSlug,
+		MemLimitMB:         appCfg.MemLimitMB,
+		AttachEdge:         attachEdge,
+		SkipProjectNetwork: skipProjectNet,
 	})
 	if err != nil {
 		return err

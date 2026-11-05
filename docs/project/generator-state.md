@@ -1,16 +1,11 @@
-# Generator handoff
+# Generator state
 
-_Last updated: 2026-11-03_
+**Updated:** 2026-11-05
 
-## Current focus
+## Last ship
 
-**Post-M5 §19 slice** on `development` — production checklist, install matrix CI, owner 2FA policy, update modal, DB detail panel, e2e fixtures skeleton.
+**M6 · Resource links** (#58–#61) @ **v0.0.49** — merged to `main`, GitHub release tagged.
 
-## Next
+## Previous
 
-- Merge to `main` + tag **v0.0.23** when verified
-- Remaining §19: automated fixture deploy, Ubuntu curl CI, chaos/load in CI
-
-## Blockers
-
-None.
+M5 released; build resilience #56–#57 @ v0.0.48.

@@ -8,6 +8,7 @@ import (
 const (
 	EdgeNetworkName = "dy-edge"
 	projectNetPrefix = "dy-p-"
+	linkNetPrefix    = "dy-l-"
 )
 
 var netSanitize = regexp.MustCompile(`[^a-z0-9-]+`)
@@ -24,6 +25,15 @@ func ProjectNetworkName(projectSlug string) string {
 		s = s[:32]
 	}
 	return projectNetPrefix + s
+}
+
+// LinkNetworkName returns the per-link bridge network name.
+func LinkNetworkName(linkID string) string {
+	short := DeployShort(linkID)
+	if short == "" {
+		short = "link"
+	}
+	return linkNetPrefix + short
 }
 
 // AppContainerName is dy-<service_slug>-<deploy_short>.

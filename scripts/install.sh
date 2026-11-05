@@ -117,6 +117,51 @@ install_docker_via_apt() {
 		docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 }
 
+merge_docker_daemon_defaults() {
+	if [ "$SKIP_ROOT" = "1" ] || [ "$DOCKYARD_SKIP_DOCKER_INSTALL" = "1" ]; then
+		return 0
+	fi
+	if ! command -v python3 >/dev/null 2>&1; then
+		return 0
+	fi
+	local path="/etc/docker/daemon.json"
+	local changed
+	changed="$(python3 - "$path" <<'PY'
+import json, os, sys
+path = sys.argv[1]
+wanted = {
+    "log-driver": "json-file",
+    "log-opts": {"max-size": "10m", "max-file": "3"},
+    "live-restore": True,
+    "default-address-pools": [{"base": "10.200.0.0/16", "size": 27}],
+}
+data = {}
+if os.path.isfile(path):
+    try:
+        with open(path) as f:
+            data = json.load(f) or {}
+    except (json.JSONDecodeError, OSError):
+        data = {}
+updated = dict(data)
+for key, val in wanted.items():
+    if key not in updated:
+        updated[key] = val
+if updated == data:
+    print("no")
+    sys.exit(0)
+os.makedirs(os.path.dirname(path) or ".", exist_ok=True)
+with open(path, "w") as f:
+    json.dump(updated, f, indent=2)
+    f.write("\n")
+print("yes")
+PY
+)"
+	if [ "$changed" = "yes" ]; then
+		log "Merged Docker defaults into ${path} (log rotation, live-restore, address pools)."
+		log "Restart docker when no workloads are running if networks were exhausted before."
+	fi
+}
+
 ensure_docker() {
 	if [ "$DOCKYARD_SKIP_DOCKER_INSTALL" = "1" ] || [ "$SKIP_ROOT" = "1" ]; then
 		if ! command -v docker >/dev/null 2>&1; then
@@ -127,12 +172,14 @@ ensure_docker() {
 	if command -v docker >/dev/null 2>&1; then
 		ensure_docker_running
 		wait_for_docker
+		merge_docker_daemon_defaults
 		log "✓ Docker is installed and running."
 		return 0
 	fi
 	install_docker_via_apt
 	ensure_docker_running
 	wait_for_docker
+	merge_docker_daemon_defaults
 	log "✓ Docker installed and running."
 }
 

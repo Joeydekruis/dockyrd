@@ -14,6 +14,7 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/inbox"
 	"github.com/Joeydekruis/dockyrd/internal/events"
 	"github.com/Joeydekruis/dockyrd/internal/jobs"
+	"github.com/Joeydekruis/dockyrd/internal/links"
 	"github.com/Joeydekruis/dockyrd/internal/metrics"
 	"github.com/Joeydekruis/dockyrd/internal/proxy"
 	"github.com/Joeydekruis/dockyrd/internal/reconcile"
@@ -75,6 +76,8 @@ func startBackground(ctx context.Context, cfg config.Config, q *sqlc.Queries, hu
 
 	go worker.RunLoop(ctx, 2*time.Second)
 	go rec.Run(ctx, 30*time.Second)
+
+	go links.BackfillAllProjects(ctx, q, cfg.SecretKeyPath(), log)
 
 	updater.StartAutoRefresh(ctx, updater.AutoRefreshInterval, func() string {
 		return BuildVersion()

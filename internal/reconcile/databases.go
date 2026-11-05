@@ -10,6 +10,7 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/crypto"
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
 	"github.com/Joeydekruis/dockyrd/internal/dbkind"
+	"github.com/Joeydekruis/dockyrd/internal/deploy"
 	"github.com/Joeydekruis/dockyrd/internal/docker"
 )
 
@@ -70,17 +71,18 @@ func SyncDatabaseServices(ctx context.Context, cfg config.Config, q *sqlc.Querie
 		if c, ok := byService[id]; ok {
 			_ = dc.StopAndRemove(ctx, c.ID, 10)
 		}
-		if err := startDatabase(ctx, dc, key, row); err != nil && log != nil {
+		if err := startDatabase(ctx, q, dc, key, row); err != nil && log != nil {
 			log.Warn("start database service", "service", id, "err", err)
 		}
 	}
 }
 
-func startDatabase(ctx context.Context, dc *docker.Client, key []byte, row sqlc.ListReconcileDatabaseServicesRow) error {
+func startDatabase(ctx context.Context, q *sqlc.Queries, dc *docker.Client, key []byte, row sqlc.ListReconcileDatabaseServicesRow) error {
 	raw, err := configRaw(row.Config)
 	if err != nil {
 		return err
 	}
+	skipProjectNet, _ := deploy.SkipProjectNetworkForProject(ctx, q, row.ProjectID)
 	name := docker.ServiceContainerName(row.Slug)
 	identity := docker.Identity{
 		ServerID:  row.ServerID,
@@ -101,16 +103,17 @@ func startDatabase(ctx context.Context, dc *docker.Client, key []byte, row sqlc.
 			"POSTGRES_DB=" + pg.Database,
 		}
 		_, err = dc.RunDatabase(ctx, docker.RunDatabaseInput{
-			Name:         name,
-			Image:        image,
-			Env:          env,
-			Identity:     identity,
-			ProjectSlug:  row.ProjectSlug,
-			ServiceSlug:  row.Slug,
-			MemLimitMB:   pg.MemLimitMB,
-			PublicPort:   pg.PublicPort,
-			InternalPort: 5432,
-			DataMount:    "/var/lib/postgresql/data",
+			Name:               name,
+			Image:              image,
+			Env:                env,
+			Identity:           identity,
+			ProjectSlug:        row.ProjectSlug,
+			ServiceSlug:        row.Slug,
+			MemLimitMB:         pg.MemLimitMB,
+			PublicPort:         pg.PublicPort,
+			InternalPort:       5432,
+			DataMount:          "/var/lib/postgresql/data",
+			SkipProjectNetwork: skipProjectNet,
 		})
 		return err
 	case "redis":
@@ -129,16 +132,17 @@ func startDatabase(ctx context.Context, dc *docker.Client, key []byte, row sqlc.
 			mem = 256
 		}
 		_, err = dc.RunDatabase(ctx, docker.RunDatabaseInput{
-			Name:         name,
-			Image:        image,
-			Cmd:          cmd,
-			Identity:     identity,
-			ProjectSlug:  row.ProjectSlug,
-			ServiceSlug:  row.Slug,
-			MemLimitMB:   mem,
-			PublicPort:   0,
-			InternalPort: 6379,
-			DataMount:    "/data",
+			Name:               name,
+			Image:              image,
+			Cmd:                cmd,
+			Identity:           identity,
+			ProjectSlug:        row.ProjectSlug,
+			ServiceSlug:        row.Slug,
+			MemLimitMB:         mem,
+			PublicPort:         0,
+			InternalPort:       6379,
+			DataMount:          "/data",
+			SkipProjectNetwork: skipProjectNet,
 		})
 		return err
 	default:

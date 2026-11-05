@@ -1,18 +1,35 @@
 "use client";
 
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Link2 } from "lucide-react";
 import { useState } from "react";
+import { Chip } from "@/components/dockyard/ui/chip";
 import { IconButton } from "@/components/dockyard/ui/icon-button";
 
 type EnvVarRowProps = {
   name: string;
   value: string;
   secret?: boolean;
+  linkId?: string;
 };
 
-export function EnvVarRow({ name, value, secret = false }: EnvVarRowProps) {
+const refPattern = /\$\{\{([a-z0-9][a-z0-9-]*)\.([A-Z][A-Z0-9_]*)\}\}/;
+
+function refHint(value: string): { slug: string; key: string } | null {
+  const m = refPattern.exec(value);
+  if (!m) return null;
+  return { slug: m[1], key: m[2] };
+}
+
+export function EnvVarRow({
+  name,
+  value,
+  secret = false,
+  linkId,
+}: EnvVarRowProps) {
   const [revealed, setRevealed] = useState(false);
   const display = secret && !revealed ? "••••••••" : value;
+  const ref = refHint(value);
+  const unresolved = value.includes("${{") && !ref;
   return (
     <div
       className="flex flex-wrap items-center gap-3 border-t py-3 font-mono text-[13px] first:border-t-0"
@@ -30,6 +47,14 @@ export function EnvVarRow({ name, value, secret = false }: EnvVarRowProps) {
       >
         {display}
       </span>
+      {linkId ? <Chip>via link</Chip> : null}
+      {ref ? (
+        <Chip>
+          <Link2 className="mr-1 inline size-3" aria-hidden />
+          {ref.slug} · {ref.key}
+        </Chip>
+      ) : null}
+      {unresolved ? <Chip>Not linked</Chip> : null}
       {secret ? (
         <IconButton
           icon={revealed ? EyeOff : Eye}

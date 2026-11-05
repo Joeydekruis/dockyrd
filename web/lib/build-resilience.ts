@@ -1,5 +1,5 @@
-import type { Deployment } from "@/lib/api";
 import { formatBytes } from "@/lib/analytics-stats";
+import type { Deployment } from "@/lib/api";
 
 export function formatBuildLocation(value: string | undefined): string {
   const v = (value ?? "local").trim().toLowerCase();

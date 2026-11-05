@@ -10,8 +10,8 @@ import {
   createRemoteBuilder,
   deleteRemoteBuilder,
   listBuilders,
-  testRemoteBuilder,
   type RemoteBuilder,
+  testRemoteBuilder,
 } from "@/lib/api";
 import {
   RESOURCE_DETAIL_CARD,
@@ -72,8 +72,8 @@ export function ServerBuildersSettingsPage() {
             Remote BuildKit
           </h1>
           <p className="mt-2 text-sm text-[var(--muted-foreground)]">
-            Register a mTLS BuildKit node on another machine. Services can target
-            it under Build location.
+            Register a mTLS BuildKit node on another machine. Services can
+            target it under Build location.
           </p>
           <form onSubmit={(e) => void onCreate(e)} className="mt-6 space-y-3">
             <Field
@@ -88,8 +88,13 @@ export function ServerBuildersSettingsPage() {
               onChange={(e) => setEndpoint(e.target.value)}
               placeholder="builder.example.com:1234"
             />
-            {error ? <p className="text-sm text-[var(--danger)]">{error}</p> : null}
-            <Button type="submit" disabled={busy || !name.trim() || !endpoint.trim()}>
+            {error ? (
+              <p className="text-sm text-[var(--danger)]">{error}</p>
+            ) : null}
+            <Button
+              type="submit"
+              disabled={busy || !name.trim() || !endpoint.trim()}
+            >
               {busy ? "Creating…" : "Add builder"}
             </Button>
           </form>

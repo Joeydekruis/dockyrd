@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.49] - 2026-11-05
+
+_Finished: 2026-11-05_
+
+### Added
+
+- **#58–#61 / Resource links (M6)** — Directed `service_links`, reference catalog filtered by links, backfill on startup, Connections UI on apps, Connected applications on databases, project List|Map, link counts, ⌘K connection hint — https://github.com/Joeydekruis/dockyrd/issues/58 https://github.com/Joeydekruis/dockyrd/issues/59 https://github.com/Joeydekruis/dockyrd/issues/60 https://github.com/Joeydekruis/dockyrd/issues/61
+- **Per-link Docker networks** (`dy-l-*`) reconciled every 30s; Garage attached per bucket link; `links_mode=strict` skips project-wide `dy-p-*` on new deploys
+- **API** — `GET/POST /services/{id}/links`, `GET …/linkable`, `DELETE /links/{id}`, `GET /projects/{id}/links`, `POST …/links/backfill`, `PATCH … links_mode`
+- **Install** — merge `default-address-pools`, log rotation, and `live-restore` into `/etc/docker/daemon.json` when missing
+- **Doctor** — warn when Docker address pools are not configured
+
+### Changed
+
+- **Apps** — join `dy-edge` only when the service has at least one domain
+- **Env vars** — `${{slug.VAR}}` rejected unless the slug is linked to the consumer; link-created vars tagged in API/UI
+
 ## [0.0.48] - 2026-11-05
 
 _Finished: 2026-11-05_

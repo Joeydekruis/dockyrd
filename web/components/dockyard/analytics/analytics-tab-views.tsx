@@ -195,38 +195,41 @@ export function OverviewTab({
     <div className="space-y-4">
       <BuildCapacityCard />
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      {cards.map((card) => (
-        <article
-          key={card.id}
-          className="rounded-[20px] border p-5"
-          style={{
-            background: "var(--surface)",
-            borderColor: "var(--border)",
-          }}
-        >
-          <p
-            className="font-mono text-[11px] uppercase tracking-widest"
-            style={{ color: "var(--muted-text)" }}
+        {cards.map((card) => (
+          <article
+            key={card.id}
+            className="rounded-[20px] border p-5"
+            style={{
+              background: "var(--surface)",
+              borderColor: "var(--border)",
+            }}
           >
-            {card.label}
-          </p>
-          <p className="mt-2 text-[32px] font-semibold leading-none tabular-nums">
-            {card.value}
-          </p>
-          <p
-            className="mt-2 text-[13px]"
-            style={{ color: "var(--muted-text)" }}
-          >
-            {card.hint}
-          </p>
-          <EChart
-            option={sparklineOption(card.series, card.format ? card.yMax : 100)}
-            height={48}
-            ariaLabel={`${card.label} sparkline`}
-          />
-          <ViewDetailsLink tab={card.id} onSelectTab={onSelectTab} />
-        </article>
-      ))}
+            <p
+              className="font-mono text-[11px] uppercase tracking-widest"
+              style={{ color: "var(--muted-text)" }}
+            >
+              {card.label}
+            </p>
+            <p className="mt-2 text-[32px] font-semibold leading-none tabular-nums">
+              {card.value}
+            </p>
+            <p
+              className="mt-2 text-[13px]"
+              style={{ color: "var(--muted-text)" }}
+            >
+              {card.hint}
+            </p>
+            <EChart
+              option={sparklineOption(
+                card.series,
+                card.format ? card.yMax : 100,
+              )}
+              height={48}
+              ariaLabel={`${card.label} sparkline`}
+            />
+            <ViewDetailsLink tab={card.id} onSelectTab={onSelectTab} />
+          </article>
+        ))}
       </div>
     </div>
   );

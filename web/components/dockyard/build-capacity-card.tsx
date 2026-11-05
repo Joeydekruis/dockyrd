@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { formatBytes } from "@/lib/analytics-stats";
-import { getBuildBudget, type BuildBudgetSnapshot } from "@/lib/api";
+import { type BuildBudgetSnapshot, getBuildBudget } from "@/lib/api";
 
 export function BuildCapacityCard() {
   const [budget, setBudget] = useState<BuildBudgetSnapshot | null>(null);
@@ -13,7 +13,9 @@ export function BuildCapacityCard() {
     void getBuildBudget()
       .then(setBudget)
       .catch((e) => {
-        setError(e instanceof Error ? e.message : "Could not load build budget");
+        setError(
+          e instanceof Error ? e.message : "Could not load build budget",
+        );
       });
   }, []);
 
@@ -53,7 +55,10 @@ export function BuildCapacityCard() {
           <p className="mt-2 text-[28px] font-semibold leading-none tabular-nums">
             {formatBytes(total)}
           </p>
-          <p className="mt-2 text-[13px]" style={{ color: "var(--muted-text)" }}>
+          <p
+            className="mt-2 text-[13px]"
+            style={{ color: "var(--muted-text)" }}
+          >
             RAM {formatBytes(budget.ram_budget)} + swap{" "}
             {formatBytes(budget.swap_budget)} per build · server{" "}
             {formatBytes(budget.mem_total)}

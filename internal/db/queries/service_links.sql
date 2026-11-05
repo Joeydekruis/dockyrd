@@ -64,3 +64,30 @@ WHERE id = ?;
 SELECT links_mode
 FROM projects
 WHERE id = ?;
+
+-- name: ListServiceLinksForReconcile :many
+SELECT
+  sl.id,
+  sl.from_service_id,
+  sl.to_service_id,
+  fs.slug AS from_slug,
+  ts.slug AS to_slug,
+  ts.kind AS to_kind,
+  fs.live_deployment_id AS from_live_deployment_id,
+  ts.live_deployment_id AS to_live_deployment_id,
+  p.slug AS project_slug,
+  p.links_mode
+FROM service_links sl
+JOIN services fs ON fs.id = sl.from_service_id
+JOIN services ts ON ts.id = sl.to_service_id
+JOIN environments e ON e.id = fs.environment_id
+JOIN projects p ON p.id = e.project_id;
+
+-- name: CountOutgoingLinksByProject :many
+SELECT sl.from_service_id AS service_id, COUNT(*) AS link_count
+FROM service_links sl
+JOIN services fs ON fs.id = sl.from_service_id
+JOIN environments e ON e.id = fs.environment_id
+WHERE e.project_id = ?
+GROUP BY sl.from_service_id;
+

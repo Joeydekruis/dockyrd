@@ -23,8 +23,8 @@ type RunAppInput struct {
 	Identity     Identity
 	ProjectSlug  string
 	MemLimitMB   int
-	// AttachEdge connects the container to dy-edge (Caddy). Only apps with public domains should attach (briefing §3.4).
 	AttachEdge   bool
+	SkipProjectNetwork bool
 }
 
 // PullImage fetches an image reference into the local daemon.
@@ -82,9 +82,11 @@ func (c *Client) RunApp(ctx context.Context, in RunAppInput) (string, error) {
 	}
 
 	projectNet := ProjectNetworkName(in.ProjectSlug)
-	if err := c.moby.NetworkConnect(ctx, projectNet, resp.ID, nil); err != nil {
-		_ = c.moby.ContainerRemove(ctx, resp.ID, container.RemoveOptions{Force: true})
-		return "", err
+	if !in.SkipProjectNetwork {
+		if err := c.moby.NetworkConnect(ctx, projectNet, resp.ID, nil); err != nil {
+			_ = c.moby.ContainerRemove(ctx, resp.ID, container.RemoveOptions{Force: true})
+			return "", err
+		}
 	}
 	if in.AttachEdge {
 		if err := c.moby.NetworkConnect(ctx, EdgeNetworkName, resp.ID, nil); err != nil {

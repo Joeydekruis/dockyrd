@@ -215,6 +215,7 @@ export type Project = {
   name: string;
   slug: string;
   description?: string;
+  links_mode?: "open" | "strict";
   created_at: number;
   updated_at: number;
 };
@@ -226,6 +227,20 @@ export function listProjects() {
 export function createProject(input: { name: string; description?: string }) {
   return apiFetch<Project>("/api/v1/projects", {
     method: "POST",
+    json: input,
+  });
+}
+
+export function patchProject(
+  projectId: string,
+  input: {
+    name?: string;
+    description?: string;
+    links_mode?: "open" | "strict";
+  },
+) {
+  return apiFetch<Project>(`/api/v1/projects/${projectId}`, {
+    method: "PATCH",
     json: input,
   });
 }
@@ -630,7 +645,10 @@ export function testRemoteBuilder(id: string) {
   );
 }
 
-export function patchServiceBuildLocation(serviceId: string, buildLocation: string) {
+export function patchServiceBuildLocation(
+  serviceId: string,
+  buildLocation: string,
+) {
   return apiFetch<{ build_location: string }>(
     `/api/v1/services/${serviceId}/build-location`,
     {
@@ -724,6 +742,7 @@ export type ServiceVariable = {
   at_build: boolean;
   at_runtime: boolean;
   value?: string;
+  link_id?: string;
 };
 
 export function listServiceVariables(serviceId: string, reveal = false) {
@@ -812,8 +831,29 @@ export function createServiceLink(
 }
 
 export function deleteServiceLink(linkId: string, removeVariables = true) {
-  const q = removeVariables ? "?remove_variables=true" : "?remove_variables=false";
+  const q = removeVariables
+    ? "?remove_variables=true"
+    : "?remove_variables=false";
   return apiFetch<void>(`/api/v1/links/${linkId}${q}`, { method: "DELETE" });
+}
+
+export type ProjectLinkEdge = {
+  id: string;
+  from_service_id: string;
+  to_service_id: string;
+  from_name: string;
+  to_name: string;
+  from_kind: string;
+  to_kind: string;
+  from_slug: string;
+  to_slug: string;
+};
+
+export function listProjectLinks(projectId: string) {
+  return apiFetch<{
+    links: ProjectLinkEdge[];
+    outgoing_counts: Record<string, number>;
+  }>(`/api/v1/projects/${projectId}/links`);
 }
 
 export type GitHubStatus = {

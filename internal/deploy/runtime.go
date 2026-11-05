@@ -193,15 +193,20 @@ func (rt *Runtime) runAppDeployment(ctx context.Context, deploymentID string, de
 	if err != nil {
 		return rt.fail(ctx, deploymentID, err)
 	}
+	skipProjectNet, err := rt.skipProjectNetwork(ctx, ctxRow.ProjectID)
+	if err != nil {
+		return rt.fail(ctx, deploymentID, err)
+	}
 	containerID, err := rt.Docker.RunApp(ctx, docker.RunAppInput{
-		Name:        containerName,
-		Image:       imageRef,
-		Port:        appCfg.Port,
-		Env:         env,
-		Identity:    identity,
-		ProjectSlug: ctxRow.ProjectSlug,
-		MemLimitMB:  appCfg.MemLimitMB,
-		AttachEdge:  attachEdge,
+		Name:               containerName,
+		Image:              imageRef,
+		Port:               appCfg.Port,
+		Env:                env,
+		Identity:           identity,
+		ProjectSlug:        ctxRow.ProjectSlug,
+		MemLimitMB:         appCfg.MemLimitMB,
+		AttachEdge:         attachEdge,
+		SkipProjectNetwork: skipProjectNet,
 	})
 	if err != nil {
 		return rt.fail(ctx, deploymentID, fmt.Errorf("run: %w", err))

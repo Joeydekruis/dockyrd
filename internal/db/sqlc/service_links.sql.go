@@ -10,6 +10,43 @@ import (
 	"database/sql"
 )
 
+const countOutgoingLinksByProject = `-- name: CountOutgoingLinksByProject :many
+SELECT sl.from_service_id AS service_id, COUNT(*) AS link_count
+FROM service_links sl
+JOIN services fs ON fs.id = sl.from_service_id
+JOIN environments e ON e.id = fs.environment_id
+WHERE e.project_id = ?
+GROUP BY sl.from_service_id
+`
+
+type CountOutgoingLinksByProjectRow struct {
+	ServiceID string
+	LinkCount int64
+}
+
+func (q *Queries) CountOutgoingLinksByProject(ctx context.Context, projectID string) ([]CountOutgoingLinksByProjectRow, error) {
+	rows, err := q.db.QueryContext(ctx, countOutgoingLinksByProject, projectID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []CountOutgoingLinksByProjectRow
+	for rows.Next() {
+		var i CountOutgoingLinksByProjectRow
+		if err := rows.Scan(&i.ServiceID, &i.LinkCount); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const createServiceLink = `-- name: CreateServiceLink :exec
 INSERT INTO service_links (id, from_service_id, to_service_id, created_by, created_at)
 VALUES (?, ?, ?, ?, ?)
@@ -266,6 +303,72 @@ func (q *Queries) ListOutgoingLinks(ctx context.Context, fromServiceID string) (
 			&i.ToServiceID,
 			&i.CreatedBy,
 			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listServiceLinksForReconcile = `-- name: ListServiceLinksForReconcile :many
+SELECT
+  sl.id,
+  sl.from_service_id,
+  sl.to_service_id,
+  fs.slug AS from_slug,
+  ts.slug AS to_slug,
+  ts.kind AS to_kind,
+  fs.live_deployment_id AS from_live_deployment_id,
+  ts.live_deployment_id AS to_live_deployment_id,
+  p.slug AS project_slug,
+  p.links_mode
+FROM service_links sl
+JOIN services fs ON fs.id = sl.from_service_id
+JOIN services ts ON ts.id = sl.to_service_id
+JOIN environments e ON e.id = fs.environment_id
+JOIN projects p ON p.id = e.project_id
+`
+
+type ListServiceLinksForReconcileRow struct {
+	ID                   string
+	FromServiceID        string
+	ToServiceID          string
+	FromSlug             string
+	ToSlug               string
+	ToKind               string
+	FromLiveDeploymentID sql.NullString
+	ToLiveDeploymentID   sql.NullString
+	ProjectSlug          string
+	LinksMode            string
+}
+
+func (q *Queries) ListServiceLinksForReconcile(ctx context.Context) ([]ListServiceLinksForReconcileRow, error) {
+	rows, err := q.db.QueryContext(ctx, listServiceLinksForReconcile)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListServiceLinksForReconcileRow
+	for rows.Next() {
+		var i ListServiceLinksForReconcileRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.FromServiceID,
+			&i.ToServiceID,
+			&i.FromSlug,
+			&i.ToSlug,
+			&i.ToKind,
+			&i.FromLiveDeploymentID,
+			&i.ToLiveDeploymentID,
+			&i.ProjectSlug,
+			&i.LinksMode,
 		); err != nil {
 			return nil, err
 		}

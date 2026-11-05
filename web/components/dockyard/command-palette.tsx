@@ -64,7 +64,22 @@ export function CommandPalette({ open, onClose }: CommandPaletteProps) {
   }, [open, query]);
 
   const filtered = useMemo(() => {
-    if (remote) return remote;
+    const base = remote
+      ? remote.flatMap((r) => {
+          if (r.kind === "service" && r.href.startsWith("/applications/")) {
+            return [
+              r,
+              {
+                kind: "action",
+                label: `Show connections · ${r.label}`,
+                href: `${r.href}?tab=overview`,
+              },
+            ];
+          }
+          return [r];
+        })
+      : null;
+    if (base) return base;
     const q = query.trim().toLowerCase();
     if (!q) {
       return palettePages.map((p) => ({

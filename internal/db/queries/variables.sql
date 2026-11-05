@@ -1,5 +1,5 @@
 -- name: ListVariablesForService :many
-SELECT id, service_id, key, value_enc, is_secret, at_build, at_runtime
+SELECT id, service_id, key, value_enc, is_secret, at_build, at_runtime, link_id
 FROM variables
 WHERE service_id = ?
 ORDER BY key ASC;

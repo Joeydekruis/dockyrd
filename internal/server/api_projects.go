@@ -43,6 +43,7 @@ func registerProjectRoutes(mux *http.ServeMux, deps apiDeps) {
 	mux.HandleFunc("GET /api/v1/projects/{id}", deps.handleGetProject)
 	mux.HandleFunc("PATCH /api/v1/projects/{id}", deps.handlePatchProject)
 	mux.HandleFunc("DELETE /api/v1/projects/{id}", deps.handleDeleteProject)
+	mux.HandleFunc("GET /api/v1/projects/{id}/links", deps.handleListProjectLinks)
 }
 
 func (d apiDeps) handleListProjects(w http.ResponseWriter, r *http.Request) {

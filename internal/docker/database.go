@@ -26,6 +26,7 @@ type RunDatabaseInput struct {
 	InternalPort int
 	DataMount    string
 	Cmd          []string
+	SkipProjectNetwork bool
 }
 
 // EnsureVolume creates a named volume when missing.
@@ -99,11 +100,13 @@ func (c *Client) RunDatabase(ctx context.Context, in RunDatabaseInput) (string, 
 	}
 
 	projectNet := ProjectNetworkName(in.ProjectSlug)
-	if err := c.moby.NetworkConnect(ctx, projectNet, resp.ID, &network.EndpointSettings{
-		Aliases: []string{in.ServiceSlug},
-	}); err != nil {
-		_ = c.moby.ContainerRemove(ctx, resp.ID, container.RemoveOptions{Force: true})
-		return "", err
+	if !in.SkipProjectNetwork {
+		if err := c.moby.NetworkConnect(ctx, projectNet, resp.ID, &network.EndpointSettings{
+			Aliases: []string{in.ServiceSlug},
+		}); err != nil {
+			_ = c.moby.ContainerRemove(ctx, resp.ID, container.RemoveOptions{Force: true})
+			return "", err
+		}
 	}
 	if err := c.moby.ContainerStart(ctx, resp.ID, container.StartOptions{}); err != nil {
 		_ = c.moby.ContainerRemove(ctx, resp.ID, container.RemoveOptions{Force: true})

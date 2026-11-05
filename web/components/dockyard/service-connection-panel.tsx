@@ -77,7 +77,7 @@ type ServiceConnectionPanelProps = {
 export function ServiceConnectionPanel({
   serviceId,
   title = "Connection",
-  description = "Use these values from other services on the same project network. Reveal a secret to copy it.",
+  description = "Reachable only for linked applications. Reveal a secret to copy it.",
 }: ServiceConnectionPanelProps) {
   const [variables, setVariables] = useState<Record<string, string>>({});
   const [plainSecrets, setPlainSecrets] = useState<Record<

@@ -7,6 +7,7 @@ import { DatabaseConnectionCards } from "@/components/dockyard/database-connecti
 import { DatabaseDetailSettings } from "@/components/dockyard/database-detail-settings";
 import { DatabaseQueryPanel } from "@/components/dockyard/database-query-panel";
 import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
+import { ServiceConnectedApplicationsPanel } from "@/components/dockyard/service-connected-applications-panel";
 import { ServiceLogsPanel } from "@/components/dockyard/service-logs-panel";
 import { Button } from "@/components/dockyard/ui/button";
 import { Chip } from "@/components/dockyard/ui/chip";
@@ -247,6 +248,7 @@ export function DatabaseDetailPage() {
                 </dl>
               </section>
               <DatabaseConnectionCards serviceId={row.id} kind={row.kind} />
+              <ServiceConnectedApplicationsPanel providerServiceId={row.id} />
             </div>
           ) : null}
 

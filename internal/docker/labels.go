@@ -8,6 +8,7 @@ const (
 	LabelService   = "dev.dockyard.service"
 	LabelKind      = "dev.dockyard.kind"
 	LabelDeployment = "dev.dockyard.deployment"
+	LabelLink       = "dev.dockyard.link"
 )
 
 const managedTrue = "true"

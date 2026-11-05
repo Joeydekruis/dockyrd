@@ -14,11 +14,12 @@ import (
 )
 
 type variableResponse struct {
-	Key      string `json:"key"`
-	IsSecret bool   `json:"is_secret"`
-	AtBuild  bool   `json:"at_build"`
-	AtRuntime bool  `json:"at_runtime"`
-	Value    string `json:"value,omitempty"`
+	Key       string  `json:"key"`
+	IsSecret  bool    `json:"is_secret"`
+	AtBuild   bool    `json:"at_build"`
+	AtRuntime bool    `json:"at_runtime"`
+	Value     string  `json:"value,omitempty"`
+	LinkID    *string `json:"link_id,omitempty"`
 }
 
 type putVariablesRequest struct {
@@ -68,6 +69,10 @@ func (d apiDeps) handleListVariables(w http.ResponseWriter, r *http.Request) {
 			IsSecret:  row.IsSecret != 0,
 			AtBuild:   row.AtBuild != 0,
 			AtRuntime: row.AtRuntime != 0,
+		}
+		if row.LinkID.Valid {
+			id := row.LinkID.String
+			item.LinkID = &id
 		}
 		if reveal || row.IsSecret == 0 {
 			plain, err := crypto.Decrypt(key, row.ValueEnc)

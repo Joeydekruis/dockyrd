@@ -8,6 +8,7 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { ServiceBuildLocationPanel } from "@/components/dockyard/service-build-location-panel";
 import { Alert } from "@/components/dockyard/ui/alert";
 import { Button } from "@/components/dockyard/ui/button";
 import { DangerZone } from "@/components/dockyard/ui/danger-zone";
@@ -22,7 +23,6 @@ import {
   SettingsGroupHeading,
 } from "@/components/dockyard/ui/settings-detail-block";
 import { Switch } from "@/components/dockyard/ui/switch";
-import { ServiceBuildLocationPanel } from "@/components/dockyard/service-build-location-panel";
 import { patchService, type Service } from "@/lib/api";
 import {
   formatBuildPart,

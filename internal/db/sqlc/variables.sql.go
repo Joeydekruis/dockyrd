@@ -48,31 +48,21 @@ func (q *Queries) InsertVariable(ctx context.Context, arg InsertVariableParams) 
 }
 
 const listVariablesForService = `-- name: ListVariablesForService :many
-SELECT id, service_id, key, value_enc, is_secret, at_build, at_runtime
+SELECT id, service_id, key, value_enc, is_secret, at_build, at_runtime, link_id
 FROM variables
 WHERE service_id = ?
 ORDER BY key ASC
 `
 
-type ListVariablesForServiceRow struct {
-	ID        string
-	ServiceID string
-	Key       string
-	ValueEnc  []byte
-	IsSecret  int64
-	AtBuild   int64
-	AtRuntime int64
-}
-
-func (q *Queries) ListVariablesForService(ctx context.Context, serviceID string) ([]ListVariablesForServiceRow, error) {
+func (q *Queries) ListVariablesForService(ctx context.Context, serviceID string) ([]Variable, error) {
 	rows, err := q.db.QueryContext(ctx, listVariablesForService, serviceID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []ListVariablesForServiceRow
+	var items []Variable
 	for rows.Next() {
-		var i ListVariablesForServiceRow
+		var i Variable
 		if err := rows.Scan(
 			&i.ID,
 			&i.ServiceID,
@@ -81,6 +71,7 @@ func (q *Queries) ListVariablesForService(ctx context.Context, serviceID string)
 			&i.IsSecret,
 			&i.AtBuild,
 			&i.AtRuntime,
+			&i.LinkID,
 		); err != nil {
 			return nil, err
 		}

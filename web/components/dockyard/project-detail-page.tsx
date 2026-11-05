@@ -11,6 +11,8 @@ import { CreateStaticSiteWizard } from "@/components/dockyard/create-static-site
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import { ProjectHardwareUsageSection } from "@/components/dockyard/project-hardware-usage-section";
+import { ProjectLinksMap } from "@/components/dockyard/project-links-map";
+import { ProjectLinksSettings } from "@/components/dockyard/project-links-settings";
 import {
   type ProjectResourceRow,
   ProjectResourceTable,
@@ -37,9 +39,11 @@ import {
   getServerContainerMetrics,
   getServerInfo,
   listDeployments,
+  listProjectLinks,
   listProjects,
   listServices,
   type Project,
+  type ProjectLinkEdge,
   type Service,
 } from "@/lib/api";
 import {
@@ -66,6 +70,9 @@ export function ProjectDetailPage() {
   const [serverHostname, setServerHostname] = useState<string | undefined>();
   const [hardwareRange, setHardwareRange] = useState<TimeRange>("24h");
   const [tab, setTab] = useState("resources");
+  const [resourceView, setResourceView] = useState<"list" | "map">("list");
+  const [projectLinks, setProjectLinks] = useState<ProjectLinkEdge[]>([]);
+  const [linkCounts, setLinkCounts] = useState<Record<string, number>>({});
   const [addOpen, setAddOpen] = useState(false);
   const [createAppOpen, setCreateAppOpen] = useState(false);
   const [createDbOpen, setCreateDbOpen] = useState(false);
@@ -147,6 +154,14 @@ export function ProjectDetailPage() {
         }
         const { services: svc } = await listServices(p.id);
         setServices(svc);
+        try {
+          const linkRes = await listProjectLinks(p.id);
+          setProjectLinks(linkRes.links);
+          setLinkCounts(linkRes.outgoing_counts);
+        } catch {
+          setProjectLinks([]);
+          setLinkCounts({});
+        }
         const depMap: Record<string, Deployment[]> = {};
         await Promise.all(
           svc.map(async (s) => {
@@ -197,8 +212,9 @@ export function ProjectDetailPage() {
         deployment: deployments[service.id]?.[0],
         cpuPercent: metricsByService[service.id]?.cpu,
         memoryBytes: metricsByService[service.id]?.mem,
+        outgoingLinkCount: linkCounts[service.id],
       })),
-    [services, deployments, metricsByService],
+    [services, deployments, metricsByService, linkCounts],
   );
 
   const inProduction = services.filter(
@@ -273,21 +289,42 @@ export function ProjectDetailPage() {
                 className="mt-2 text-sm"
                 style={{ color: "var(--muted-text)" }}
               >
-                Name, slug, and environment settings for this project will live
-                here.
+                Slug: <span className="font-mono">{project.slug}</span>
               </p>
+              <ProjectLinksSettings
+                project={project}
+                onUpdated={() => void refresh()}
+              />
             </section>
           ) : (
             <>
               <section className="mt-8" aria-label="Resources">
-                <div className="mb-4">
-                  <h2 className="text-lg font-semibold">Resources</h2>
-                  <p
-                    className="mt-1 text-sm"
-                    style={{ color: "var(--muted-text)" }}
-                  >
-                    Everything that runs in this project.
-                  </p>
+                <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+                  <div>
+                    <h2 className="text-lg font-semibold">Resources</h2>
+                    <p
+                      className="mt-1 text-sm"
+                      style={{ color: "var(--muted-text)" }}
+                    >
+                      Everything that runs in this project.
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant={resourceView === "list" ? "primary" : "outline"}
+                      onClick={() => setResourceView("list")}
+                    >
+                      List
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={resourceView === "map" ? "primary" : "outline"}
+                      onClick={() => setResourceView("map")}
+                    >
+                      Map
+                    </Button>
+                  </div>
                 </div>
                 {resourceRows.length === 0 ? (
                   <div
@@ -309,6 +346,8 @@ export function ProjectDetailPage() {
                       {projectResourceActions}
                     </div>
                   </div>
+                ) : resourceView === "map" ? (
+                  <ProjectLinksMap links={projectLinks} />
                 ) : (
                   <ProjectResourceTable rows={resourceRows} />
                 )}

@@ -6,6 +6,7 @@ import { AddEnvVariableModal } from "@/components/dockyard/add-env-variable-moda
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import { ServiceBuildLocationPanel } from "@/components/dockyard/service-build-location-panel";
+import { ServiceConnectionsPanel } from "@/components/dockyard/service-connections-panel";
 import { ServiceDomainsTab } from "@/components/dockyard/service-domains-tab";
 import { ServiceLogsPanel } from "@/components/dockyard/service-logs-panel";
 import { Button } from "@/components/dockyard/ui/button";
@@ -394,6 +395,13 @@ export function ApplicationDetailPage() {
                   ) : null}
                 </div>
               </section>
+              <div className="lg:col-span-2">
+                <ServiceConnectionsPanel
+                  serviceId={row.service.id}
+                  project={row.project}
+                  onChanged={() => void refresh()}
+                />
+              </div>
             </div>
           ) : null}
 
@@ -479,6 +487,7 @@ export function ApplicationDetailPage() {
                     name={v.key}
                     value={v.value ?? ""}
                     secret={v.is_secret}
+                    linkId={v.link_id}
                   />
                 ))}
                 {row.variables.length === 0 ? (
@@ -507,40 +516,42 @@ export function ApplicationDetailPage() {
 
           {tab === "settings" ? (
             <>
-            <section
-              className={RESOURCE_DETAIL_CARD}
-              style={resourceDetailCardStyle()}
-            >
-              <h2 className="text-lg font-semibold tracking-tight">Settings</h2>
-              <p
-                className="mt-2 text-sm"
-                style={{ color: "var(--muted-text)" }}
+              <section
+                className={RESOURCE_DETAIL_CARD}
+                style={resourceDetailCardStyle()}
               >
-                Image, GitHub, and health-check settings for container apps will
-                expand here. Configure deploy source from the{" "}
-                <Link
-                  href={`/projects/${row.project.slug}`}
-                  className="underline"
-                  style={{ color: "var(--link-blue)" }}
+                <h2 className="text-lg font-semibold tracking-tight">
+                  Settings
+                </h2>
+                <p
+                  className="mt-2 text-sm"
+                  style={{ color: "var(--muted-text)" }}
                 >
-                  project page
-                </Link>{" "}
-                for now.
-              </p>
-              <dl className="mt-4">
-                <KeyValueRow label="Slug" value={row.service.slug} />
-                <KeyValueRow
-                  label="Desired state"
-                  value={row.service.desired_state}
-                />
-              </dl>
-            </section>
-            <ServiceBuildLocationPanel
-              service={row.service}
-              onSaved={() => void refresh()}
-              cardClassName={RESOURCE_DETAIL_CARD}
-              cardStyle={resourceDetailCardStyle()}
-            />
+                  Image, GitHub, and health-check settings for container apps
+                  will expand here. Configure deploy source from the{" "}
+                  <Link
+                    href={`/projects/${row.project.slug}`}
+                    className="underline"
+                    style={{ color: "var(--link-blue)" }}
+                  >
+                    project page
+                  </Link>{" "}
+                  for now.
+                </p>
+                <dl className="mt-4">
+                  <KeyValueRow label="Slug" value={row.service.slug} />
+                  <KeyValueRow
+                    label="Desired state"
+                    value={row.service.desired_state}
+                  />
+                </dl>
+              </section>
+              <ServiceBuildLocationPanel
+                service={row.service}
+                onSaved={() => void refresh()}
+                cardClassName={RESOURCE_DETAIL_CARD}
+                cardStyle={resourceDetailCardStyle()}
+              />
             </>
           ) : null}
 
