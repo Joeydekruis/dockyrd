@@ -1,12 +1,12 @@
 "use client";
 
-import { Plus, Layers } from "lucide-react";
+import { Layers, Plus } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AddProjectResourceModal } from "@/components/dockyard/add-project-resource-modal";
 import { CreateApplicationModal } from "@/components/dockyard/create-application-modal";
-import { CreateComposeModal } from "@/components/dockyard/create-compose-modal";
 import { CreateBucketModal } from "@/components/dockyard/create-bucket-modal";
+import { CreateComposeModal } from "@/components/dockyard/create-compose-modal";
 import { CreateDatabaseModal } from "@/components/dockyard/create-database-modal";
 import { CreateStaticSiteWizard } from "@/components/dockyard/create-static-site-wizard";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
@@ -37,9 +37,9 @@ import type { TimeRange } from "@/components/dockyard/ui/time-range-toggle";
 import { formatBytes } from "@/lib/analytics-stats";
 import {
   type Deployment,
+  getMe,
   getServerContainerMetrics,
   getServerInfo,
-  getMe,
   listDeployments,
   listProjectLinks,
   listProjects,
@@ -136,11 +136,7 @@ export function ProjectDetailPage() {
 
   const projectResourceActions = (
     <div className="flex flex-wrap items-center justify-end gap-2">
-      <Button
-        type="button"
-        variant="outline"
-        onClick={() => setAddOpen(true)}
-      >
+      <Button type="button" variant="outline" onClick={() => setAddOpen(true)}>
         Add existing resource
       </Button>
       <SplitButton

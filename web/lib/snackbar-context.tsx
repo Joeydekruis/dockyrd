@@ -10,8 +10,8 @@ import {
   useState,
 } from "react";
 import {
-  SnackbarViewport,
   type SnackbarTone,
+  SnackbarViewport,
 } from "@/components/dockyard/ui/snackbar";
 import { writeClipboardText } from "@/lib/clipboard";
 

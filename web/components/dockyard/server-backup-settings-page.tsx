@@ -12,8 +12,8 @@ import {
   configureGarageBackupTarget,
   getServerBackupTarget,
   patchServerBackupTarget,
-  testServerBackupTarget,
   type ServerBackupTarget,
+  testServerBackupTarget,
 } from "@/lib/api";
 import {
   RESOURCE_DETAIL_CARD,
@@ -143,7 +143,9 @@ export function ServerBackupSettingsPage() {
                   ? [
                       {
                         label: "Last test",
-                        value: new Date(target.last_test_at * 1000).toLocaleString(),
+                        value: new Date(
+                          target.last_test_at * 1000,
+                        ).toLocaleString(),
                       },
                     ]
                   : []),

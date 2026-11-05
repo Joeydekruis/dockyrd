@@ -166,7 +166,10 @@ export function ComposeDetailPage() {
   if (!service || !project) {
     return (
       <DashboardShell title="Compose stack" breadcrumb="Stacks">
-        <EmptyState title="Stack not found" description="No compose service matches this URL." />
+        <EmptyState
+          title="Stack not found"
+          description="No compose service matches this URL."
+        />
       </DashboardShell>
     );
   }
@@ -180,16 +183,24 @@ export function ComposeDetailPage() {
     <DashboardShell title={title} breadcrumb="Stacks">
       <div className="mx-auto max-w-[960px] space-y-6 px-6 py-8">
         <div className="space-y-2">
-          <p className="font-mono text-[11px] uppercase tracking-widest" style={{ color: "var(--muted-text)" }}>
+          <p
+            className="font-mono text-[11px] uppercase tracking-widest"
+            style={{ color: "var(--muted-text)" }}
+          >
             {projectPathLabel(project.name)} · Compose stack
           </p>
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl font-semibold tracking-tight">{service.name}</h1>
-            {status ? <StatusBadge label={status.label} variant={status.variant} /> : null}
+            <h1 className="text-2xl font-semibold tracking-tight">
+              {service.name}
+            </h1>
+            {status ? (
+              <StatusBadge label={status.label} variant={status.variant} />
+            ) : null}
           </div>
           <p className="text-sm" style={{ color: "var(--muted-text)" }}>
             Zero-downtime deploy is not available for Compose stacks. Host{" "}
-            <code className="font-mono text-xs">ports:</code> are stripped — attach HTTPS domains instead.
+            <code className="font-mono text-xs">ports:</code> are stripped —
+            attach HTTPS domains instead.
           </p>
         </div>
 
@@ -206,23 +217,38 @@ export function ComposeDetailPage() {
         />
 
         {tab === "overview" ? (
-          <section className={RESOURCE_DETAIL_CARD} style={resourceDetailCardStyle()}>
+          <section
+            className={RESOURCE_DETAIL_CARD}
+            style={resourceDetailCardStyle()}
+          >
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-lg font-semibold">Containers</h2>
-              <Button type="button" variant="outline" onClick={() => void refresh()}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => void refresh()}
+              >
                 Refresh
               </Button>
             </div>
             {containers.length === 0 ? (
-              <p className="mt-4 text-sm" style={{ color: "var(--muted-text)" }}>
+              <p
+                className="mt-4 text-sm"
+                style={{ color: "var(--muted-text)" }}
+              >
                 No containers yet — deploy the stack to start services.
               </p>
             ) : (
               <ul className="mt-4 space-y-2 text-sm">
                 {containers.map((c) => (
-                  <li key={c.name} className="flex flex-wrap gap-2 font-mono text-xs">
+                  <li
+                    key={c.name}
+                    className="flex flex-wrap gap-2 font-mono text-xs"
+                  >
                     <span>{c.service}</span>
-                    <span style={{ color: "var(--muted-text)" }}>{c.state}</span>
+                    <span style={{ color: "var(--muted-text)" }}>
+                      {c.state}
+                    </span>
                     {c.health ? <span>{c.health}</span> : null}
                   </li>
                 ))}
@@ -232,23 +258,42 @@ export function ComposeDetailPage() {
         ) : null}
 
         {tab === "deployments" ? (
-          <section className={RESOURCE_DETAIL_CARD} style={resourceDetailCardStyle()}>
+          <section
+            className={RESOURCE_DETAIL_CARD}
+            style={resourceDetailCardStyle()}
+          >
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="text-lg font-semibold">Deployments</h2>
-              <Button type="button" disabled={busyDeploy} onClick={() => void onRedeploy()}>
+              <Button
+                type="button"
+                disabled={busyDeploy}
+                onClick={() => void onRedeploy()}
+              >
                 {busyDeploy ? "Deploying…" : "Deploy now"}
               </Button>
             </div>
-            <ul className="mt-4 divide-y text-sm" style={{ borderColor: "var(--border)" }}>
+            <ul
+              className="mt-4 divide-y text-sm"
+              style={{ borderColor: "var(--border)" }}
+            >
               {deployments.map((d) => {
                 const st = deploymentStatusDisplay(d.status);
                 return (
-                  <li key={d.id} className="flex flex-wrap items-center justify-between gap-2 py-3">
+                  <li
+                    key={d.id}
+                    className="flex flex-wrap items-center justify-between gap-2 py-3"
+                  >
                     <div>
-                      <Link href={`/deployments/${d.id}`} className="font-mono text-xs hover:underline">
+                      <Link
+                        href={`/deployments/${d.id}`}
+                        className="font-mono text-xs hover:underline"
+                      >
                         {d.id.slice(0, 8)}
                       </Link>
-                      <span className="ml-2" style={{ color: "var(--muted-text)" }}>
+                      <span
+                        className="ml-2"
+                        style={{ color: "var(--muted-text)" }}
+                      >
                         {formatDeploymentWhen(d.finished_at ?? d.queued_at)}
                       </span>
                     </div>
@@ -313,10 +358,15 @@ export function ComposeDetailPage() {
         ) : null}
 
         {tab === "settings" ? (
-          <section className={RESOURCE_DETAIL_CARD} style={resourceDetailCardStyle()}>
+          <section
+            className={RESOURCE_DETAIL_CARD}
+            style={resourceDetailCardStyle()}
+          >
             <h2 className="text-lg font-semibold">Compose YAML</h2>
             <p className="mt-1 text-sm" style={{ color: "var(--muted-text)" }}>
-              Validate before redeploying. Saving inline YAML to the service is coming in a follow-up; redeploy uses the last created config until then.
+              Validate before redeploying. Saving inline YAML to the service is
+              coming in a follow-up; redeploy uses the last created config until
+              then.
             </p>
             <Field label="YAML">
               <textarea
@@ -327,12 +377,18 @@ export function ComposeDetailPage() {
               />
             </Field>
             <div className="mt-4 flex flex-wrap gap-2">
-              <Button type="button" variant="outline" onClick={() => void onValidateYaml()}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => void onValidateYaml()}
+              >
                 Validate
               </Button>
             </div>
             {validateResult ? (
-              <pre className="mt-4 whitespace-pre-wrap font-mono text-xs">{validateResult}</pre>
+              <pre className="mt-4 whitespace-pre-wrap font-mono text-xs">
+                {validateResult}
+              </pre>
             ) : null}
           </section>
         ) : null}

@@ -144,9 +144,7 @@ export function deploymentDisplayName(d: Deployment): string {
 }
 
 /** Commit body (lines after subject) when present. */
-export function deploymentCommitDescription(
-  d: Deployment,
-): string | undefined {
+export function deploymentCommitDescription(d: Deployment): string | undefined {
   const msg = d.commit_message?.trim();
   if (!msg) return undefined;
   const lines = msg
@@ -160,7 +158,9 @@ export function deploymentCommitDescription(
 function dockerImageTag(imageRef: string): string | undefined {
   const ref = imageRef.trim();
   if (!ref || ref.includes("@sha256:")) return undefined;
-  const namePart = ref.includes("/") ? ref.slice(ref.lastIndexOf("/") + 1) : ref;
+  const namePart = ref.includes("/")
+    ? ref.slice(ref.lastIndexOf("/") + 1)
+    : ref;
   const colon = namePart.lastIndexOf(":");
   if (colon <= 0) return undefined;
   return namePart.slice(colon + 1) || undefined;
@@ -169,7 +169,8 @@ function dockerImageTag(imageRef: string): string | undefined {
 function branchReleaseTag(branch: string): string | undefined {
   const b = branch.trim();
   if (!b) return undefined;
-  if (b.startsWith("refs/tags/")) return b.slice("refs/tags/".length) || undefined;
+  if (b.startsWith("refs/tags/"))
+    return b.slice("refs/tags/".length) || undefined;
   if (/^v\d+\.\d+/.test(b)) return b;
   return undefined;
 }

@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { Modal } from "@/components/dockyard/ui/modal";
 import { Button } from "@/components/dockyard/ui/button";
+import { Modal } from "@/components/dockyard/ui/modal";
 import {
   getNotificationSettings,
   type NotificationSettingsPayload,
@@ -175,10 +175,7 @@ export function NotificationChannelModal({
             {!smtpConfigured ? (
               <p className="text-[var(--destructive)]">
                 Configure SMTP first under{" "}
-                <Link
-                  href="/settings/server/email"
-                  className="underline"
-                >
+                <Link href="/settings/server/email" className="underline">
                   Server → Email
                 </Link>
                 .
@@ -212,7 +209,9 @@ export function NotificationChannelModal({
         ) : (
           <>
             <label className="block space-y-1">
-              <span className="text-[var(--muted-foreground)]">Webhook URL</span>
+              <span className="text-[var(--muted-foreground)]">
+                Webhook URL
+              </span>
               <input
                 className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 font-mono text-xs"
                 value={url}

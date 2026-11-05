@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Button } from "@/components/dockyard/ui/button";
 import {
   patchServicePreviewConfig,
   type Service,
   type ServicePreviewConfig,
 } from "@/lib/api";
-import { Button } from "@/components/dockyard/ui/button";
 import {
   RESOURCE_DETAIL_CARD,
   resourceDetailCardStyle,

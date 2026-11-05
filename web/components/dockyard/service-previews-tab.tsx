@@ -2,19 +2,19 @@
 
 import { ExternalLink, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
+import { Button } from "@/components/dockyard/ui/button";
+import { EmptyState } from "@/components/dockyard/ui/empty-state";
+import { StatusBadge } from "@/components/dockyard/ui/status-badge";
 import {
   deleteServicePreview,
   listServicePreviews,
   type ServicePreview,
 } from "@/lib/api";
-import { Button } from "@/components/dockyard/ui/button";
-import { EmptyState } from "@/components/dockyard/ui/empty-state";
-import { StatusBadge } from "@/components/dockyard/ui/status-badge";
+import { formatTimeAgo } from "@/lib/resource-dashboard";
 import {
   RESOURCE_DETAIL_CARD,
   resourceDetailCardStyle,
 } from "@/lib/resource-detail-page";
-import { formatTimeAgo } from "@/lib/resource-dashboard";
 
 type Props = {
   serviceId: string;
@@ -56,10 +56,7 @@ export function ServicePreviewsTab({ serviceId, onError }: Props) {
   }
 
   return (
-    <section
-      className={RESOURCE_DETAIL_CARD}
-      style={resourceDetailCardStyle()}
-    >
+    <section className={RESOURCE_DETAIL_CARD} style={resourceDetailCardStyle()}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold tracking-tight">

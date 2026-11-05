@@ -11,11 +11,11 @@ import {
   patchDatabasePublicAccess,
   type ServiceConnectionResponse,
 } from "@/lib/api";
-import { useCopyToClipboard } from "@/lib/snackbar-context";
 import {
   RESOURCE_DETAIL_CARD,
   resourceDetailCardStyle,
 } from "@/lib/resource-detail-page";
+import { useCopyToClipboard } from "@/lib/snackbar-context";
 
 const MASK = "••••••••";
 

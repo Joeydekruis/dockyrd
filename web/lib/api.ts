@@ -499,7 +499,10 @@ export function restoreDatabaseBackup(
 ) {
   return apiFetch<{ restore_id: string }>(
     `/api/v1/services/${serviceId}/backup-runs/${runId}/restore`,
-    { method: "POST", json: { mode: input.mode ?? "in_place", confirm: input.confirm } },
+    {
+      method: "POST",
+      json: { mode: input.mode ?? "in_place", confirm: input.confirm },
+    },
   );
 }
 
@@ -765,10 +768,9 @@ export function listServicePreviews(serviceId: string) {
 }
 
 export function deleteServicePreview(serviceId: string, previewId: string) {
-  return apiFetch<void>(
-    `/api/v1/services/${serviceId}/previews/${previewId}`,
-    { method: "DELETE" },
-  );
+  return apiFetch<void>(`/api/v1/services/${serviceId}/previews/${previewId}`, {
+    method: "DELETE",
+  });
 }
 
 export function patchServicePreviewConfig(

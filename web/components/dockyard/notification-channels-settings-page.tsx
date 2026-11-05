@@ -14,10 +14,10 @@ import {
   deleteNotificationChannel,
   getNotificationSettings,
   listNotificationChannels,
+  type NotificationChannel,
   patchNotificationChannel,
   patchNotificationSettings,
   testNotificationChannel,
-  type NotificationChannel,
 } from "@/lib/api";
 
 const settingsCardClass =
@@ -41,7 +41,9 @@ export function NotificationChannelsSettingsPage() {
   const [channels, setChannels] = useState<NotificationChannel[]>([]);
   const [eventTypes, setEventTypes] = useState<string[]>([]);
   const [addOpen, setAddOpen] = useState(false);
-  const [logChannel, setLogChannel] = useState<NotificationChannel | null>(null);
+  const [logChannel, setLogChannel] = useState<NotificationChannel | null>(
+    null,
+  );
   const [error, setError] = useState<string | null>(null);
   const [diskWarnPct, setDiskWarnPct] = useState(85);
   const [diskCritPct, setDiskCritPct] = useState(95);
@@ -111,7 +113,10 @@ export function NotificationChannelsSettingsPage() {
 
   if (loading) {
     return (
-      <DashboardShell title="Notification channels" breadcrumb="Server settings">
+      <DashboardShell
+        title="Notification channels"
+        breadcrumb="Server settings"
+      >
         <DockyrdPageLoading />
       </DashboardShell>
     );
@@ -134,7 +139,10 @@ export function NotificationChannelsSettingsPage() {
         {error ? (
           <p className="mb-4 text-sm text-[var(--destructive)]">{error}</p>
         ) : null}
-        <section className={settingsCardClass} aria-labelledby="alert-thresholds">
+        <section
+          className={settingsCardClass}
+          aria-labelledby="alert-thresholds"
+        >
           <div>
             <h2
               id="alert-thresholds"
@@ -203,14 +211,18 @@ export function NotificationChannelsSettingsPage() {
             ) : null}
           </div>
         </section>
-        <section className={settingsCardClass} aria-labelledby="external-heartbeat">
+        <section
+          className={settingsCardClass}
+          aria-labelledby="external-heartbeat"
+        >
           <h2 id="external-heartbeat" className="text-base font-semibold">
             External heartbeat
           </h2>
           <p className="mt-1 text-sm text-[var(--muted-foreground)]">
             Optional GET ping every five minutes for dead-man monitoring (e.g.
-            Healthchecks.io, Uptime Kuma). Dockyard cannot alert when the host is
-            fully down — this URL lets an external service notice missing pings.
+            Healthchecks.io, Uptime Kuma). Dockyard cannot alert when the host
+            is fully down — this URL lets an external service notice missing
+            pings.
           </p>
           <label className="mt-4 block text-sm">
             <span className="text-[var(--muted-foreground)]">Ping URL</span>
@@ -235,7 +247,9 @@ export function NotificationChannelsSettingsPage() {
                     setThresholdSaved(true);
                   } catch (e) {
                     setError(
-                      e instanceof Error ? e.message : "Failed to save heartbeat",
+                      e instanceof Error
+                        ? e.message
+                        : "Failed to save heartbeat",
                     );
                   } finally {
                     setThresholdSaving(false);

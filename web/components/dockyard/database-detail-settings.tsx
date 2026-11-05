@@ -76,7 +76,9 @@ export function DatabaseDetailSettings({ row }: DatabaseDetailSettingsProps) {
   const [restoreOpen, setRestoreOpen] = useState(false);
   const [restoreRunId, setRestoreRunId] = useState<string | null>(null);
   const [restoreConfirm, setRestoreConfirm] = useState("");
-  const [restoreDbNameHint, setRestoreDbNameHint] = useState<string | null>(null);
+  const [restoreDbNameHint, setRestoreDbNameHint] = useState<string | null>(
+    null,
+  );
   const [restoreBusy, setRestoreBusy] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteBusy, setDeleteBusy] = useState(false);

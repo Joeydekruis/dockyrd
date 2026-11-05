@@ -11,12 +11,12 @@ import { SettingsPageBody } from "@/components/dockyard/settings-page-body";
 import { Button } from "@/components/dockyard/ui/button";
 import { Field } from "@/components/dockyard/ui/field";
 import {
-  createAPIToken,
   type APITokenEntry,
+  createAPIToken,
   listAPITokens,
   listProjects,
-  revokeAPIToken,
   type Project,
+  revokeAPIToken,
 } from "@/lib/api";
 
 const SCOPES = [

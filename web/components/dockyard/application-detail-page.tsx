@@ -4,13 +4,14 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AddEnvVariableModal } from "@/components/dockyard/add-env-variable-modal";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { DeploymentResourceStrip } from "@/components/dockyard/deployment-resource-strip";
 import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import { ServiceBuildLocationPanel } from "@/components/dockyard/service-build-location-panel";
-import { ServicePreviewSettingsCard } from "@/components/dockyard/service-preview-settings-card";
-import { ServicePreviewsTab } from "@/components/dockyard/service-previews-tab";
 import { ServiceConnectionsPanel } from "@/components/dockyard/service-connections-panel";
 import { ServiceDomainsTab } from "@/components/dockyard/service-domains-tab";
 import { ServiceLogsPanel } from "@/components/dockyard/service-logs-panel";
+import { ServicePreviewSettingsCard } from "@/components/dockyard/service-preview-settings-card";
+import { ServicePreviewsTab } from "@/components/dockyard/service-previews-tab";
 import { Button } from "@/components/dockyard/ui/button";
 import { CommitChip } from "@/components/dockyard/ui/commit-chip";
 import { EmptyState } from "@/components/dockyard/ui/empty-state";
@@ -32,6 +33,7 @@ import {
   type ServiceDomain,
   type ServiceVariable,
 } from "@/lib/api";
+import { hasDeploymentResourceMetrics } from "@/lib/build-resilience";
 import {
   formatTimeAgo,
   projectPathLabel,
@@ -49,8 +51,6 @@ import {
   formatDeploymentWhen,
   formatDurationSec,
 } from "@/lib/static-site-display";
-import { DeploymentResourceStrip } from "@/components/dockyard/deployment-resource-strip";
-import { hasDeploymentResourceMetrics } from "@/lib/build-resilience";
 import { useRouteParam } from "@/lib/use-route-param";
 
 const DETAIL_TABS = [
@@ -100,7 +100,10 @@ function DeploymentRow({ deployment }: { deployment: Deployment }) {
   const meta = `${deployment.trigger}${dur !== undefined ? ` · ${formatDurationSec(dur)}` : ""}`;
 
   return (
-    <div className="border-t first:border-t-0" style={{ borderColor: "var(--border)" }}>
+    <div
+      className="border-t first:border-t-0"
+      style={{ borderColor: "var(--border)" }}
+    >
       <div className="flex flex-wrap items-center gap-3 py-4">
         <StatusBadge label={st.label} variant={st.variant} />
         <CommitChip
@@ -522,10 +525,7 @@ export function ApplicationDetailPage() {
           ) : null}
 
           {tab === "previews" && row ? (
-            <ServicePreviewsTab
-              serviceId={row.service.id}
-              onError={setError}
-            />
+            <ServicePreviewsTab serviceId={row.service.id} onError={setError} />
           ) : null}
 
           {tab === "settings" ? (

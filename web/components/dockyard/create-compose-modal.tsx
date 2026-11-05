@@ -6,11 +6,7 @@ import { Button } from "@/components/dockyard/ui/button";
 import { Field } from "@/components/dockyard/ui/field";
 import { Modal } from "@/components/dockyard/ui/modal";
 import { SelectField } from "@/components/dockyard/ui/select-field";
-import {
-  createService,
-  listProjects,
-  type Project,
-} from "@/lib/api";
+import { createService, listProjects, type Project } from "@/lib/api";
 
 const DEFAULT_YAML = `services:
   web:
@@ -87,7 +83,12 @@ export function CreateComposeModal({
       onClose={onClose}
       footer={
         <>
-          <Button type="button" variant="outline" onClick={onClose} disabled={busy}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onClose}
+            disabled={busy}
+          >
             Cancel
           </Button>
           <Button type="submit" form="create-compose-form" disabled={busy}>

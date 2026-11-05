@@ -179,9 +179,7 @@ export function StaticSiteDeploymentDetailPage() {
                     className="mt-2 flex flex-wrap items-center gap-2 font-mono text-[12px] uppercase tracking-wide"
                     style={{ color: "var(--muted-text)" }}
                   >
-                    {sha !== "—" ? (
-                      <SettingsCopyPill value={sha} />
-                    ) : null}
+                    {sha !== "—" ? <SettingsCopyPill value={sha} /> : null}
                     {releaseTag ? (
                       <>
                         {sha !== "—" ? <span aria-hidden>·</span> : null}

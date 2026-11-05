@@ -6,11 +6,11 @@ import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import { IconButton } from "@/components/dockyard/ui/icon-button";
 import { KeyValueRow } from "@/components/dockyard/ui/key-value-row";
 import { getServiceConnection } from "@/lib/api";
-import { useCopyToClipboard } from "@/lib/snackbar-context";
 import {
   RESOURCE_DETAIL_CARD,
   resourceDetailCardStyle,
 } from "@/lib/resource-detail-page";
+import { useCopyToClipboard } from "@/lib/snackbar-context";
 
 const MASK = "••••••••";
 
