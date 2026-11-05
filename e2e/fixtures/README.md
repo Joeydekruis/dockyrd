@@ -5,6 +5,9 @@ Sample apps for manual and future automated deploy smoke (briefing §19).
 | Fixture | Purpose |
 |---------|---------|
 | [`hello-static/`](hello-static/) | Minimal static files for static-site deploy tests |
+| [`memhog/`](memhog/) | Holds ~400MB RSS — OOM / build budget scenarios on 1GB VMs |
+| [`cpuhog/`](cpuhog/) | CPU spin — pressure / watchdog smoke |
+| [`spiky-app/`](spiky-app/) | Periodic 200MB allocations — spiky build memory |
 | _(planned)_ `next-postgres/` | Next.js + `DATABASE_URL` reference var |
 | _(planned)_ `s3-upload/` | App using bucket published vars |
 

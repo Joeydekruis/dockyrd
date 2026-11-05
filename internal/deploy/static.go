@@ -76,6 +76,7 @@ func (rt *Runtime) RunStaticSiteDeployment(ctx context.Context, deploymentID str
 	defer cancel()
 	stopWatch := rt.startBuildWatchdog(buildCtx, dep.ServiceID, deploymentID, cancel)
 	defer stopWatch()
+	sampler := build.StartPeakSampler(buildCtx, rt.Resources)
 
 	outputDir, buildErr := staticsite.Build(buildCtx, "docker", staticsite.BuildInput{
 		CloneURL:     cloneURL,
@@ -99,6 +100,7 @@ func (rt *Runtime) RunStaticSiteDeployment(ctx context.Context, deploymentID str
 	if buildErr != nil {
 		return rt.fail(ctx, deploymentID, buildErr)
 	}
+	rt.recordBuildMetrics(ctx, deploymentID, budget, "local", sampler)
 
 	releasePath, err := staticsite.PublishRelease(outputDir, rt.Cfg.SitesDir(), ctxRow.ServiceSlug, deploymentID)
 	if err != nil {

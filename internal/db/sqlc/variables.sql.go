@@ -54,15 +54,25 @@ WHERE service_id = ?
 ORDER BY key ASC
 `
 
-func (q *Queries) ListVariablesForService(ctx context.Context, serviceID string) ([]Variable, error) {
+type ListVariablesForServiceRow struct {
+	ID        string
+	ServiceID string
+	Key       string
+	ValueEnc  []byte
+	IsSecret  int64
+	AtBuild   int64
+	AtRuntime int64
+}
+
+func (q *Queries) ListVariablesForService(ctx context.Context, serviceID string) ([]ListVariablesForServiceRow, error) {
 	rows, err := q.db.QueryContext(ctx, listVariablesForService, serviceID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Variable
+	var items []ListVariablesForServiceRow
 	for rows.Next() {
-		var i Variable
+		var i ListVariablesForServiceRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.ServiceID,

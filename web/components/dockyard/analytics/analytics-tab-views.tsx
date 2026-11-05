@@ -12,6 +12,7 @@ import {
   type AnalyticsTabId,
   ViewDetailsLink,
 } from "@/components/dockyard/analytics/use-analytics-data";
+import { BuildCapacityCard } from "@/components/dockyard/build-capacity-card";
 import { Button } from "@/components/dockyard/ui/button";
 import { Chip } from "@/components/dockyard/ui/chip";
 import { EChart } from "@/components/dockyard/ui/echart";
@@ -191,7 +192,9 @@ export function OverviewTab({
   ];
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="space-y-4">
+      <BuildCapacityCard />
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       {cards.map((card) => (
         <article
           key={card.id}
@@ -224,6 +227,7 @@ export function OverviewTab({
           <ViewDetailsLink tab={card.id} onSelectTab={onSelectTab} />
         </article>
       ))}
+      </div>
     </div>
   );
 }

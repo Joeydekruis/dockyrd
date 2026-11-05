@@ -24,6 +24,14 @@ SELECT
   release_path,
   error,
   build_log_path,
+  mem_peak_bytes,
+  swap_peak_bytes,
+  cpu_seconds,
+  waited_ms,
+  frozen_ms,
+  budget_bytes,
+  builder,
+  failure_kind,
   queued_at,
   started_at,
   finished_at
@@ -46,6 +54,14 @@ SELECT
   branch,
   build_log_path,
   error,
+  mem_peak_bytes,
+  swap_peak_bytes,
+  cpu_seconds,
+  waited_ms,
+  frozen_ms,
+  budget_bytes,
+  builder,
+  failure_kind,
   queued_at,
   started_at,
   finished_at
@@ -84,6 +100,23 @@ SET
   commit_message = ?,
   commit_author = ?,
   branch = ?
+WHERE id = ?;
+
+-- name: SetDeploymentBuildMetrics :exec
+UPDATE deployments
+SET
+  mem_peak_bytes = ?,
+  swap_peak_bytes = ?,
+  waited_ms = ?,
+  frozen_ms = ?,
+  budget_bytes = ?,
+  builder = ?,
+  failure_kind = ?
+WHERE id = ?;
+
+-- name: SetDeploymentFailureKind :exec
+UPDATE deployments
+SET failure_kind = ?
 WHERE id = ?;
 
 -- name: SupersedeLiveDeployments :exec

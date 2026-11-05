@@ -62,6 +62,7 @@ func registerAPIRoutes(mux *http.ServeMux, deps apiDeps) {
 	registerDomainRoutes(mux, deps)
 	registerDeploymentRoutes(mux, deps)
 	registerVariableRoutes(mux, deps)
+	registerServiceLinkRoutes(mux, deps)
 	registerLogRoutes(mux, deps)
 	registerStreamRoutes(mux, deps)
 	registerGitHubRoutes(mux, deps)

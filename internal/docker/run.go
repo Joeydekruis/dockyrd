@@ -23,6 +23,8 @@ type RunAppInput struct {
 	Identity     Identity
 	ProjectSlug  string
 	MemLimitMB   int
+	// AttachEdge connects the container to dy-edge (Caddy). Only apps with public domains should attach (briefing §3.4).
+	AttachEdge   bool
 }
 
 // PullImage fetches an image reference into the local daemon.
@@ -48,8 +50,10 @@ func (c *Client) RunApp(ctx context.Context, in RunAppInput) (string, error) {
 	if in.MemLimitMB <= 0 {
 		in.MemLimitMB = 512
 	}
-	if err := c.EnsureEdgeNetwork(ctx); err != nil {
-		return "", err
+	if in.AttachEdge {
+		if err := c.EnsureEdgeNetwork(ctx); err != nil {
+			return "", err
+		}
 	}
 	if err := c.EnsureProjectNetwork(ctx, in.ProjectSlug); err != nil {
 		return "", err
@@ -82,9 +86,11 @@ func (c *Client) RunApp(ctx context.Context, in RunAppInput) (string, error) {
 		_ = c.moby.ContainerRemove(ctx, resp.ID, container.RemoveOptions{Force: true})
 		return "", err
 	}
-	if err := c.moby.NetworkConnect(ctx, EdgeNetworkName, resp.ID, nil); err != nil {
-		_ = c.moby.ContainerRemove(ctx, resp.ID, container.RemoveOptions{Force: true})
-		return "", err
+	if in.AttachEdge {
+		if err := c.moby.NetworkConnect(ctx, EdgeNetworkName, resp.ID, nil); err != nil {
+			_ = c.moby.ContainerRemove(ctx, resp.ID, container.RemoveOptions{Force: true})
+			return "", err
+		}
 	}
 	if err := c.moby.ContainerStart(ctx, resp.ID, container.StartOptions{}); err != nil {
 		_ = c.moby.ContainerRemove(ctx, resp.ID, container.RemoveOptions{Force: true})

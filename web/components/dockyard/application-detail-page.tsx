@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { AddEnvVariableModal } from "@/components/dockyard/add-env-variable-modal";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
+import { ServiceBuildLocationPanel } from "@/components/dockyard/service-build-location-panel";
 import { ServiceDomainsTab } from "@/components/dockyard/service-domains-tab";
 import { ServiceLogsPanel } from "@/components/dockyard/service-logs-panel";
 import { Button } from "@/components/dockyard/ui/button";
@@ -505,6 +506,7 @@ export function ApplicationDetailPage() {
           ) : null}
 
           {tab === "settings" ? (
+            <>
             <section
               className={RESOURCE_DETAIL_CARD}
               style={resourceDetailCardStyle()}
@@ -533,6 +535,13 @@ export function ApplicationDetailPage() {
                 />
               </dl>
             </section>
+            <ServiceBuildLocationPanel
+              service={row.service}
+              onSaved={() => void refresh()}
+              cardClassName={RESOURCE_DETAIL_CARD}
+              cardStyle={resourceDetailCardStyle()}
+            />
+            </>
           ) : null}
 
           <AddEnvVariableModal

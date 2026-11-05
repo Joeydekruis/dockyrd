@@ -272,6 +272,7 @@ type Project struct {
 	Description sql.NullString
 	CreatedAt   sql.NullInt64
 	UpdatedAt   sql.NullInt64
+	LinksMode   string
 }
 
 type ProjectMember struct {
@@ -306,6 +307,14 @@ type Service struct {
 	LiveDeploymentID sql.NullString
 	CreatedAt        sql.NullInt64
 	UpdatedAt        sql.NullInt64
+}
+
+type ServiceLink struct {
+	ID            string
+	FromServiceID string
+	ToServiceID   string
+	CreatedBy     sql.NullString
+	CreatedAt     int64
 }
 
 type Session struct {
@@ -347,4 +356,5 @@ type Variable struct {
 	IsSecret  int64
 	AtBuild   int64
 	AtRuntime int64
+	LinkID    sql.NullString
 }

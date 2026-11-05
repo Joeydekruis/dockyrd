@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.48] - 2026-11-05
+
+_Finished: 2026-11-05_
+
+### Added
+
+- **#56** — Deployment build metrics on `GET …/deployments` (peak memory, budget, wait/freeze, failure kind); dashboard **Waiting** badge; deployment resource strip; Analytics **Build capacity** card; service **Build location** settings; **Server settings → Builders** (remote BuildKit CRUD/test) — https://github.com/Joeydekruis/dockyrd/issues/56
+- **#57** — Remote BuildKit API (`internal/build/remote.go`, builders table), `dockyard doctor` build-resilience checks, peak sampler + metrics on successful builds, e2e fixtures `memhog` / `cpuhog` / `spiky-app` — https://github.com/Joeydekruis/dockyrd/issues/57
+
+### Changed
+
+- **Failed deploys** — OOM-style errors map to `failure_kind=oom` with user-facing hints (`internal/build.FailureMessage`)
+
 ## [0.0.47] - 2026-11-05
 
 _Finished: 2026-11-05_

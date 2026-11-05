@@ -21,6 +21,7 @@ type projectResponse struct {
 	Name        string  `json:"name"`
 	Slug        string  `json:"slug"`
 	Description *string `json:"description,omitempty"`
+	LinksMode   string  `json:"links_mode"`
 	CreatedAt   int64   `json:"created_at"`
 	UpdatedAt   int64   `json:"updated_at"`
 }
@@ -33,6 +34,7 @@ type createProjectRequest struct {
 type patchProjectRequest struct {
 	Name        *string `json:"name"`
 	Description *string `json:"description"`
+	LinksMode   *string `json:"links_mode"`
 }
 
 func registerProjectRoutes(mux *http.ServeMux, deps apiDeps) {
@@ -143,6 +145,11 @@ func (d apiDeps) handleCreateProject(w http.ResponseWriter, r *http.Request) {
 		writeJSONError(w, http.StatusInternalServerError, "project member error")
 		return
 	}
+	_ = d.q.UpdateProjectLinksMode(ctx, sqlc.UpdateProjectLinksModeParams{
+		LinksMode: "strict",
+		UpdatedAt: sql.NullInt64{Int64: now, Valid: true},
+		ID:        projectID,
+	})
 
 	row, err := d.q.GetProjectByID(ctx, projectID)
 	if err != nil {
@@ -193,6 +200,21 @@ func (d apiDeps) handlePatchProject(w http.ResponseWriter, r *http.Request) {
 	}); err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "update error")
 		return
+	}
+	if body.LinksMode != nil {
+		mode := strings.TrimSpace(strings.ToLower(*body.LinksMode))
+		if mode != "open" && mode != "strict" {
+			writeJSONError(w, http.StatusBadRequest, "links_mode must be open or strict")
+			return
+		}
+		if err := d.q.UpdateProjectLinksMode(ctx, sqlc.UpdateProjectLinksModeParams{
+			LinksMode: mode,
+			UpdatedAt: sql.NullInt64{Int64: now, Valid: true},
+			ID:        id,
+		}); err != nil {
+			writeJSONError(w, http.StatusInternalServerError, "update links_mode error")
+			return
+		}
 	}
 	updated, err := d.q.GetProjectByID(ctx, id)
 	if err != nil {
@@ -265,6 +287,7 @@ func projectFromRow(row sqlc.Project) projectResponse {
 		Name:        row.Name,
 		Slug:        row.Slug,
 		Description: desc,
+		LinksMode:   row.LinksMode,
 		CreatedAt:   created,
 		UpdatedAt:   updated,
 	}

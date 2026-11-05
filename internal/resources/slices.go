@@ -8,6 +8,11 @@ const (
 	SliceBuild  = "dy-build.slice"
 )
 
+// SliceBuildPath returns the cgroup path for the build slice.
+func SliceBuildPath() string {
+	return sliceCgroupPath(SliceBuild)
+}
+
 // OOM score adjustments per briefing.
 const (
 	OOMScoreSystem = -900

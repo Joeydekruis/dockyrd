@@ -79,7 +79,8 @@ SELECT
   slug,
   description,
   created_at,
-  updated_at
+  updated_at,
+  links_mode
 FROM projects
 WHERE id = ?
 LIMIT 1
@@ -96,6 +97,7 @@ func (q *Queries) GetProjectByID(ctx context.Context, id string) (Project, error
 		&i.Description,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.LinksMode,
 	)
 	return i, err
 }
@@ -108,7 +110,8 @@ SELECT
   slug,
   description,
   created_at,
-  updated_at
+  updated_at,
+  links_mode
 FROM projects
 WHERE slug = ?
 LIMIT 1
@@ -125,6 +128,7 @@ func (q *Queries) GetProjectBySlug(ctx context.Context, slug string) (Project, e
 		&i.Description,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.LinksMode,
 	)
 	return i, err
 }
@@ -137,7 +141,8 @@ SELECT
   slug,
   description,
   created_at,
-  updated_at
+  updated_at,
+  links_mode
 FROM projects
 ORDER BY created_at DESC
 `
@@ -159,6 +164,7 @@ func (q *Queries) ListProjects(ctx context.Context) ([]Project, error) {
 			&i.Description,
 			&i.CreatedAt,
 			&i.UpdatedAt,
+			&i.LinksMode,
 		); err != nil {
 			return nil, err
 		}

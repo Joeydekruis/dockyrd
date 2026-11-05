@@ -55,11 +55,13 @@ func Run(ctx context.Context, cfg config.Config, version string) Report {
 	rep.Checks = append(rep.Checks, checkDatabase(cfg)...)
 	rep.Checks = append(rep.Checks, checkDisk(cfg)...)
 	rep.Checks = append(rep.Checks, checkDocker(ctx)...)
+	rep.Checks = append(rep.Checks, checkDockerAddressPools()...)
 	rep.Checks = append(rep.Checks, checkProxyContainer(ctx)...)
 	rep.Checks = append(rep.Checks, checkProxySocket(cfg)...)
 	rep.Checks = append(rep.Checks, checkHTTPSPorts(ctx)...)
 	rep.Checks = append(rep.Checks, checkListen(cfg)...)
 	rep.Checks = append(rep.Checks, checkClock()...)
+	rep.Checks = append(rep.Checks, checkBuildResilience(ctx, cfg)...)
 	return rep
 }
 

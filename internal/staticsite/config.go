@@ -12,6 +12,7 @@ import (
 type Config struct {
 	Source       appconfig.Source `json:"source"`
 	AutoDeploy   bool             `json:"autoDeploy"`
+	BuildLocation string          `json:"buildLocation"`
 	BuildEnabled *bool            `json:"buildEnabled"`
 	InstallCmd   string           `json:"installCmd"`
 	BuildScript  string           `json:"buildScript"`

@@ -60,6 +60,14 @@ SELECT
   release_path,
   error,
   build_log_path,
+  mem_peak_bytes,
+  swap_peak_bytes,
+  cpu_seconds,
+  waited_ms,
+  frozen_ms,
+  budget_bytes,
+  builder,
+  failure_kind,
   queued_at,
   started_at,
   finished_at
@@ -82,6 +90,14 @@ type GetDeploymentByIDRow struct {
 	ReleasePath   sql.NullString
 	Error         sql.NullString
 	BuildLogPath  sql.NullString
+	MemPeakBytes  sql.NullInt64
+	SwapPeakBytes sql.NullInt64
+	CpuSeconds    sql.NullFloat64
+	WaitedMs      int64
+	FrozenMs      int64
+	BudgetBytes   sql.NullInt64
+	Builder       string
+	FailureKind   sql.NullString
 	QueuedAt      sql.NullInt64
 	StartedAt     sql.NullInt64
 	FinishedAt    sql.NullInt64
@@ -104,6 +120,14 @@ func (q *Queries) GetDeploymentByID(ctx context.Context, id string) (GetDeployme
 		&i.ReleasePath,
 		&i.Error,
 		&i.BuildLogPath,
+		&i.MemPeakBytes,
+		&i.SwapPeakBytes,
+		&i.CpuSeconds,
+		&i.WaitedMs,
+		&i.FrozenMs,
+		&i.BudgetBytes,
+		&i.Builder,
+		&i.FailureKind,
 		&i.QueuedAt,
 		&i.StartedAt,
 		&i.FinishedAt,
@@ -126,6 +150,14 @@ SELECT
   branch,
   build_log_path,
   error,
+  mem_peak_bytes,
+  swap_peak_bytes,
+  cpu_seconds,
+  waited_ms,
+  frozen_ms,
+  budget_bytes,
+  builder,
+  failure_kind,
   queued_at,
   started_at,
   finished_at
@@ -148,6 +180,14 @@ type ListDeploymentsForServiceRow struct {
 	Branch        sql.NullString
 	BuildLogPath  sql.NullString
 	Error         sql.NullString
+	MemPeakBytes  sql.NullInt64
+	SwapPeakBytes sql.NullInt64
+	CpuSeconds    sql.NullFloat64
+	WaitedMs      int64
+	FrozenMs      int64
+	BudgetBytes   sql.NullInt64
+	Builder       string
+	FailureKind   sql.NullString
 	QueuedAt      sql.NullInt64
 	StartedAt     sql.NullInt64
 	FinishedAt    sql.NullInt64
@@ -176,6 +216,14 @@ func (q *Queries) ListDeploymentsForService(ctx context.Context, serviceID strin
 			&i.Branch,
 			&i.BuildLogPath,
 			&i.Error,
+			&i.MemPeakBytes,
+			&i.SwapPeakBytes,
+			&i.CpuSeconds,
+			&i.WaitedMs,
+			&i.FrozenMs,
+			&i.BudgetBytes,
+			&i.Builder,
+			&i.FailureKind,
 			&i.QueuedAt,
 			&i.StartedAt,
 			&i.FinishedAt,
@@ -220,6 +268,60 @@ type SetDeploymentBuildLogPathParams struct {
 
 func (q *Queries) SetDeploymentBuildLogPath(ctx context.Context, arg SetDeploymentBuildLogPathParams) error {
 	_, err := q.db.ExecContext(ctx, setDeploymentBuildLogPath, arg.BuildLogPath, arg.ID)
+	return err
+}
+
+const setDeploymentBuildMetrics = `-- name: SetDeploymentBuildMetrics :exec
+UPDATE deployments
+SET
+  mem_peak_bytes = ?,
+  swap_peak_bytes = ?,
+  waited_ms = ?,
+  frozen_ms = ?,
+  budget_bytes = ?,
+  builder = ?,
+  failure_kind = ?
+WHERE id = ?
+`
+
+type SetDeploymentBuildMetricsParams struct {
+	MemPeakBytes  sql.NullInt64
+	SwapPeakBytes sql.NullInt64
+	WaitedMs      int64
+	FrozenMs      int64
+	BudgetBytes   sql.NullInt64
+	Builder       string
+	FailureKind   sql.NullString
+	ID            string
+}
+
+func (q *Queries) SetDeploymentBuildMetrics(ctx context.Context, arg SetDeploymentBuildMetricsParams) error {
+	_, err := q.db.ExecContext(ctx, setDeploymentBuildMetrics,
+		arg.MemPeakBytes,
+		arg.SwapPeakBytes,
+		arg.WaitedMs,
+		arg.FrozenMs,
+		arg.BudgetBytes,
+		arg.Builder,
+		arg.FailureKind,
+		arg.ID,
+	)
+	return err
+}
+
+const setDeploymentFailureKind = `-- name: SetDeploymentFailureKind :exec
+UPDATE deployments
+SET failure_kind = ?
+WHERE id = ?
+`
+
+type SetDeploymentFailureKindParams struct {
+	FailureKind sql.NullString
+	ID          string
+}
+
+func (q *Queries) SetDeploymentFailureKind(ctx context.Context, arg SetDeploymentFailureKindParams) error {
+	_, err := q.db.ExecContext(ctx, setDeploymentFailureKind, arg.FailureKind, arg.ID)
 	return err
 }
 

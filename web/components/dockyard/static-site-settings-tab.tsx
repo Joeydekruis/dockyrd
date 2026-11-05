@@ -22,6 +22,7 @@ import {
   SettingsGroupHeading,
 } from "@/components/dockyard/ui/settings-detail-block";
 import { Switch } from "@/components/dockyard/ui/switch";
+import { ServiceBuildLocationPanel } from "@/components/dockyard/service-build-location-panel";
 import { patchService, type Service } from "@/lib/api";
 import {
   formatBuildPart,
@@ -361,6 +362,16 @@ export function StaticSiteSettingsTab({
           />
         </section>
       </div>
+
+      <ServiceBuildLocationPanel
+        service={service}
+        onSaved={() => onUpdated()}
+        cardClassName={cardClassName()}
+        cardStyle={{
+          borderColor: "var(--border)",
+          background: "var(--surface)",
+        }}
+      />
 
       <div>
         <SettingsGroupHeading

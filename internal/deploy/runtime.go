@@ -127,6 +127,7 @@ func (rt *Runtime) runAppDeployment(ctx context.Context, deploymentID string, de
 		defer cancel()
 		stopWatch := rt.startBuildWatchdog(buildCtx, dep.ServiceID, deploymentID, cancel)
 		defer stopWatch()
+		sampler := build.StartPeakSampler(buildCtx, rt.Resources)
 		logPath, buildErr := build.RunGitAppBuild(buildCtx, build.GitAppBuildInput{
 			WorkDir:            rt.Cfg.BuildsDir(),
 			DataDir:            rt.Cfg.DataDir,
@@ -146,6 +147,7 @@ func (rt *Runtime) runAppDeployment(ctx context.Context, deploymentID string, de
 		if buildErr != nil {
 			return rt.fail(ctx, deploymentID, buildErr)
 		}
+		rt.recordBuildMetrics(ctx, deploymentID, budget, "local", sampler)
 		if err := rt.Q.UpdateDeploymentStatus(ctx, sqlc.UpdateDeploymentStatusParams{
 			Status:    "starting",
 			Error:     sql.NullString{},
@@ -187,6 +189,10 @@ func (rt *Runtime) runAppDeployment(ctx context.Context, deploymentID string, de
 		Kind:         docker.KindApp,
 		DeploymentID: deploymentID,
 	}
+	attachEdge, err := rt.appAttachEdge(ctx, dep.ServiceID)
+	if err != nil {
+		return rt.fail(ctx, deploymentID, err)
+	}
 	containerID, err := rt.Docker.RunApp(ctx, docker.RunAppInput{
 		Name:        containerName,
 		Image:       imageRef,
@@ -195,6 +201,7 @@ func (rt *Runtime) runAppDeployment(ctx context.Context, deploymentID string, de
 		Identity:    identity,
 		ProjectSlug: ctxRow.ProjectSlug,
 		MemLimitMB:  appCfg.MemLimitMB,
+		AttachEdge:  attachEdge,
 	})
 	if err != nil {
 		return rt.fail(ctx, deploymentID, fmt.Errorf("run: %w", err))
@@ -262,7 +269,7 @@ func (rt *Runtime) runtimeEnv(ctx context.Context, serviceID string) ([]string, 
 	if err != nil {
 		return nil, err
 	}
-	catalog, err := rt.projectCatalog(ctx, ctxRow.ProjectID)
+	catalog, err := rt.consumerCatalog(ctx, serviceID, ctxRow.ProjectID)
 	if err != nil {
 		return nil, err
 	}
@@ -297,7 +304,7 @@ func (rt *Runtime) buildArgs(ctx context.Context, serviceID string) (map[string]
 	if err != nil {
 		return nil, nil, err
 	}
-	catalog, err := rt.projectCatalog(ctx, ctxRow.ProjectID)
+	catalog, err := rt.consumerCatalog(ctx, serviceID, ctxRow.ProjectID)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -352,6 +359,11 @@ func (rt *Runtime) stopSupersededContainers(ctx context.Context, serviceID, live
 
 func (rt *Runtime) fail(ctx context.Context, deploymentID string, err error) error {
 	msg := err.Error()
+	kind := ""
+	if strings.Contains(strings.ToLower(msg), "out of memory") || strings.Contains(msg, "137") {
+		kind = "oom"
+		msg = build.FailureMessage(kind, msg)
+	}
 	finished := time.Now().Unix()
 	dep, _ := rt.Q.GetDeploymentByID(ctx, deploymentID)
 	_ = rt.Q.UpdateDeploymentStatus(ctx, sqlc.UpdateDeploymentStatusParams{
@@ -361,6 +373,12 @@ func (rt *Runtime) fail(ctx context.Context, deploymentID string, err error) err
 		FinishedAt: sql.NullInt64{Int64: finished, Valid: true},
 		ID:        deploymentID,
 	})
+	if kind != "" {
+		_ = rt.Q.SetDeploymentFailureKind(ctx, sqlc.SetDeploymentFailureKindParams{
+			FailureKind: sql.NullString{String: kind, Valid: true},
+			ID:          deploymentID,
+		})
+	}
 	if dep.ServiceID != "" {
 		rt.recordDeployEvent(ctx, dep.ServiceID, deploymentID, "error", "Deploy failed", msg)
 		if rt.Inbox != nil {

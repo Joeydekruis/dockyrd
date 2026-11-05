@@ -9,6 +9,7 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/crypto"
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
 	"github.com/Joeydekruis/dockyrd/internal/dbkind"
+	"github.com/Joeydekruis/dockyrd/internal/refs"
 )
 
 // projectCatalog builds published variables for every service in a project (briefing §7.3).
@@ -81,6 +82,29 @@ func publishedForService(ctx context.Context, q *sqlc.Queries, masterKey []byte,
 	default:
 		return nil, nil
 	}
+}
+
+// consumerCatalog builds published variables only for services linked to the consumer.
+func (rt *Runtime) consumerCatalog(ctx context.Context, consumerServiceID, projectID string) (refs.Catalog, error) {
+	full, err := rt.projectCatalog(ctx, projectID)
+	if err != nil {
+		return nil, err
+	}
+	slugs, err := rt.Q.ListLinkedProviderSlugs(ctx, consumerServiceID)
+	if err != nil {
+		return nil, err
+	}
+	allowed := make(map[string]struct{}, len(slugs))
+	for _, s := range slugs {
+		allowed[s] = struct{}{}
+	}
+	out := make(refs.Catalog, len(allowed))
+	for slug, vars := range full {
+		if _, ok := allowed[slug]; ok {
+			out[slug] = vars
+		}
+	}
+	return out, nil
 }
 
 func publishedBucket(raw json.RawMessage, masterKey []byte, slug string) (map[string]string, error) {

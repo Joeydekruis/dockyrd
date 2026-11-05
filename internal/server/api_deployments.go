@@ -26,6 +26,14 @@ type deploymentResponse struct {
 	CommitAuthor  *string `json:"commit_author,omitempty"`
 	Branch       *string `json:"branch,omitempty"`
 	Error        *string `json:"error,omitempty"`
+	MemPeakBytes  *int64   `json:"mem_peak_bytes,omitempty"`
+	SwapPeakBytes *int64   `json:"swap_peak_bytes,omitempty"`
+	CpuSeconds    *float64 `json:"cpu_seconds,omitempty"`
+	WaitedMs      *int64   `json:"waited_ms,omitempty"`
+	FrozenMs      *int64   `json:"frozen_ms,omitempty"`
+	BudgetBytes   *int64   `json:"budget_bytes,omitempty"`
+	Builder       *string  `json:"builder,omitempty"`
+	FailureKind   *string  `json:"failure_kind,omitempty"`
 	QueuedAt   int64   `json:"queued_at"`
 	StartedAt  *int64  `json:"started_at,omitempty"`
 	FinishedAt *int64  `json:"finished_at,omitempty"`
@@ -277,6 +285,14 @@ func deploymentFromRow(row sqlc.ListDeploymentsForServiceRow) deploymentResponse
 		Branch:       nullStrPtr(row.Branch),
 		BuildLogPath: nullStrPtr(row.BuildLogPath),
 		Error:        nullStrPtr(row.Error),
+		MemPeakBytes:  nullInt64Ptr(row.MemPeakBytes),
+		SwapPeakBytes: nullInt64Ptr(row.SwapPeakBytes),
+		CpuSeconds:    nullFloat64Ptr(row.CpuSeconds),
+		WaitedMs:      int64PtrIfNonZero(row.WaitedMs),
+		FrozenMs:      int64PtrIfNonZero(row.FrozenMs),
+		BudgetBytes:   nullInt64Ptr(row.BudgetBytes),
+		Builder:       stringPtrIfNonEmpty(row.Builder),
+		FailureKind:   nullStrPtr(row.FailureKind),
 		QueuedAt:   nullInt64(row.QueuedAt),
 		StartedAt:  nullInt64Ptr(row.StartedAt),
 		FinishedAt: nullInt64Ptr(row.FinishedAt),
@@ -297,6 +313,14 @@ func deploymentFromFullRow(row sqlc.GetDeploymentByIDRow) deploymentResponse {
 		Branch:       nullStrPtr(row.Branch),
 		BuildLogPath: nullStrPtr(row.BuildLogPath),
 		Error:        nullStrPtr(row.Error),
+		MemPeakBytes:  nullInt64Ptr(row.MemPeakBytes),
+		SwapPeakBytes: nullInt64Ptr(row.SwapPeakBytes),
+		CpuSeconds:    nullFloat64Ptr(row.CpuSeconds),
+		WaitedMs:      int64PtrIfNonZero(row.WaitedMs),
+		FrozenMs:      int64PtrIfNonZero(row.FrozenMs),
+		BudgetBytes:   nullInt64Ptr(row.BudgetBytes),
+		Builder:       stringPtrIfNonEmpty(row.Builder),
+		FailureKind:   nullStrPtr(row.FailureKind),
 		QueuedAt:   nullInt64(row.QueuedAt),
 		StartedAt:  nullInt64Ptr(row.StartedAt),
 		FinishedAt: nullInt64Ptr(row.FinishedAt),
@@ -325,10 +349,32 @@ func nullFloat64(v sql.NullFloat64) float64 {
 	return v.Float64
 }
 
+func nullFloat64Ptr(v sql.NullFloat64) *float64 {
+	if !v.Valid {
+		return nil
+	}
+	n := v.Float64
+	return &n
+}
+
 func nullInt64Ptr(v sql.NullInt64) *int64 {
 	if !v.Valid {
 		return nil
 	}
 	n := v.Int64
 	return &n
+}
+
+func int64PtrIfNonZero(v int64) *int64 {
+	if v == 0 {
+		return nil
+	}
+	return &v
+}
+
+func stringPtrIfNonEmpty(v string) *string {
+	if v == "" {
+		return nil
+	}
+	return &v
 }

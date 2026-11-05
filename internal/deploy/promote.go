@@ -67,6 +67,10 @@ func (rt *Runtime) promoteAppRelease(ctx context.Context, svc sqlc.Service, depl
 		Kind:         docker.KindApp,
 		DeploymentID: deploymentID,
 	}
+	attachEdge, err := rt.appAttachEdge(ctx, svc.ID)
+	if err != nil {
+		return err
+	}
 	containerID, err := rt.Docker.RunApp(ctx, docker.RunAppInput{
 		Name:        containerName,
 		Image:       imageRef,
@@ -75,6 +79,7 @@ func (rt *Runtime) promoteAppRelease(ctx context.Context, svc sqlc.Service, depl
 		Identity:    identity,
 		ProjectSlug: ctxRow.ProjectSlug,
 		MemLimitMB:  appCfg.MemLimitMB,
+		AttachEdge:  attachEdge,
 	})
 	if err != nil {
 		return err

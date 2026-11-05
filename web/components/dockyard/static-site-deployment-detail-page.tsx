@@ -13,6 +13,7 @@ import {
   SettingsMetaGrid,
 } from "@/components/dockyard/ui/settings-detail-block";
 import { StatusBadge } from "@/components/dockyard/ui/status-badge";
+import { DeploymentResourceStrip } from "@/components/dockyard/deployment-resource-strip";
 import {
   type Deployment,
   fetchDeploymentLog,
@@ -175,6 +176,8 @@ export function StaticSiteDeploymentDetailPage() {
               ) : null}
             </div>
           </section>
+
+          <DeploymentResourceStrip deployment={row.deployment} />
 
           <section
             className="rounded-[20px] border px-6 py-5"

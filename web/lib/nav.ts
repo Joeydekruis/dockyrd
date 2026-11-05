@@ -11,6 +11,7 @@ import {
   KeyRound,
   Layers,
   LayoutDashboard,
+  Hammer,
   Mail,
   Plug,
   RefreshCw,
@@ -103,6 +104,11 @@ export const serverSettingsSidebarNav: SettingsNavItem[] = [
     label: "Backups",
     href: "/settings/server/backups",
     icon: HardDrive,
+  },
+  {
+    label: "Builders",
+    href: "/settings/server/builders",
+    icon: Hammer,
   },
   {
     label: "Git providers",

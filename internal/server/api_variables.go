@@ -108,6 +108,18 @@ func (d apiDeps) handlePutVariables(w http.ResponseWriter, r *http.Request) {
 		writeJSONError(w, http.StatusInternalServerError, "secrets not configured")
 		return
 	}
+	var vals []string
+	for _, v := range body.Variables {
+		k := strings.TrimSpace(v.Key)
+		if k == "" {
+			continue
+		}
+		vals = append(vals, v.Value)
+	}
+	if err := validateVariableRefs(ctx, d.q, serviceID, vals); err != nil {
+		writeJSONError(w, http.StatusUnprocessableEntity, err.Error())
+		return
+	}
 	if err := d.q.DeleteVariablesForService(ctx, serviceID); err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "database error")
 		return

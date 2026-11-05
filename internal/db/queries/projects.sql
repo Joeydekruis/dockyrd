@@ -6,7 +6,8 @@ SELECT
   slug,
   description,
   created_at,
-  updated_at
+  updated_at,
+  links_mode
 FROM projects
 ORDER BY created_at DESC;
 
@@ -26,7 +27,8 @@ SELECT
   slug,
   description,
   created_at,
-  updated_at
+  updated_at,
+  links_mode
 FROM projects
 WHERE id = ?
 LIMIT 1;
@@ -39,7 +41,8 @@ SELECT
   slug,
   description,
   created_at,
-  updated_at
+  updated_at,
+  links_mode
 FROM projects
 WHERE slug = ?
 LIMIT 1;

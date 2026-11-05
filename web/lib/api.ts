@@ -567,10 +567,78 @@ export type Deployment = {
   branch?: string;
   build_log_path?: string;
   error?: string;
+  mem_peak_bytes?: number;
+  swap_peak_bytes?: number;
+  cpu_seconds?: number;
+  waited_ms?: number;
+  frozen_ms?: number;
+  budget_bytes?: number;
+  builder?: string;
+  failure_kind?: string;
   queued_at: number;
   started_at?: number;
   finished_at?: number;
 };
+
+export type BuildBudgetSnapshot = {
+  ram_budget: number;
+  swap_budget: number;
+  apps_ws: number;
+  system_ws: number;
+  kernel_reserve: number;
+  mem_total: number;
+  isolation_active: boolean;
+};
+
+export type RemoteBuilder = {
+  id: string;
+  name: string;
+  kind: string;
+  endpoint: string;
+  platforms?: string | null;
+  status?: string | null;
+  last_seen_at?: number | null;
+  created_at: number;
+};
+
+export function getBuildBudget() {
+  return apiFetch<BuildBudgetSnapshot>("/api/v1/server/build-budget");
+}
+
+export function listBuilders() {
+  return apiFetch<{ builders: RemoteBuilder[] }>("/api/v1/builders");
+}
+
+export function createRemoteBuilder(body: { name: string; endpoint: string }) {
+  return apiFetch<{
+    id: string;
+    name: string;
+    endpoint: string;
+    docker_run: string;
+    server_certs: Record<string, string>;
+  }>("/api/v1/builders", { method: "POST", json: body });
+}
+
+export function deleteRemoteBuilder(id: string) {
+  return apiFetch<void>(`/api/v1/builders/${id}`, { method: "DELETE" });
+}
+
+export function testRemoteBuilder(id: string) {
+  return apiFetch<{ status: string; detail: string }>(
+    `/api/v1/builders/${id}/test`,
+    { method: "POST", json: {} },
+  );
+}
+
+export function patchServiceBuildLocation(serviceId: string, buildLocation: string) {
+  return apiFetch<{ build_location: string }>(
+    `/api/v1/services/${serviceId}/build-location`,
+    {
+      method: "PATCH",
+      json: { build_location: buildLocation },
+    },
+  );
+}
 
 export function listDeployments(serviceId: string) {
   return apiFetch<{ deployments: Deployment[] }>(
@@ -679,6 +747,73 @@ export function putServiceVariables(
     method: "PUT",
     json: { variables },
   });
+}
+
+export type ServiceLinkPeer = {
+  id: string;
+  name: string;
+  kind: string;
+  slug: string;
+  status: string;
+};
+
+export type ServiceLink = {
+  id: string;
+  from_service_id: string;
+  to_service_id: string;
+  peer: ServiceLinkPeer;
+  variables_count: number;
+  created_at: number;
+};
+
+export type LinkableCandidate = {
+  service: ServiceLinkPeer;
+  suggested_variables: {
+    key: string;
+    ref: string;
+    at_build: boolean;
+    at_runtime: boolean;
+    default_on: boolean;
+    is_secret: boolean;
+  }[];
+  internal_host: string;
+};
+
+export function listServiceLinks(serviceId: string) {
+  return apiFetch<{ outgoing: ServiceLink[]; incoming: ServiceLink[] }>(
+    `/api/v1/services/${serviceId}/links`,
+  );
+}
+
+export function listLinkableServices(serviceId: string) {
+  return apiFetch<{ candidates: LinkableCandidate[] }>(
+    `/api/v1/services/${serviceId}/linkable`,
+  );
+}
+
+export function createServiceLink(
+  serviceId: string,
+  body: {
+    to_service_id?: string;
+    from_service_id?: string;
+    variables?: {
+      key: string;
+      ref: string;
+      at_build?: boolean;
+      at_runtime?: boolean;
+      is_secret?: boolean;
+    }[];
+  },
+) {
+  return apiFetch<{ id: string }>(`/api/v1/services/${serviceId}/links`, {
+    method: "POST",
+    json: body,
+  });
+}
+
+export function deleteServiceLink(linkId: string, removeVariables = true) {
+  const q = removeVariables ? "?remove_variables=true" : "?remove_variables=false";
+  return apiFetch<void>(`/api/v1/links/${linkId}${q}`, { method: "DELETE" });
 }
 
 export type GitHubStatus = {

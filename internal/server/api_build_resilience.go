@@ -24,6 +24,12 @@ func registerBuildResilienceRoutes(mux *http.ServeMux, deps apiDeps) {
 	mux.HandleFunc("GET /api/v1/services/{id}/github-workflow", deps.handleGitHubWorkflow)
 	mux.HandleFunc("POST /api/v1/services/{id}/deploy-token", deps.handleCreateDeployToken)
 	mux.HandleFunc("POST /api/v1/hooks/deploy/{service_id}", deps.handleDeployHook)
+	mux.HandleFunc("GET /api/v1/builders", deps.handleListBuilders)
+	mux.HandleFunc("POST /api/v1/builders", deps.handleCreateBuilder)
+	mux.HandleFunc("DELETE /api/v1/builders/{id}", deps.handleDeleteBuilder)
+	mux.HandleFunc("POST /api/v1/builders/{id}/test", deps.handleTestBuilder)
+	mux.HandleFunc("GET /api/v1/builders/{id}/bundle", deps.handleBuilderBundle)
+	mux.HandleFunc("PATCH /api/v1/services/{id}/build-location", deps.handlePatchBuildLocation)
 }
 
 func (d apiDeps) handleBuildBudget(w http.ResponseWriter, r *http.Request) {

@@ -9,6 +9,7 @@ export type StaticSiteConfig = {
     rootDir?: string;
   };
   autoDeploy?: boolean;
+  buildLocation?: string;
   buildEnabled?: boolean;
   installCmd?: string;
   buildScript?: string;
@@ -100,6 +101,7 @@ export function deploymentStatusDisplay(status: string): {
   if (s === "building" || s === "queued" || s === "running") {
     return { label: "Deploying", variant: "warn" };
   }
+  if (s === "waiting") return { label: "Waiting", variant: "info" };
   if (s === "cancelled") return { label: "Cancelled", variant: "idle" };
   return {
     label: status.charAt(0).toUpperCase() + status.slice(1),
