@@ -11,15 +11,16 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/eventlog"
 )
 
-func (rt *Runtime) acquireBuildBudget(ctx context.Context, deploymentID, serviceID string, expectedPeak int64) (build.Budget, error) {
+func (rt *Runtime) acquireBuildBudget(ctx context.Context, deploymentID, serviceID string, expectedPeak int64) (build.Budget, int64, error) {
 	if rt.Resources == nil || !rt.Resources.Available() {
-		return build.Budget{}, nil
+		return build.Budget{}, 0, nil
 	}
 	waitStart := time.Now()
+	var waitedMs int64
 	for {
 		snap, err := rt.Resources.Snapshot(ctx)
 		if err != nil {
-			return build.Budget{}, err
+			return build.Budget{}, waitedMs, err
 		}
 		b := build.ComputeBudget(snap, build.BudgetParams{})
 		dec := build.DecideAdmission(b, expectedPeak)
@@ -29,13 +30,13 @@ func (rt *Runtime) acquireBuildBudget(ctx context.Context, deploymentID, service
 				Error:  sql.NullString{String: dec.Message, Valid: true},
 				ID:     deploymentID,
 			})
-			return b, errors.New(dec.Message)
+			return b, waitedMs, errors.New(dec.Message)
 		}
 		if dec.Allowed {
 			if err := build.ApplyBuildLimits(ctx, rt.Resources, b); err != nil && rt.Log != nil {
 				rt.Log.Warn("set build limits", "err", err)
 			}
-			return b, nil
+			return b, waitedMs, nil
 		}
 		_ = rt.Q.UpdateDeploymentStatus(ctx, sqlc.UpdateDeploymentStatusParams{
 			Status: "waiting",
@@ -52,17 +53,20 @@ func (rt *Runtime) acquireBuildBudget(ctx context.Context, deploymentID, service
 				DeploymentID: deploymentID,
 			})
 		}
+		waitSlice := time.Now()
 		select {
 		case <-ctx.Done():
-			return b, ctx.Err()
+			waitedMs += time.Since(waitSlice).Milliseconds()
+			return b, waitedMs, ctx.Err()
 		case <-time.After(10 * time.Second):
 		}
+		waitedMs += time.Since(waitSlice).Milliseconds()
 		if time.Since(waitStart) >= build.DefaultWaitTimeout() {
 			dec.Allowed = true
 			if err := build.ApplyBuildLimits(ctx, rt.Resources, b); err != nil && rt.Log != nil {
 				rt.Log.Warn("set build limits after wait", "err", err)
 			}
-			return b, nil
+			return b, waitedMs, nil
 		}
 	}
 }

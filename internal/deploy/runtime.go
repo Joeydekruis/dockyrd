@@ -17,6 +17,7 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/docker"
 	"github.com/Joeydekruis/dockyrd/internal/eventlog"
 	"github.com/Joeydekruis/dockyrd/internal/inbox"
+	"github.com/Joeydekruis/dockyrd/internal/notify"
 	"github.com/Joeydekruis/dockyrd/internal/github"
 	"github.com/Joeydekruis/dockyrd/internal/proxy"
 	"github.com/Joeydekruis/dockyrd/internal/refs"
@@ -33,6 +34,7 @@ type Runtime struct {
 	Log       *slog.Logger
 	Events    *eventlog.Logger
 	Inbox     *inbox.Dispatcher
+	Notify    *notify.Notifier
 	Resources resources.Resources
 }
 
@@ -101,9 +103,20 @@ func (rt *Runtime) runAppDeployment(ctx context.Context, deploymentID string, de
 		}
 		isNext := strings.Contains(strings.ToLower(appCfg.Source.Repo+appCfg.Source.URL), "next")
 		peak := build.ExpectedPeakHeuristic(builder, isNext)
-		budget, err := rt.acquireBuildBudget(ctx, deploymentID, dep.ServiceID, peak)
-		if err != nil {
-			return err
+		buildxName, builderLabel, remote, resolveErr := rt.resolveBuildx(ctx, appCfg.BuildLocation)
+		if resolveErr != nil {
+			return rt.fail(ctx, deploymentID, resolveErr)
+		}
+		var budget build.Budget
+		var waitedMs int64
+		if remote {
+			budget = build.Budget{}
+		} else {
+			var admErr error
+			budget, waitedMs, admErr = rt.acquireBuildBudget(ctx, deploymentID, dep.ServiceID, peak)
+			if admErr != nil {
+				return admErr
+			}
 		}
 		if err := rt.Q.UpdateDeploymentStatus(ctx, sqlc.UpdateDeploymentStatusParams{
 			Status:    "building",
@@ -125,7 +138,8 @@ func (rt *Runtime) runAppDeployment(ctx context.Context, deploymentID string, de
 		}
 		buildCtx, cancel := context.WithTimeout(ctx, rt.Cfg.BuildTimeout())
 		defer cancel()
-		stopWatch := rt.startBuildWatchdog(buildCtx, dep.ServiceID, deploymentID, cancel)
+		buildCtx = build.WithBuildxBuilder(buildCtx, buildxName)
+		stopWatch, frozenAcc := rt.startBuildWatchdog(buildCtx, dep.ServiceID, deploymentID, cancel)
 		defer stopWatch()
 		sampler := build.StartPeakSampler(buildCtx, rt.Resources)
 		logPath, buildErr := build.RunGitAppBuild(buildCtx, build.GitAppBuildInput{
@@ -147,7 +161,7 @@ func (rt *Runtime) runAppDeployment(ctx context.Context, deploymentID string, de
 		if buildErr != nil {
 			return rt.fail(ctx, deploymentID, buildErr)
 		}
-		rt.recordBuildMetrics(ctx, deploymentID, budget, "local", sampler)
+		rt.recordBuildMetrics(ctx, deploymentID, budget, builderLabel, sampler, waitedMs, atomicFrozenMs(frozenAcc))
 		if err := rt.Q.UpdateDeploymentStatus(ctx, sqlc.UpdateDeploymentStatusParams{
 			Status:    "starting",
 			Error:     sql.NullString{},
@@ -256,9 +270,13 @@ func (rt *Runtime) runAppDeployment(ctx context.Context, deploymentID string, de
 	if err := proxy.SyncFromDB(ctx, rt.Q, rt.Cfg); err != nil && rt.Log != nil {
 		rt.Log.Warn("proxy sync after deploy", "err", err)
 	}
-	rt.recordDeployEvent(ctx, dep.ServiceID, deploymentID, "info", "Deploy live", "")
-	if rt.Inbox != nil {
-		rt.Inbox.NotifyDeployLive(ctx, dep.ServiceID, deploymentID)
+	if rt.Notify != nil {
+		rt.Notify.EmitDeploySucceeded(ctx, dep.ServiceID, deploymentID)
+	} else {
+		rt.recordDeployEvent(ctx, dep.ServiceID, deploymentID, "info", "Deploy live", "")
+		if rt.Inbox != nil {
+			rt.Inbox.NotifyDeployLive(ctx, dep.ServiceID, deploymentID)
+		}
 	}
 	if needsBuild && rt.Docker != nil {
 		slug := ctxRow.ServiceSlug
@@ -385,9 +403,13 @@ func (rt *Runtime) fail(ctx context.Context, deploymentID string, err error) err
 		})
 	}
 	if dep.ServiceID != "" {
-		rt.recordDeployEvent(ctx, dep.ServiceID, deploymentID, "error", "Deploy failed", msg)
-		if rt.Inbox != nil {
-			rt.Inbox.NotifyDeployFailed(ctx, dep.ServiceID, deploymentID, msg)
+		if rt.Notify != nil {
+			rt.Notify.EmitDeployFailed(ctx, dep.ServiceID, deploymentID, msg)
+		} else {
+			rt.recordDeployEvent(ctx, dep.ServiceID, deploymentID, "error", "Deploy failed", msg)
+			if rt.Inbox != nil {
+				rt.Inbox.NotifyDeployFailed(ctx, dep.ServiceID, deploymentID, msg)
+			}
 		}
 	}
 	return err

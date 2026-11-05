@@ -44,7 +44,7 @@ func exportWithBuildkit(ctx context.Context, dockerBin string, in BuildInput, wo
 	}
 
 	args := []string{"buildx", "build"}
-	args = build.AppendBuilderArgsPublic(args)
+	args = build.AppendBuilderArgs(ctx, args)
 	args = append(args,
 		"-f", dfPath,
 		"--output", "type=local,dest="+exportDir,

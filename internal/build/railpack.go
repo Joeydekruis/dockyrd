@@ -88,7 +88,7 @@ func BuildRailpack(ctx context.Context, in RailpackInput) error {
 		"buildx", "build",
 		"--load",
 	}
-	buildArgs = appendBuilderArgs(buildArgs)
+	buildArgs = appendBuilderArgs(ctx, buildArgs)
 	buildArgs = append(buildArgs,
 		"--build-arg", "BUILDKIT_SYNTAX="+in.FrontendRef,
 		"--build-arg", "cache-key="+in.ServiceID,

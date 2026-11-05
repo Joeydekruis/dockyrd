@@ -2,18 +2,23 @@ package deploy
 
 import (
 	"context"
+	"sync/atomic"
+	"time"
 
 	"github.com/Joeydekruis/dockyrd/internal/build"
 	"github.com/Joeydekruis/dockyrd/internal/eventlog"
 )
 
-func (rt *Runtime) startBuildWatchdog(ctx context.Context, serviceID, deploymentID string, cancelBuild context.CancelFunc) context.CancelFunc {
+func (rt *Runtime) startBuildWatchdog(ctx context.Context, serviceID, deploymentID string, cancelBuild context.CancelFunc) (stop context.CancelFunc, frozenMs *int64) {
 	if rt.Resources == nil || !rt.Resources.Available() {
-		return func() {}
+		return func() {}, new(int64)
 	}
-	wctx, stop := context.WithCancel(ctx)
+	var acc int64
+	var freezeAt int64
+	wctx, stopWatch := context.WithCancel(ctx)
 	go build.RunBuildWatchdog(wctx, rt.Resources, build.WatchdogCallbacks{
 		OnFrozen: func() {
+			atomic.StoreInt64(&freezeAt, time.Now().UnixMilli())
 			if rt.Events != nil {
 				_ = rt.Events.Record(wctx, eventlog.RecordInput{
 					Level: "info", Category: "build", Title: "build.frozen",
@@ -23,6 +28,14 @@ func (rt *Runtime) startBuildWatchdog(ctx context.Context, serviceID, deployment
 			}
 		},
 		OnResumed: func() {
+			start := atomic.LoadInt64(&freezeAt)
+			if start > 0 {
+				delta := time.Now().UnixMilli() - start
+				if delta > 0 {
+					atomic.AddInt64(&acc, delta)
+				}
+				atomic.StoreInt64(&freezeAt, 0)
+			}
 			if rt.Events != nil {
 				_ = rt.Events.Record(wctx, eventlog.RecordInput{
 					Level: "info", Category: "build", Title: "build.resumed",
@@ -44,5 +57,5 @@ func (rt *Runtime) startBuildWatchdog(ctx context.Context, serviceID, deployment
 			}
 		},
 	}, build.WatchdogThresholds{})
-	return stop
+	return stopWatch, &acc
 }

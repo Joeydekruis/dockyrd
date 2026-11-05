@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.50] - 2026-11-05
+
+_Finished: 2026-11-05_
+
+### Added
+
+- **#57 follow-up** — `buildLocation` `local` / `auto` / `remote:<id>` wired into app + static buildx; `waited_ms` and `frozen_ms` persisted on deployments
+
+### Changed
+
+- **Apps → Deployments** — build resource strip when metrics exist
+
 ## [0.0.49] - 2026-11-05
 
 _Finished: 2026-11-05_

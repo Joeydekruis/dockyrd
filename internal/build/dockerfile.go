@@ -58,7 +58,7 @@ func BuildDockerfile(ctx context.Context, in DockerfileInput) error {
 		"buildx", "build",
 		"--load",
 	}
-	args = appendBuilderArgs(args)
+	args = appendBuilderArgs(ctx, args)
 	args = append(args,
 		"-f", df,
 		"-t", tag,

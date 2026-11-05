@@ -47,6 +47,8 @@ import {
   formatDeploymentWhen,
   formatDurationSec,
 } from "@/lib/static-site-display";
+import { DeploymentResourceStrip } from "@/components/dockyard/deployment-resource-strip";
+import { hasDeploymentResourceMetrics } from "@/lib/build-resilience";
 import { useRouteParam } from "@/lib/use-route-param";
 
 const DETAIL_TABS = [
@@ -95,27 +97,29 @@ function DeploymentRow({ deployment }: { deployment: Deployment }) {
   const meta = `${deployment.trigger}${dur !== undefined ? ` · ${formatDurationSec(dur)}` : ""}`;
 
   return (
-    <div
-      className="flex flex-wrap items-center gap-3 border-t py-4 first:border-t-0"
-      style={{ borderColor: "var(--border)" }}
-    >
-      <StatusBadge label={st.label} variant={st.variant} />
-      <CommitChip
-        sha={deployment.commit_sha ?? deployment.image_ref ?? "—"}
-        message={deployment.branch ?? deployment.trigger}
-      />
-      <span
-        className="min-w-0 flex-1 truncate text-[13px]"
-        style={{ color: "var(--muted-text)" }}
-      >
-        {meta}
-      </span>
-      <span
-        className="shrink-0 font-mono text-[12px] tabular-nums"
-        style={{ color: "var(--muted-text)" }}
-      >
-        {when}
-      </span>
+    <div className="border-t first:border-t-0" style={{ borderColor: "var(--border)" }}>
+      <div className="flex flex-wrap items-center gap-3 py-4">
+        <StatusBadge label={st.label} variant={st.variant} />
+        <CommitChip
+          sha={deployment.commit_sha ?? deployment.image_ref ?? "—"}
+          message={deployment.branch ?? deployment.trigger}
+        />
+        <span
+          className="min-w-0 flex-1 truncate text-[13px]"
+          style={{ color: "var(--muted-text)" }}
+        >
+          {meta}
+        </span>
+        <span
+          className="shrink-0 font-mono text-[12px] tabular-nums"
+          style={{ color: "var(--muted-text)" }}
+        >
+          {when}
+        </span>
+      </div>
+      {hasDeploymentResourceMetrics(deployment) ? (
+        <DeploymentResourceStrip deployment={deployment} className="mb-4" />
+      ) : null}
     </div>
   );
 }

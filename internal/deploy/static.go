@@ -23,7 +23,7 @@ func (rt *Runtime) RunStaticSiteDeployment(ctx context.Context, deploymentID str
 	if err != nil {
 		return err
 	}
-	if dep.Status != "queued" && dep.Status != "starting" {
+	if dep.Status != "queued" && dep.Status != "starting" && dep.Status != "waiting" {
 		return nil
 	}
 
@@ -68,13 +68,25 @@ func (rt *Runtime) RunStaticSiteDeployment(ctx context.Context, deploymentID str
 		return rt.fail(ctx, deploymentID, err)
 	}
 	peak := build.ExpectedPeakHeuristic("static_site", false)
-	budget, err := rt.acquireBuildBudget(ctx, deploymentID, dep.ServiceID, peak)
-	if err != nil {
-		return err
+	buildxName, builderLabel, remote, resolveErr := rt.resolveBuildx(ctx, cfg.BuildLocation)
+	if resolveErr != nil {
+		return rt.fail(ctx, deploymentID, resolveErr)
+	}
+	var budget build.Budget
+	var waitedMs int64
+	if remote {
+		budget = build.Budget{}
+	} else {
+		var admErr error
+		budget, waitedMs, admErr = rt.acquireBuildBudget(ctx, deploymentID, dep.ServiceID, peak)
+		if admErr != nil {
+			return admErr
+		}
 	}
 	buildCtx, cancel := context.WithTimeout(ctx, rt.Cfg.BuildTimeout())
 	defer cancel()
-	stopWatch := rt.startBuildWatchdog(buildCtx, dep.ServiceID, deploymentID, cancel)
+	buildCtx = build.WithBuildxBuilder(buildCtx, buildxName)
+	stopWatch, frozenAcc := rt.startBuildWatchdog(buildCtx, dep.ServiceID, deploymentID, cancel)
 	defer stopWatch()
 	sampler := build.StartPeakSampler(buildCtx, rt.Resources)
 
@@ -100,7 +112,7 @@ func (rt *Runtime) RunStaticSiteDeployment(ctx context.Context, deploymentID str
 	if buildErr != nil {
 		return rt.fail(ctx, deploymentID, buildErr)
 	}
-	rt.recordBuildMetrics(ctx, deploymentID, budget, "local", sampler)
+	rt.recordBuildMetrics(ctx, deploymentID, budget, builderLabel, sampler, waitedMs, atomicFrozenMs(frozenAcc))
 
 	releasePath, err := staticsite.PublishRelease(outputDir, rt.Cfg.SitesDir(), ctxRow.ServiceSlug, deploymentID)
 	if err != nil {
@@ -140,7 +152,9 @@ func (rt *Runtime) RunStaticSiteDeployment(ctx context.Context, deploymentID str
 	if err := proxy.SyncFromDB(ctx, rt.Q, rt.Cfg); err != nil && rt.Log != nil {
 		rt.Log.Warn("proxy sync after static deploy", "err", err)
 	}
-	if rt.Inbox != nil {
+	if rt.Notify != nil {
+		rt.Notify.EmitDeploySucceeded(ctx, dep.ServiceID, deploymentID)
+	} else if rt.Inbox != nil {
 		rt.Inbox.NotifyDeployLive(ctx, dep.ServiceID, deploymentID)
 	}
 	return nil

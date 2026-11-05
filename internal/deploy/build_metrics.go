@@ -8,7 +8,7 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
 )
 
-func (rt *Runtime) recordBuildMetrics(ctx context.Context, deploymentID string, budget build.Budget, builder string, sampler *build.PeakSampler) {
+func (rt *Runtime) recordBuildMetrics(ctx context.Context, deploymentID string, budget build.Budget, builder string, sampler *build.PeakSampler, waitedMs, frozenMs int64) {
 	if rt.Q == nil {
 		return
 	}
@@ -30,8 +30,8 @@ func (rt *Runtime) recordBuildMetrics(ctx context.Context, deploymentID string, 
 	_ = rt.Q.SetDeploymentBuildMetrics(ctx, sqlc.SetDeploymentBuildMetricsParams{
 		MemPeakBytes:  memNull,
 		SwapPeakBytes: swapNull,
-		WaitedMs:      0,
-		FrozenMs:      0,
+		WaitedMs:      waitedMs,
+		FrozenMs:      frozenMs,
 		BudgetBytes:   budgetNull,
 		Builder:       builder,
 		FailureKind:   sql.NullString{},
@@ -53,4 +53,11 @@ func (rt *Runtime) failWithKind(ctx context.Context, deploymentID, kind string, 
 		})
 	}
 	return err
+}
+
+func atomicFrozenMs(p *int64) int64 {
+	if p == nil {
+		return 0
+	}
+	return *p
 }
