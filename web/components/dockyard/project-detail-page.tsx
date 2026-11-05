@@ -1,10 +1,11 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { Plus, Layers } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AddProjectResourceModal } from "@/components/dockyard/add-project-resource-modal";
 import { CreateApplicationModal } from "@/components/dockyard/create-application-modal";
+import { CreateComposeModal } from "@/components/dockyard/create-compose-modal";
 import { CreateBucketModal } from "@/components/dockyard/create-bucket-modal";
 import { CreateDatabaseModal } from "@/components/dockyard/create-database-modal";
 import { CreateStaticSiteWizard } from "@/components/dockyard/create-static-site-wizard";
@@ -38,6 +39,7 @@ import {
   type Deployment,
   getServerContainerMetrics,
   getServerInfo,
+  getMe,
   listDeployments,
   listProjectLinks,
   listProjects,
@@ -75,6 +77,8 @@ export function ProjectDetailPage() {
   const [linkCounts, setLinkCounts] = useState<Record<string, number>>({});
   const [addOpen, setAddOpen] = useState(false);
   const [createAppOpen, setCreateAppOpen] = useState(false);
+  const [createComposeOpen, setCreateComposeOpen] = useState(false);
+  const [canCreateCompose, setCanCreateCompose] = useState(false);
   const [createDbOpen, setCreateDbOpen] = useState(false);
   const [createBucketOpen, setCreateBucketOpen] = useState(false);
   const [staticWizardOpen, setStaticWizardOpen] = useState(false);
@@ -104,16 +108,31 @@ export function ProjectDetailPage() {
     }
   }, []);
 
-  const createMenuItems: SplitButtonMenuItem[] = useMemo(
-    () =>
-      PROJECT_RESOURCE_KINDS.map((item) => ({
-        id: item.id,
-        label: item.label,
-        icon: item.icon,
-        onSelect: () => openCreateKind(item.id),
-      })),
-    [openCreateKind],
-  );
+  useEffect(() => {
+    void getMe()
+      .then((u) =>
+        setCanCreateCompose(u.role === "owner" || u.role === "admin"),
+      )
+      .catch(() => setCanCreateCompose(false));
+  }, []);
+
+  const createMenuItems: SplitButtonMenuItem[] = useMemo(() => {
+    const base: SplitButtonMenuItem[] = PROJECT_RESOURCE_KINDS.map((item) => ({
+      id: item.id,
+      label: item.label,
+      icon: item.icon,
+      onSelect: () => openCreateKind(item.id),
+    }));
+    if (canCreateCompose) {
+      base.push({
+        id: "compose-stack",
+        label: "Compose stack",
+        icon: Layers,
+        onSelect: () => setCreateComposeOpen(true),
+      });
+    }
+    return base;
+  }, [openCreateKind, canCreateCompose]);
 
   const projectResourceActions = (
     <div className="flex flex-wrap items-center justify-end gap-2">
@@ -377,6 +396,16 @@ export function ProjectDetailPage() {
         open={createAppOpen}
         defaultProjectId={project?.id}
         onClose={() => setCreateAppOpen(false)}
+        onCreated={(ctx) => {
+          setProvisionContext(ctx);
+          setProvisionOpen(true);
+        }}
+      />
+
+      <CreateComposeModal
+        open={createComposeOpen}
+        defaultProjectId={project?.id}
+        onClose={() => setCreateComposeOpen(false)}
         onCreated={(ctx) => {
           setProvisionContext(ctx);
           setProvisionOpen(true);

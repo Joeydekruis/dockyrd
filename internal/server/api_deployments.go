@@ -7,6 +7,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/Joeydekruis/dockyrd/internal/apitoken"
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
 	"github.com/Joeydekruis/dockyrd/internal/deploy"
 	"github.com/Joeydekruis/dockyrd/internal/docker"
@@ -42,6 +43,7 @@ type deploymentResponse struct {
 func registerDeploymentRoutes(mux *http.ServeMux, deps apiDeps) {
 	mux.HandleFunc("GET /api/v1/services/{id}/deployments", deps.handleListDeployments)
 	mux.HandleFunc("POST /api/v1/services/{id}/deployments", deps.handleCreateDeployment)
+	mux.HandleFunc("GET /api/v1/deployments/{id}", deps.handleGetDeployment)
 	mux.HandleFunc("POST /api/v1/deployments/{id}/cancel", deps.handleCancelDeployment)
 	mux.HandleFunc("POST /api/v1/deployments/{id}/promote", deps.handlePromoteDeployment)
 	mux.HandleFunc("POST /api/v1/deployments/{id}/redeploy", deps.handleRedeployDeployment)
@@ -49,10 +51,19 @@ func registerDeploymentRoutes(mux *http.ServeMux, deps apiDeps) {
 }
 
 func (d apiDeps) handleListDeployments(w http.ResponseWriter, r *http.Request) {
-	if _, ok := d.requireUser(w, r); !ok {
+	serviceID := r.PathValue("id")
+	projectID, err := d.q.GetServiceProjectID(r.Context(), serviceID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeJSONError(w, http.StatusNotFound, "service not found")
+			return
+		}
+		writeJSONError(w, http.StatusInternalServerError, "database error")
 		return
 	}
-	serviceID := r.PathValue("id")
+	if _, ok := d.requireProjectScope(w, r, apitoken.ScopeRead, projectID); !ok {
+		return
+	}
 	if _, err := d.q.GetServiceByID(r.Context(), serviceID); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			writeJSONError(w, http.StatusNotFound, "service not found")
@@ -74,12 +85,22 @@ func (d apiDeps) handleListDeployments(w http.ResponseWriter, r *http.Request) {
 }
 
 func (d apiDeps) handleCreateDeployment(w http.ResponseWriter, r *http.Request) {
-	user, ok := d.requireUser(w, r)
+	serviceID := r.PathValue("id")
+	ctx := r.Context()
+	projectID, err := d.q.GetServiceProjectID(ctx, serviceID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeJSONError(w, http.StatusNotFound, "service not found")
+			return
+		}
+		writeJSONError(w, http.StatusInternalServerError, "database error")
+		return
+	}
+	p, ok := d.requireProjectScope(w, r, apitoken.ScopeDeploy, projectID)
 	if !ok {
 		return
 	}
-	serviceID := r.PathValue("id")
-	ctx := r.Context()
+	user := p.User
 	if _, err := d.q.GetServiceByID(ctx, serviceID); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			writeJSONError(w, http.StatusNotFound, "service not found")
@@ -102,6 +123,29 @@ func (d apiDeps) handleCreateDeployment(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 	writeJSON(w, http.StatusCreated, deploymentFromFullRow(row))
+}
+
+func (d apiDeps) handleGetDeployment(w http.ResponseWriter, r *http.Request) {
+	id := r.PathValue("id")
+	ctx := r.Context()
+	row, err := d.q.GetDeploymentByID(ctx, id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeJSONError(w, http.StatusNotFound, "deployment not found")
+			return
+		}
+		writeJSONError(w, http.StatusInternalServerError, "database error")
+		return
+	}
+	projectID, err := d.q.GetServiceProjectID(ctx, row.ServiceID)
+	if err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "database error")
+		return
+	}
+	if _, ok := d.requireProjectScope(w, r, apitoken.ScopeRead, projectID); !ok {
+		return
+	}
+	writeJSON(w, http.StatusOK, deploymentFromFullRow(row))
 }
 
 func (d apiDeps) handleCancelDeployment(w http.ResponseWriter, r *http.Request) {

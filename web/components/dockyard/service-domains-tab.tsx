@@ -25,7 +25,8 @@ type ServiceDomainsTabProps = {
   domains: ServiceDomain[];
   onRefresh: () => Promise<void>;
   onError: (message: string | null) => void;
-  layout?: "static" | "app";
+  layout?: "static" | "app" | "compose";
+  composeTarget?: { service: string; port: number };
   addDomainPlaceholder?: string;
   cardClassName?: string;
   cardStyle?: CSSProperties;
@@ -184,6 +185,7 @@ export function ServiceDomainsTab({
   onRefresh,
   onError,
   layout = "app",
+  composeTarget,
   cardClassName = "rounded-[20px] border px-6 py-5",
   cardStyle,
 }: ServiceDomainsTabProps) {
@@ -244,6 +246,12 @@ export function ServiceDomainsTab({
       await createServiceDomain(serviceId, {
         hostname,
         primary: !hasPrimary,
+        ...(layout === "compose" && composeTarget
+          ? {
+              target_service: composeTarget.service,
+              target_port: composeTarget.port,
+            }
+          : {}),
       });
       await onRefresh();
       return true;
@@ -256,6 +264,12 @@ export function ServiceDomainsTab({
       await createServiceDomain(serviceId, {
         platform: true,
         primary: !hasPrimary,
+        ...(layout === "compose" && composeTarget
+          ? {
+              target_service: composeTarget.service,
+              target_port: composeTarget.port,
+            }
+          : {}),
       });
       await onRefresh();
     });
@@ -355,6 +369,34 @@ export function ServiceDomainsTab({
   const custom = customDomains;
   const mixed = [...platform, ...custom];
   const showSplit = platform.length > 0 && custom.length > 0;
+
+  if (layout === "compose") {
+    return (
+      <div className={cardClassName} style={surfaceStyle}>
+        {modals}
+        <DomainSection
+          title="Domains"
+          description={
+            composeTarget
+              ? `HTTPS routes to compose service “${composeTarget.service}” on port ${composeTarget.port}. Adjust targets above before adding a domain.`
+              : "HTTPS routes to a compose service and port. Set target service and port before adding domains."
+          }
+          action={addCustomButton}
+          domains={mixed}
+          busy={busy}
+          onShowDns={setDnsDomain}
+          onDelete={setDeleteTarget}
+          onMakePrimary={handleMakePrimary}
+          emptyMessage={
+            <p className="mt-5 text-sm" style={{ color: "var(--muted-text)" }}>
+              No domains yet. Set target service/port, then add a custom or
+              platform domain.
+            </p>
+          }
+        />
+      </div>
+    );
+  }
 
   if (showSplit) {
     return (

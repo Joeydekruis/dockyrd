@@ -132,6 +132,14 @@ func checkDomainCert(ctx context.Context, q *sqlc.Queries, n *notify.Notifier, c
 		CertExpiresAt: sqlNullInt64(expires),
 		ID:            domainID,
 	})
+	if eval.status == "valid" || eval.status == "expiring" {
+		now := time.Now().Unix()
+		_ = q.UpdateDomainDNSStatus(ctx, sqlc.UpdateDomainDNSStatusParams{
+			DnsStatus:    sqlNullString("active"),
+			DnsCheckedAt: sqlNullInt64(now),
+			ID:           domainID,
+		})
+	}
 
 	if n == nil {
 		return

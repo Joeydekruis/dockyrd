@@ -47,7 +47,17 @@ func registerProjectRoutes(mux *http.ServeMux, deps apiDeps) {
 }
 
 func (d apiDeps) handleListProjects(w http.ResponseWriter, r *http.Request) {
-	if _, ok := d.requireUser(w, r); !ok {
+	p, ok := d.requireAction(w, r, ActionRead)
+	if !ok {
+		return
+	}
+	if p.Token != nil {
+		row, err := d.q.GetProjectByID(r.Context(), tokenProjectID(*p.Token))
+		if err != nil {
+			writeJSONError(w, http.StatusNotFound, "project not found")
+			return
+		}
+		writeJSON(w, http.StatusOK, map[string]any{"projects": []projectResponse{projectFromRow(row)}})
 		return
 	}
 	rows, err := d.q.ListProjects(r.Context())
@@ -242,15 +252,19 @@ func (d apiDeps) requireUser(w http.ResponseWriter, r *http.Request) (sqlc.GetUs
 		writeJSONError(w, http.StatusServiceUnavailable, "database not ready")
 		return sqlc.GetUserByIDRow{}, false
 	}
-	user, err := d.userFromRequest(r)
+	p, err := d.resolvePrincipal(r)
 	if err != nil {
 		writeJSONError(w, http.StatusUnauthorized, "authentication required")
 		return sqlc.GetUserByIDRow{}, false
 	}
-	if !d.enforce2FASetupPolicy(w, r, user) {
+	if p.Token != nil {
+		writeJSONError(w, http.StatusForbidden, "session required")
 		return sqlc.GetUserByIDRow{}, false
 	}
-	return user, true
+	if !d.enforce2FASetupPolicy(w, r, p.User) {
+		return sqlc.GetUserByIDRow{}, false
+	}
+	return p.User, true
 }
 
 func (d apiDeps) uniqueProjectSlug(ctx context.Context, base string) (string, error) {

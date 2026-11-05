@@ -1,8 +1,11 @@
+"use client";
+
 import type { LucideIcon } from "lucide-react";
 import { Circle, CircleCheck, Copy, GitBranch } from "lucide-react";
 import type { ReactNode } from "react";
 import { Button } from "@/components/dockyard/ui/button";
 import { IconButton } from "@/components/dockyard/ui/icon-button";
+import { useCopyToClipboard } from "@/lib/snackbar-context";
 
 export type SettingsDetailRow = {
   label: string;
@@ -78,6 +81,7 @@ export function SettingsMetaGrid({ children }: { children: ReactNode }) {
 }
 
 export function SettingsCopyPill({ value }: { value: string }) {
+  const copyToClipboard = useCopyToClipboard();
   return (
     <span
       className="inline-flex max-w-full items-center gap-1 rounded-lg border py-1 pl-2.5 pr-1 font-mono text-[13px]"
@@ -91,7 +95,7 @@ export function SettingsCopyPill({ value }: { value: string }) {
         icon={Copy}
         label="Copy"
         onClick={() => {
-          void navigator.clipboard.writeText(value);
+          void copyToClipboard(value);
         }}
       />
     </span>

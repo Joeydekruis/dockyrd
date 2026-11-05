@@ -296,7 +296,7 @@ export function listServices(projectId: string, kind?: string) {
 export function createService(input: {
   project_id: string;
   environment?: string;
-  kind: "app" | "static_site" | "postgres" | "redis" | "bucket";
+  kind: "app" | "static_site" | "postgres" | "redis" | "bucket" | "compose";
   name: string;
   config?: Record<string, unknown>;
 }) {
@@ -564,8 +564,12 @@ export async function fetchServiceLogs(
   serviceId: string,
   tail = "200",
   stream: "runtime" | "access" = "runtime",
+  composeService?: string,
 ) {
   const params = new URLSearchParams({ tail, stream });
+  if (composeService?.trim()) {
+    params.set("compose_service", composeService.trim());
+  }
   const res = await fetch(
     `/api/v1/services/${serviceId}/logs?${params.toString()}`,
     { credentials: "same-origin" },
@@ -826,6 +830,8 @@ export type ServiceDomain = {
   redirect_to?: string;
   dns_status?: string;
   cert_status?: string;
+  target_service?: string;
+  target_port?: number;
 };
 
 export function listServiceDomains(serviceId: string) {
@@ -836,7 +842,13 @@ export function listServiceDomains(serviceId: string) {
 
 export function createServiceDomain(
   serviceId: string,
-  input: { hostname?: string; platform?: boolean; primary?: boolean },
+  input: {
+    hostname?: string;
+    platform?: boolean;
+    primary?: boolean;
+    target_service?: string;
+    target_port?: number;
+  },
 ) {
   return apiFetch<ServiceDomain>(`/api/v1/services/${serviceId}/domains`, {
     method: "POST",
@@ -848,11 +860,52 @@ export function deleteServiceDomain(domainId: string) {
   return apiFetch<void>(`/api/v1/domains/${domainId}`, { method: "DELETE" });
 }
 
-export function patchServiceDomain(domainId: string, body: { primary: true }) {
+export function patchServiceDomain(
+  domainId: string,
+  body: {
+    primary?: true;
+    target_service?: string;
+    target_port?: number;
+  },
+) {
   return apiFetch<ServiceDomain>(`/api/v1/domains/${domainId}`, {
     method: "PATCH",
     json: body,
   });
+}
+
+export function checkServiceDomain(domainId: string) {
+  return apiFetch<ServiceDomain>(`/api/v1/domains/${domainId}/check`, {
+    method: "POST",
+  });
+}
+
+export type ComposeValidateResult = {
+  ok: boolean;
+  errors: { rule: string; message: string }[];
+  warnings: { rule: string; message: string }[];
+  services: string[];
+  exposable_ports: { service: string; port: number }[];
+};
+
+export function validateComposeYaml(serviceId: string, yaml: string) {
+  return apiFetch<ComposeValidateResult>(
+    `/api/v1/services/${serviceId}/compose/validate`,
+    { method: "POST", json: { yaml } },
+  );
+}
+
+export type ComposeContainerStatus = {
+  name: string;
+  service: string;
+  state: string;
+  health?: string;
+};
+
+export function listComposeContainers(serviceId: string) {
+  return apiFetch<{ containers: ComposeContainerStatus[] }>(
+    `/api/v1/services/${serviceId}/compose/containers`,
+  );
 }
 
 export type ServiceVariable = {

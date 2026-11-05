@@ -74,8 +74,11 @@ func startBackground(ctx context.Context, cfg config.Config, db *sql.DB, q *sqlc
 		}
 		if err := dockerCli.EnsureProxy(ctx, cfg); err != nil && log != nil {
 			log.Warn("ensure dy-proxy", "err", err)
-		} else if err := proxy.SyncFromDB(ctx, q, cfg); err != nil && log != nil {
-			log.Warn("proxy sync", "err", err)
+		} else {
+			RepairStaleLoopbackPlatformDomains(ctx, cfg, q)
+			if err := proxy.SyncFromDB(ctx, q, cfg); err != nil && log != nil {
+				log.Warn("proxy sync", "err", err)
+			}
 		}
 	}
 
@@ -84,10 +87,11 @@ func startBackground(ctx context.Context, cfg config.Config, db *sql.DB, q *sqlc
 	if dispatcher != nil {
 		go dispatcher.Run(ctx, 2*time.Second)
 	}
+	go watch.RunDNS(ctx, cfg, q, log, 2*time.Minute)
+	go watch.RunCerts(ctx, cfg, q, notifier, log, 6*time.Hour)
 	if notifier != nil {
 		go watch.RunDisk(ctx, cfg, q, notifier, log, 60*time.Second, dockerCli)
 		go watch.RunBackupsOverdue(ctx, q, notifier, log, 10*time.Minute)
-		go watch.RunCerts(ctx, cfg, q, notifier, log, 6*time.Hour)
 	}
 	go watch.RunHeartbeat(ctx, q, log, 5*time.Minute)
 

@@ -2,14 +2,12 @@
 
 **Updated:** 2026-11-05
 
-## Notifications (#62–#66)
+## In progress
 
-Shipped on `development` (see `CHANGELOG` 0.0.51–0.0.53). Issues labeled `status/ready-for-review`. Local compose/preview/API-token WIP lives under `docs/project/wip/` (not on branch).
+None — v0.2 slice **#68–#70** ready for maintainer verify on `development` after push.
 
 ## Last ship
 
-**Notifications polish** @ **v0.0.53** — delivery/event prune, `verify-notify-smoke.sh`, `docker/info` for disk watch.
+**v0.2 features** — API tokens + `dy` (#68), preview deploys (#69), Docker Compose kind (#70) @ **v0.0.54**.
 
-## Previous
-
-**M6 · Resource links** @ **v0.0.49**; notifications F0–F4 @ **0.0.51–0.0.52** (commits `957ba45`, `0885170`).
+Prior: notifications (#62–#66) @ **v0.0.52**; notify smoke/prune @ **v0.0.53**.

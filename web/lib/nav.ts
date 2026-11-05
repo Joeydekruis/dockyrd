@@ -71,6 +71,11 @@ export type SettingsNavItem = {
 export const accountSettingsNav: SettingsNavItem[] = [
   { label: "Profile", href: "/settings/account/profile", icon: User },
   {
+    label: "API tokens",
+    href: "/settings/account/tokens",
+    icon: Plug,
+  },
+  {
     label: "Password & 2FA",
     href: "/settings/account/password",
     icon: KeyRound,

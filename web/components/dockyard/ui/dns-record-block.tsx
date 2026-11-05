@@ -1,10 +1,9 @@
 "use client";
 
-import { Check, Copy } from "lucide-react";
-import { useState } from "react";
+import { Copy } from "lucide-react";
 import { CodeInline } from "@/components/dockyard/ui/code-inline";
 import { IconButton } from "@/components/dockyard/ui/icon-button";
-import { copyText } from "@/lib/domain-dns";
+import { useCopyToClipboard } from "@/lib/snackbar-context";
 
 type DnsRecordBlockProps = {
   type: string;
@@ -16,19 +15,16 @@ type DnsRecordBlockProps = {
 };
 
 function CopyableValue({ value }: { value: string }) {
-  const [copied, setCopied] = useState(false);
+  const copyToClipboard = useCopyToClipboard();
   return (
     <span className="inline-flex items-start gap-1">
       <span className="break-all">{value}</span>
       <IconButton
-        icon={copied ? Check : Copy}
-        label={copied ? "Copied" : "Copy value"}
+        icon={Copy}
+        label="Copy value"
         className="shrink-0"
         onClick={() => {
-          void copyText(value).then(() => {
-            setCopied(true);
-            window.setTimeout(() => setCopied(false), 2000);
-          });
+          void copyToClipboard(value, "Copied DNS value");
         }}
       />
     </span>
@@ -36,7 +32,7 @@ function CopyableValue({ value }: { value: string }) {
 }
 
 function CopyableName({ name, nameAlt }: { name: string; nameAlt?: string }) {
-  const [copied, setCopied] = useState<string | null>(null);
+  const copyToClipboard = useCopyToClipboard();
   const names = nameAlt && nameAlt !== name ? [name, nameAlt] : [name];
   return (
     <span className="inline-flex flex-wrap items-center gap-2">
@@ -44,13 +40,10 @@ function CopyableName({ name, nameAlt }: { name: string; nameAlt?: string }) {
         <span key={n} className="inline-flex items-center gap-0.5">
           <CodeInline>{n}</CodeInline>
           <IconButton
-            icon={copied === n ? Check : Copy}
-            label={copied === n ? "Copied" : `Copy ${n}`}
+            icon={Copy}
+            label={`Copy ${n}`}
             onClick={() => {
-              void copyText(n).then(() => {
-                setCopied(n);
-                window.setTimeout(() => setCopied(null), 2000);
-              });
+              void copyToClipboard(n, "Copied DNS name");
             }}
           />
         </span>

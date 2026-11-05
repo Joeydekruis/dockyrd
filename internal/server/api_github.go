@@ -12,6 +12,7 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/github"
 	"github.com/Joeydekruis/dockyrd/internal/instance"
 	"github.com/Joeydekruis/dockyrd/internal/jobs"
+	"github.com/Joeydekruis/dockyrd/internal/preview"
 )
 
 func registerGitHubRoutes(mux *http.ServeMux, deps apiDeps) {
@@ -213,6 +214,21 @@ func (d apiDeps) handleGitHubWebhook(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		w.WriteHeader(http.StatusNoContent)
+		return
+	case "pull_request":
+		ev, err := github.ParsePullRequestEvent(body)
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid pull_request payload")
+			return
+		}
+		if err := preview.HandlePullRequest(r.Context(), d.q, preview.SyncOptions{
+			SecretKeyPath: d.cfg.SecretKeyPath(),
+			PublicIPv4:    d.cfg.EffectivePublicIPv4(),
+		}, ev); err != nil {
+			writeJSONError(w, http.StatusInternalServerError, "preview sync failed")
+			return
+		}
+		w.WriteHeader(http.StatusAccepted)
 		return
 	case "push":
 		// handled below

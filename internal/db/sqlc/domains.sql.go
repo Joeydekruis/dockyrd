@@ -30,8 +30,10 @@ INSERT INTO domains (
   dns_status,
   dns_checked_at,
   cert_status,
-  cert_expires_at
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  cert_expires_at,
+  target_service,
+  target_port
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `
 
 type CreateDomainParams struct {
@@ -45,6 +47,8 @@ type CreateDomainParams struct {
 	DnsCheckedAt  sql.NullInt64
 	CertStatus    sql.NullString
 	CertExpiresAt sql.NullInt64
+	TargetService sql.NullString
+	TargetPort    sql.NullInt64
 }
 
 func (q *Queries) CreateDomain(ctx context.Context, arg CreateDomainParams) error {
@@ -59,6 +63,8 @@ func (q *Queries) CreateDomain(ctx context.Context, arg CreateDomainParams) erro
 		arg.DnsCheckedAt,
 		arg.CertStatus,
 		arg.CertExpiresAt,
+		arg.TargetService,
+		arg.TargetPort,
 	)
 	return err
 }
@@ -84,7 +90,9 @@ SELECT
   dns_status,
   dns_checked_at,
   cert_status,
-  cert_expires_at
+  cert_expires_at,
+  target_service,
+  target_port
 FROM domains
 WHERE id = ?
 LIMIT 1
@@ -104,6 +112,8 @@ func (q *Queries) GetDomainByID(ctx context.Context, id string) (Domain, error) 
 		&i.DnsCheckedAt,
 		&i.CertStatus,
 		&i.CertExpiresAt,
+		&i.TargetService,
+		&i.TargetPort,
 	)
 	return i, err
 }
@@ -196,6 +206,45 @@ func (q *Queries) ListDomainsForCertWatch(ctx context.Context) ([]ListDomainsFor
 	return items, nil
 }
 
+const listDomainsForDNSWatch = `-- name: ListDomainsForDNSWatch :many
+SELECT
+  d.id,
+  d.hostname,
+  d.is_platform
+FROM domains d
+JOIN services s ON s.id = d.service_id
+WHERE d.is_platform = 0 AND s.desired_state = 'running'
+`
+
+type ListDomainsForDNSWatchRow struct {
+	ID         string
+	Hostname   string
+	IsPlatform int64
+}
+
+func (q *Queries) ListDomainsForDNSWatch(ctx context.Context) ([]ListDomainsForDNSWatchRow, error) {
+	rows, err := q.db.QueryContext(ctx, listDomainsForDNSWatch)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListDomainsForDNSWatchRow
+	for rows.Next() {
+		var i ListDomainsForDNSWatchRow
+		if err := rows.Scan(&i.ID, &i.Hostname, &i.IsPlatform); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listDomainsForService = `-- name: ListDomainsForService :many
 SELECT
   id,
@@ -207,7 +256,9 @@ SELECT
   dns_status,
   dns_checked_at,
   cert_status,
-  cert_expires_at
+  cert_expires_at,
+  target_service,
+  target_port
 FROM domains
 WHERE service_id = ?
 ORDER BY is_primary DESC, hostname ASC
@@ -233,6 +284,53 @@ func (q *Queries) ListDomainsForService(ctx context.Context, serviceID string) (
 			&i.DnsCheckedAt,
 			&i.CertStatus,
 			&i.CertExpiresAt,
+			&i.TargetService,
+			&i.TargetPort,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listStaleLoopbackPlatformDomains = `-- name: ListStaleLoopbackPlatformDomains :many
+SELECT
+  id,
+  service_id,
+  hostname,
+  is_primary
+FROM domains
+WHERE is_platform = 1 AND hostname LIKE '%.127-0-0-1.sslip.io'
+`
+
+type ListStaleLoopbackPlatformDomainsRow struct {
+	ID        string
+	ServiceID string
+	Hostname  string
+	IsPrimary int64
+}
+
+func (q *Queries) ListStaleLoopbackPlatformDomains(ctx context.Context) ([]ListStaleLoopbackPlatformDomainsRow, error) {
+	rows, err := q.db.QueryContext(ctx, listStaleLoopbackPlatformDomains)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListStaleLoopbackPlatformDomainsRow
+	for rows.Next() {
+		var i ListStaleLoopbackPlatformDomainsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.ServiceID,
+			&i.Hostname,
+			&i.IsPrimary,
 		); err != nil {
 			return nil, err
 		}
@@ -286,5 +384,55 @@ type UpdateDomainCertStatusParams struct {
 
 func (q *Queries) UpdateDomainCertStatus(ctx context.Context, arg UpdateDomainCertStatusParams) error {
 	_, err := q.db.ExecContext(ctx, updateDomainCertStatus, arg.CertStatus, arg.CertExpiresAt, arg.ID)
+	return err
+}
+
+const updateDomainComposeTarget = `-- name: UpdateDomainComposeTarget :exec
+UPDATE domains
+SET target_service = ?, target_port = ?
+WHERE id = ?
+`
+
+type UpdateDomainComposeTargetParams struct {
+	TargetService sql.NullString
+	TargetPort    sql.NullInt64
+	ID            string
+}
+
+func (q *Queries) UpdateDomainComposeTarget(ctx context.Context, arg UpdateDomainComposeTargetParams) error {
+	_, err := q.db.ExecContext(ctx, updateDomainComposeTarget, arg.TargetService, arg.TargetPort, arg.ID)
+	return err
+}
+
+const updateDomainDNSStatus = `-- name: UpdateDomainDNSStatus :exec
+UPDATE domains
+SET dns_status = ?, dns_checked_at = ?
+WHERE id = ?
+`
+
+type UpdateDomainDNSStatusParams struct {
+	DnsStatus    sql.NullString
+	DnsCheckedAt sql.NullInt64
+	ID           string
+}
+
+func (q *Queries) UpdateDomainDNSStatus(ctx context.Context, arg UpdateDomainDNSStatusParams) error {
+	_, err := q.db.ExecContext(ctx, updateDomainDNSStatus, arg.DnsStatus, arg.DnsCheckedAt, arg.ID)
+	return err
+}
+
+const updateDomainHostname = `-- name: UpdateDomainHostname :exec
+UPDATE domains
+SET hostname = ?
+WHERE id = ?
+`
+
+type UpdateDomainHostnameParams struct {
+	Hostname string
+	ID       string
+}
+
+func (q *Queries) UpdateDomainHostname(ctx context.Context, arg UpdateDomainHostnameParams) error {
+	_, err := q.db.ExecContext(ctx, updateDomainHostname, arg.Hostname, arg.ID)
 	return err
 }

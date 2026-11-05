@@ -29,6 +29,9 @@ type ApiToken struct {
 	LastUsedAt sql.NullInt64
 	ExpiresAt  sql.NullInt64
 	CreatedAt  int64
+	ProjectID  sql.NullString
+	RevokedAt  sql.NullInt64
+	LastUsedIp sql.NullString
 }
 
 type AuditLog struct {
@@ -158,6 +161,8 @@ type Domain struct {
 	DnsCheckedAt  sql.NullInt64
 	CertStatus    sql.NullString
 	CertExpiresAt sql.NullInt64
+	TargetService sql.NullString
+	TargetPort    sql.NullInt64
 }
 
 type EmailLog struct {
@@ -373,16 +378,20 @@ type Server struct {
 }
 
 type Service struct {
-	ID               string
-	EnvironmentID    string
-	Kind             string
-	Name             string
-	Slug             string
-	DesiredState     string
-	Config           interface{}
-	LiveDeploymentID sql.NullString
-	CreatedAt        sql.NullInt64
-	UpdatedAt        sql.NullInt64
+	ID                string
+	EnvironmentID     string
+	Kind              string
+	Name              string
+	Slug              string
+	DesiredState      string
+	Config            interface{}
+	LiveDeploymentID  sql.NullString
+	CreatedAt         sql.NullInt64
+	UpdatedAt         sql.NullInt64
+	ParentServiceID   sql.NullString
+	PreviewPr         sql.NullInt64
+	PreviewHeadSha    sql.NullString
+	PreviewLastPushAt sql.NullInt64
 }
 
 type ServiceLink struct {

@@ -10,6 +10,7 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
 	"github.com/Joeydekruis/dockyrd/internal/dbkind"
 	"github.com/Joeydekruis/dockyrd/internal/refs"
+	"github.com/Joeydekruis/dockyrd/internal/serviceops"
 )
 
 // projectCatalog builds published variables for every service in a project (briefing §7.3).
@@ -25,7 +26,7 @@ func (rt *Runtime) projectCatalog(ctx context.Context, projectID string) (map[st
 	out := make(map[string]map[string]string, len(rows))
 	for _, row := range rows {
 		raw := appconfig.RawConfig(row.Config)
-		vars, err := publishedForService(ctx, rt.Q, key, row, raw)
+		vars, err := publishedForService(ctx, rt.Q, key, serviceops.ServiceFromListRow(row), raw)
 		if err != nil {
 			return nil, fmt.Errorf("service %s: %w", row.Slug, err)
 		}

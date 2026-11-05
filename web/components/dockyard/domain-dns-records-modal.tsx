@@ -6,7 +6,8 @@ import { Button } from "@/components/dockyard/ui/button";
 import { DnsRecordBlock } from "@/components/dockyard/ui/dns-record-block";
 import { Modal } from "@/components/dockyard/ui/modal";
 import type { ServiceDomain } from "@/lib/api";
-import { aRecordForHostname } from "@/lib/domain-dns";
+import { checkServiceDomain } from "@/lib/api";
+import { aRecordForHostname, domainStatusDisplay } from "@/lib/domain-dns";
 
 type DomainDnsRecordsModalProps = {
   open: boolean;
@@ -52,12 +53,24 @@ export function DomainDnsRecordsModal({
 }: DomainDnsRecordsModalProps) {
   if (!domain) return null;
 
+  const d = domain;
   const ip =
     publicIPv4.trim() ||
     "Set DOCKYARD_PUBLIC_IPV4 on the server (Instance → General)";
-  const { name, nameAlt } = aRecordForHostname(domain.hostname);
-  const verified =
-    !domain.is_platform && (domain.dns_status ?? "").toLowerCase() === "active";
+  const { name, nameAlt } = aRecordForHostname(d.hostname);
+  const statusView = domainStatusDisplay(d);
+  const verified = !d.is_platform && !statusView.needsVerification;
+
+  async function handleRefreshStatus() {
+    if (!d.is_platform) {
+      await checkServiceDomain(d.id);
+    }
+    await onRefresh();
+  }
+
+  if (!domain) {
+    return null;
+  }
 
   return (
     <Modal
@@ -71,7 +84,7 @@ export function DomainDnsRecordsModal({
           <Button type="button" variant="outline" onClick={onClose}>
             Close
           </Button>
-          <Button type="button" onClick={onRefresh}>
+          <Button type="button" onClick={() => void handleRefreshStatus()}>
             Refresh status
           </Button>
         </>
@@ -80,7 +93,7 @@ export function DomainDnsRecordsModal({
       <p className="mb-6 text-sm" style={{ color: "var(--muted-text)" }}>
         Status:{" "}
         <span className="font-medium" style={{ color: "var(--ink-navy)" }}>
-          {verified ? "Active" : "Verification"}
+          {statusView.label}
         </span>
       </p>
 

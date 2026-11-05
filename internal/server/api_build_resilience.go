@@ -123,6 +123,7 @@ func (d apiDeps) handleCreateDeployToken(w http.ResponseWriter, r *http.Request)
 		TokenHash: hash,
 		Scope:     scope,
 		CreatedBy: sql.NullString{String: admin.ID, Valid: true},
+		ProjectID: sql.NullString{},
 		CreatedAt: now,
 	}); err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "store token failed")
@@ -152,6 +153,10 @@ func (d apiDeps) handleDeployHook(w http.ResponseWriter, r *http.Request) {
 		writeJSONError(w, http.StatusForbidden, "invalid deploy token")
 		return
 	}
+	if row.RevokedAt.Valid {
+		writeJSONError(w, http.StatusForbidden, "invalid deploy token")
+		return
+	}
 	body, err := io.ReadAll(io.LimitReader(r.Body, 1<<20))
 	if err != nil {
 		writeJSONError(w, http.StatusBadRequest, "invalid body")
@@ -176,7 +181,11 @@ func (d apiDeps) handleDeployHook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	now := time.Now().Unix()
-	_ = d.q.TouchAPITokenUsed(r.Context(), sqlc.TouchAPITokenUsedParams{LastUsedAt: sql.NullInt64{Int64: now, Valid: true}, ID: row.ID})
+	_ = d.q.TouchAPITokenUsed(r.Context(), sqlc.TouchAPITokenUsedParams{
+		LastUsedAt: sql.NullInt64{Int64: now, Valid: true},
+		LastUsedIp: sql.NullString{String: clientIP(r), Valid: true},
+		ID:         row.ID,
+	})
 	deploymentID, err := jobs.EnqueueHookDeploy(r.Context(), d.q, serviceID, strings.TrimSpace(payload.Image), jobs.GitMeta{CommitSHA: payload.CommitSHA})
 	if err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "enqueue failed")

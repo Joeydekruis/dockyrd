@@ -13,6 +13,7 @@ import { TopBar } from "@/components/dockyard/top-bar";
 import { UpdateAvailableNotifier } from "@/components/dockyard/update-available-modal";
 import { getMe, type MeResponse } from "@/lib/api";
 import { isAccountSettingsPath, isSettingsPath } from "@/lib/nav";
+import { SnackbarProvider } from "@/lib/snackbar-context";
 import { UserLocaleProvider } from "@/lib/user-locale-context";
 
 type DashboardShellProps = {
@@ -61,7 +62,8 @@ export function DashboardShell({
   }
 
   return (
-    <UserLocaleProvider>
+    <SnackbarProvider>
+      <UserLocaleProvider>
       <div className="min-h-dvh" style={{ background: "var(--page-bg)" }}>
         <TopBar className="fixed top-0 right-0 left-0 z-50" />
         <Sidebar />
@@ -98,6 +100,7 @@ export function DashboardShell({
         </div>
         <CommandPalette open={palette.open} onClose={palette.close} />
       </div>
-    </UserLocaleProvider>
+      </UserLocaleProvider>
+    </SnackbarProvider>
   );
 }

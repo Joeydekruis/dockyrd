@@ -56,6 +56,7 @@ func (l *Loop) Tick(ctx context.Context) {
 		SyncGarage(ctx, l.Cfg, l.Q, l.Docker, l.Log)
 		SyncServiceLinks(ctx, l.Q, l.Docker, l.Log)
 		SyncBucketNetworks(ctx, l.Q, l.Docker, l.Log)
+		SyncComposeServices(ctx, l.Cfg, l.Q, l.Docker, l.Log)
 	}
 	if err := proxy.SyncFromDB(ctx, l.Q, l.Cfg); err != nil && l.Log != nil {
 		l.Log.Debug("proxy sync", "err", err)

@@ -2,9 +2,10 @@ package docker
 
 import (
 	"context"
+	"strings"
 )
 
-// DockerRootDir returns the daemon's data root (e.g. /var/lib/docker).
+// DockerRootDir returns the daemon data root (e.g. /var/lib/docker).
 func (c *Client) DockerRootDir(ctx context.Context) (string, error) {
 	if c == nil || c.moby == nil {
 		return "", nil
@@ -13,5 +14,5 @@ func (c *Client) DockerRootDir(ctx context.Context) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return info.DockerRootDir, nil
+	return strings.TrimSpace(info.DockerRootDir), nil
 }

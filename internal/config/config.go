@@ -8,6 +8,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/Joeydekruis/dockyrd/internal/netutil"
 )
 
 const (
@@ -77,6 +79,18 @@ func (c Config) EnsureLayout() error {
 		return err
 	}
 	return nil
+}
+
+// EffectivePublicIPv4 returns configured public IPv4 or auto-detected local address.
+// Falls back to 127.0.0.1 only when nothing else is available (local dev).
+func (c Config) EffectivePublicIPv4() string {
+	if ip := strings.TrimSpace(c.PublicIPv4); ip != "" {
+		return ip
+	}
+	if ip, ok := netutil.PrimaryIPv4(); ok {
+		return ip
+	}
+	return "127.0.0.1"
 }
 
 // DatabasePath returns the control-plane SQLite file path.

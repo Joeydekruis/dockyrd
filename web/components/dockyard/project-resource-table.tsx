@@ -1,7 +1,7 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
-import { Box, Database, Globe, HardDrive } from "lucide-react";
+import { Box, Database, Globe, HardDrive, Layers } from "lucide-react";
 import Link from "next/link";
 import { CommitChip } from "@/components/dockyard/ui/commit-chip";
 import { StatusBadge } from "@/components/dockyard/ui/status-badge";
@@ -22,6 +22,8 @@ function kindIcon(kind: string): LucideIcon {
       return Database;
     case "bucket":
       return HardDrive;
+    case "compose":
+      return Layers;
     default:
       return Box;
   }

@@ -16,6 +16,7 @@ const managedTrue = "true"
 // Kind values for LabelKind.
 const (
 	KindApp      = "app"
+	KindCompose  = "compose"
 	KindDatabase = "database"
 	KindRedis    = "redis"
 	KindBucket   = "bucket"
@@ -24,11 +25,12 @@ const (
 
 // Identity holds the label set for a managed object.
 type Identity struct {
-	ServerID     string
-	ProjectID    string
-	ServiceID    string
-	Kind         string
-	DeploymentID string // apps only; empty for databases etc.
+	ServerID       string
+	ProjectID      string
+	ServiceID      string
+	Kind           string
+	DeploymentID   string // apps only; empty for databases etc.
+	ComposeService string // compose stack service name
 }
 
 // Labels returns Docker labels for create/update.
@@ -52,11 +54,12 @@ func ParseIdentity(labels map[string]string) (Identity, bool) {
 		return Identity{}, false
 	}
 	return Identity{
-		ServerID:     labels[LabelServer],
-		ProjectID:    labels[LabelProject],
-		ServiceID:    labels[LabelService],
-		Kind:         labels[LabelKind],
-		DeploymentID: labels[LabelDeployment],
+		ServerID:       labels[LabelServer],
+		ProjectID:      labels[LabelProject],
+		ServiceID:      labels[LabelService],
+		Kind:           labels[LabelKind],
+		DeploymentID:   labels[LabelDeployment],
+		ComposeService: labels["com.docker.compose.service"],
 	}, true
 }
 

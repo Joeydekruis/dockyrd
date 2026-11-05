@@ -11,6 +11,7 @@ import {
   patchDatabasePublicAccess,
   type ServiceConnectionResponse,
 } from "@/lib/api";
+import { useCopyToClipboard } from "@/lib/snackbar-context";
 import {
   RESOURCE_DETAIL_CARD,
   resourceDetailCardStyle,
@@ -44,6 +45,8 @@ function ConnectionValue({
   const plain = plainSecrets?.[name];
   const display = secret && !revealed ? MASK : (plain ?? maskedValue);
   const copyValue = secret ? (plain ?? "") : maskedValue;
+  const copyToClipboard = useCopyToClipboard();
+  const canCopy = !(secret && !plain);
 
   return (
     <span className="inline-flex max-w-full flex-wrap items-center gap-1 sm:gap-2">
@@ -62,10 +65,10 @@ function ConnectionValue({
         <IconButton
           icon={Copy}
           label={`Copy ${name}`}
-          disabled={secret && !plain}
+          disabled={!canCopy}
           onClick={() => {
-            if (secret && !plain) return;
-            void navigator.clipboard.writeText(copyValue);
+            if (!canCopy) return;
+            void copyToClipboard(copyValue, `Copied ${name}`);
           }}
         />
       </span>

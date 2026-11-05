@@ -3,6 +3,34 @@ UPDATE domains
 SET cert_status = ?, cert_expires_at = ?
 WHERE id = ?;
 
+-- name: UpdateDomainDNSStatus :exec
+UPDATE domains
+SET dns_status = ?, dns_checked_at = ?
+WHERE id = ?;
+
+-- name: UpdateDomainHostname :exec
+UPDATE domains
+SET hostname = ?
+WHERE id = ?;
+
+-- name: ListDomainsForDNSWatch :many
+SELECT
+  d.id,
+  d.hostname,
+  d.is_platform
+FROM domains d
+JOIN services s ON s.id = d.service_id
+WHERE d.is_platform = 0 AND s.desired_state = 'running';
+
+-- name: ListStaleLoopbackPlatformDomains :many
+SELECT
+  id,
+  service_id,
+  hostname,
+  is_primary
+FROM domains
+WHERE is_platform = 1 AND hostname LIKE '%.127-0-0-1.sslip.io';
+
 -- name: ListDomainsForCertWatch :many
 SELECT
   d.id,
@@ -25,7 +53,9 @@ SELECT
   dns_status,
   dns_checked_at,
   cert_status,
-  cert_expires_at
+  cert_expires_at,
+  target_service,
+  target_port
 FROM domains
 WHERE service_id = ?
 ORDER BY is_primary DESC, hostname ASC;
@@ -41,7 +71,9 @@ SELECT
   dns_status,
   dns_checked_at,
   cert_status,
-  cert_expires_at
+  cert_expires_at,
+  target_service,
+  target_port
 FROM domains
 WHERE id = ?
 LIMIT 1;
@@ -57,8 +89,15 @@ INSERT INTO domains (
   dns_status,
   dns_checked_at,
   cert_status,
-  cert_expires_at
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+  cert_expires_at,
+  target_service,
+  target_port
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+-- name: UpdateDomainComposeTarget :exec
+UPDATE domains
+SET target_service = ?, target_port = ?
+WHERE id = ?;
 
 -- name: DeleteDomain :exec
 DELETE FROM domains

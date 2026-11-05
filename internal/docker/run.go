@@ -188,3 +188,21 @@ func (c *Client) FindLiveContainerForService(ctx context.Context, serviceID, dep
 	}
 	return "", fmt.Errorf("live container not found")
 }
+
+// FindComposeServiceContainer returns a running container for a compose service name.
+func (c *Client) FindComposeServiceContainer(ctx context.Context, serviceID, deploymentID, composeService string) (string, error) {
+	list, err := c.ListManaged(ctx)
+	if err != nil {
+		return "", err
+	}
+	composeService = strings.TrimSpace(composeService)
+	for _, item := range list {
+		if item.Identity.ServiceID != serviceID || item.Identity.DeploymentID != deploymentID || item.State != "running" {
+			continue
+		}
+		if item.Identity.ComposeService == composeService {
+			return item.ID, nil
+		}
+	}
+	return "", fmt.Errorf("compose container %q not found", composeService)
+}

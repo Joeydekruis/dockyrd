@@ -12,6 +12,7 @@ func (d apiDeps) syncEdgeProxy(ctx context.Context) {
 	if d.q == nil || d.docker == nil {
 		return
 	}
+	d.repairStaleLoopbackPlatformDomains(ctx)
 	log := slog.New(slog.NewJSONHandler(os.Stderr, nil))
 	if err := d.docker.EnsureProxy(ctx, d.cfg); err != nil {
 		log.Warn("ensure dy-proxy", "err", err)

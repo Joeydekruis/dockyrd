@@ -2,7 +2,6 @@ package setup
 
 import (
 	"bytes"
-	"net"
 	"strings"
 	"testing"
 	"time"
@@ -65,19 +64,4 @@ func TestSetupBannerLoopbackBind(t *testing.T) {
 	if !strings.Contains(out, "http://127.0.0.1:8000/setup?token=tok-123") {
 		t.Fatalf("loopback bind should use 127.0.0.1:\n%s", out)
 	}
-}
-
-func TestIsPublicIPv4(t *testing.T) {
-	pub := netParse("2.31.105.31")
-	priv := netParse("10.0.0.5")
-	if !isPublicIPv4(pub) {
-		t.Fatal("expected public")
-	}
-	if isPublicIPv4(priv) {
-		t.Fatal("expected private")
-	}
-}
-
-func netParse(s string) net.IP {
-	return net.ParseIP(s)
 }

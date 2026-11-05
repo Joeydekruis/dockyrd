@@ -59,6 +59,8 @@ export function resourceKindMeta(kind: string): {
       return { tag: "REDIS", surface: "database" };
     case "bucket":
       return { tag: "BUCKET", surface: "application" };
+    case "compose":
+      return { tag: "COMPOSE", surface: "application" };
     default:
       return { tag: "APP", surface: "application" };
   }

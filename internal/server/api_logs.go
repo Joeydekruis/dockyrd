@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/Joeydekruis/dockyrd/internal/accesslog"
+	"github.com/Joeydekruis/dockyrd/internal/apitoken"
 	"github.com/Joeydekruis/dockyrd/internal/docker"
 )
 
@@ -19,11 +20,20 @@ func registerLogRoutes(mux *http.ServeMux, deps apiDeps) {
 }
 
 func (d apiDeps) handleServiceLogs(w http.ResponseWriter, r *http.Request) {
-	if _, ok := d.requireUser(w, r); !ok {
-		return
-	}
 	serviceID := r.PathValue("id")
 	ctx := r.Context()
+	projectID, err := d.q.GetServiceProjectID(ctx, serviceID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeJSONError(w, http.StatusNotFound, "service not found")
+			return
+		}
+		writeJSONError(w, http.StatusInternalServerError, "database error")
+		return
+	}
+	if _, ok := d.requireProjectScope(w, r, apitoken.ScopeRead, projectID); !ok {
+		return
+	}
 	svc, err := d.q.GetServiceByID(ctx, serviceID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -82,6 +92,8 @@ func (d apiDeps) handleServiceLogs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	composeService := strings.TrimSpace(r.URL.Query().Get("compose_service"))
+
 	cli, err := docker.NewClient()
 	if err != nil {
 		writeJSONError(w, http.StatusServiceUnavailable, "docker unavailable")
@@ -89,7 +101,16 @@ func (d apiDeps) handleServiceLogs(w http.ResponseWriter, r *http.Request) {
 	}
 	defer cli.Close()
 
-	containerID, err := cli.FindLiveContainerForService(ctx, serviceID, svc.LiveDeploymentID.String)
+	var containerID string
+	if svc.Kind == "compose" {
+		if composeService == "" {
+			writeJSONError(w, http.StatusBadRequest, "compose_service query required for compose logs")
+			return
+		}
+		containerID, err = cli.FindComposeServiceContainer(ctx, serviceID, svc.LiveDeploymentID.String, composeService)
+	} else {
+		containerID, err = cli.FindLiveContainerForService(ctx, serviceID, svc.LiveDeploymentID.String)
+	}
 	if err != nil {
 		return
 	}

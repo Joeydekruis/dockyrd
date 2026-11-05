@@ -64,7 +64,7 @@ func BuildManifestLaunch(p ManifestParams, state string) (ManifestLaunch, error)
 			"metadata":      "read",
 			"pull_requests": "read",
 		},
-		"default_events": []string{"push"},
+		"default_events": []string{"push", "pull_request"},
 	}
 	raw, err := json.Marshal(manifest)
 	if err != nil {

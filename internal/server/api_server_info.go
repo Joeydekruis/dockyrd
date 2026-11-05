@@ -38,7 +38,7 @@ func (d apiDeps) handleServerInfo(w http.ResponseWriter, r *http.Request) {
 		Version:    BuildVersion(),
 		UptimeSec:  time.Now().Unix() - ProcessStartedAt(),
 		CPUCount:   runtime.NumCPU(),
-		PublicIPv4: d.cfg.PublicIPv4,
+		PublicIPv4: d.cfg.EffectivePublicIPv4(),
 	}
 	if host, err := os.Hostname(); err == nil && host != "" {
 		resp.Hostname = host

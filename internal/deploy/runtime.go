@@ -56,6 +56,8 @@ func (rt *Runtime) RunDeployment(ctx context.Context, deploymentID string) error
 		return rt.RunStaticSiteDeployment(ctx, deploymentID)
 	case "app":
 		return rt.runAppDeployment(ctx, deploymentID, dep)
+	case "compose":
+		return rt.runComposeDeployment(ctx, deploymentID, dep)
 	default:
 		return rt.fail(ctx, deploymentID, fmt.Errorf("deploy not supported for kind %q", svc.Kind))
 	}

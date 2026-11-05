@@ -7,6 +7,8 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/Joeydekruis/dockyrd/internal/netutil"
 )
 
 type bannerDisplayMode int
@@ -51,66 +53,6 @@ func listenBindHost(listen string) string {
 	return host
 }
 
-func isPublicIPv4(ip net.IP) bool {
-	ip = ip.To4()
-	if ip == nil {
-		return false
-	}
-	if ip.IsLoopback() || ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast() {
-		return false
-	}
-	// RFC1918 and CGNAT-ish ranges treated as non-public for banner preference.
-	if ip[0] == 10 {
-		return false
-	}
-	if ip[0] == 172 && ip[1] >= 16 && ip[1] <= 31 {
-		return false
-	}
-	if ip[0] == 192 && ip[1] == 168 {
-		return false
-	}
-	if ip[0] == 100 && ip[1] >= 64 && ip[1] <= 127 {
-		return false
-	}
-	return true
-}
-
-func primaryIPv4() (string, bool) {
-	ifaces, err := net.Interfaces()
-	if err != nil {
-		return "", false
-	}
-	var fallback []string
-	for _, iface := range ifaces {
-		if iface.Flags&net.FlagUp == 0 || iface.Flags&net.FlagLoopback != 0 {
-			continue
-		}
-		addrs, err := iface.Addrs()
-		if err != nil {
-			continue
-		}
-		for _, addr := range addrs {
-			ipNet, ok := addr.(*net.IPNet)
-			if !ok {
-				continue
-			}
-			ip4 := ipNet.IP.To4()
-			if ip4 == nil || ip4.IsLoopback() || ip4.IsLinkLocalUnicast() {
-				continue
-			}
-			s := ip4.String()
-			if isPublicIPv4(ip4) {
-				return s, true
-			}
-			fallback = append(fallback, s)
-		}
-	}
-	if len(fallback) > 0 {
-		return fallback[0], true
-	}
-	return "", false
-}
-
 func resolveBannerDisplay(listen string, detect func() (string, bool)) (bannerDisplayMode, string) {
 	bind := listenBindHost(listen)
 	if bind == "127.0.0.1" || bind == "localhost" {
@@ -149,5 +91,5 @@ func writeSetupBanner(w io.Writer, token string, expiresAt time.Time, listen str
 
 // PrintInitBanner writes the post-install message to stdout.
 func PrintInitBanner(token string, expiresAt time.Time, listen string) {
-	writeSetupBanner(os.Stdout, token, expiresAt, listen, primaryIPv4)
+	writeSetupBanner(os.Stdout, token, expiresAt, listen, netutil.PrimaryIPv4)
 }

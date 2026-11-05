@@ -10,6 +10,59 @@ import (
 	"database/sql"
 )
 
+const createPreviewChildService = `-- name: CreatePreviewChildService :exec
+INSERT INTO services (
+  id,
+  environment_id,
+  kind,
+  name,
+  slug,
+  desired_state,
+  config,
+  created_at,
+  updated_at,
+  parent_service_id,
+  preview_pr,
+  preview_head_sha,
+  preview_last_push_at
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+`
+
+type CreatePreviewChildServiceParams struct {
+	ID                string
+	EnvironmentID     string
+	Kind              string
+	Name              string
+	Slug              string
+	DesiredState      string
+	Config            interface{}
+	CreatedAt         sql.NullInt64
+	UpdatedAt         sql.NullInt64
+	ParentServiceID   sql.NullString
+	PreviewPr         sql.NullInt64
+	PreviewHeadSha    sql.NullString
+	PreviewLastPushAt sql.NullInt64
+}
+
+func (q *Queries) CreatePreviewChildService(ctx context.Context, arg CreatePreviewChildServiceParams) error {
+	_, err := q.db.ExecContext(ctx, createPreviewChildService,
+		arg.ID,
+		arg.EnvironmentID,
+		arg.Kind,
+		arg.Name,
+		arg.Slug,
+		arg.DesiredState,
+		arg.Config,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+		arg.ParentServiceID,
+		arg.PreviewPr,
+		arg.PreviewHeadSha,
+		arg.PreviewLastPushAt,
+	)
+	return err
+}
+
 const createService = `-- name: CreateService :exec
 INSERT INTO services (
   id,
@@ -116,7 +169,11 @@ SELECT
   config,
   live_deployment_id,
   created_at,
-  updated_at
+  updated_at,
+  parent_service_id,
+  preview_pr,
+  preview_head_sha,
+  preview_last_push_at
 FROM services
 WHERE id = ?
 LIMIT 1
@@ -136,8 +193,75 @@ func (q *Queries) GetServiceByID(ctx context.Context, id string) (Service, error
 		&i.LiveDeploymentID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.ParentServiceID,
+		&i.PreviewPr,
+		&i.PreviewHeadSha,
+		&i.PreviewLastPushAt,
 	)
 	return i, err
+}
+
+const getServiceByParentAndPR = `-- name: GetServiceByParentAndPR :one
+SELECT
+  id,
+  environment_id,
+  kind,
+  name,
+  slug,
+  desired_state,
+  config,
+  live_deployment_id,
+  created_at,
+  updated_at,
+  parent_service_id,
+  preview_pr,
+  preview_head_sha,
+  preview_last_push_at
+FROM services
+WHERE parent_service_id = ? AND preview_pr = ?
+LIMIT 1
+`
+
+type GetServiceByParentAndPRParams struct {
+	ParentServiceID sql.NullString
+	PreviewPr       sql.NullInt64
+}
+
+func (q *Queries) GetServiceByParentAndPR(ctx context.Context, arg GetServiceByParentAndPRParams) (Service, error) {
+	row := q.db.QueryRowContext(ctx, getServiceByParentAndPR, arg.ParentServiceID, arg.PreviewPr)
+	var i Service
+	err := row.Scan(
+		&i.ID,
+		&i.EnvironmentID,
+		&i.Kind,
+		&i.Name,
+		&i.Slug,
+		&i.DesiredState,
+		&i.Config,
+		&i.LiveDeploymentID,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.ParentServiceID,
+		&i.PreviewPr,
+		&i.PreviewHeadSha,
+		&i.PreviewLastPushAt,
+	)
+	return i, err
+}
+
+const getServiceProjectID = `-- name: GetServiceProjectID :one
+SELECT e.project_id
+FROM services s
+JOIN environments e ON e.id = s.environment_id
+WHERE s.id = ?
+LIMIT 1
+`
+
+func (q *Queries) GetServiceProjectID(ctx context.Context, id string) (string, error) {
+	row := q.db.QueryRowContext(ctx, getServiceProjectID, id)
+	var project_id string
+	err := row.Scan(&project_id)
+	return project_id, err
 }
 
 const listDatabaseServices = `-- name: ListDatabaseServices :many
@@ -206,7 +330,8 @@ func (q *Queries) ListDatabaseServices(ctx context.Context) ([]ListDatabaseServi
 const listDeployableServices = `-- name: ListDeployableServices :many
 SELECT id, kind, config, slug
 FROM services
-WHERE kind IN ('app', 'static_site')
+WHERE kind IN ('app', 'static_site', 'compose')
+  AND parent_service_id IS NULL
 `
 
 type ListDeployableServicesRow struct {
@@ -230,6 +355,108 @@ func (q *Queries) ListDeployableServices(ctx context.Context) ([]ListDeployableS
 			&i.Kind,
 			&i.Config,
 			&i.Slug,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listPreviewParentServices = `-- name: ListPreviewParentServices :many
+SELECT id, kind, config, slug, environment_id
+FROM services
+WHERE parent_service_id IS NULL AND kind IN ('app', 'static_site')
+`
+
+type ListPreviewParentServicesRow struct {
+	ID            string
+	Kind          string
+	Config        interface{}
+	Slug          string
+	EnvironmentID string
+}
+
+func (q *Queries) ListPreviewParentServices(ctx context.Context) ([]ListPreviewParentServicesRow, error) {
+	rows, err := q.db.QueryContext(ctx, listPreviewParentServices)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListPreviewParentServicesRow
+	for rows.Next() {
+		var i ListPreviewParentServicesRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Kind,
+			&i.Config,
+			&i.Slug,
+			&i.EnvironmentID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listPreviewServicesByParent = `-- name: ListPreviewServicesByParent :many
+SELECT
+  id,
+  environment_id,
+  kind,
+  name,
+  slug,
+  desired_state,
+  config,
+  live_deployment_id,
+  created_at,
+  updated_at,
+  parent_service_id,
+  preview_pr,
+  preview_head_sha,
+  preview_last_push_at
+FROM services
+WHERE parent_service_id = ?
+ORDER BY preview_pr DESC
+`
+
+func (q *Queries) ListPreviewServicesByParent(ctx context.Context, parentServiceID sql.NullString) ([]Service, error) {
+	rows, err := q.db.QueryContext(ctx, listPreviewServicesByParent, parentServiceID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Service
+	for rows.Next() {
+		var i Service
+		if err := rows.Scan(
+			&i.ID,
+			&i.EnvironmentID,
+			&i.Kind,
+			&i.Name,
+			&i.Slug,
+			&i.DesiredState,
+			&i.Config,
+			&i.LiveDeploymentID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.ParentServiceID,
+			&i.PreviewPr,
+			&i.PreviewHeadSha,
+			&i.PreviewLastPushAt,
 		); err != nil {
 			return nil, err
 		}
@@ -311,6 +538,7 @@ SELECT
   s.slug,
   s.desired_state,
   s.config,
+  s.live_deployment_id,
   e.project_id,
   p.name AS project_name,
   p.slug AS project_slug
@@ -322,15 +550,16 @@ ORDER BY s.created_at DESC
 `
 
 type ListServicesByKindRow struct {
-	ID           string
-	Kind         string
-	Name         string
-	Slug         string
-	DesiredState string
-	Config       interface{}
-	ProjectID    string
-	ProjectName  string
-	ProjectSlug  string
+	ID               string
+	Kind             string
+	Name             string
+	Slug             string
+	DesiredState     string
+	Config           interface{}
+	LiveDeploymentID sql.NullString
+	ProjectID        string
+	ProjectName      string
+	ProjectSlug      string
 }
 
 func (q *Queries) ListServicesByKind(ctx context.Context, kind string) ([]ListServicesByKindRow, error) {
@@ -349,6 +578,7 @@ func (q *Queries) ListServicesByKind(ctx context.Context, kind string) ([]ListSe
 			&i.Slug,
 			&i.DesiredState,
 			&i.Config,
+			&i.LiveDeploymentID,
 			&i.ProjectID,
 			&i.ProjectName,
 			&i.ProjectSlug,
@@ -380,19 +610,32 @@ SELECT
   s.updated_at
 FROM services s
 JOIN environments e ON e.id = s.environment_id
-WHERE e.project_id = ?
+WHERE e.project_id = ? AND s.parent_service_id IS NULL
 ORDER BY s.created_at DESC
 `
 
-func (q *Queries) ListServicesByProject(ctx context.Context, projectID string) ([]Service, error) {
+type ListServicesByProjectRow struct {
+	ID               string
+	EnvironmentID    string
+	Kind             string
+	Name             string
+	Slug             string
+	DesiredState     string
+	Config           interface{}
+	LiveDeploymentID sql.NullString
+	CreatedAt        sql.NullInt64
+	UpdatedAt        sql.NullInt64
+}
+
+func (q *Queries) ListServicesByProject(ctx context.Context, projectID string) ([]ListServicesByProjectRow, error) {
 	rows, err := q.db.QueryContext(ctx, listServicesByProject, projectID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Service
+	var items []ListServicesByProjectRow
 	for rows.Next() {
-		var i Service
+		var i ListServicesByProjectRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.EnvironmentID,
@@ -451,6 +694,29 @@ type SetServiceLiveDeploymentParams struct {
 
 func (q *Queries) SetServiceLiveDeployment(ctx context.Context, arg SetServiceLiveDeploymentParams) error {
 	_, err := q.db.ExecContext(ctx, setServiceLiveDeployment, arg.LiveDeploymentID, arg.UpdatedAt, arg.ID)
+	return err
+}
+
+const updatePreviewPushMeta = `-- name: UpdatePreviewPushMeta :exec
+UPDATE services
+SET preview_head_sha = ?, preview_last_push_at = ?, updated_at = ?
+WHERE id = ?
+`
+
+type UpdatePreviewPushMetaParams struct {
+	PreviewHeadSha    sql.NullString
+	PreviewLastPushAt sql.NullInt64
+	UpdatedAt         sql.NullInt64
+	ID                string
+}
+
+func (q *Queries) UpdatePreviewPushMeta(ctx context.Context, arg UpdatePreviewPushMetaParams) error {
+	_, err := q.db.ExecContext(ctx, updatePreviewPushMeta,
+		arg.PreviewHeadSha,
+		arg.PreviewLastPushAt,
+		arg.UpdatedAt,
+		arg.ID,
+	)
 	return err
 }
 

@@ -13,23 +13,28 @@ import (
 
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
 	"github.com/Joeydekruis/dockyrd/internal/proxy"
+	"github.com/Joeydekruis/dockyrd/internal/watch"
 )
 
 type domainResponse struct {
-	ID           string  `json:"id"`
-	ServiceID    string  `json:"service_id"`
-	Hostname     string  `json:"hostname"`
-	IsPlatform   bool    `json:"is_platform"`
-	IsPrimary    bool    `json:"is_primary"`
-	RedirectTo   *string `json:"redirect_to,omitempty"`
-	DNSStatus    *string `json:"dns_status,omitempty"`
-	CertStatus   *string `json:"cert_status,omitempty"`
+	ID             string  `json:"id"`
+	ServiceID      string  `json:"service_id"`
+	Hostname       string  `json:"hostname"`
+	IsPlatform     bool    `json:"is_platform"`
+	IsPrimary      bool    `json:"is_primary"`
+	RedirectTo     *string `json:"redirect_to,omitempty"`
+	DNSStatus      *string `json:"dns_status,omitempty"`
+	CertStatus     *string `json:"cert_status,omitempty"`
+	TargetService  *string `json:"target_service,omitempty"`
+	TargetPort     *int    `json:"target_port,omitempty"`
 }
 
 type createDomainRequest struct {
-	Hostname string `json:"hostname"`
-	Platform bool   `json:"platform"`
-	Primary  bool   `json:"primary"`
+	Hostname      string `json:"hostname"`
+	Platform      bool   `json:"platform"`
+	Primary       bool   `json:"primary"`
+	TargetService string `json:"target_service"`
+	TargetPort    int    `json:"target_port"`
 }
 
 func registerDomainRoutes(mux *http.ServeMux, deps apiDeps) {
@@ -37,6 +42,7 @@ func registerDomainRoutes(mux *http.ServeMux, deps apiDeps) {
 	mux.HandleFunc("POST /api/v1/services/{id}/domains", deps.handleCreateDomain)
 	mux.HandleFunc("DELETE /api/v1/domains/{id}", deps.handleDeleteDomain)
 	mux.HandleFunc("PATCH /api/v1/domains/{id}", deps.handlePatchDomain)
+	mux.HandleFunc("POST /api/v1/domains/{id}/check", deps.handleCheckDomain)
 }
 
 func (d apiDeps) handleListDomains(w http.ResponseWriter, r *http.Request) {
@@ -85,18 +91,22 @@ func (d apiDeps) handleCreateDomain(w http.ResponseWriter, r *http.Request) {
 		writeJSONError(w, http.StatusInternalServerError, "database error")
 		return
 	}
-	if svc.Kind != "app" && svc.Kind != "static_site" {
-		writeJSONError(w, http.StatusBadRequest, "domains only supported for app and static site services")
+	if svc.Kind != "app" && svc.Kind != "static_site" && svc.Kind != "compose" {
+		writeJSONError(w, http.StatusBadRequest, "domains not supported for this service kind")
 		return
+	}
+	if svc.Kind == "compose" {
+		target := strings.TrimSpace(body.TargetService)
+		if target == "" || body.TargetPort <= 0 {
+			writeJSONError(w, http.StatusBadRequest, "target_service and target_port required for compose domains")
+			return
+		}
 	}
 
 	hostname := normalizeHostname(body.Hostname)
 	isPlatform := body.Platform || hostname == ""
 	if isPlatform {
-		publicIP := d.cfg.PublicIPv4
-		if publicIP == "" {
-			publicIP = "127.0.0.1"
-		}
+		publicIP := d.cfg.EffectivePublicIPv4()
 		hostname, err = proxy.PlatformHostname(svc.Slug, publicIP)
 		if err != nil {
 			writeJSONError(w, http.StatusInternalServerError, "platform hostname error")
@@ -104,7 +114,7 @@ func (d apiDeps) handleCreateDomain(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	row, err := d.insertDomain(ctx, serviceID, hostname, isPlatform, body.Primary)
+	row, err := d.insertDomain(ctx, serviceID, hostname, isPlatform, body.Primary, body.TargetService, body.TargetPort)
 	if err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "create domain error")
 		return
@@ -157,10 +167,21 @@ func (d apiDeps) handlePatchDomain(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var body struct {
-		Primary *bool `json:"primary"`
+		Primary       *bool  `json:"primary"`
+		TargetService string `json:"target_service"`
+		TargetPort    *int   `json:"target_port"`
 	}
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.Primary == nil || !*body.Primary {
-		writeJSONError(w, http.StatusBadRequest, "only {\"primary\": true} is supported")
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		writeJSONError(w, http.StatusBadRequest, "invalid json")
+		return
+	}
+	hasTarget := strings.TrimSpace(body.TargetService) != "" && body.TargetPort != nil
+	if body.Primary == nil && !hasTarget {
+		writeJSONError(w, http.StatusBadRequest, "no fields to update")
+		return
+	}
+	if body.Primary != nil && !*body.Primary && !hasTarget {
+		writeJSONError(w, http.StatusBadRequest, "only {\"primary\": true} or compose target updates are supported")
 		return
 	}
 	ctx := r.Context()
@@ -174,14 +195,69 @@ func (d apiDeps) handlePatchDomain(w http.ResponseWriter, r *http.Request) {
 		writeJSONError(w, http.StatusInternalServerError, "database error")
 		return
 	}
-	if err := d.q.SetDomainPrimaryForService(ctx, sqlc.SetDomainPrimaryForServiceParams{
-		ID:        id,
-		ServiceID: dom.ServiceID,
-	}); err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "update error")
-		return
+	if hasTarget {
+		svc, err := d.q.GetServiceByID(ctx, dom.ServiceID)
+		if err != nil {
+			writeJSONError(w, http.StatusInternalServerError, "database error")
+			return
+		}
+		if svc.Kind != "compose" {
+			writeJSONError(w, http.StatusBadRequest, "target_service applies to compose services only")
+			return
+		}
+		if *body.TargetPort <= 0 {
+			writeJSONError(w, http.StatusBadRequest, "target_port must be positive")
+			return
+		}
+		if err := d.q.UpdateDomainComposeTarget(ctx, sqlc.UpdateDomainComposeTargetParams{
+			TargetService: sql.NullString{String: strings.TrimSpace(body.TargetService), Valid: true},
+			TargetPort:    sql.NullInt64{Int64: int64(*body.TargetPort), Valid: true},
+			ID:            id,
+		}); err != nil {
+			writeJSONError(w, http.StatusInternalServerError, "update error")
+			return
+		}
+	}
+	if body.Primary != nil && *body.Primary {
+		if err := d.q.SetDomainPrimaryForService(ctx, sqlc.SetDomainPrimaryForServiceParams{
+			ID:        id,
+			ServiceID: dom.ServiceID,
+		}); err != nil {
+			writeJSONError(w, http.StatusInternalServerError, "update error")
+			return
+		}
 	}
 	d.syncEdgeProxy(ctx)
+	row, err := d.q.GetDomainByID(ctx, id)
+	if err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "database error")
+		return
+	}
+	writeJSON(w, http.StatusOK, domainFromRow(row))
+}
+
+func (d apiDeps) handleCheckDomain(w http.ResponseWriter, r *http.Request) {
+	if _, ok := d.requireUser(w, r); !ok {
+		return
+	}
+	if r.Method != http.MethodPost {
+		writeJSONError(w, http.StatusMethodNotAllowed, "method not allowed")
+		return
+	}
+	ctx := r.Context()
+	id := r.PathValue("id")
+	if _, err := d.q.GetDomainByID(ctx, id); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeJSONError(w, http.StatusNotFound, "domain not found")
+			return
+		}
+		writeJSONError(w, http.StatusInternalServerError, "database error")
+		return
+	}
+	if _, err := watch.CheckDomainDNS(ctx, d.cfg, d.q, id); err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "dns check failed")
+		return
+	}
 	row, err := d.q.GetDomainByID(ctx, id)
 	if err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "database error")
@@ -205,6 +281,8 @@ func (d apiDeps) insertDomain(
 	ctx context.Context,
 	serviceID, hostname string,
 	isPlatform, isPrimary bool,
+	targetService string,
+	targetPort int,
 ) (sqlc.Domain, error) {
 	now := time.Now().Unix()
 	domainID := ulid.Make().String()
@@ -223,14 +301,16 @@ func (d apiDeps) insertDomain(
 		certStatus = "active"
 	}
 	if err := d.q.CreateDomain(ctx, sqlc.CreateDomainParams{
-		ID:           domainID,
-		ServiceID:    serviceID,
-		Hostname:     hostname,
-		IsPlatform:   platformFlag,
-		IsPrimary:    isPrimaryFlag,
-		DnsStatus:    sql.NullString{String: dnsStatus, Valid: true},
-		DnsCheckedAt: sql.NullInt64{Int64: now, Valid: true},
-		CertStatus:   sql.NullString{String: certStatus, Valid: true},
+		ID:            domainID,
+		ServiceID:     serviceID,
+		Hostname:      hostname,
+		IsPlatform:    platformFlag,
+		IsPrimary:     isPrimaryFlag,
+		DnsStatus:     sql.NullString{String: dnsStatus, Valid: true},
+		DnsCheckedAt:  sql.NullInt64{Int64: now, Valid: true},
+		CertStatus:    sql.NullString{String: certStatus, Valid: true},
+		TargetService: sql.NullString{String: strings.TrimSpace(targetService), Valid: strings.TrimSpace(targetService) != ""},
+		TargetPort:    sql.NullInt64{Int64: int64(targetPort), Valid: targetPort > 0},
 	}); err != nil {
 		return sqlc.Domain{}, err
 	}
@@ -246,7 +326,7 @@ func (d apiDeps) provisionServiceDomains(ctx context.Context, svc sqlc.Service, 
 	if custom != "" {
 		custom = normalizeHostname(custom)
 		if custom != "" {
-			_, _ = d.insertDomain(ctx, svc.ID, custom, false, true)
+			_, _ = d.insertDomain(ctx, svc.ID, custom, false, true, "", 0)
 		}
 	}
 	d.syncEdgeProxy(ctx)
@@ -264,15 +344,12 @@ func staticSiteCustomDomain(cfg json.RawMessage) string {
 }
 
 func (d apiDeps) insertPlatformDomain(ctx context.Context, serviceID, serviceSlug string, isPrimary bool) (sqlc.Domain, error) {
-	publicIP := d.cfg.PublicIPv4
-	if publicIP == "" {
-		publicIP = "127.0.0.1"
-	}
+	publicIP := d.cfg.EffectivePublicIPv4()
 	hostname, err := proxy.PlatformHostname(serviceSlug, publicIP)
 	if err != nil {
 		return sqlc.Domain{}, err
 	}
-	return d.insertDomain(ctx, serviceID, hostname, true, isPrimary)
+	return d.insertDomain(ctx, serviceID, hostname, true, isPrimary, "", 0)
 }
 
 func domainFromRow(row sqlc.Domain) domainResponse {
@@ -289,14 +366,26 @@ func domainFromRow(row sqlc.Domain) domainResponse {
 		s := row.CertStatus.String
 		cert = &s
 	}
+	var targetSvc *string
+	if row.TargetService.Valid && strings.TrimSpace(row.TargetService.String) != "" {
+		s := row.TargetService.String
+		targetSvc = &s
+	}
+	var targetPort *int
+	if row.TargetPort.Valid && row.TargetPort.Int64 > 0 {
+		p := int(row.TargetPort.Int64)
+		targetPort = &p
+	}
 	return domainResponse{
-		ID:         row.ID,
-		ServiceID:  row.ServiceID,
-		Hostname:   row.Hostname,
-		IsPlatform: row.IsPlatform != 0,
-		IsPrimary:  row.IsPrimary != 0,
-		RedirectTo: redirect,
-		DNSStatus:  dns,
-		CertStatus: cert,
+		ID:            row.ID,
+		ServiceID:     row.ServiceID,
+		Hostname:      row.Hostname,
+		IsPlatform:    row.IsPlatform != 0,
+		IsPrimary:     row.IsPrimary != 0,
+		RedirectTo:    redirect,
+		DNSStatus:     dns,
+		CertStatus:    cert,
+		TargetService: targetSvc,
+		TargetPort:    targetPort,
 	}
 }

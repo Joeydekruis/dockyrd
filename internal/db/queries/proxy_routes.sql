@@ -37,3 +37,19 @@ FROM domains d
 JOIN services s ON s.id = d.service_id
 JOIN deployments dep ON dep.id = s.live_deployment_id
 WHERE s.kind = 'static_site' AND dep.status = 'live' AND dep.release_path IS NOT NULL AND dep.release_path != '';
+
+-- name: ListLiveComposeProxyRoutes :many
+SELECT
+  d.hostname,
+  s.id AS service_id,
+  d.target_service,
+  d.target_port
+FROM domains d
+JOIN services s ON s.id = d.service_id
+JOIN deployments dep ON dep.id = s.live_deployment_id
+WHERE s.kind = 'compose'
+  AND dep.status = 'live'
+  AND d.target_service IS NOT NULL
+  AND d.target_service != ''
+  AND d.target_port IS NOT NULL
+  AND d.target_port > 0;

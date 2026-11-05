@@ -12,12 +12,14 @@ type ServiceLogsPanelProps = {
   serviceId: string;
   title?: string;
   description?: string;
+  composeService?: string;
 };
 
 export function ServiceLogsPanel({
   serviceId,
   title = "Runtime logs",
   description = "Latest output from the Docker container (json-file driver).",
+  composeService,
 }: ServiceLogsPanelProps) {
   const [log, setLog] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -27,7 +29,12 @@ export function ServiceLogsPanel({
     setLoading(true);
     setError(null);
     try {
-      const text = await fetchServiceLogs(serviceId);
+      const text = await fetchServiceLogs(
+        serviceId,
+        "200",
+        "runtime",
+        composeService,
+      );
       setLog(text);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load logs");
@@ -35,7 +42,7 @@ export function ServiceLogsPanel({
     } finally {
       setLoading(false);
     }
-  }, [serviceId]);
+  }, [serviceId, composeService]);
 
   useEffect(() => {
     void refresh();

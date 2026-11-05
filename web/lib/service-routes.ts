@@ -10,6 +10,8 @@ export function serviceDetailHref(kind: string, slug: string): string {
       return `/databases/${slug}`;
     case "bucket":
       return `/object-storage/${slug}`;
+    case "compose":
+      return `/stacks/${slug}`;
     default:
       return `/projects/_`;
   }

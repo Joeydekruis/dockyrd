@@ -10,9 +10,12 @@ import (
 
 	"github.com/oklog/ulid/v2"
 
+	"github.com/Joeydekruis/dockyrd/internal/apitoken"
+	"github.com/Joeydekruis/dockyrd/internal/compose"
 	"github.com/Joeydekruis/dockyrd/internal/crypto"
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
 	"github.com/Joeydekruis/dockyrd/internal/dbkind"
+	"github.com/Joeydekruis/dockyrd/internal/serviceops"
 	"github.com/Joeydekruis/dockyrd/internal/slug"
 	"github.com/Joeydekruis/dockyrd/internal/staticsite"
 )
@@ -50,15 +53,16 @@ func registerServiceRoutes(mux *http.ServeMux, deps apiDeps) {
 	mux.HandleFunc("PATCH /api/v1/services/{id}", deps.handlePatchService)
 	registerServiceLifecycleRoutes(mux, deps)
 	registerDatabaseServiceRoutes(mux, deps)
+	registerPreviewRoutes(mux, deps)
 }
 
 func (d apiDeps) handleListServices(w http.ResponseWriter, r *http.Request) {
-	if _, ok := d.requireUser(w, r); !ok {
-		return
-	}
 	projectID := strings.TrimSpace(r.URL.Query().Get("project_id"))
 	if projectID == "" {
 		writeJSONError(w, http.StatusBadRequest, "project_id query required")
+		return
+	}
+	if _, ok := d.requireProjectScope(w, r, apitoken.ScopeRead, projectID); !ok {
 		return
 	}
 	kind := strings.TrimSpace(r.URL.Query().Get("kind"))
@@ -72,7 +76,7 @@ func (d apiDeps) handleListServices(w http.ResponseWriter, r *http.Request) {
 		if kind != "" && row.Kind != kind {
 			continue
 		}
-		out = append(out, serviceFromRow(row))
+		out = append(out, serviceFromRow(serviceops.ServiceFromListRow(row)))
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"services": out})
 }
@@ -95,11 +99,17 @@ func (d apiDeps) handleCreateService(w http.ResponseWriter, r *http.Request) {
 		writeJSONError(w, http.StatusBadRequest, "project_id, kind, and name required")
 		return
 	}
-	if body.Kind != "app" && body.Kind != "static_site" && body.Kind != "postgres" && body.Kind != "redis" && body.Kind != "bucket" {
+	if body.Kind == "compose" {
+		if _, ok := d.requireAdmin(w, r); !ok {
+			return
+		}
+	}
+	if body.Kind != "app" && body.Kind != "static_site" && body.Kind != "postgres" && body.Kind != "redis" && body.Kind != "bucket" && body.Kind != "compose" {
 		writeJSONError(w, http.StatusBadRequest, "unsupported service kind")
 		return
 	}
 	cfg := body.Config
+	var composeYAML string
 	switch body.Kind {
 	case "static_site":
 		if len(cfg) == 0 {
@@ -151,6 +161,21 @@ func (d apiDeps) handleCreateService(w http.ResponseWriter, r *http.Request) {
 			writeJSONError(w, http.StatusBadRequest, err.Error())
 			return
 		}
+	case "compose":
+		var partial struct {
+			Source struct {
+				Type string `json:"type"`
+				YAML string `json:"yaml"`
+			} `json:"source"`
+		}
+		if len(cfg) > 0 {
+			_ = json.Unmarshal(cfg, &partial)
+		}
+		composeYAML = strings.TrimSpace(partial.Source.YAML)
+		if composeYAML == "" {
+			writeJSONError(w, http.StatusBadRequest, "config.source.yaml required for compose")
+			return
+		}
 	}
 
 	ctx := r.Context()
@@ -169,6 +194,14 @@ func (d apiDeps) handleCreateService(w http.ResponseWriter, r *http.Request) {
 
 	now := time.Now().Unix()
 	serviceID := ulid.Make().String()
+	if body.Kind == "compose" {
+		var err error
+		cfg, err = compose.NewInlineConfigJSON(serviceID, composeYAML)
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, err.Error())
+			return
+		}
+	}
 	serviceSlug := slug.FromName(body.Name)
 	if err := d.q.CreateService(ctx, sqlc.CreateServiceParams{
 		ID:            serviceID,
@@ -196,10 +229,19 @@ func (d apiDeps) handleCreateService(w http.ResponseWriter, r *http.Request) {
 }
 
 func (d apiDeps) handleGetService(w http.ResponseWriter, r *http.Request) {
-	if _, ok := d.requireUser(w, r); !ok {
+	id := r.PathValue("id")
+	projectID, err := d.q.GetServiceProjectID(r.Context(), id)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeJSONError(w, http.StatusNotFound, "service not found")
+			return
+		}
+		writeJSONError(w, http.StatusInternalServerError, "database error")
 		return
 	}
-	id := r.PathValue("id")
+	if _, ok := d.requireProjectScope(w, r, apitoken.ScopeRead, projectID); !ok {
+		return
+	}
 	row, err := d.q.GetServiceByID(r.Context(), id)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {

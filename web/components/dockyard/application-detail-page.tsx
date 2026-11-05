@@ -6,6 +6,8 @@ import { AddEnvVariableModal } from "@/components/dockyard/add-env-variable-moda
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import { ServiceBuildLocationPanel } from "@/components/dockyard/service-build-location-panel";
+import { ServicePreviewSettingsCard } from "@/components/dockyard/service-preview-settings-card";
+import { ServicePreviewsTab } from "@/components/dockyard/service-previews-tab";
 import { ServiceConnectionsPanel } from "@/components/dockyard/service-connections-panel";
 import { ServiceDomainsTab } from "@/components/dockyard/service-domains-tab";
 import { ServiceLogsPanel } from "@/components/dockyard/service-logs-panel";
@@ -57,6 +59,7 @@ const DETAIL_TABS = [
   { id: "logs", label: "Logs" },
   { id: "environment", label: "Environment" },
   { id: "domains", label: "Domains" },
+  { id: "previews", label: "Previews" },
   { id: "settings", label: "Settings" },
 ] as const;
 
@@ -518,6 +521,13 @@ export function ApplicationDetailPage() {
             />
           ) : null}
 
+          {tab === "previews" && row ? (
+            <ServicePreviewsTab
+              serviceId={row.service.id}
+              onError={setError}
+            />
+          ) : null}
+
           {tab === "settings" ? (
             <>
               <section
@@ -550,6 +560,11 @@ export function ApplicationDetailPage() {
                   />
                 </dl>
               </section>
+              <ServicePreviewSettingsCard
+                service={row.service}
+                onSaved={() => void refresh()}
+                onError={setError}
+              />
               <ServiceBuildLocationPanel
                 service={row.service}
                 onSaved={() => void refresh()}

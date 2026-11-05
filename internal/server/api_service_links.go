@@ -15,6 +15,7 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/crypto"
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
 	"github.com/Joeydekruis/dockyrd/internal/links"
+	"github.com/Joeydekruis/dockyrd/internal/serviceops"
 )
 
 type linkPeerResponse struct {
@@ -201,9 +202,9 @@ func (d apiDeps) handleListLinkable(w http.ResponseWriter, r *http.Request) {
 				continue
 			}
 		}
-		host := internalHostLabel(s)
+		host := internalHostLabel(serviceops.ServiceFromListRow(s))
 		candidates = append(candidates, candidate{
-			Service:            servicePeer(s),
+			Service:            servicePeer(serviceops.ServiceFromListRow(s)),
 			SuggestedVariables: links.SuggestedVariables(s.Kind, s.Slug),
 			InternalHost:       host,
 		})

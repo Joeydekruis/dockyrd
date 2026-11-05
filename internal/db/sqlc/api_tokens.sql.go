@@ -20,7 +20,8 @@ func (q *Queries) DeleteAPITokensByScope(ctx context.Context, scope string) erro
 }
 
 const getAPITokenByHash = `-- name: GetAPITokenByHash :one
-SELECT id, name, token_hash, scope, created_by, last_used_at, expires_at, created_at
+SELECT id, name, token_hash, scope, created_by, last_used_at, expires_at, created_at,
+       project_id, revoked_at, last_used_ip
 FROM api_tokens
 WHERE token_hash = ?
 LIMIT 1
@@ -38,14 +39,17 @@ func (q *Queries) GetAPITokenByHash(ctx context.Context, tokenHash []byte) (ApiT
 		&i.LastUsedAt,
 		&i.ExpiresAt,
 		&i.CreatedAt,
+		&i.ProjectID,
+		&i.RevokedAt,
+		&i.LastUsedIp,
 	)
 	return i, err
 }
 
 const insertAPIToken = `-- name: InsertAPIToken :exec
 INSERT INTO api_tokens (
-  id, name, token_hash, scope, created_by, created_at
-) VALUES (?, ?, ?, ?, ?, ?)
+  id, name, token_hash, scope, created_by, created_at, project_id
+) VALUES (?, ?, ?, ?, ?, ?, ?)
 `
 
 type InsertAPITokenParams struct {
@@ -55,6 +59,7 @@ type InsertAPITokenParams struct {
 	Scope     string
 	CreatedBy sql.NullString
 	CreatedAt int64
+	ProjectID sql.NullString
 }
 
 func (q *Queries) InsertAPIToken(ctx context.Context, arg InsertAPITokenParams) error {
@@ -65,20 +70,87 @@ func (q *Queries) InsertAPIToken(ctx context.Context, arg InsertAPITokenParams) 
 		arg.Scope,
 		arg.CreatedBy,
 		arg.CreatedAt,
+		arg.ProjectID,
 	)
 	return err
 }
 
+const listAPITokensForUser = `-- name: ListAPITokensForUser :many
+SELECT id, name, scope, project_id, last_used_at, last_used_ip, created_at, token_hash
+FROM api_tokens
+WHERE created_by = ? AND revoked_at IS NULL
+ORDER BY created_at DESC
+`
+
+type ListAPITokensForUserRow struct {
+	ID         string
+	Name       sql.NullString
+	Scope      string
+	ProjectID  sql.NullString
+	LastUsedAt sql.NullInt64
+	LastUsedIp sql.NullString
+	CreatedAt  int64
+	TokenHash  []byte
+}
+
+func (q *Queries) ListAPITokensForUser(ctx context.Context, createdBy sql.NullString) ([]ListAPITokensForUserRow, error) {
+	rows, err := q.db.QueryContext(ctx, listAPITokensForUser, createdBy)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListAPITokensForUserRow
+	for rows.Next() {
+		var i ListAPITokensForUserRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Scope,
+			&i.ProjectID,
+			&i.LastUsedAt,
+			&i.LastUsedIp,
+			&i.CreatedAt,
+			&i.TokenHash,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const revokeAPIToken = `-- name: RevokeAPIToken :exec
+UPDATE api_tokens SET revoked_at = ? WHERE id = ? AND created_by = ? AND revoked_at IS NULL
+`
+
+type RevokeAPITokenParams struct {
+	RevokedAt sql.NullInt64
+	ID        string
+	CreatedBy sql.NullString
+}
+
+func (q *Queries) RevokeAPIToken(ctx context.Context, arg RevokeAPITokenParams) error {
+	_, err := q.db.ExecContext(ctx, revokeAPIToken, arg.RevokedAt, arg.ID, arg.CreatedBy)
+	return err
+}
+
 const touchAPITokenUsed = `-- name: TouchAPITokenUsed :exec
-UPDATE api_tokens SET last_used_at = ? WHERE id = ?
+UPDATE api_tokens SET last_used_at = ?, last_used_ip = ? WHERE id = ?
 `
 
 type TouchAPITokenUsedParams struct {
 	LastUsedAt sql.NullInt64
+	LastUsedIp sql.NullString
 	ID         string
 }
 
 func (q *Queries) TouchAPITokenUsed(ctx context.Context, arg TouchAPITokenUsedParams) error {
-	_, err := q.db.ExecContext(ctx, touchAPITokenUsed, arg.LastUsedAt, arg.ID)
+	_, err := q.db.ExecContext(ctx, touchAPITokenUsed, arg.LastUsedAt, arg.LastUsedIp, arg.ID)
 	return err
 }

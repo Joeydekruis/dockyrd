@@ -40,10 +40,4 @@ export function aRecordForHostname(hostname: string): {
   return { name: label, nameAlt: `${label}.${parts.slice(1).join(".")}` };
 }
 
-export async function copyText(value: string): Promise<void> {
-  if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
-    await navigator.clipboard.writeText(value);
-    return;
-  }
-  throw new Error("Clipboard unavailable");
-}
+export { writeClipboardText as copyText } from "@/lib/clipboard";

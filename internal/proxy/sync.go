@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/Joeydekruis/dockyrd/internal/appconfig"
+	"github.com/Joeydekruis/dockyrd/internal/compose"
 	"github.com/Joeydekruis/dockyrd/internal/config"
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
 	"github.com/Joeydekruis/dockyrd/internal/docker"
@@ -58,6 +59,25 @@ func SyncFromDB(ctx context.Context, q *sqlc.Queries, cfg config.Config) error {
 			IndexNames:  staticsite.IndexFileNames(siteCfg),
 			ErrorPage:   strings.TrimSpace(siteCfg.ErrorFile),
 			SpaFallback: siteCfg.SpaFallback,
+		})
+	}
+
+	composeRows, err := q.ListLiveComposeProxyRoutes(ctx)
+	if err != nil {
+		return err
+	}
+	for _, row := range composeRows {
+		port := int(row.TargetPort.Int64)
+		if !row.TargetPort.Valid || port <= 0 {
+			continue
+		}
+		target := strings.TrimSpace(row.TargetService.String)
+		if target == "" {
+			continue
+		}
+		appRoutes = append(appRoutes, AppRoute{
+			Hostname:     row.Hostname,
+			UpstreamDial: compose.UpstreamDial(row.ServiceID, target, port),
 		})
 	}
 

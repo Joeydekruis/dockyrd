@@ -28,7 +28,11 @@ SELECT
   config,
   live_deployment_id,
   created_at,
-  updated_at
+  updated_at,
+  parent_service_id,
+  preview_pr,
+  preview_head_sha,
+  preview_last_push_at
 FROM services
 WHERE id = ?
 LIMIT 1;
@@ -52,13 +56,83 @@ SELECT
   s.updated_at
 FROM services s
 JOIN environments e ON e.id = s.environment_id
-WHERE e.project_id = ?
+WHERE e.project_id = ? AND s.parent_service_id IS NULL
 ORDER BY s.created_at DESC;
 
 -- name: ListDeployableServices :many
 SELECT id, kind, config, slug
 FROM services
-WHERE kind IN ('app', 'static_site');
+WHERE kind IN ('app', 'static_site', 'compose')
+  AND parent_service_id IS NULL;
+
+-- name: GetServiceProjectID :one
+SELECT e.project_id
+FROM services s
+JOIN environments e ON e.id = s.environment_id
+WHERE s.id = ?
+LIMIT 1;
+
+-- name: ListPreviewServicesByParent :many
+SELECT
+  id,
+  environment_id,
+  kind,
+  name,
+  slug,
+  desired_state,
+  config,
+  live_deployment_id,
+  created_at,
+  updated_at,
+  parent_service_id,
+  preview_pr,
+  preview_head_sha,
+  preview_last_push_at
+FROM services
+WHERE parent_service_id = ?
+ORDER BY preview_pr DESC;
+
+-- name: GetServiceByParentAndPR :one
+SELECT
+  id,
+  environment_id,
+  kind,
+  name,
+  slug,
+  desired_state,
+  config,
+  live_deployment_id,
+  created_at,
+  updated_at,
+  parent_service_id,
+  preview_pr,
+  preview_head_sha,
+  preview_last_push_at
+FROM services
+WHERE parent_service_id = ? AND preview_pr = ?
+LIMIT 1;
+
+-- name: CreatePreviewChildService :exec
+INSERT INTO services (
+  id,
+  environment_id,
+  kind,
+  name,
+  slug,
+  desired_state,
+  config,
+  created_at,
+  updated_at,
+  parent_service_id,
+  preview_pr,
+  preview_head_sha,
+  preview_last_push_at
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+-- name: UpdatePreviewPushMeta :exec
+UPDATE services
+SET preview_head_sha = ?, preview_last_push_at = ?, updated_at = ?
+WHERE id = ?;
 
 -- name: ListReconcileDatabaseServices :many
 SELECT
@@ -100,6 +174,7 @@ SELECT
   s.slug,
   s.desired_state,
   s.config,
+  s.live_deployment_id,
   e.project_id,
   p.name AS project_name,
   p.slug AS project_slug
@@ -144,3 +219,8 @@ WHERE id = ?;
 -- name: DeleteService :exec
 DELETE FROM services
 WHERE id = ?;
+
+-- name: ListPreviewParentServices :many
+SELECT id, kind, config, slug, environment_id
+FROM services
+WHERE parent_service_id IS NULL AND kind IN ('app', 'static_site');

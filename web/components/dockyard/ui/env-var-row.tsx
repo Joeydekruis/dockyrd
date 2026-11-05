@@ -1,9 +1,10 @@
 "use client";
 
-import { Eye, EyeOff, Link2 } from "lucide-react";
+import { Copy, Eye, EyeOff, Link2 } from "lucide-react";
 import { useState } from "react";
 import { Chip } from "@/components/dockyard/ui/chip";
 import { IconButton } from "@/components/dockyard/ui/icon-button";
+import { useCopyToClipboard } from "@/lib/snackbar-context";
 
 type EnvVarRowProps = {
   name: string;
@@ -27,9 +28,11 @@ export function EnvVarRow({
   linkId,
 }: EnvVarRowProps) {
   const [revealed, setRevealed] = useState(false);
+  const copyToClipboard = useCopyToClipboard();
   const display = secret && !revealed ? "••••••••" : value;
   const ref = refHint(value);
   const unresolved = value.includes("${{") && !ref;
+  const canCopy = !secret || revealed;
   return (
     <div
       className="flex flex-wrap items-center gap-3 border-t py-3 font-mono text-[13px] first:border-t-0"
@@ -62,6 +65,15 @@ export function EnvVarRow({
           onClick={() => setRevealed((v) => !v)}
         />
       ) : null}
+      <IconButton
+        icon={Copy}
+        label={`Copy ${name}`}
+        disabled={!canCopy}
+        onClick={() => {
+          if (!canCopy) return;
+          void copyToClipboard(value, `Copied ${name}`);
+        }}
+      />
     </div>
   );
 }

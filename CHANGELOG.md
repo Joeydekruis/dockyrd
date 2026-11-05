@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.54] - 2026-11-05
+
+_Finished: 2026-11-05_
+
+### Added
+
+- **#70 / Docker Compose (C-1)** — `kind=compose` service, migration `00011_compose.sql`, `internal/compose` normalize/deploy pipeline, proxy routes for compose upstreams, validate/containers API, **Stacks** detail UI — https://github.com/Joeydekruis/dockyrd/issues/70
+- **#69 / Preview deployments (P-1)** — migration `00010_previews.sql`, PR webhook sync, child preview services, previews tab + settings on apps — https://github.com/Joeydekruis/dockyrd/issues/69
+- **#68 / API tokens + dy CLI (K-1/K-2)** — migration `00009_api_tokens_v2.sql`, project-scoped `dyk_` tokens with read/deploy/write, Bearer auth (default deny), `GET /api/v1/deployments/{id}`, account tokens UI, `cmd/dy` — https://github.com/Joeydekruis/dockyrd/issues/68
+
 ## [0.0.53] - 2026-11-05
 
 _Finished: 2026-11-05_

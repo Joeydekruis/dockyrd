@@ -11,6 +11,7 @@ import (
 
 	"github.com/oklog/ulid/v2"
 
+	"github.com/Joeydekruis/dockyrd/internal/apitoken"
 	"github.com/Joeydekruis/dockyrd/internal/auth"
 	"github.com/Joeydekruis/dockyrd/internal/audit"
 	"github.com/Joeydekruis/dockyrd/internal/config"
@@ -88,6 +89,8 @@ func registerAPIRoutes(mux *http.ServeMux, deps apiDeps) {
 	registerUpdatesRoutes(mux, deps)
 	registerInboxRoutes(mux, deps)
 	registerBuildResilienceRoutes(mux, deps)
+	registerComposeRoutes(mux, deps)
+	registerTokenRoutes(mux, deps)
 }
 
 func (d apiDeps) handleLogin(w http.ResponseWriter, r *http.Request) {
@@ -147,7 +150,7 @@ func (d apiDeps) handleLogout(w http.ResponseWriter, r *http.Request) {
 }
 
 func (d apiDeps) handleMe(w http.ResponseWriter, r *http.Request) {
-	user, err := d.userFromRequest(r)
+	p, err := d.resolvePrincipal(r)
 	if err != nil {
 		if d.q != nil {
 			if sess, serr := d.sessionFromRequest(r); serr == nil {
@@ -166,6 +169,16 @@ func (d apiDeps) handleMe(w http.ResponseWriter, r *http.Request) {
 		writeJSONError(w, http.StatusUnauthorized, "not signed in")
 		return
 	}
+	if p.Token != nil {
+		if !apitoken.ValidateScope(p.Token.Scope, apitoken.ScopeRead) {
+			writeJSONError(w, http.StatusForbidden, "insufficient token scope")
+			return
+		}
+		d.touchAPIToken(r, *p.Token)
+	} else if !d.enforce2FASetupPolicy(w, r, p.User) {
+		return
+	}
+	user := p.User
 	writeJSON(w, http.StatusOK, userResponse{
 		ID:          user.ID,
 		Email:       user.Email,
@@ -291,28 +304,7 @@ func (d apiDeps) startSession(w http.ResponseWriter, r *http.Request, userID str
 }
 
 func (d apiDeps) userFromRequest(r *http.Request) (sqlc.GetUserByIDRow, error) {
-	if d.q == nil {
-		return sqlc.GetUserByIDRow{}, errors.New("no db")
-	}
-	c, err := r.Cookie(sessionCookie)
-	if err != nil {
-		return sqlc.GetUserByIDRow{}, err
-	}
-	sess, err := d.q.GetSession(r.Context(), auth.HashSessionToken(c.Value))
-	if err != nil {
-		return sqlc.GetUserByIDRow{}, err
-	}
-	if time.Now().Unix() > sess.ExpiresAt {
-		return sqlc.GetUserByIDRow{}, errors.New("expired")
-	}
-	user, err := d.q.GetUserByID(r.Context(), sess.UserID)
-	if err != nil {
-		return sqlc.GetUserByIDRow{}, err
-	}
-	if totpEnabled(user.TotpEnabledAt) && sess.MfaPassed == 0 {
-		return sqlc.GetUserByIDRow{}, errors.New("mfa required")
-	}
-	return user, nil
+	return d.sessionUserFromRequest(r)
 }
 
 func clearSessionCookie(w http.ResponseWriter) {
