@@ -55,6 +55,7 @@ func startBackground(ctx context.Context, cfg config.Config, db *sql.DB, q *sqlc
 		Docker:    dockerCli,
 		Log:       log,
 		Resources: resources.New(cfg.BuildIsolationEnabled()),
+		Notify:    notifier,
 	}
 
 	worker := &jobs.Worker{Cfg: cfg, Q: q, Deploy: deployRT, Docker: dockerCli, Log: log, Notify: notifier, Events: eventLog}
@@ -84,10 +85,11 @@ func startBackground(ctx context.Context, cfg config.Config, db *sql.DB, q *sqlc
 		go dispatcher.Run(ctx, 2*time.Second)
 	}
 	if notifier != nil {
-		go watch.RunDisk(ctx, cfg, q, notifier, log, 60*time.Second)
+		go watch.RunDisk(ctx, cfg, q, notifier, log, 60*time.Second, dockerCli)
 		go watch.RunBackupsOverdue(ctx, q, notifier, log, 10*time.Minute)
 		go watch.RunCerts(ctx, cfg, q, notifier, log, 6*time.Hour)
 	}
+	go watch.RunHeartbeat(ctx, q, log, 5*time.Minute)
 
 	go links.BackfillAllProjects(ctx, q, cfg.SecretKeyPath(), log)
 

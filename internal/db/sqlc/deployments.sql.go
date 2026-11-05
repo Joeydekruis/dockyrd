@@ -255,6 +255,44 @@ func (q *Queries) MarkInterruptedDeployments(ctx context.Context, finishedAt sql
 	return err
 }
 
+const markInterruptedDeploymentsReturning = `-- name: MarkInterruptedDeploymentsReturning :many
+UPDATE deployments
+SET
+  status = 'failed',
+  error = 'interrupted',
+  finished_at = ?
+WHERE status IN ('building', 'starting', 'healthchecking')
+RETURNING id, service_id
+`
+
+type MarkInterruptedDeploymentsReturningRow struct {
+	ID        string
+	ServiceID string
+}
+
+func (q *Queries) MarkInterruptedDeploymentsReturning(ctx context.Context, finishedAt sql.NullInt64) ([]MarkInterruptedDeploymentsReturningRow, error) {
+	rows, err := q.db.QueryContext(ctx, markInterruptedDeploymentsReturning, finishedAt)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []MarkInterruptedDeploymentsReturningRow
+	for rows.Next() {
+		var i MarkInterruptedDeploymentsReturningRow
+		if err := rows.Scan(&i.ID, &i.ServiceID); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const setDeploymentBuildLogPath = `-- name: SetDeploymentBuildLogPath :exec
 UPDATE deployments
 SET build_log_path = ?

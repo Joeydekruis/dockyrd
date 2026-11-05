@@ -15,9 +15,13 @@ import {
   getNotificationSettings,
   listNotificationChannels,
   patchNotificationChannel,
+  patchNotificationSettings,
   testNotificationChannel,
   type NotificationChannel,
 } from "@/lib/api";
+
+const settingsCardClass =
+  "mb-8 space-y-4 rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-6";
 
 function statusVariant(status: string): "ok" | "warn" | "err" | "idle" {
   switch (status) {
@@ -39,6 +43,12 @@ export function NotificationChannelsSettingsPage() {
   const [addOpen, setAddOpen] = useState(false);
   const [logChannel, setLogChannel] = useState<NotificationChannel | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [diskWarnPct, setDiskWarnPct] = useState(85);
+  const [diskCritPct, setDiskCritPct] = useState(95);
+  const [certWarnPct, setCertWarnPct] = useState(15);
+  const [heartbeatURL, setHeartbeatURL] = useState("");
+  const [thresholdSaving, setThresholdSaving] = useState(false);
+  const [thresholdSaved, setThresholdSaved] = useState(false);
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -48,6 +58,10 @@ export function NotificationChannelsSettingsPage() {
         getNotificationSettings(),
         listNotificationChannels(),
       ]);
+      setDiskWarnPct(settings.settings.disk_warn_pct);
+      setDiskCritPct(settings.settings.disk_crit_pct);
+      setCertWarnPct(settings.settings.cert_warn_pct);
+      setHeartbeatURL(settings.settings.heartbeat_url ?? "");
       setEventTypes(settings.event_types);
       setChannels(list.channels);
     } catch (e) {
@@ -77,6 +91,24 @@ export function NotificationChannelsSettingsPage() {
     await reload();
   }
 
+  async function saveThresholds() {
+    setThresholdSaving(true);
+    setThresholdSaved(false);
+    setError(null);
+    try {
+      await patchNotificationSettings({
+        disk_warn_pct: diskWarnPct,
+        disk_crit_pct: diskCritPct,
+        cert_warn_pct: certWarnPct,
+      });
+      setThresholdSaved(true);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to save thresholds");
+    } finally {
+      setThresholdSaving(false);
+    }
+  }
+
   if (loading) {
     return (
       <DashboardShell title="Notification channels" breadcrumb="Server settings">
@@ -102,6 +134,119 @@ export function NotificationChannelsSettingsPage() {
         {error ? (
           <p className="mb-4 text-sm text-[var(--destructive)]">{error}</p>
         ) : null}
+        <section className={settingsCardClass} aria-labelledby="alert-thresholds">
+          <div>
+            <h2
+              id="alert-thresholds"
+              className="text-base font-semibold text-[var(--foreground)]"
+            >
+              Alert thresholds
+            </h2>
+            <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+              Disk alerts resolve below 80% usage. Certificate warnings use
+              remaining lifetime as a percentage of the cert validity period.
+            </p>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-3">
+            <label className="block text-sm">
+              <span className="text-[var(--muted-foreground)]">
+                Disk warning (%)
+              </span>
+              <input
+                type="number"
+                min={1}
+                max={100}
+                className="mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-3 py-2"
+                value={diskWarnPct}
+                onChange={(e) => setDiskWarnPct(Number(e.target.value))}
+              />
+            </label>
+            <label className="block text-sm">
+              <span className="text-[var(--muted-foreground)]">
+                Disk critical (%)
+              </span>
+              <input
+                type="number"
+                min={1}
+                max={100}
+                className="mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-3 py-2"
+                value={diskCritPct}
+                onChange={(e) => setDiskCritPct(Number(e.target.value))}
+              />
+            </label>
+            <label className="block text-sm">
+              <span className="text-[var(--muted-foreground)]">
+                Certificate warning (% life left)
+              </span>
+              <input
+                type="number"
+                min={1}
+                max={50}
+                className="mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-3 py-2"
+                value={certWarnPct}
+                onChange={(e) => setCertWarnPct(Number(e.target.value))}
+              />
+            </label>
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <Button
+              type="button"
+              disabled={thresholdSaving}
+              onClick={() => void saveThresholds()}
+            >
+              {thresholdSaving ? "Saving…" : "Save thresholds"}
+            </Button>
+            {thresholdSaved ? (
+              <span className="text-sm text-[var(--muted-foreground)]">
+                Saved
+              </span>
+            ) : null}
+          </div>
+        </section>
+        <section className={settingsCardClass} aria-labelledby="external-heartbeat">
+          <h2 id="external-heartbeat" className="text-base font-semibold">
+            External heartbeat
+          </h2>
+          <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+            Optional GET ping every five minutes for dead-man monitoring (e.g.
+            Healthchecks.io, Uptime Kuma). Dockyard cannot alert when the host is
+            fully down — this URL lets an external service notice missing pings.
+          </p>
+          <label className="mt-4 block text-sm">
+            <span className="text-[var(--muted-foreground)]">Ping URL</span>
+            <input
+              className="mt-1 w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-3 py-2 font-mono text-[13px]"
+              value={heartbeatURL}
+              onChange={(e) => setHeartbeatURL(e.target.value)}
+              placeholder="https://healthchecks.io/ping/…"
+            />
+          </label>
+          <div className="mt-4">
+            <Button
+              type="button"
+              disabled={thresholdSaving}
+              onClick={() =>
+                void (async () => {
+                  setThresholdSaving(true);
+                  try {
+                    await patchNotificationSettings({
+                      heartbeat_url: heartbeatURL.trim(),
+                    });
+                    setThresholdSaved(true);
+                  } catch (e) {
+                    setError(
+                      e instanceof Error ? e.message : "Failed to save heartbeat",
+                    );
+                  } finally {
+                    setThresholdSaving(false);
+                  }
+                })()
+              }
+            >
+              Save heartbeat URL
+            </Button>
+          </div>
+        </section>
         {channels.length === 0 ? (
           <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-8 text-center text-sm text-[var(--muted-foreground)]">
             No alert channels yet. Add Slack, Discord, webhook, or email to

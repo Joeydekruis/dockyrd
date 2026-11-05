@@ -9,6 +9,7 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/config"
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
 	"github.com/Joeydekruis/dockyrd/internal/docker"
+	"github.com/Joeydekruis/dockyrd/internal/notify"
 	"github.com/Joeydekruis/dockyrd/internal/prune"
 	"github.com/Joeydekruis/dockyrd/internal/proxy"
 	"github.com/Joeydekruis/dockyrd/internal/resources"
@@ -16,11 +17,12 @@ import (
 
 // Loop marks interrupted deploys and syncs proxy config periodically.
 type Loop struct {
-	Cfg       config.Config
-	Q         *sqlc.Queries
-	Docker    *docker.Client
-	Log       *slog.Logger
-	Resources resources.Resources
+	Cfg               config.Config
+	Q                 *sqlc.Queries
+	Docker            *docker.Client
+	Log               *slog.Logger
+	Resources         resources.Resources
+	Notify            *notify.Notifier
 	tickCount         int
 	thawed            bool
 	interruptedMarked bool
@@ -36,8 +38,13 @@ func (l *Loop) Tick(ctx context.Context) {
 	}
 	if !l.interruptedMarked {
 		now := time.Now().Unix()
-		if err := l.Q.MarkInterruptedDeployments(ctx, sql.NullInt64{Int64: now, Valid: true}); err != nil && l.Log != nil {
+		rows, err := l.Q.MarkInterruptedDeploymentsReturning(ctx, sql.NullInt64{Int64: now, Valid: true})
+		if err != nil && l.Log != nil {
 			l.Log.Warn("mark interrupted deployments", "err", err)
+		} else if l.Notify != nil {
+			for _, row := range rows {
+				l.Notify.EmitDeployFailed(ctx, row.ServiceID, row.ID, "Deploy interrupted by panel restart")
+			}
 		}
 		l.interruptedMarked = true
 	}

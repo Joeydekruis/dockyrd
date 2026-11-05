@@ -180,6 +180,36 @@ export function revokeAuthSession(id: string) {
   return apiFetch<void>(`/api/v1/auth/sessions/${id}`, { method: "DELETE" });
 }
 
+export type APITokenEntry = {
+  id: string;
+  name: string;
+  scope: string;
+  project_id: string;
+  last_used_at?: number;
+  last_used_ip?: string;
+  created_at: number;
+  token_prefix?: string;
+};
+
+export function listAPITokens() {
+  return apiFetch<{ tokens: APITokenEntry[] }>("/api/v1/tokens");
+}
+
+export function createAPIToken(body: {
+  name: string;
+  scope: string;
+  project_id: string;
+}) {
+  return apiFetch<{ token: string; entry: APITokenEntry }>("/api/v1/tokens", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export function revokeAPIToken(id: string) {
+  return apiFetch<void>(`/api/v1/tokens/${id}`, { method: "DELETE" });
+}
+
 export type AuditEntry = {
   id: string;
   user_id?: string;
@@ -709,6 +739,44 @@ export function patchServiceBuildLocation(
   );
 }
 
+export type ServicePreviewConfig = {
+  enabled: boolean;
+};
+
+export type ServicePreview = {
+  id: string;
+  name: string;
+  slug: string;
+  preview_pr: number;
+  preview_head_sha?: string;
+  preview_last_push_at?: number;
+  primary_hostname?: string;
+  live_deployment_id?: string;
+};
+
+export function listServicePreviews(serviceId: string) {
+  return apiFetch<{ previews: ServicePreview[] }>(
+    `/api/v1/services/${serviceId}/previews`,
+  );
+}
+
+export function deleteServicePreview(serviceId: string, previewId: string) {
+  return apiFetch<void>(
+    `/api/v1/services/${serviceId}/previews/${previewId}`,
+    { method: "DELETE" },
+  );
+}
+
+export function patchServicePreviewConfig(
+  serviceId: string,
+  config: ServicePreviewConfig,
+) {
+  return apiFetch<{ preview: ServicePreviewConfig }>(
+    `/api/v1/services/${serviceId}/preview-config`,
+    { method: "PATCH", json: config },
+  );
+}
+
 export function listDeployments(serviceId: string) {
   return apiFetch<{ deployments: Deployment[] }>(
     `/api/v1/services/${serviceId}/deployments`,
@@ -919,6 +987,8 @@ export type GitHubStatus = {
   manage_url?: string;
   app_configured?: boolean;
   installation_ready?: boolean;
+  missing_webhook_events?: string[];
+  webhook_events_warning?: string;
 };
 
 export function getGitHubStatus() {
@@ -1370,6 +1440,7 @@ export type NotificationSettingsPayload = {
     reminder_hours: number;
     instance_name: string;
     allow_private_targets: boolean;
+    heartbeat_url?: string;
   };
   event_types: string[];
   smtp_configured: boolean;
@@ -1388,6 +1459,7 @@ export function patchNotificationSettings(body: {
   reminder_hours?: number;
   instance_name?: string;
   allow_private_targets?: boolean;
+  heartbeat_url?: string;
 }) {
   return apiFetch<NotificationSettingsPayload>(
     "/api/v1/settings/notifications",

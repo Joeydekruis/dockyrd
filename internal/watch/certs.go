@@ -3,6 +3,7 @@ package watch
 import (
 	"context"
 	"crypto/tls"
+	"crypto/x509"
 	"database/sql"
 	"fmt"
 	"log/slog"
@@ -14,6 +15,41 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
 	"github.com/Joeydekruis/dockyrd/internal/notify"
 )
+
+type certEval struct {
+	status string
+	level  notify.Level
+	emit   bool
+	resolve bool
+}
+
+// evalCertLifetime derives status and alert intent from leaf validity and now.
+func evalCertLifetime(now time.Time, notBefore, notAfter time.Time, warnPct float64) certEval {
+	lifetime := notAfter.Sub(notBefore).Seconds()
+	if lifetime <= 0 {
+		lifetime = 1
+	}
+	remaining := notAfter.Sub(now)
+	remainPct := remaining.Seconds() / lifetime * 100
+
+	if remaining <= 0 {
+		return certEval{status: "expired", level: notify.LevelError, emit: true}
+	}
+	if remainPct <= 5 || remaining <= 72*time.Hour {
+		return certEval{status: "expiring", level: notify.LevelError, emit: true}
+	}
+	warnThreshold := warnPct
+	if warnThreshold <= 0 {
+		warnThreshold = 15
+	}
+	if remainPct <= warnThreshold || remaining <= 14*24*time.Hour {
+		return certEval{status: "expiring", level: notify.LevelWarning, emit: true}
+	}
+	if remainPct > 33 {
+		return certEval{status: "valid", resolve: true}
+	}
+	return certEval{status: "valid"}
+}
 
 // RunCerts checks TLS certificates served on :443 and updates domain rows.
 func RunCerts(ctx context.Context, cfg config.Config, q *sqlc.Queries, n *notify.Notifier, log *slog.Logger, interval time.Duration) {
@@ -37,6 +73,7 @@ func tickCerts(ctx context.Context, cfg config.Config, q *sqlc.Queries, n *notif
 	if q == nil {
 		return
 	}
+	settings := loadNotifySettings(ctx, q)
 	rows, err := q.ListDomainsForCertWatch(ctx)
 	if err != nil {
 		return
@@ -49,13 +86,13 @@ func tickCerts(ctx context.Context, cfg config.Config, q *sqlc.Queries, n *notif
 		if row.DnsStatus.Valid {
 			dns = row.DnsStatus.String
 		}
-		checkDomainCert(ctx, q, n, row.ID, row.Hostname, dns)
+		checkDomainCert(ctx, q, n, settings.CertWarnPct, row.ID, row.Hostname, dns)
 	}
 	_ = cfg
 	_ = log
 }
 
-func checkDomainCert(ctx context.Context, q *sqlc.Queries, n *notify.Notifier, domainID, hostname, dnsStatus string) {
+func checkDomainCert(ctx context.Context, q *sqlc.Queries, n *notify.Notifier, certWarnPct int, domainID, hostname, dnsStatus string) {
 	hostname = strings.TrimSpace(hostname)
 	if hostname == "" {
 		return
@@ -79,29 +116,19 @@ func checkDomainCert(ctx context.Context, q *sqlc.Queries, n *notify.Notifier, d
 		return
 	}
 	leaf := certs[0]
-	expires := leaf.NotAfter.Unix()
-	lifetime := leaf.NotAfter.Sub(leaf.NotBefore).Seconds()
-	remaining := time.Until(leaf.NotAfter)
-	remainPct := remaining.Seconds() / lifetime * 100
-
-	status := "valid"
-	level := notify.LevelWarning
-	emit := false
-	if remaining <= 0 {
-		status = "expired"
-		level = notify.LevelError
-		emit = true
-	} else if remainPct <= 5 || remaining <= 72*time.Hour {
-		status = "expiring"
-		level = notify.LevelError
-		emit = true
-	} else if remainPct <= 15 || remaining <= 14*24*time.Hour {
-		status = "expiring"
-		emit = true
+	if !hostnameMatchesCert(hostname, leaf) {
+		_ = q.UpdateDomainCertStatus(ctx, sqlc.UpdateDomainCertStatusParams{
+			CertStatus:    sqlNullString("missing"),
+			CertExpiresAt: sql.NullInt64{},
+			ID:            domainID,
+		})
+		return
 	}
+	expires := leaf.NotAfter.Unix()
+	eval := evalCertLifetime(time.Now(), leaf.NotBefore, leaf.NotAfter, float64(certWarnPct))
 
 	_ = q.UpdateDomainCertStatus(ctx, sqlc.UpdateDomainCertStatusParams{
-		CertStatus:    sqlNullString(status),
+		CertStatus:    sqlNullString(eval.status),
 		CertExpiresAt: sqlNullInt64(expires),
 		ID:            domainID,
 	})
@@ -109,26 +136,42 @@ func checkDomainCert(ctx context.Context, q *sqlc.Queries, n *notify.Notifier, d
 	if n == nil {
 		return
 	}
-	if remainPct > 33 && status == "valid" {
+	if eval.resolve {
 		_ = n.Emit(ctx, notify.Event{
 			Type: notify.TypeCertExpiring, Level: notify.LevelWarning, State: notify.StateResolved,
 			DedupKey: "cert:" + hostname, Title: "Certificate renewed · " + hostname,
 		})
 		return
 	}
-	if !emit {
+	if !eval.emit {
 		return
 	}
 	title := fmt.Sprintf("Certificate expires soon · %s", hostname)
-	if status == "expired" {
+	if eval.status == "expired" {
 		title = fmt.Sprintf("Certificate expired · %s", hostname)
 	}
 	detail := fmt.Sprintf("NotAfter %s (DNS: %s).", leaf.NotAfter.UTC().Format(time.RFC3339), dnsStatus)
 	_ = n.Emit(ctx, notify.Event{
-		Type: notify.TypeCertExpiring, Level: level, State: notify.StateFiring,
+		Type: notify.TypeCertExpiring, Level: eval.level, State: notify.StateFiring,
 		DedupKey: "cert:" + hostname, Title: title, Detail: detail, Href: "/domains",
 		Data: map[string]any{"hostname": hostname, "dns_status": dnsStatus},
 	})
+}
+
+func hostnameMatchesCert(hostname string, leaf *x509.Certificate) bool {
+	if err := leaf.VerifyHostname(hostname); err == nil {
+		return true
+	}
+	h := strings.ToLower(strings.TrimSuffix(hostname, "."))
+	for _, name := range leaf.DNSNames {
+		if strings.EqualFold(name, h) {
+			return true
+		}
+	}
+	if strings.EqualFold(leaf.Subject.CommonName, h) {
+		return true
+	}
+	return false
 }
 
 func sqlNullString(s string) sql.NullString {

@@ -37,6 +37,7 @@ type notificationSettings struct {
 	ReminderHours       int    `json:"reminder_hours"`
 	InstanceName        string `json:"instance_name"`
 	AllowPrivateTargets bool   `json:"allow_private_targets"`
+	HeartbeatURL        string `json:"heartbeat_url"`
 }
 
 func defaultNotificationSettings() notificationSettings {
@@ -57,7 +58,10 @@ func (d apiDeps) loadNotificationSettings(ctx context.Context) notificationSetti
 	if err != nil {
 		return out
 	}
-	raw, _ := json.Marshal(row.Value)
+	raw, err := settingValueBytes(row.Value)
+	if err != nil {
+		return out
+	}
 	_ = json.Unmarshal(raw, &out)
 	if out.DiskWarnPct == 0 {
 		out.DiskWarnPct = 85
@@ -78,7 +82,7 @@ func (d apiDeps) saveNotificationSettings(ctx context.Context, s notificationSet
 	}
 	return d.q.UpsertSetting(ctx, sqlc.UpsertSettingParams{
 		Key:   "notifications",
-		Value: string(raw),
+		Value: raw,
 	})
 }
 
@@ -101,30 +105,41 @@ func (d apiDeps) handlePatchNotificationSettings(w http.ResponseWriter, r *http.
 	if !ok {
 		return
 	}
-	var body notificationSettings
+	var body struct {
+		DiskWarnPct         *int    `json:"disk_warn_pct"`
+		DiskCritPct         *int    `json:"disk_crit_pct"`
+		CertWarnPct         *int    `json:"cert_warn_pct"`
+		ReminderHours       *int    `json:"reminder_hours"`
+		InstanceName        *string `json:"instance_name"`
+		AllowPrivateTargets *bool   `json:"allow_private_targets"`
+		HeartbeatURL        *string `json:"heartbeat_url"`
+	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		writeJSONError(w, http.StatusBadRequest, "invalid json")
 		return
 	}
 	ctx := r.Context()
 	cur := d.loadNotificationSettings(ctx)
-	if body.DiskWarnPct > 0 {
-		cur.DiskWarnPct = body.DiskWarnPct
+	if body.DiskWarnPct != nil && *body.DiskWarnPct > 0 {
+		cur.DiskWarnPct = *body.DiskWarnPct
 	}
-	if body.DiskCritPct > 0 {
-		cur.DiskCritPct = body.DiskCritPct
+	if body.DiskCritPct != nil && *body.DiskCritPct > 0 {
+		cur.DiskCritPct = *body.DiskCritPct
 	}
-	if body.CertWarnPct > 0 {
-		cur.CertWarnPct = body.CertWarnPct
+	if body.CertWarnPct != nil && *body.CertWarnPct > 0 {
+		cur.CertWarnPct = *body.CertWarnPct
 	}
-	if body.ReminderHours > 0 {
-		cur.ReminderHours = body.ReminderHours
+	if body.ReminderHours != nil && *body.ReminderHours > 0 {
+		cur.ReminderHours = *body.ReminderHours
 	}
-	if strings.TrimSpace(body.InstanceName) != "" {
-		cur.InstanceName = strings.TrimSpace(body.InstanceName)
+	if body.InstanceName != nil {
+		cur.InstanceName = strings.TrimSpace(*body.InstanceName)
 	}
-	if user.Role == "owner" {
-		cur.AllowPrivateTargets = body.AllowPrivateTargets
+	if user.Role == "owner" && body.AllowPrivateTargets != nil {
+		cur.AllowPrivateTargets = *body.AllowPrivateTargets
+	}
+	if body.HeartbeatURL != nil {
+		cur.HeartbeatURL = strings.TrimSpace(*body.HeartbeatURL)
 	}
 	if err := d.saveNotificationSettings(ctx, cur); err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "database error")

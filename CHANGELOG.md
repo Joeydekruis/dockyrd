@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.52] - 2026-11-05
+
+_Finished: 2026-11-05_
+
+### Added
+
+- **#66 / Notifications F4** — optional `heartbeat_url` in notification settings; `watch.RunHeartbeat` GET ping every 5m via `netsafe` client; field on **Settings → Server → Channels** — https://github.com/Joeydekruis/dockyrd/issues/66
+- **Deploy restart alerts** — interrupted deployments marked at panel startup emit `deploy.failed` via notify outbox (`MarkInterruptedDeploymentsReturning` + reconcile hook)
+
+### Changed
+
+- **#65 / Notifications F3** — disk and certificate watchers use configurable warn/critical thresholds and reminder intervals from settings; threshold controls on Channels page — https://github.com/Joeydekruis/dockyrd/issues/65
+- **#64 / Notifications F2** — notification settings PATCH uses pointer fields so partial updates do not clear SMTP or watch config — https://github.com/Joeydekruis/dockyrd/issues/64
+- **Notify** — Slack/webhook delivery tests (404 disables channel, 429 honors Retry-After)
+
 ## [0.0.51] - 2026-11-05
 
 _Finished: 2026-11-05_

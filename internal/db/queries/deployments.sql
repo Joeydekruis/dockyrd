@@ -131,3 +131,12 @@ SET
   error = 'interrupted',
   finished_at = ?
 WHERE status IN ('building', 'starting', 'healthchecking');
+
+-- name: MarkInterruptedDeploymentsReturning :many
+UPDATE deployments
+SET
+  status = 'failed',
+  error = 'interrupted',
+  finished_at = ?
+WHERE status IN ('building', 'starting', 'healthchecking')
+RETURNING id, service_id;

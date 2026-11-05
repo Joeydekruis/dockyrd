@@ -76,6 +76,9 @@ func TestMarkInterruptedOnlyOnStartupTick(t *testing.T) {
 	if row.Status != "failed" {
 		t.Fatalf("first startup tick: %q want failed", row.Status)
 	}
+	if row.Error.String != "interrupted" {
+		t.Fatalf("error: %q", row.Error.String)
+	}
 
 	dep2 := "01TESTDEP00000000000000002"
 	if err := q.CreateDeployment(ctx, sqlc.CreateDeploymentParams{
