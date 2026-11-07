@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-11-07
+
+_Finished: 2026-11-07_
+
+### Fixed
+
+- **#45 / UI shell parity** — dismissible announcement banner (`localStorage`), collapse on main scroll, duplicate Server settings **Channels** nav entry removed — https://github.com/Joeydekruis/dockyrd/issues/45
+
+### Changed
+
+- **#67** — backlog closed: B-1 backup hardening already on `main` (restore runs, disk guard, garage test target, `backup.failed` notify, Redis restore blocked)
+
 ## [0.6.0] - 2026-11-07
 
 _Finished: 2026-11-07_

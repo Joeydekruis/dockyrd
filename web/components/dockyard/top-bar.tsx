@@ -1,21 +1,37 @@
+"use client";
+
 import { AnnouncementBanner } from "@/components/dockyard/ui/announcement-banner";
 
-const BANNER_HEIGHT_PX = 44;
+export const BANNER_HEIGHT_PX = 44;
 
 type TopBarProps = {
   className?: string;
+  visible?: boolean;
+  /** When false, the bar is collapsed (e.g. user scrolled main content). */
+  expanded?: boolean;
+  onDismiss?: () => void;
 };
 
 /** Fixed announcement strip spanning the full app width (above sidebar and header). */
-export function TopBar({ className = "" }: TopBarProps) {
+export function TopBar({
+  className = "",
+  visible = true,
+  expanded = true,
+  onDismiss,
+}: TopBarProps) {
+  if (!visible) return null;
+
   return (
     <div
       className={className}
-      style={{ height: BANNER_HEIGHT_PX, minHeight: BANNER_HEIGHT_PX }}
+      style={{
+        height: expanded ? BANNER_HEIGHT_PX : 0,
+        minHeight: expanded ? BANNER_HEIGHT_PX : 0,
+        overflow: "hidden",
+        transition: "height 0.2s ease, min-height 0.2s ease",
+      }}
     >
-      <AnnouncementBanner />
+      <AnnouncementBanner onDismiss={onDismiss} />
     </div>
   );
 }
-
-export { BANNER_HEIGHT_PX };

@@ -112,7 +112,6 @@ export const serverSettingsSidebarNav: SettingsNavItem[] = [
     href: "/settings/server/channels",
     icon: Bell,
   },
-  { label: "Channels", href: "/settings/server/channels", icon: Bell },
   {
     label: "Backups",
     href: "/settings/server/backups",
