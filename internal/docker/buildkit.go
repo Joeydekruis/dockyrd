@@ -32,6 +32,9 @@ func (c *Client) EnsureBuildkit(ctx context.Context, dataDir string) error {
 	if err := c.EnsureVolume(ctx, buildkitDataVolume); err != nil {
 		return err
 	}
+	if err := c.PullImage(ctx, BuildkitImage); err != nil {
+		return fmt.Errorf("pull %s: %w", BuildkitImage, err)
+	}
 	cfgDir := filepath.Dir(cfgPath)
 	inspect, err := c.moby.ContainerInspect(ctx, BuildkitContainerName)
 	if err != nil && !errdefs.IsNotFound(err) {
@@ -67,7 +70,9 @@ func (c *Client) EnsureBuildkit(ctx context.Context, dataDir string) error {
 	} else {
 		if !inspect.State.Running {
 			if err := c.moby.ContainerStart(ctx, BuildkitContainerName, container.StartOptions{}); err != nil {
-				return err
+				if err := c.recreateBuildkit(ctx, dataDir, err); err != nil {
+					return fmt.Errorf("start %s: %w", BuildkitContainerName, err)
+				}
 			}
 		}
 	}
@@ -95,4 +100,16 @@ func ensureBuildxBuilder(ctx context.Context, buildkitdConfig string) error {
 		return fmt.Errorf("buildx create %q: %w: %s", name, err, strings.TrimSpace(string(out)))
 	}
 	return nil
+}
+
+func (c *Client) recreateBuildkit(ctx context.Context, dataDir string, startErr error) error {
+	if startErr == nil {
+		return nil
+	}
+	msg := strings.ToLower(startErr.Error())
+	if !strings.Contains(msg, "no such image") && !strings.Contains(msg, "not found") {
+		return startErr
+	}
+	_ = c.moby.ContainerRemove(ctx, BuildkitContainerName, container.RemoveOptions{Force: true})
+	return c.EnsureBuildkit(ctx, dataDir)
 }

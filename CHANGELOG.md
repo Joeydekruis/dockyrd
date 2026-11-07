@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.7.9] - 2026-11-07
+
+_Finished: 2026-11-07_
+
+### Fixed
+
+- **BuildKit bootstrap** — pull `moby/buildkit:buildx-stable-1` before creating `dy-buildkit`; recreate container when start fails with missing image
+- **Static site (publish-only)** — skip `dy-buildkit` / buildx when build before publish is off and no install/build commands
+
 ## [0.7.8] - 2026-11-07
 
 _Finished: 2026-11-07_

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/Joeydekruis/dockyrd/internal/appconfig"
@@ -67,28 +68,41 @@ func (rt *Runtime) RunStaticSiteDeployment(ctx context.Context, deploymentID str
 	if err := build.CheckDiskGuard(rt.Cfg.DataDir, rt.Cfg.MinFreeDiskPercent()); err != nil {
 		return rt.fail(ctx, deploymentID, err)
 	}
+	needsContainerBuild := strings.TrimSpace(staticsite.ResolveBuildCommand(cfg, ".")) != ""
 	peak := build.ExpectedPeakHeuristic("static_site", false)
-	buildxName, builderLabel, remote, resolveErr := rt.resolveBuildx(ctx, cfg.BuildLocation)
-	if resolveErr != nil {
-		return rt.fail(ctx, deploymentID, resolveErr)
-	}
+	var buildxName, builderLabel string
 	var budget build.Budget
 	var waitedMs int64
-	if remote {
-		budget = build.Budget{}
-	} else {
-		var admErr error
-		budget, waitedMs, admErr = rt.acquireBuildBudget(ctx, deploymentID, dep.ServiceID, peak)
-		if admErr != nil {
-			return admErr
+	var sampler *build.PeakSampler
+	stopWatch := func() {}
+	frozenAcc := new(int64)
+	if needsContainerBuild {
+		var remote bool
+		var resolveErr error
+		buildxName, builderLabel, remote, resolveErr = rt.resolveBuildx(ctx, cfg.BuildLocation)
+		if resolveErr != nil {
+			return rt.fail(ctx, deploymentID, resolveErr)
 		}
+		if remote {
+			budget = build.Budget{}
+		} else {
+			var admErr error
+			budget, waitedMs, admErr = rt.acquireBuildBudget(ctx, deploymentID, dep.ServiceID, peak)
+			if admErr != nil {
+				return admErr
+			}
+		}
+	} else {
+		builderLabel = "clone"
 	}
 	buildCtx, cancel := context.WithTimeout(ctx, rt.Cfg.BuildTimeout())
 	defer cancel()
-	buildCtx = build.WithBuildxBuilder(buildCtx, buildxName)
-	stopWatch, frozenAcc := rt.startBuildWatchdog(buildCtx, dep.ServiceID, deploymentID, cancel)
+	if needsContainerBuild {
+		buildCtx = build.WithBuildxBuilder(buildCtx, buildxName)
+		stopWatch, frozenAcc = rt.startBuildWatchdog(buildCtx, dep.ServiceID, deploymentID, cancel)
+		sampler = build.StartPeakSampler(buildCtx, rt.Resources)
+	}
 	defer stopWatch()
-	sampler := build.StartPeakSampler(buildCtx, rt.Resources)
 
 	outputDir, buildErr := staticsite.Build(buildCtx, "docker", staticsite.BuildInput{
 		CloneURL:     cloneURL,
