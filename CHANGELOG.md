@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.7.5] - 2026-11-07
+
+_Finished: 2026-11-07_
+
+### Fixed
+
+- **`dockyrd.service` `226/NAMESPACE` on fresh VPS** — optional `ReadWritePaths` for legacy `/var/lib/dockyard` and `/etc/dockyard` so systemd sandbox setup succeeds before those dirs exist
+- **Installer** — warn when the panel does not answer on `:8000` within 30s after `systemctl start`
+- **CLI** — accept `dockyrd --version` (alias of `dockyrd version`)
+
 ## [0.7.4] - 2026-11-07
 
 _Finished: 2026-11-07_

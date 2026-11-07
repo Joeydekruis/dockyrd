@@ -31,7 +31,7 @@ func main() {
 			fmt.Fprintf(os.Stderr, "serve: %v\n", err)
 			os.Exit(1)
 		}
-	case "version":
+	case "version", "--version", "-version":
 		fmt.Println(version)
 	case "init":
 		res, err := setup.Init(cfg)

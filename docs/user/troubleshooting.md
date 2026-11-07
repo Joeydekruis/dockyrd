@@ -42,6 +42,26 @@ Use **`dockyard.service`** in the URL above — not `dockyrd.service` — when t
 
 If `curl` to `:8000` fails immediately after `enable --now`, wait a second and retry; then check `journalctl -u dockyrd -n 40`.
 
+## `dockyrd.service` fails with `status=226/NAMESPACE`
+
+systemd could not build the service sandbox — the panel never binds to port **8000**.
+
+On **fresh** installs this often means a path in `ReadWritePaths=` does not exist (for example legacy `/var/lib/dockyard` before a rename). Check logs:
+
+```bash
+journalctl -u dockyrd -n 40 --no-pager
+```
+
+**Quick fix** (creates optional legacy dirs) or reinstall after upgrading to a release that marks them optional in the unit:
+
+```bash
+sudo mkdir -p /var/lib/dockyard /etc/dockyard
+sudo systemctl restart dockyrd
+curl -sS http://127.0.0.1:8000/api/v1/health
+```
+
+Or run the panel once without systemd to confirm the binary works: `sudo /usr/local/bin/dockyrd serve` (Ctrl+C to stop).
+
 ## Login / 2FA
 
 - **Forgot password:** use **Forgot password?** on the sign-in page (link-based reset until SMTP is configured).

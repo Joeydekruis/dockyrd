@@ -422,12 +422,28 @@ main() {
 	install_systemd
 	if [ "$SKIP_SYSTEMD" != "1" ] && command -v systemctl >/dev/null 2>&1; then
 		systemctl restart dockyrd.service || systemctl start dockyrd.service
+		verify_service_healthy
 	fi
 	if [ "$SKIP_SYSTEMD" = "1" ]; then
 		log "✓ dockyrd installed (systemd skipped). Run: $BIN_DEST serve"
 	else
 		log "✓ dockyrd service installed. See init output above for the setup token."
 	fi
+}
+
+verify_service_healthy() {
+	i=0
+	while [ "$i" -lt 30 ]; do
+		if systemctl is-active --quiet dockyrd.service 2>/dev/null \
+			&& curl -sf "http://127.0.0.1:8000/api/v1/health" >/dev/null 2>&1; then
+			log "✓ Panel API is listening on :8000"
+			return 0
+		fi
+		i=$((i + 1))
+		sleep 1
+	done
+	log "Warning: dockyrd.service is not healthy on :8000. Check: journalctl -u dockyrd -n 40 --no-pager" >&2
+	return 1
 }
 
 main "$@"

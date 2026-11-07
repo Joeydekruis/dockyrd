@@ -21,7 +21,9 @@ NoNewPrivileges=true
 ProtectSystem=full
 ProtectHome=true
 PrivateTmp=true
-ReadWritePaths=/var/lib/dockyrd /var/lib/dockyard /etc/dockyrd /etc/dockyard /usr/local/bin
+ReadWritePaths=/var/lib/dockyrd /etc/dockyrd /usr/local/bin
+ReadWritePaths=-/var/lib/dockyard
+ReadWritePaths=-/etc/dockyard
 
 [Install]
 WantedBy=multi-user.target
