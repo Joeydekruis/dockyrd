@@ -91,6 +91,7 @@ func registerAPIRoutes(mux *http.ServeMux, deps apiDeps) {
 	registerBuildResilienceRoutes(mux, deps)
 	registerComposeRoutes(mux, deps)
 	registerTokenRoutes(mux, deps)
+	registerTerminalRoutes(mux, deps)
 }
 
 func (d apiDeps) handleLogin(w http.ResponseWriter, r *http.Request) {

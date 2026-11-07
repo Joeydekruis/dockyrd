@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.57] - 2026-11-07
+
+_Finished: 2026-11-07_
+
+### Added
+
+- **#72 / Web terminal** — Server → Terminal for owner/admin: interactive `docker exec` TTY into running app/database/compose containers via WebSocket tickets + Origin check; psql and valkey-cli shortcuts; audit + idle/max session limits — https://github.com/Joeydekruis/dockyrd/issues/72
+
 ## [0.0.56] - 2026-11-07
 
 _Finished: 2026-11-07_

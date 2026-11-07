@@ -1618,3 +1618,28 @@ export function retryNotificationDelivery(id: string) {
     { method: "POST" },
   );
 }
+
+export type TerminalTarget = {
+  service_id: string;
+  service_name: string;
+  kind: string;
+  service_kind: string;
+  compose_service?: string;
+  container_name: string;
+};
+
+export function listTerminalTargets() {
+  return apiFetch<{ targets: TerminalTarget[] }>("/api/v1/terminal/targets");
+}
+
+export function createTerminalSession(input: {
+  service_id: string;
+  compose_service?: string;
+  mode?: string;
+  exec_user?: string;
+}) {
+  return apiFetch<{ ticket: string; expires_at: number }>(
+    "/api/v1/terminal/sessions",
+    { method: "POST", json: input },
+  );
+}

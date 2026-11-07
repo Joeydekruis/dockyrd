@@ -6,6 +6,7 @@ import { EmptyState } from "@/components/dockyard/empty-state";
 import { ObjectStoragePage } from "@/components/dockyard/object-storage-page";
 import { ProjectsPage } from "@/components/dockyard/projects-page";
 import { StaticSitesPage } from "@/components/dockyard/static-sites-page";
+import { TerminalPage } from "@/components/dockyard/terminal-page";
 
 const pages = [
   {
@@ -38,6 +39,11 @@ const pages = [
     title: "Analytics",
     description: "Server analytics arrive in M4.",
   },
+  {
+    segment: "terminal",
+    title: "Terminal",
+    description: "Container shell for owners and admins.",
+  },
 ] as const;
 
 export function generateStaticParams() {
@@ -64,6 +70,9 @@ export default async function SegmentPlaceholder({
   }
   if (segment === "analytics") {
     return <AnalyticsPage />;
+  }
+  if (segment === "terminal") {
+    return <TerminalPage />;
   }
   if (segment === "applications") {
     return <ApplicationsPage />;

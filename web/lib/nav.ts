@@ -18,6 +18,7 @@ import {
   Settings,
   Shield,
   SlidersHorizontal,
+  Terminal,
   User,
   Users,
 } from "lucide-react";
@@ -53,6 +54,7 @@ export const projectNav: NavItem[] = [
 
 export const serverNav: NavItem[] = [
   { label: "Analytics", href: "/analytics", icon: BarChart3, group: "server" },
+  { label: "Terminal", href: "/terminal", icon: Terminal, group: "server" },
 ];
 
 export const serverSettingsNav: NavItem = {
