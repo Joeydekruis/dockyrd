@@ -55,15 +55,44 @@ func NewTicketStore() *TicketStore {
 }
 
 func (s *TicketStore) Issue(spec SessionSpec) (string, time.Time, error) {
+	return s.issue(spec, nil)
+}
+
+// IssueWithAbandonCallback issues a ticket and runs fn if it expires unused (never redeemed).
+func (s *TicketStore) IssueWithAbandonCallback(spec SessionSpec, onAbandon func(SessionSpec)) (string, time.Time, error) {
+	return s.issue(spec, onAbandon)
+}
+
+func (s *TicketStore) issue(spec SessionSpec, onAbandon func(SessionSpec)) (string, time.Time, error) {
 	token, err := randomToken()
 	if err != nil {
 		return "", time.Time{}, err
 	}
 	exp := time.Now().Add(TicketTTL)
 	s.mu.Lock()
-	defer s.mu.Unlock()
 	s.records[token] = ticketRecord{spec: spec, expiresAt: exp}
+	s.mu.Unlock()
+	if onAbandon != nil {
+		wait := time.Until(exp)
+		time.AfterFunc(wait, func() {
+			if sp, ok := s.AbandonIfUnused(token); ok {
+				onAbandon(sp)
+			}
+		})
+	}
 	return token, exp, nil
+}
+
+// AbandonIfUnused removes an unredeemed ticket and returns its spec for cleanup.
+func (s *TicketStore) AbandonIfUnused(token string) (SessionSpec, bool) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	rec, ok := s.records[token]
+	if !ok || rec.used {
+		return SessionSpec{}, false
+	}
+	delete(s.records, token)
+	return rec.spec, true
 }
 
 // Peek validates a ticket without consuming it (for use before WebSocket upgrade).

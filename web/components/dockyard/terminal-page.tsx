@@ -18,9 +18,9 @@ import {
   getTerminalPreferences,
   listProjects,
   listTerminalTargets,
-  patchTerminalPreferences,
   type MeResponse,
   type Project,
+  patchTerminalPreferences,
   type TerminalMeta,
   type TerminalTarget,
 } from "@/lib/api";
@@ -45,6 +45,12 @@ type TerminalTab = {
   mode: "shell" | "psql" | "valkey-cli";
   useRoot: boolean;
   connState: ConnState;
+};
+
+type TabSession = {
+  term: XTerm;
+  fit: FitAddon;
+  ws: WebSocket | null;
 };
 
 function targetKey(t: TerminalTarget): string {
@@ -76,11 +82,8 @@ export function TerminalPage() {
   const [hostMfaCode, setHostMfaCode] = useState("");
   const mfaInputId = useId();
 
-  const hostRef = useRef<HTMLDivElement | null>(null);
-  const termRef = useRef<XTerm | null>(null);
-  const fitRef = useRef<FitAddon | null>(null);
-  const wsRef = useRef<WebSocket | null>(null);
-  const activeTabRef = useRef("");
+  const tabHostRefs = useRef(new Map<string, HTMLDivElement>());
+  const tabSessions = useRef(new Map<string, TabSession>());
   const didAutoConnect = useRef(false);
 
   const activeTab = tabs.find((t) => t.id === activeId) ?? null;
@@ -104,7 +107,9 @@ export function TerminalPage() {
           listTerminalTargets(),
           getTerminalMeta(),
           listProjects(),
-          getTerminalPreferences().catch(() => ({ theme_id: loadTerminalThemeId() })),
+          getTerminalPreferences().catch(() => ({
+            theme_id: loadTerminalThemeId(),
+          })),
         ]);
       })
       .then((res) => {
@@ -117,15 +122,52 @@ export function TerminalPage() {
           setThemeId(prefs.theme_id as TerminalThemeId);
           saveTerminalThemeId(prefs.theme_id as TerminalThemeId);
         }
-        if (targetRes.targets[0]) {
+        const preferTest =
+          !metaRes.session_kinds.host.available &&
+          metaRes.session_kinds.test.available &&
+          projectRes.projects.length > 0;
+        const id = newTabId();
+        if (preferTest) {
+          const p = projectRes.projects[0];
+          setTabs([
+            {
+              id,
+              kind: "test",
+              label: `Test · ${p.name}`,
+              badge: "SANDBOX",
+              projectId: p.id,
+              mode: "shell",
+              useRoot: false,
+              connState: "idle",
+            },
+          ]);
+          setActiveId(id);
+        } else if (targetRes.targets[0]) {
           const t = targetRes.targets[0];
-          const id = newTabId();
           setTabs([
             {
               id,
               kind: "container",
               label: targetLabel(t),
               target: t,
+              mode: "shell",
+              useRoot: false,
+              connState: "idle",
+            },
+          ]);
+          setActiveId(id);
+        } else if (
+          metaRes.session_kinds.test.available &&
+          projectRes.projects[0]
+        ) {
+          const p = projectRes.projects[0];
+          setTabs([
+            {
+              id,
+              kind: "test",
+              label: `Test · ${p.name}`,
+              badge: "SANDBOX",
+              projectId: p.id,
               mode: "shell",
               useRoot: false,
               connState: "idle",
@@ -146,98 +188,122 @@ export function TerminalPage() {
     setTabs((prev) => prev.map((t) => (t.id === id ? { ...t, ...patch } : t)));
   }, []);
 
-  const teardown = useCallback(() => {
-    wsRef.current?.close();
-    wsRef.current = null;
-    termRef.current?.dispose();
-    termRef.current = null;
-    fitRef.current = null;
+  const teardownTab = useCallback((tabId: string) => {
+    const sess = tabSessions.current.get(tabId);
+    if (!sess) return;
+    sess.ws?.close();
+    sess.term.dispose();
+    tabSessions.current.delete(tabId);
   }, []);
 
-  useEffect(() => () => teardown(), [teardown]);
+  const teardownAllTabs = useCallback(() => {
+    for (const id of [...tabSessions.current.keys()]) {
+      teardownTab(id);
+    }
+  }, [teardownTab]);
+
+  useEffect(() => () => teardownAllTabs(), [teardownAllTabs]);
 
   const applyTheme = useCallback((term: XTerm, id: TerminalThemeId) => {
     const th = themeById(id);
     term.options.theme = { ...th.xterm };
   }, []);
 
-  const copyPlainSelection = useCallback(async (term?: XTerm) => {
-    const t = term ?? termRef.current;
-    if (!t) return;
-    const raw = t.getSelection();
-    if (!raw) return;
-    const plain = stripAnsi(raw);
-    try {
-      await navigator.clipboard.writeText(plain);
-      setStatusNote("Copied plain text (no styling).");
-      window.setTimeout(() => setStatusNote(null), 2500);
-    } catch {
-      setStatusNote("Could not copy to clipboard.");
-    }
-  }, []);
-
-  const mountTerm = useCallback(() => {
-    if (!hostRef.current) return;
-    teardown();
-    const term = new XTerm({
-      cursorBlink: true,
-      fontFamily: "var(--font-mono, ui-monospace, monospace)",
-      fontSize: 14,
-      convertEol: true,
-      theme: { ...shellTheme.xterm },
-    });
-    const fit = new FitAddon();
-    term.loadAddon(fit);
-    term.open(hostRef.current);
-    fit.fit();
-    term.attachCustomKeyEventHandler((ev) => {
-      if (
-        ev.type === "keydown" &&
-        ev.key === "c" &&
-        (ev.ctrlKey || ev.metaKey) &&
-        ev.shiftKey
-      ) {
-        void copyPlainSelection(term);
-        return false;
+  const copyPlainSelection = useCallback(
+    async (term?: XTerm) => {
+      const t =
+        term ??
+        (activeId ? tabSessions.current.get(activeId)?.term : undefined);
+      if (!t) return;
+      const raw = t.getSelection();
+      if (!raw) return;
+      const plain = stripAnsi(raw);
+      try {
+        await navigator.clipboard.writeText(plain);
+        setStatusNote("Copied plain text (no styling).");
+        window.setTimeout(() => setStatusNote(null), 2500);
+      } catch {
+        setStatusNote("Could not copy to clipboard.");
       }
-      return true;
-    });
-    termRef.current = term;
-    fitRef.current = fit;
-  }, [shellTheme.xterm, teardown, copyPlainSelection]);
+    },
+    [activeId],
+  );
+
+  const ensureTabSession = useCallback(
+    (tabId: string): TabSession | null => {
+      const existing = tabSessions.current.get(tabId);
+      if (existing) return existing;
+      const host = tabHostRefs.current.get(tabId);
+      if (!host) return null;
+      const term = new XTerm({
+        cursorBlink: true,
+        fontFamily: "var(--font-mono, ui-monospace, monospace)",
+        fontSize: 14,
+        convertEol: true,
+        theme: { ...shellTheme.xterm },
+      });
+      const fit = new FitAddon();
+      term.loadAddon(fit);
+      term.open(host);
+      fit.fit();
+      term.attachCustomKeyEventHandler((ev) => {
+        if (
+          ev.type === "keydown" &&
+          ev.key === "c" &&
+          (ev.ctrlKey || ev.metaKey) &&
+          ev.shiftKey
+        ) {
+          void copyPlainSelection(term);
+          return false;
+        }
+        return true;
+      });
+      const sess: TabSession = { term, fit, ws: null };
+      tabSessions.current.set(tabId, sess);
+      return sess;
+    },
+    [shellTheme.xterm, copyPlainSelection],
+  );
 
   useEffect(() => {
-    if (termRef.current) {
-      applyTheme(termRef.current, themeId);
+    for (const sess of tabSessions.current.values()) {
+      applyTheme(sess.term, themeId);
     }
   }, [themeId, applyTheme]);
 
-  const sendResize = useCallback(() => {
-    const term = termRef.current;
-    const ws = wsRef.current;
-    if (!term || !ws || ws.readyState !== WebSocket.OPEN) return;
-    ws.send(
+  const sendResizeFor = useCallback((sess: TabSession) => {
+    if (!sess.ws || sess.ws.readyState !== WebSocket.OPEN) return;
+    sess.ws.send(
       JSON.stringify({
         type: "resize",
-        cols: term.cols,
-        rows: term.rows,
+        cols: sess.term.cols,
+        rows: sess.term.rows,
       }),
     );
   }, []);
 
   useEffect(() => {
     const onResize = () => {
-      fitRef.current?.fit();
-      sendResize();
+      const sess = activeId ? tabSessions.current.get(activeId) : undefined;
+      if (!sess) return;
+      sess.fit.fit();
+      sendResizeFor(sess);
     };
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
-  }, [sendResize]);
+  }, [activeId, sendResizeFor]);
 
   const connectTab = useCallback(
     async (tab: TerminalTab, mfaCode?: string) => {
-      activeTabRef.current = tab.id;
-      mountTerm();
+      const existing = tabSessions.current.get(tab.id);
+      if (existing?.ws?.readyState === WebSocket.OPEN) {
+        return;
+      }
+      if (tab.connState === "connecting") {
+        return;
+      }
+      const sess = ensureTabSession(tab.id);
+      if (!sess) return;
       patchTab(tab.id, { connState: "connecting" });
       setStatusNote(null);
       try {
@@ -255,18 +321,17 @@ export function TerminalPage() {
           `${proto}//${window.location.host}/api/v1/terminal/ws?ticket=${encodeURIComponent(session.ticket)}`,
         );
         ws.binaryType = "arraybuffer";
-        wsRef.current = ws;
-        const term = termRef.current;
-        if (!term) return;
+        sess.ws = ws;
+        const { term, fit } = sess;
 
         ws.onopen = () => {
-          if (activeTabRef.current !== tab.id) return;
           patchTab(tab.id, { connState: "connected" });
-          fitRef.current?.fit();
-          sendResize();
+          if (activeId === tab.id) {
+            fit.fit();
+            sendResizeFor(sess);
+          }
         };
         ws.onmessage = (ev) => {
-          if (activeTabRef.current !== tab.id) return;
           if (typeof ev.data === "string") {
             term.write(ev.data);
             return;
@@ -275,12 +340,13 @@ export function TerminalPage() {
         };
         ws.onerror = () => {
           patchTab(tab.id, { connState: "error" });
-          setStatusNote("Connection failed.");
+          if (activeId === tab.id) {
+            setStatusNote("Connection failed.");
+          }
         };
         ws.onclose = () => {
-          if (activeTabRef.current === tab.id) {
-            patchTab(tab.id, { connState: "idle" });
-          }
+          sess.ws = null;
+          patchTab(tab.id, { connState: "idle" });
         };
 
         term.onData((data) => {
@@ -295,36 +361,51 @@ export function TerminalPage() {
         );
       }
     },
-    [mountTerm, patchTab, sendResize],
+    [activeId, ensureTabSession, patchTab, sendResizeFor],
   );
 
   useEffect(() => {
     if (!activeTab || didAutoConnect.current) return;
-    if (activeTab.connState === "idle") {
+    if (activeTab.connState !== "idle") return;
+    const id = activeTab.id;
+    requestAnimationFrame(() => {
+      if (!tabHostRefs.current.has(id)) return;
       didAutoConnect.current = true;
       void connectTab(activeTab);
-    }
+    });
   }, [activeTab, connectTab]);
 
   const selectTab = (id: string) => {
     if (id === activeId) return;
-    teardown();
     setActiveId(id);
-    const tab = tabs.find((t) => t.id === id);
-    if (tab) {
-      void connectTab(tab);
-    }
+    requestAnimationFrame(() => {
+      const sess = tabSessions.current.get(id);
+      if (sess) {
+        sess.fit.fit();
+        sendResizeFor(sess);
+      }
+      const tab = tabs.find((t) => t.id === id);
+      if (tab && (tab.connState === "idle" || tab.connState === "error")) {
+        void connectTab(tab);
+      }
+    });
   };
 
   const closeTab = (id: string) => {
+    teardownTab(id);
+    tabHostRefs.current.delete(id);
     setTabs((prev) => {
       const next = prev.filter((t) => t.id !== id);
       if (activeId === id) {
-        teardown();
         const fallback = next[0]?.id ?? "";
         setActiveId(fallback);
-        const tab = next[0];
-        if (tab) void connectTab(tab);
+        requestAnimationFrame(() => {
+          const sess = tabSessions.current.get(fallback);
+          if (sess) {
+            sess.fit.fit();
+            sendResizeFor(sess);
+          }
+        });
       }
       return next.length ? next : prev;
     });
@@ -343,7 +424,6 @@ export function TerminalPage() {
       connState: "idle",
     };
     setTabs((prev) => [...prev, tab]);
-    teardown();
     setActiveId(id);
     void connectTab(tab);
   };
@@ -380,7 +460,6 @@ export function TerminalPage() {
       connState: "idle",
     };
     setTabs((prev) => [...prev, tab]);
-    teardown();
     setActiveId(id);
     void connectTab(tab);
   };
@@ -398,7 +477,6 @@ export function TerminalPage() {
       connState: "idle",
     };
     setTabs((prev) => [...prev, tab]);
-    teardown();
     setActiveId(id);
     void connectTab(tab, mfaCode);
   };
@@ -410,7 +488,7 @@ export function TerminalPage() {
   };
 
   const clear = () => {
-    termRef.current?.clear();
+    tabSessions.current.get(activeId)?.term.clear();
   };
 
   const warning = activeTab
@@ -690,10 +768,25 @@ export function TerminalPage() {
         ) : null}
 
         <div
-          ref={hostRef}
-          className="min-h-[420px] p-3"
+          className="relative min-h-[420px] p-3"
           style={{ background: shellTheme.xterm.background }}
-        />
+        >
+          {tabs.map((tab) => (
+            <div
+              key={tab.id}
+              ref={(el) => {
+                if (el) tabHostRefs.current.set(tab.id, el);
+                else tabHostRefs.current.delete(tab.id);
+              }}
+              className="absolute inset-3 overflow-hidden"
+              style={{
+                visibility: tab.id === activeId ? "visible" : "hidden",
+                pointerEvents: tab.id === activeId ? "auto" : "none",
+              }}
+              aria-hidden={tab.id !== activeId}
+            />
+          ))}
+        </div>
 
         <div
           className="flex flex-wrap items-center justify-between gap-2 border-t px-5 py-2.5 font-mono text-xs text-[var(--muted-foreground)]"

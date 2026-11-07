@@ -199,7 +199,9 @@ func (d apiDeps) handleCreateTerminalSession(w http.ResponseWriter, r *http.Requ
 		writeJSONError(w, http.StatusForbidden, "only the owner may use root in the container")
 		return
 	}
-	if body.SessionKind == terminal.SessionKindContainer && d.docker == nil {
+	if (body.SessionKind == terminal.SessionKindContainer ||
+		body.SessionKind == terminal.SessionKindTest ||
+		body.SessionKind == "") && d.docker == nil {
 		writeJSONError(w, http.StatusServiceUnavailable, "docker unavailable")
 		return
 	}
@@ -219,7 +221,27 @@ func (d apiDeps) handleCreateTerminalSession(w http.ResponseWriter, r *http.Requ
 		writeJSONError(w, status, err.Error())
 		return
 	}
-	ticket, exp, err := terminalState.tickets.Issue(spec)
+	var ticket string
+	var exp time.Time
+	if spec.SessionKind == terminal.SessionKindTest && spec.ContainerID != "" {
+		ticket, exp, err = terminalState.tickets.IssueWithAbandonCallback(spec, func(sp terminal.SessionSpec) {
+			if d.docker == nil || sp.ContainerID == "" {
+				return
+			}
+			_ = d.docker.StopAndRemove(context.Background(), sp.ContainerID, 10)
+			_ = d.audit.Record(context.Background(), audit.Entry{
+				UserID:     sp.UserID,
+				Action:     "terminal.sandbox.abandoned",
+				TargetKind: "project",
+				TargetID:   sp.ProjectID,
+				Meta: map[string]any{
+					"reason": "ticket_expired",
+				},
+			})
+		})
+	} else {
+		ticket, exp, err = terminalState.tickets.Issue(spec)
+	}
 	if err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "ticket error")
 		return
@@ -342,10 +364,23 @@ func (d apiDeps) resolveTestTerminalSession(ctx context.Context, user sqlc.GetUs
 	for _, l := range links {
 		linkIDs = append(linkIDs, l.ID)
 	}
+	if d.docker == nil {
+		return terminal.SessionSpec{}, nil, fmt.Errorf("docker unavailable")
+	}
+	sandboxID, err := d.docker.RunTerminalSandbox(ctx, docker.RunTerminalSandboxInput{
+		ProjectID:   projectID,
+		ProjectSlug: row.Slug,
+		LinksMode:   row.LinksMode,
+		LinkIDs:     linkIDs,
+	})
+	if err != nil {
+		return terminal.SessionSpec{}, nil, err
+	}
 	meta := map[string]any{
-		"session_kind": terminal.SessionKindTest,
-		"project_id":   projectID,
-		"links_mode":   row.LinksMode,
+		"session_kind":  terminal.SessionKindTest,
+		"project_id":    projectID,
+		"links_mode":    row.LinksMode,
+		"container_id":  sandboxID,
 	}
 	return terminal.SessionSpec{
 		SessionKind: terminal.SessionKindTest,
@@ -354,6 +389,7 @@ func (d apiDeps) resolveTestTerminalSession(ctx context.Context, user sqlc.GetUs
 		ProjectSlug: row.Slug,
 		LinksMode:   row.LinksMode,
 		LinkIDs:     linkIDs,
+		ContainerID: sandboxID,
 		Mode:        "shell",
 		Cmd:         []string{"/bin/sh"},
 	}, meta, nil
@@ -504,30 +540,14 @@ func (d apiDeps) handleTerminalWebSocket(w http.ResponseWriter, r *http.Request)
 		}
 		containerID := spec.ContainerID
 		if spec.SessionKind == terminal.SessionKindTest {
-			sandboxID, serr := d.docker.RunTerminalSandbox(sessionCtx, docker.RunTerminalSandboxInput{
-				ProjectID:   spec.ProjectID,
-				ProjectSlug: spec.ProjectSlug,
-				LinksMode:   spec.LinksMode,
-				LinkIDs:     spec.LinkIDs,
-			})
-			if serr != nil {
-				_ = conn.WriteMessage(websocket.TextMessage, []byte("\r\nCould not start test shell: "+serr.Error()+"\r\n"))
-				_ = conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.ClosePolicyViolation, "sandbox failed"))
+			if containerID == "" {
+				_ = conn.WriteMessage(websocket.TextMessage, []byte("\r\nTest shell is not ready (missing sandbox).\r\n"))
+				_ = conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.ClosePolicyViolation, "sandbox missing"))
 				return
 			}
 			defer func() {
-				_ = d.docker.StopAndRemove(context.Background(), sandboxID, 10)
+				_ = d.docker.StopAndRemove(context.Background(), containerID, 10)
 			}()
-			containerID = sandboxID
-			_ = d.audit.Record(ctx, audit.Entry{
-				UserID:     spec.UserID,
-				Action:     "terminal.sandbox.start",
-				TargetKind: "project",
-				TargetID:   spec.ProjectID,
-				Meta: map[string]any{
-					"links_mode": spec.LinksMode,
-				},
-			})
 		}
 		var err error
 		dockerExec, err = d.docker.StartInteractiveExec(ctx, containerID, spec.Cmd, spec.ExecUser, spec.Env)

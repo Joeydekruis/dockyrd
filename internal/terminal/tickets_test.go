@@ -45,6 +45,26 @@ func TestTicketPeekBeforeRedeem(t *testing.T) {
 	}
 }
 
+func TestTicketAbandonIfUnused(t *testing.T) {
+	store := NewTicketStore()
+	spec := SessionSpec{UserID: "u1", ContainerID: "c-test"}
+	token, _, err := store.Issue(spec)
+	if err != nil {
+		t.Fatal(err)
+	}
+	got, ok := store.AbandonIfUnused(token)
+	if !ok || got.ContainerID != "c-test" {
+		t.Fatalf("abandon got %+v ok=%v", got, ok)
+	}
+	if _, err := store.Peek(token); err != ErrTicketNotFound {
+		t.Fatalf("want gone, got %v", err)
+	}
+	_, ok = store.AbandonIfUnused(token)
+	if ok {
+		t.Fatal("second abandon should be false")
+	}
+}
+
 func TestTicketExpiry(t *testing.T) {
 	store := NewTicketStore()
 	store.mu.Lock()

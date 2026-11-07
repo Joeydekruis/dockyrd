@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.6.4] - 2026-11-07
+
+_Finished: 2026-11-07_
+
+### Changed
+
+- **#73 / Terminal UX** — Default tab is a **test shell** when host terminal is unavailable; **multiple tabs** keep separate xterm/WebSocket sessions when switching; test sandboxes **provisional on POST** with **auto-cleanup** if the WS ticket expires unused (60s)
+
 ## [0.6.3] - 2026-11-07
 
 _Finished: 2026-11-07_
