@@ -3,6 +3,7 @@
 import { Container, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { GitHubBranchSelectField } from "@/components/dockyard/github-branch-select-field";
 import type { ResourceProvisionContext } from "@/components/dockyard/resource-provisioning-modal";
 import { Button } from "@/components/dockyard/ui/button";
 import { Field } from "@/components/dockyard/ui/field";
@@ -26,6 +27,7 @@ import {
   type Project,
   putServiceVariables,
 } from "@/lib/api";
+import { previewDefaultPlatformHostname } from "@/lib/domain-dns";
 
 const STEPS: WizardStepDef[] = [
   { id: "source", label: "Source" },
@@ -48,7 +50,6 @@ type Draft = {
   imageRef: string;
   appName: string;
   projectId: string;
-  environment: string;
   builder: BuilderChoice;
   port: string;
   memPreset: string;
@@ -76,25 +77,6 @@ function newEnvRow(): EnvRow {
     value: "",
     secret: false,
   };
-}
-
-function defaultPlatformHost(
-  appName: string,
-  instance: InstanceSettings | null,
-): string {
-  const slug = slugifyName(appName) || "app";
-  const host =
-    instance?.wildcard_domain?.trim() ||
-    (instance?.public_url
-      ? (() => {
-          try {
-            return new URL(instance.public_url).hostname;
-          } catch {
-            return "your-server.example";
-          }
-        })()
-      : "your-server.example");
-  return `${slug}.deploy.${host}`;
 }
 
 type CreateApplicationWizardProps = {
@@ -126,7 +108,6 @@ export function CreateApplicationWizard({
     imageRef: "nginx:alpine",
     appName: "",
     projectId: "",
-    environment: "production",
     builder: "railpack",
     port: "3000",
     memPreset: "512",
@@ -170,7 +151,11 @@ export function CreateApplicationWizard({
   }, [open, loadMeta, defaultProjectId]);
 
   const defaultUrl = useMemo(
-    () => defaultPlatformHost(draft.appName || "app", instance),
+    () =>
+      previewDefaultPlatformHostname(
+        slugifyName(draft.appName || "app") || "app",
+        instance,
+      ),
     [draft.appName, instance],
   );
 
@@ -231,7 +216,6 @@ export function CreateApplicationWizard({
     try {
       const service = await createService({
         project_id: draft.projectId,
-        environment: draft.environment,
         kind: "app",
         name: draft.appName.trim(),
         config: {
@@ -377,16 +361,26 @@ function StepSource({
             <SearchSelectField
               label="Repository"
               value={draft.repo}
-              onChange={(v) => onChange({ repo: v })}
+              onChange={(v) => {
+                const match = repos.find((r) => r.full_name === v);
+                onChange({
+                  repo: v,
+                  branch: match?.default_branch || draft.branch,
+                });
+              }}
               options={repos.map((r) => ({
                 value: r.full_name,
                 label: r.full_name,
               }))}
             />
-            <Field
-              label="Branch"
+            <GitHubBranchSelectField
+              repo={draft.repo}
               value={draft.branch}
-              onChange={(e) => onChange({ branch: e.target.value })}
+              preferredBranch={
+                repos.find((r) => r.full_name === draft.repo)?.default_branch
+              }
+              onChange={(branch) => onChange({ branch })}
+              hint="Deploys run on pushes to this branch."
             />
           </div>
         ) : (
@@ -446,15 +440,6 @@ function StepNameProject({
             options={projects.map((p) => ({ value: p.id, label: p.name }))}
           />
         )}
-        <SelectField
-          label="Environment"
-          value={draft.environment}
-          onChange={(v) => onChange({ environment: v })}
-          options={[
-            { value: "production", label: "Production" },
-            { value: "staging", label: "Staging" },
-          ]}
-        />
       </div>
     </>
   );

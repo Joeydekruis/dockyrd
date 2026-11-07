@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.7.2] - 2026-11-07
+
+_Finished: 2026-11-07_
+
+### Added
+
+- **Application / static site detail** — primary **Visit site** in the header; **Deploy now** is outline and asks for confirmation before starting a deploy
+- **Deployments** — auto-refresh on the deployments tab and deployment detail pages while a deploy is in progress (status + logs)
+- **Create app / static site** — GitHub branch picker loads branches for the selected repo; default URL preview uses instance wildcard/public host
+
 ## [0.7.1] - 2026-11-07
 
 _Finished: 2026-11-07_

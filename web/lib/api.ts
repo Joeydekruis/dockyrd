@@ -1110,6 +1110,24 @@ export function listGitHubRepos(query?: string) {
   return apiFetch<{ repos: GitHubRepo[] }>(`/api/v1/github/repos${q}`);
 }
 
+export type GitHubBranch = {
+  name: string;
+};
+
+export function parseGitHubOwnerRepo(
+  fullName: string,
+): { owner: string; repo: string } | null {
+  const parts = fullName.trim().split("/");
+  if (parts.length !== 2 || !parts[0] || !parts[1]) return null;
+  return { owner: parts[0], repo: parts[1] };
+}
+
+export function listGitHubBranches(owner: string, repo: string) {
+  return apiFetch<{ branches: GitHubBranch[] }>(
+    `/api/v1/github/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/branches`,
+  );
+}
+
 export type MetricRange = "1h" | "24h" | "7d" | "30d";
 
 export type HostMetricPoint = {

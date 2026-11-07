@@ -109,6 +109,13 @@ export function deploymentStatusDisplay(status: string): {
   };
 }
 
+export function deploymentIsInProgress(status: string): boolean {
+  const s = status.trim().toLowerCase();
+  return (
+    s === "building" || s === "queued" || s === "running" || s === "waiting"
+  );
+}
+
 /** Static site list/detail: live deployments read as “Deployed”. */
 export function staticSiteDeploymentStatusDisplay(status: string): {
   label: string;

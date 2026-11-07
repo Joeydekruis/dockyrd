@@ -28,6 +28,7 @@ import {
   deploymentCommitShaShort,
   deploymentDisplayName,
   deploymentDurationSec,
+  deploymentIsInProgress,
   deploymentReleaseTag,
   deploymentTriggerLabel,
   formatDeploymentStartedAt,
@@ -35,6 +36,7 @@ import {
   staticSiteDeploymentStatusDisplay,
   truncateDeploymentTitle,
 } from "@/lib/static-site-display";
+import { useDeploymentPoll } from "@/lib/use-deployment-poll";
 import { useRouteParam } from "@/lib/use-route-param";
 
 type Row = {
@@ -52,33 +54,47 @@ export function ApplicationDeploymentDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const refresh = useCallback(async () => {
-    if (!appSlug || !deploymentId) {
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    try {
-      const { projects } = await listProjects();
-      for (const project of projects) {
-        const { services } = await listServices(project.id, "app");
-        const service = services.find((s) => s.slug === appSlug);
-        if (!service) continue;
-        const { deployments } = await listDeployments(service.id);
-        const deployment = deployments.find((d) => d.id === deploymentId);
-        if (!deployment) continue;
-        setRow({ project, service, deployment });
-        setError(null);
+  const refresh = useCallback(
+    async (opts?: { silent?: boolean }) => {
+      if (!appSlug || !deploymentId) {
         setLoading(false);
         return;
       }
-      setRow(null);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load deployment");
-    } finally {
-      setLoading(false);
+      if (!opts?.silent) setLoading(true);
+      try {
+        const { projects } = await listProjects();
+        for (const project of projects) {
+          const { services } = await listServices(project.id, "app");
+          const service = services.find((s) => s.slug === appSlug);
+          if (!service) continue;
+          const { deployments } = await listDeployments(service.id);
+          const deployment = deployments.find((d) => d.id === deploymentId);
+          if (!deployment) continue;
+          setRow({ project, service, deployment });
+          setError(null);
+          if (!opts?.silent) setLoading(false);
+          return;
+        }
+        setRow(null);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Failed to load deployment");
+      } finally {
+        if (!opts?.silent) setLoading(false);
+      }
+    },
+    [appSlug, deploymentId],
+  );
+
+  const refreshLog = useCallback(async () => {
+    if (!deploymentId) return;
+    try {
+      const text = await fetchDeploymentLog(deploymentId);
+      setLog(text || "");
+      setLoadingLog(false);
+    } catch {
+      /* keep last log */
     }
-  }, [appSlug, deploymentId]);
+  }, [deploymentId]);
 
   useEffect(() => {
     void refresh();
@@ -97,6 +113,18 @@ export function ApplicationDeploymentDetailPage() {
       cancelled = true;
     };
   }, [deploymentId]);
+
+  const deploymentPollActive = useMemo(
+    () => (row ? deploymentIsInProgress(row.deployment.status) : false),
+    [row],
+  );
+
+  const pollDeployment = useCallback(() => {
+    void refresh({ silent: true });
+    void refreshLog();
+  }, [refresh, refreshLog]);
+
+  useDeploymentPoll(deploymentPollActive, pollDeployment);
 
   const status = useMemo(
     () =>

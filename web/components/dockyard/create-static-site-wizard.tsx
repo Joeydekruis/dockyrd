@@ -3,6 +3,7 @@
 import { GitBranch, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { GitHubBranchSelectField } from "@/components/dockyard/github-branch-select-field";
 import type { StaticSiteCreateResult } from "@/components/dockyard/static-site-create-progress-modal";
 import { Button } from "@/components/dockyard/ui/button";
 import { Field } from "@/components/dockyard/ui/field";
@@ -26,6 +27,7 @@ import {
   type Project,
   putServiceVariables,
 } from "@/lib/api";
+import { previewDefaultPlatformHostname } from "@/lib/domain-dns";
 
 const STEPS: WizardStepDef[] = [
   { id: "source", label: "Source" },
@@ -90,7 +92,6 @@ type Draft = {
   rootDir: string;
   siteName: string;
   projectId: string;
-  environment: string;
   framework: FrameworkPreset;
   installCmd: string;
   buildCmd: string;
@@ -110,25 +111,6 @@ function slugifyName(name: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")
     .slice(0, 48);
-}
-
-function defaultDeployUrl(
-  siteName: string,
-  instance: InstanceSettings | null,
-): string {
-  const slug = slugifyName(siteName) || "site";
-  const host =
-    instance?.wildcard_domain?.trim() ||
-    (instance?.public_url
-      ? (() => {
-          try {
-            return new URL(instance.public_url).hostname;
-          } catch {
-            return "your-server.example";
-          }
-        })()
-      : "your-server.example");
-  return `${slug}.deploy.${host}`;
 }
 
 function combineBuildCmd(install: string, build: string): string {
@@ -178,7 +160,6 @@ export function CreateStaticSiteWizard({
     rootDir: "/",
     siteName: "",
     projectId: "",
-    environment: "production",
     framework: "astro",
     installCmd: "npm install",
     buildCmd: "npm run build",
@@ -226,7 +207,11 @@ export function CreateStaticSiteWizard({
   }, [open, loadMeta, defaultProjectId]);
 
   const defaultUrl = useMemo(
-    () => defaultDeployUrl(draft.siteName || "marketing", instance),
+    () =>
+      previewDefaultPlatformHostname(
+        slugifyName(draft.siteName || "marketing") || "site",
+        instance,
+      ),
     [draft.siteName, instance],
   );
 
@@ -286,7 +271,6 @@ export function CreateStaticSiteWizard({
         draft.nodeVersion === "20" ? "node:20-alpine" : "node:22-alpine";
       const service = await createService({
         project_id: draft.projectId,
-        environment: draft.environment,
         kind: "static_site",
         name: draft.siteName.trim(),
         config: {
@@ -320,7 +304,10 @@ export function CreateStaticSiteWizard({
       const deployment = await createDeployment(service.id);
       const url =
         draft.customDomain.trim() ||
-        defaultDeployUrl(draft.siteName.trim(), instance);
+        previewDefaultPlatformHostname(
+          slugifyName(draft.siteName.trim()) || "site",
+          instance,
+        );
       onCreated({
         serviceId: service.id,
         deploymentId: deployment.id,
@@ -463,11 +450,13 @@ function StepSource({
             label: r.full_name,
           }))}
         />
-        <Field
-          label="Branch"
+        <GitHubBranchSelectField
+          repo={draft.repo}
           value={draft.branch}
-          onChange={(e) => onChange({ branch: e.target.value })}
-          hint="Pushes to this branch deploy."
+          preferredBranch={
+            repos.find((r) => r.full_name === draft.repo)?.default_branch
+          }
+          onChange={(branch) => onChange({ branch })}
         />
       </div>
       <div className="mt-4">
@@ -496,9 +485,7 @@ function StepNameProject({
   return (
     <>
       <StepHeading title="Name & project" hint="Where this site shows up." />
-      <div
-        className={`grid gap-4 ${lockProject ? "md:grid-cols-2" : "md:grid-cols-3"}`}
-      >
+      <div className={`grid gap-4 ${lockProject ? "" : "md:grid-cols-2"}`}>
         <Field
           label="Site name"
           value={draft.siteName}
@@ -515,15 +502,6 @@ function StepNameProject({
             options={projects.map((p) => ({ value: p.id, label: p.name }))}
           />
         )}
-        <SelectField
-          label="Environment"
-          value={draft.environment}
-          onChange={(v) => onChange({ environment: v })}
-          options={[
-            { value: "production", label: "Production" },
-            { value: "staging", label: "Staging" },
-          ]}
-        />
       </div>
     </>
   );

@@ -22,7 +22,12 @@ export function PendingEnvRedeployBanner({
       onDismiss={onDismiss}
       action={
         onDeploy ? (
-          <Button type="button" disabled={deployBusy} onClick={onDeploy}>
+          <Button
+            type="button"
+            variant="outline"
+            disabled={deployBusy}
+            onClick={onDeploy}
+          >
             {deployBusy ? "Deploying…" : "Deploy now"}
           </Button>
         ) : undefined

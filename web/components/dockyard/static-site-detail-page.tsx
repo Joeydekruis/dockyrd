@@ -13,6 +13,7 @@ import {
 } from "@/components/dockyard/service-traffic-panel";
 import { StaticSiteSettingsTab } from "@/components/dockyard/static-site-settings-tab";
 import { Button } from "@/components/dockyard/ui/button";
+import { ConfirmDialog } from "@/components/dockyard/ui/confirm-dialog";
 import { EmptyState } from "@/components/dockyard/ui/empty-state";
 import { EnvVarRow } from "@/components/dockyard/ui/env-var-row";
 import { KeyValueRow } from "@/components/dockyard/ui/key-value-row";
@@ -36,10 +37,12 @@ import {
 import { formatTimeAgo, resourceStatusDisplay } from "@/lib/resource-dashboard";
 import {
   deploymentCommitShaShort,
+  deploymentIsInProgress,
   parseStaticSiteConfig,
   primaryDomainHost,
   visitSiteHref,
 } from "@/lib/static-site-display";
+import { useDeploymentPoll } from "@/lib/use-deployment-poll";
 import { useRouteParam } from "@/lib/use-route-param";
 
 const DETAIL_TABS = [
@@ -76,38 +79,41 @@ export function StaticSiteDetailPage() {
   const [revealedSecrets, setRevealedSecrets] = useState(false);
   const [addVarOpen, setAddVarOpen] = useState(false);
   const [deployBusy, setDeployBusy] = useState(false);
+  const [deployConfirmOpen, setDeployConfirmOpen] = useState(false);
 
-  const refresh = useCallback(async () => {
-    if (!slug) {
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    try {
-      const { projects } = await listProjects();
-      for (const project of projects) {
-        const { services } = await listServices(project.id, "static_site");
-        const service = services.find((s) => s.slug === slug);
-        if (!service) continue;
-        const [{ deployments }, { domains }, { variables }] = await Promise.all(
-          [
-            listDeployments(service.id),
-            listServiceDomains(service.id),
-            listServiceVariables(service.id, revealedSecrets),
-          ],
-        );
-        setRow({ project, service, deployments, domains, variables });
-        setError(null);
+  const refresh = useCallback(
+    async (opts?: { silent?: boolean }) => {
+      if (!slug) {
         setLoading(false);
         return;
       }
-      setRow(null);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load static site");
-    } finally {
-      setLoading(false);
-    }
-  }, [slug, revealedSecrets]);
+      if (!opts?.silent) setLoading(true);
+      try {
+        const { projects } = await listProjects();
+        for (const project of projects) {
+          const { services } = await listServices(project.id, "static_site");
+          const service = services.find((s) => s.slug === slug);
+          if (!service) continue;
+          const [{ deployments }, { domains }, { variables }] =
+            await Promise.all([
+              listDeployments(service.id),
+              listServiceDomains(service.id),
+              listServiceVariables(service.id, revealedSecrets),
+            ]);
+          setRow({ project, service, deployments, domains, variables });
+          setError(null);
+          if (!opts?.silent) setLoading(false);
+          return;
+        }
+        setRow(null);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Failed to load static site");
+      } finally {
+        if (!opts?.silent) setLoading(false);
+      }
+    },
+    [slug, revealedSecrets],
+  );
 
   useEffect(() => {
     void refresh();
@@ -147,19 +153,39 @@ export function StaticSiteDetailPage() {
   const visitHref = visitSiteHref(primaryHost);
   const latest = row?.deployments[0];
 
+  const deploymentsPollActive = useMemo(() => {
+    if (!row || tab !== "deployments") return false;
+    return row.deployments.some((d) => deploymentIsInProgress(d.status));
+  }, [row, tab]);
+
+  const pollDeployments = useCallback(() => {
+    void refresh({ silent: true });
+  }, [refresh]);
+
+  useDeploymentPoll(deploymentsPollActive, pollDeployments);
+
+  function requestDeploy() {
+    setDeployConfirmOpen(true);
+  }
+
   async function onDeployNow() {
     if (!row) return;
     setDeployBusy(true);
     setError(null);
     try {
       await createDeployment(row.service.id);
-      await refresh();
+      await refresh({ silent: true });
       selectTab("deployments");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Deploy failed");
     } finally {
       setDeployBusy(false);
     }
+  }
+
+  function confirmDeploy() {
+    setDeployConfirmOpen(false);
+    void onDeployNow();
   }
 
   async function onAddVariables(
@@ -249,18 +275,23 @@ export function StaticSiteDetailPage() {
               </p>
             </div>
             <div className="flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={deployBusy}
+                onClick={requestDeploy}
+              >
+                {deployBusy ? "Deploying…" : "Deploy now"}
+              </Button>
               {visitHref ? (
-                <Button href={visitHref} variant="outline" target="_blank">
+                <Button
+                  href={visitHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   Visit site
                 </Button>
               ) : null}
-              <Button
-                type="button"
-                disabled={deployBusy}
-                onClick={() => void onDeployNow()}
-              >
-                Deploy now
-              </Button>
             </div>
           </header>
 
@@ -349,9 +380,9 @@ export function StaticSiteDetailPage() {
                     type="button"
                     variant="outline"
                     disabled={deployBusy}
-                    onClick={() => void onDeployNow()}
+                    onClick={requestDeploy}
                   >
-                    Deploy now
+                    {deployBusy ? "Deploying…" : "Deploy now"}
                   </Button>
                 </div>
                 <div className="mt-2">
@@ -389,10 +420,11 @@ export function StaticSiteDetailPage() {
                 </h2>
                 <Button
                   type="button"
+                  variant="outline"
                   disabled={deployBusy}
-                  onClick={() => void onDeployNow()}
+                  onClick={requestDeploy}
                 >
-                  Deploy now
+                  {deployBusy ? "Deploying…" : "Deploy now"}
                 </Button>
               </div>
               <div className="mt-2">
@@ -410,11 +442,12 @@ export function StaticSiteDetailPage() {
                     />
                     <Button
                       type="button"
+                      variant="outline"
                       className="mt-4"
                       disabled={deployBusy}
-                      onClick={() => void onDeployNow()}
+                      onClick={requestDeploy}
                     >
-                      Deploy now
+                      {deployBusy ? "Deploying…" : "Deploy now"}
                     </Button>
                   </div>
                 ) : null}
@@ -515,6 +548,15 @@ export function StaticSiteDetailPage() {
             existingKeys={row.variables.map((v) => v.key)}
             onClose={() => setAddVarOpen(false)}
             onAdd={onAddVariables}
+          />
+
+          <ConfirmDialog
+            open={deployConfirmOpen}
+            title="Deploy now?"
+            description="This starts a new build and publish for this static site."
+            confirmLabel="Deploy"
+            onConfirm={confirmDeploy}
+            onCancel={() => setDeployConfirmOpen(false)}
           />
         </div>
       )}

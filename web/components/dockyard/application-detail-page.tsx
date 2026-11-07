@@ -20,6 +20,7 @@ import {
 } from "@/components/dockyard/service-traffic-panel";
 import { ApplicationDeploymentTable } from "@/components/dockyard/ui/application-deployment-table";
 import { Button } from "@/components/dockyard/ui/button";
+import { ConfirmDialog } from "@/components/dockyard/ui/confirm-dialog";
 import { EmptyState } from "@/components/dockyard/ui/empty-state";
 import {
   SettingsBranchPill,
@@ -58,9 +59,13 @@ import {
 } from "@/lib/resource-detail-page";
 import {
   deploymentCommitShaShort,
+  deploymentIsInProgress,
   deploymentSourceTitle,
+  primaryDomainHost,
   staticSiteDeploymentStatusDisplay,
+  visitSiteHref,
 } from "@/lib/static-site-display";
+import { useDeploymentPoll } from "@/lib/use-deployment-poll";
 import { useRouteParam } from "@/lib/use-route-param";
 
 const DETAIL_TABS = [
@@ -113,46 +118,50 @@ export function ApplicationDetailPage() {
   const [tab, setTab] = useState<TabId>("overview");
   const [revealedSecrets, setRevealedSecrets] = useState(false);
   const [deployBusy, setDeployBusy] = useState(false);
+  const [deployConfirmOpen, setDeployConfirmOpen] = useState(false);
   const [bannerDismissed, setBannerDismissed] = useState(false);
 
-  const refresh = useCallback(async () => {
-    if (!slug) {
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    try {
-      const { projects } = await listProjects();
-      for (const project of projects) {
-        const { services } = await listServices(project.id, "app");
-        const service = services.find((s) => s.slug === slug);
-        if (!service) continue;
-        const [{ deployments }, { domains }, { variables }, linksRes] =
-          await Promise.all([
-            listDeployments(service.id),
-            listServiceDomains(service.id),
-            listServiceVariables(service.id, revealedSecrets),
-            listServiceLinks(service.id),
-          ]);
-        setRow({
-          project,
-          service,
-          deployments,
-          domains,
-          variables,
-          links: linksRes.outgoing,
-        });
-        setError(null);
+  const refresh = useCallback(
+    async (opts?: { silent?: boolean }) => {
+      if (!slug) {
         setLoading(false);
         return;
       }
-      setRow(null);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load application");
-    } finally {
-      setLoading(false);
-    }
-  }, [slug, revealedSecrets]);
+      if (!opts?.silent) setLoading(true);
+      try {
+        const { projects } = await listProjects();
+        for (const project of projects) {
+          const { services } = await listServices(project.id, "app");
+          const service = services.find((s) => s.slug === slug);
+          if (!service) continue;
+          const [{ deployments }, { domains }, { variables }, linksRes] =
+            await Promise.all([
+              listDeployments(service.id),
+              listServiceDomains(service.id),
+              listServiceVariables(service.id, revealedSecrets),
+              listServiceLinks(service.id),
+            ]);
+          setRow({
+            project,
+            service,
+            deployments,
+            domains,
+            variables,
+            links: linksRes.outgoing,
+          });
+          setError(null);
+          if (!opts?.silent) setLoading(false);
+          return;
+        }
+        setRow(null);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Failed to load application");
+      } finally {
+        if (!opts?.silent) setLoading(false);
+      }
+    },
+    [slug, revealedSecrets],
+  );
 
   useEffect(() => {
     void refresh();
@@ -198,8 +207,20 @@ export function ApplicationDetailPage() {
     [row],
   );
 
-  const primaryHost = row?.domains.find((d) => d.is_primary)?.hostname;
+  const primaryHost = row ? primaryDomainHost(row.domains) : undefined;
+  const visitHref = visitSiteHref(primaryHost);
   const latest = row?.deployments[0];
+
+  const deploymentsPollActive = useMemo(() => {
+    if (!row || tab !== "deployments") return false;
+    return row.deployments.some((d) => deploymentIsInProgress(d.status));
+  }, [row, tab]);
+
+  const pollDeployments = useCallback(() => {
+    void refresh({ silent: true });
+  }, [refresh]);
+
+  useDeploymentPoll(deploymentsPollActive, pollDeployments);
   const port = row ? appPort(row.service.config) : 80;
   const source = row?.service.config.source as
     | { repo?: string; branch?: string }
@@ -218,19 +239,28 @@ export function ApplicationDetailPage() {
     });
   }, [bannerDismissed, linkedSlugs, row]);
 
+  function requestDeploy() {
+    setDeployConfirmOpen(true);
+  }
+
   async function onDeployNow() {
     if (!row) return;
     setDeployBusy(true);
     setError(null);
     try {
       await createDeployment(row.service.id);
-      await refresh();
+      await refresh({ silent: true });
       selectTab("deployments");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Deploy failed");
     } finally {
       setDeployBusy(false);
     }
+  }
+
+  function confirmDeploy() {
+    setDeployConfirmOpen(false);
+    void onDeployNow();
   }
 
   async function onAddVariables(
@@ -289,7 +319,7 @@ export function ApplicationDetailPage() {
         <div className="space-y-6">
           {showOverviewBanner ? (
             <PendingEnvRedeployBanner
-              onDeploy={() => void onDeployNow()}
+              onDeploy={requestDeploy}
               deployBusy={deployBusy}
               onDismiss={() => setBannerDismissed(true)}
             />
@@ -343,11 +373,21 @@ export function ApplicationDetailPage() {
             <div className="flex flex-wrap gap-2">
               <Button
                 type="button"
+                variant="outline"
                 disabled={deployBusy}
-                onClick={() => void onDeployNow()}
+                onClick={requestDeploy}
               >
-                Deploy now
+                {deployBusy ? "Deploying…" : "Deploy now"}
               </Button>
+              {visitHref ? (
+                <Button
+                  href={visitHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Visit site
+                </Button>
+              ) : null}
             </div>
           </header>
 
@@ -504,10 +544,11 @@ export function ApplicationDetailPage() {
                 </h2>
                 <Button
                   type="button"
+                  variant="outline"
                   disabled={deployBusy}
-                  onClick={() => void onDeployNow()}
+                  onClick={requestDeploy}
                 >
-                  Deploy now
+                  {deployBusy ? "Deploying…" : "Deploy now"}
                 </Button>
               </div>
               <div className="mt-2">
@@ -525,11 +566,12 @@ export function ApplicationDetailPage() {
                     />
                     <Button
                       type="button"
+                      variant="outline"
                       className="mt-4"
                       disabled={deployBusy}
-                      onClick={() => void onDeployNow()}
+                      onClick={requestDeploy}
                     >
-                      Deploy now
+                      {deployBusy ? "Deploying…" : "Deploy now"}
                     </Button>
                   </div>
                 ) : null}
@@ -559,7 +601,7 @@ export function ApplicationDetailPage() {
               onToggleRevealSecrets={() => setRevealedSecrets((v) => !v)}
               onAddVariables={onAddVariables}
               onRefresh={refresh}
-              onDeploy={() => void onDeployNow()}
+              onDeploy={requestDeploy}
               deployBusy={deployBusy}
               bannerDismissed={bannerDismissed}
               onDismissBanner={() => setBannerDismissed(true)}
@@ -602,6 +644,15 @@ export function ApplicationDetailPage() {
               onError={setError}
             />
           ) : null}
+
+          <ConfirmDialog
+            open={deployConfirmOpen}
+            title="Deploy now?"
+            description="This starts a new deployment and may replace the currently live version."
+            confirmLabel="Deploy"
+            onConfirm={confirmDeploy}
+            onCancel={() => setDeployConfirmOpen(false)}
+          />
         </div>
       )}
     </DashboardShell>

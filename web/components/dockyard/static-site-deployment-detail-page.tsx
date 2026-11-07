@@ -31,6 +31,7 @@ import {
   deploymentCommitShaShort,
   deploymentDisplayName,
   deploymentDurationSec,
+  deploymentIsInProgress,
   deploymentReleaseTag,
   deploymentTriggerLabel,
   formatDeploymentStartedAt,
@@ -40,6 +41,7 @@ import {
   truncateDeploymentTitle,
   visitSiteHref,
 } from "@/lib/static-site-display";
+import { useDeploymentPoll } from "@/lib/use-deployment-poll";
 import { useRouteParam } from "@/lib/use-route-param";
 
 type Row = {
@@ -58,36 +60,50 @@ export function StaticSiteDeploymentDetailPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const refresh = useCallback(async () => {
-    if (!siteSlug || !deploymentId) {
-      setLoading(false);
-      return;
-    }
-    setLoading(true);
-    try {
-      const { projects } = await listProjects();
-      for (const project of projects) {
-        const { services } = await listServices(project.id, "static_site");
-        const service = services.find((s) => s.slug === siteSlug);
-        if (!service) continue;
-        const [{ deployments }, { domains }] = await Promise.all([
-          listDeployments(service.id),
-          listServiceDomains(service.id),
-        ]);
-        const deployment = deployments.find((d) => d.id === deploymentId);
-        if (!deployment) continue;
-        setRow({ project, service, deployment, domains });
-        setError(null);
+  const refresh = useCallback(
+    async (opts?: { silent?: boolean }) => {
+      if (!siteSlug || !deploymentId) {
         setLoading(false);
         return;
       }
-      setRow(null);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Failed to load deployment");
-    } finally {
-      setLoading(false);
+      if (!opts?.silent) setLoading(true);
+      try {
+        const { projects } = await listProjects();
+        for (const project of projects) {
+          const { services } = await listServices(project.id, "static_site");
+          const service = services.find((s) => s.slug === siteSlug);
+          if (!service) continue;
+          const [{ deployments }, { domains }] = await Promise.all([
+            listDeployments(service.id),
+            listServiceDomains(service.id),
+          ]);
+          const deployment = deployments.find((d) => d.id === deploymentId);
+          if (!deployment) continue;
+          setRow({ project, service, deployment, domains });
+          setError(null);
+          if (!opts?.silent) setLoading(false);
+          return;
+        }
+        setRow(null);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Failed to load deployment");
+      } finally {
+        if (!opts?.silent) setLoading(false);
+      }
+    },
+    [siteSlug, deploymentId],
+  );
+
+  const refreshLog = useCallback(async () => {
+    if (!deploymentId) return;
+    try {
+      const text = await fetchDeploymentLog(deploymentId);
+      setLog(text || "");
+      setLoadingLog(false);
+    } catch {
+      /* keep last log */
     }
-  }, [siteSlug, deploymentId]);
+  }, [deploymentId]);
 
   useEffect(() => {
     void refresh();
@@ -106,6 +122,18 @@ export function StaticSiteDeploymentDetailPage() {
       cancelled = true;
     };
   }, [deploymentId]);
+
+  const deploymentPollActive = useMemo(
+    () => (row ? deploymentIsInProgress(row.deployment.status) : false),
+    [row],
+  );
+
+  const pollDeployment = useCallback(() => {
+    void refresh({ silent: true });
+    void refreshLog();
+  }, [refresh, refreshLog]);
+
+  useDeploymentPoll(deploymentPollActive, pollDeployment);
 
   const status = useMemo(
     () =>

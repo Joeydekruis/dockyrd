@@ -1,5 +1,37 @@
 import type { StatusVariant } from "@/components/dockyard/ui/status-badge";
-import type { ServiceDomain } from "@/lib/api";
+import type { InstanceSettings, ServiceDomain } from "@/lib/api";
+
+/** Dashboard / server hostname used in create-flow Default URL previews. */
+export function serverDomainForPreview(
+  instance: InstanceSettings | null,
+): string {
+  const url = instance?.public_url?.trim();
+  if (url) {
+    try {
+      return new URL(url).hostname;
+    } catch {
+      /* fall through */
+    }
+  }
+  let suffix = instance?.wildcard_domain?.trim().replace(/^\*\./, "");
+  if (suffix) {
+    suffix = suffix.replace(/\.$/, "");
+    if (suffix.startsWith("apps.")) {
+      suffix = suffix.slice("apps.".length);
+    }
+    return suffix;
+  }
+  return "your-server.example";
+}
+
+/** `{slug}.{serverDomain}` shown while creating apps / static sites (not the issued platform hostname). */
+export function previewDefaultPlatformHostname(
+  slug: string,
+  instance: InstanceSettings | null,
+): string {
+  const part = slug.trim() || "app";
+  return `${part}.${serverDomainForPreview(instance)}`;
+}
 
 export type DomainStatusView = {
   label: string;
