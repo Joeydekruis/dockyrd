@@ -122,7 +122,7 @@ Reinstall the release binary (pick `arm64` or `amd64` from `uname -m`):
 ```bash
 sudo systemctl stop dockyard.service
 sudo rm -f /usr/local/bin/dockyard /usr/local/bin/dockyrd
-VER=0.7.2
+VER=0.7.3
 arch=$(uname -m); case "$arch" in aarch64|arm64) arch=arm64;; *) arch=amd64;; esac
 tmp=$(mktemp -d)
 curl -sfL -o "$tmp/p.tgz" "https://github.com/Joeydekruis/dockyrd/releases/download/v${VER}/dockyard_${VER}_linux_${arch}.tar.gz" \

@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.7.4] - 2026-11-07
+
+_Finished: 2026-11-07_
+
+### Added
+
+- **#73 / terminal briefing** — `docs/project/issues/73/terminal-briefing.md` (web-terminal product notes for Terminal v2)
+
+### Changed
+
+- **`.gitignore`** — ignore local `dockyard`/`dockyrd` repo-root binaries, agent scratch (`docs/project/wip/`, `_scratch/`, `Claude outputs/`)
+- **`docs/user/troubleshooting.md`** — reinstall example uses current release version in `VER=`
+
 ## [0.7.3] - 2026-11-07
 
 _Finished: 2026-11-07_

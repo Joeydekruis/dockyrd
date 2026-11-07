@@ -1,8 +1,16 @@
+# Local dev binaries (GoReleaser outputs at repo root)
+/dockyard
+/dockyrd
+
+# Agent / scratch (not shipped)
+Claude outputs/
+docs/project/wip/
+docs/project/issues/_scratch/
+
 web/out/
 web/node_modules/
 web/.next/
 bin/
-/dockyrd
 *.test
 web/tsconfig.tsbuildinfo
 
