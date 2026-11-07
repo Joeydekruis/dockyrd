@@ -48,7 +48,8 @@ func Render(in RenderInput) ([]byte, error) {
 		in.ACMEEmail = "ops@localhost"
 	}
 
-	routes := make([]any, 0, len(in.AppRoutes)+len(in.StaticRoutes)+1)
+	routes := make([]any, 0, len(in.AppRoutes)+len(in.StaticRoutes)+2)
+	routes = append(routes, httpToHTTPSRedirectRoute())
 
 	if in.PanelHost != "" && in.PanelUpstream != "" {
 		routes = append(routes, map[string]any{

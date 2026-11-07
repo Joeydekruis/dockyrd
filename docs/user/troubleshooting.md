@@ -185,6 +185,18 @@ Your unit name is **`dockyard.service`** until you install `dockyrd.service`; th
 
 dockyrd configures Caddy via a unix admin socket. Panel restarts do not stop user containers. If HTTPS fails, verify DNS points at the server and system time is correct (`doctor` clock check).
 
+### TLS works on HTTP but browsers show SSL error on HTTPS
+
+If `curl -I http://your-domain/` returns **308** from Caddy but `curl -I https://your-domain/` fails TLS, Let's Encrypt **HTTP-01** is usually stuck: Caddy was redirecting `/.well-known/acme-challenge/*` to HTTPS before a certificate existed. **0.7.10+** disables that broken default and reloads edge config on `dockyrd` restart. Also set a **real ACME email** under **Settings → Instance**, save, then restart `dockyrd` and wait ~1–2 minutes.
+
+Quick check from your laptop:
+
+```bash
+curl -sI "http://dockyrd.io/.well-known/acme-challenge/test"
+```
+
+A **308** here means ACME is still blocked (upgrade/restart panel). **404** (or another non-redirect) is OK for a fake token; real issuance should follow after restart.
+
 ## Logs
 
 ```bash

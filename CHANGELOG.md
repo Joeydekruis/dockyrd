@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.7.10] - 2026-11-07
+
+_Finished: 2026-11-07_
+
+### Fixed
+
+- **HTTPS / ACME** — stop Caddy’s automatic HTTP→HTTPS redirect from breaking HTTP-01 on `/.well-known/acme-challenge/*` (fixes stuck TLS / `ERR_SSL_PROTOCOL_ERROR` when certs never issued); explicit HTTP→HTTPS redirect except ACME paths
+
 ## [0.7.9] - 2026-11-07
 
 _Finished: 2026-11-07_

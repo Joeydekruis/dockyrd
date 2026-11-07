@@ -82,6 +82,35 @@ func mergeServerConfig(base map[string]any, trusted TrustedProxyConfig) map[stri
 	}
 	// HTTP/3 needs UDP 443; many cloud firewalls (Hetzner) only open TCP — Chrome then shows ERR_QUIC_PROTOCOL_ERROR.
 	base["protocols"] = []string{"h1", "h2"}
+	// Caddy's default HTTP→HTTPS redirect runs before certs exist and breaks ACME HTTP-01
+	// (LE follows 308 to HTTPS; handshake fails with "tls: internal error").
+	base["automatic_https"] = map[string]any{
+		"disable_redirects": true,
+	}
 	applyTrustedProxies(base, trusted)
 	return base
+}
+
+// httpToHTTPSRedirectRoute redirects cleartext HTTP after certs exist, but not ACME challenges.
+func httpToHTTPSRedirectRoute() map[string]any {
+	return map[string]any{
+		"match": []any{
+			map[string]any{
+				"protocol": []string{"http"},
+				"not": []any{
+					map[string]any{
+						"path": []string{"/.well-known/acme-challenge/*"},
+					},
+				},
+			},
+		},
+		"handle": []any{
+			map[string]any{
+				"handler":  "redir",
+				"location": "https://{http.request.host}{http.request.uri}",
+				"permanent": true,
+			},
+		},
+		"terminal": true,
+	}
 }
