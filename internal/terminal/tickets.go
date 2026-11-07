@@ -14,8 +14,16 @@ var (
 	ErrTicketExpired  = errors.New("terminal ticket expired")
 )
 
-// SessionSpec describes a container exec target for one WebSocket session.
+// Session kinds for web terminal sessions.
+const (
+	SessionKindContainer = "container"
+	SessionKindHost      = "host"
+	SessionKindTest      = "test"
+)
+
+// SessionSpec describes one WebSocket terminal session.
 type SessionSpec struct {
+	SessionKind    string // container | host | test
 	UserID         string
 	ServiceID      string
 	ContainerID    string

@@ -36,6 +36,7 @@ func (d apiDeps) instanceSettingsPayload(ctx context.Context, panel instance.Pan
 		"suggested_apps_domain":     instance.SuggestAppsWildcard(panel.PublicURL),
 		"public_ipv4":               expected,
 		"require_2fa_all":           panel.Require2FAAll,
+		"terminal_allow_host":       panel.TerminalAllowHost,
 		"smtp":                      smtp,
 	}
 }

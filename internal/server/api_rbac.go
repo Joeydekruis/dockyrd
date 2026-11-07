@@ -6,6 +6,18 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
 )
 
+func (d apiDeps) requireOwner(w http.ResponseWriter, r *http.Request) (sqlc.GetUserByIDRow, bool) {
+	user, ok := d.requireUser(w, r)
+	if !ok {
+		return user, false
+	}
+	if user.Role != "owner" {
+		writeJSONError(w, http.StatusForbidden, "owner required")
+		return user, false
+	}
+	return user, true
+}
+
 func (d apiDeps) requireAdmin(w http.ResponseWriter, r *http.Request) (sqlc.GetUserByIDRow, bool) {
 	user, ok := d.requireUser(w, r)
 	if !ok {

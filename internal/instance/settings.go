@@ -27,6 +27,7 @@ type Panel struct {
 	WildcardVerifiedAt   int64  `json:"wildcard_verified_at,omitempty"`
 	WildcardProbeHost    string `json:"wildcard_probe_host,omitempty"`
 	Require2FAAll        bool   `json:"require_2fa_all,omitempty"`
+	TerminalAllowHost    bool   `json:"terminal_allow_host,omitempty"`
 }
 
 // SMTPPublic is returned to clients (no secrets).

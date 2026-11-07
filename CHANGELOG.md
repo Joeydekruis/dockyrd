@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.6.2] - 2026-11-07
+
+_Finished: 2026-11-07_
+
+### Added
+
+- **#73 / Terminal v2** — Owner-only opt-in **host shell** (`terminal_allow_host`, 2FA on enable and per session); `GET /api/v1/terminal/meta`; host PTY via WebSocket; Termius-style tabs and new-session menu; **4 terminal themes**; **plain-text copy** (no ANSI); instance setting under Server → General — https://github.com/Joeydekruis/dockyrd/issues/73
+
+### Changed
+
+- **Terminal UI** — Subtitle and layout aligned with `docs/project/briefings/terminal-web.md`; test shell menu item shown as coming soon (API returns not implemented)
+
 ## [0.6.1] - 2026-11-07
 
 _Finished: 2026-11-07_

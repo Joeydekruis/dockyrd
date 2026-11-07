@@ -10,6 +10,7 @@ import { Button } from "@/components/dockyard/ui/button";
 import { SnackbarViewport } from "@/components/dockyard/ui/snackbar";
 import {
   getInstanceSettings,
+  getMe,
   type InstanceSettings,
   patchInstanceSettings,
 } from "@/lib/api";
@@ -26,6 +27,8 @@ export function InstanceSettingsPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [instance, setInstance] = useState<InstanceSettings | null>(null);
+  const [isOwner, setIsOwner] = useState(false);
+  const [hostMfaCode, setHostMfaCode] = useState("");
   const [snackbar, setSnackbar] = useState<SnackbarState>(null);
 
   const dismissSnackbar = useCallback(() => setSnackbar(null), []);
@@ -46,8 +49,12 @@ export function InstanceSettingsPage() {
   const refresh = useCallback(async () => {
     setLoading(true);
     try {
-      const inst = await getInstanceSettings().catch(() => null);
+      const [inst, me] = await Promise.all([
+        getInstanceSettings().catch(() => null),
+        getMe().catch(() => null),
+      ]);
       setInstance(inst);
+      setIsOwner(me?.role === "owner");
       setError(null);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load settings");
@@ -59,6 +66,21 @@ export function InstanceSettingsPage() {
   useEffect(() => {
     void refresh();
   }, [refresh]);
+
+  async function onSaveTerminalHost() {
+    if (!instance) return;
+    try {
+      const updated = await patchInstanceSettings({
+        terminal_allow_host: instance.terminal_allow_host,
+        terminal_host_mfa_code: hostMfaCode.trim() || undefined,
+      });
+      setInstance(updated);
+      setHostMfaCode("");
+      showSnackbar("Terminal access settings saved.", "success");
+    } catch (e) {
+      showSnackbar(e instanceof Error ? e.message : "Could not save", "warn");
+    }
+  }
 
   async function onSavePublicUrl(e: React.FormEvent) {
     e.preventDefault();
@@ -151,6 +173,47 @@ export function InstanceSettingsPage() {
             </p>
           )}
         </section>
+
+        {instance && isOwner ? (
+          <section aria-label="Web terminal" className={settingsCardClass}>
+            <h2 className="text-lg font-medium">Host terminal</h2>
+            <p className="text-sm text-[var(--muted-foreground)]">
+              When enabled, the server owner can open a root shell on the host
+              from the Terminal page. Requires 2FA confirmation when you turn it
+              on (if 2FA is configured).
+            </p>
+            <label className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={Boolean(instance.terminal_allow_host)}
+                onChange={(e) =>
+                  setInstance({
+                    ...instance,
+                    terminal_allow_host: e.target.checked,
+                  })
+                }
+              />
+              Allow host terminal (owner only)
+            </label>
+            {!instance.terminal_allow_host ? null : (
+              <label className="block text-sm">
+                <span className="text-[var(--muted-foreground)]">
+                  2FA code (required when enabling)
+                </span>
+                <input
+                  className="field-input mt-1 w-full max-w-xs"
+                  inputMode="numeric"
+                  autoComplete="one-time-code"
+                  value={hostMfaCode}
+                  onChange={(e) => setHostMfaCode(e.target.value)}
+                />
+              </label>
+            )}
+            <Button type="button" onClick={() => void onSaveTerminalHost()}>
+              Save terminal access
+            </Button>
+          </section>
+        ) : null}
 
         {error ? (
           <p className="text-sm text-red-600" role="alert">

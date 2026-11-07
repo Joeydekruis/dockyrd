@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/Joeydekruis/dockyrd/internal/audit"
 	"github.com/Joeydekruis/dockyrd/internal/instance"
 	"github.com/Joeydekruis/dockyrd/internal/mail"
 )
@@ -56,11 +57,13 @@ func (d apiDeps) handlePatchInstanceSettings(w http.ResponseWriter, r *http.Requ
 		return
 	}
 	var body struct {
-		PublicURL       *string `json:"public_url"`
-		AcmeEmail       *string `json:"acme_email"`
-		WildcardDomain  *string `json:"wildcard_domain"`
-		Require2FAAll   *bool   `json:"require_2fa_all"`
-		SMTP            *struct {
+		PublicURL            *string `json:"public_url"`
+		AcmeEmail            *string `json:"acme_email"`
+		WildcardDomain       *string `json:"wildcard_domain"`
+		Require2FAAll        *bool   `json:"require_2fa_all"`
+		TerminalAllowHost    *bool   `json:"terminal_allow_host"`
+		TerminalHostMfaCode  *string `json:"terminal_host_mfa_code"`
+		SMTP                 *struct {
 			Host     string `json:"host"`
 			Port     int    `json:"port"`
 			Username string `json:"username"`
@@ -81,6 +84,42 @@ func (d apiDeps) handlePatchInstanceSettings(w http.ResponseWriter, r *http.Requ
 	}
 	prev := panel
 	applyInstancePanelPatch(&panel, prev, body.WildcardDomain, body.PublicURL, body.AcmeEmail, body.Require2FAAll)
+	if body.TerminalAllowHost != nil {
+		user, ok := d.requireUser(w, r)
+		if !ok {
+			return
+		}
+		if user.Role != "owner" {
+			writeJSONError(w, http.StatusForbidden, "only the owner may change host terminal settings")
+			return
+		}
+		want := *body.TerminalAllowHost
+		if want && !prev.TerminalAllowHost {
+			code := ""
+			if body.TerminalHostMfaCode != nil {
+				code = strings.TrimSpace(*body.TerminalHostMfaCode)
+			}
+			if err := d.verifyUserTOTPCode(ctx, user, code); err != nil {
+				writeJSONError(w, http.StatusUnauthorized, err.Error())
+				return
+			}
+			_ = d.audit.Record(ctx, audit.Entry{
+				UserID:     user.ID,
+				Action:     "terminal.host_enabled",
+				TargetKind: "instance",
+				TargetID:   "panel",
+			})
+		}
+		if !want && prev.TerminalAllowHost {
+			_ = d.audit.Record(ctx, audit.Entry{
+				UserID:     user.ID,
+				Action:     "terminal.host_disabled",
+				TargetKind: "instance",
+				TargetID:   "panel",
+			})
+		}
+		panel.TerminalAllowHost = want
+	}
 	if err := instance.SavePanel(ctx, d.q, panel); err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "database error")
 		return

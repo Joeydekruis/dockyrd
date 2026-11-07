@@ -1313,6 +1313,7 @@ export type InstanceSettings = {
   suggested_apps_domain?: string;
   public_ipv4?: string;
   require_2fa_all: boolean;
+  terminal_allow_host?: boolean;
   smtp: {
     host: string;
     port: number;
@@ -1342,6 +1343,8 @@ export function patchInstanceSettings(body: {
   acme_email?: string;
   wildcard_domain?: string;
   require_2fa_all?: boolean;
+  terminal_allow_host?: boolean;
+  terminal_host_mfa_code?: string;
   smtp?: {
     host: string;
     port: number;
@@ -1632,11 +1635,29 @@ export function listTerminalTargets() {
   return apiFetch<{ targets: TerminalTarget[] }>("/api/v1/terminal/targets");
 }
 
+export type TerminalMeta = {
+  session_kinds: {
+    container: { available: boolean };
+    host: {
+      available: boolean;
+      allowed_by_instance: boolean;
+      requires_mfa_if_enabled: boolean;
+    };
+    test: { available: boolean };
+  };
+};
+
+export function getTerminalMeta() {
+  return apiFetch<TerminalMeta>("/api/v1/terminal/meta");
+}
+
 export function createTerminalSession(input: {
-  service_id: string;
+  session_kind?: "container" | "host" | "test";
+  service_id?: string;
   compose_service?: string;
   mode?: string;
   exec_user?: string;
+  mfa_code?: string;
 }) {
   return apiFetch<{ ticket: string; expires_at: number }>(
     "/api/v1/terminal/sessions",
