@@ -27,6 +27,7 @@ const sessionCookie = "dy_session"
 type apiDeps struct {
 	cfg       config.Config
 	q         *sqlc.Queries
+	db        *sql.DB
 	events    *events.Hub
 	audit     audit.Logger
 	docker    *docker.Client
@@ -92,6 +93,10 @@ func registerAPIRoutes(mux *http.ServeMux, deps apiDeps) {
 	registerComposeRoutes(mux, deps)
 	registerTokenRoutes(mux, deps)
 	registerTerminalRoutes(mux, deps)
+	registerSecurityHostActionRoutes(mux, deps)
+	registerSecurityCheckRoutes(mux, deps)
+	registerSecurityAddonRoutes(mux, deps)
+	registerSecurityPolicyRoutes(mux, deps)
 }
 
 func (d apiDeps) handleLogin(w http.ResponseWriter, r *http.Request) {

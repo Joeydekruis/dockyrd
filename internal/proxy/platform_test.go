@@ -81,6 +81,43 @@ func TestRenderContainsRoute(t *testing.T) {
 	}
 }
 
+func TestRenderTrustedProxiesCloudflare(t *testing.T) {
+	raw, err := Render(RenderInput{
+		ACMEEmail: "ops@example.com",
+		Trusted: TrustedProxyConfig{
+			Mode:           "cloudflare",
+			Ranges:         []string{"173.245.48.0/20"},
+			ClientIPHeader: "CF-Connecting-IP",
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := string(raw)
+	if !strings.Contains(s, "trusted_proxies") || !strings.Contains(s, "CF-Connecting-IP") {
+		t.Fatalf("missing trusted proxy config: %s", s)
+	}
+}
+
+func TestRenderBaselineHandlers(t *testing.T) {
+	raw, err := Render(RenderInput{
+		ACMEEmail: "ops@example.com",
+		AppRoutes: []AppRoute{{
+			Hostname:     "app.example.com",
+			UpstreamDial: "dy-app:3000",
+		}},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	s := string(raw)
+	for _, frag := range []string{`"handler": "encode"`, `Strict-Transport-Security`, `nosniff`, `read_header_timeout`} {
+		if !strings.Contains(s, frag) {
+			t.Fatalf("missing %q in render output", frag)
+		}
+	}
+}
+
 func TestRenderStaticFileServerRoot(t *testing.T) {
 	raw, err := Render(RenderInput{
 		ACMEEmail: "ops@example.com",

@@ -357,6 +357,10 @@ func (d apiDeps) handleCreateServiceLink(w http.ResponseWriter, r *http.Request)
 			return
 		}
 	}
+	_ = d.q.TouchServiceUpdatedAt(ctx, sqlc.TouchServiceUpdatedAtParams{
+		UpdatedAt: sql.NullInt64{Int64: now, Valid: true},
+		ID:        fromID,
+	})
 	_ = d.audit.Record(ctx, audit.Entry{
 		UserID:     user.ID,
 		Action:     "link.create",
@@ -397,6 +401,11 @@ func (d apiDeps) handleDeleteServiceLink(w http.ResponseWriter, r *http.Request)
 		writeJSONError(w, http.StatusInternalServerError, "delete link error")
 		return
 	}
+	now := time.Now().Unix()
+	_ = d.q.TouchServiceUpdatedAt(ctx, sqlc.TouchServiceUpdatedAtParams{
+		UpdatedAt: sql.NullInt64{Int64: now, Valid: true},
+		ID:        link.FromServiceID,
+	})
 	_ = d.audit.Record(ctx, audit.Entry{
 		UserID:     user.ID,
 		Action:     "link.delete",

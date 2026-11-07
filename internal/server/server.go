@@ -70,7 +70,7 @@ func Serve(cfg config.Config) error {
 		notifyReg = notify.BuildRegistry(cfg, q, BuildVersion())
 		dispatcher = notify.NewDispatcher(q, cfg, log, notifyReg, notifier, BuildVersion(), wake)
 	}
-	deps := apiDeps{cfg: cfg, q: q, events: hub, audit: audit.Logger{Q: q}, docker: dockerCli, notifier: notifier, notifyReg: notifyReg}
+	deps := apiDeps{cfg: cfg, q: q, db: sqlConn, events: hub, audit: audit.Logger{Q: q}, docker: dockerCli, notifier: notifier, notifyReg: notifyReg}
 	registerAPIRoutes(mux, deps)
 	mux.HandleFunc("GET /api/v1/setup/status", func(w http.ResponseWriter, r *http.Request) {
 		handleSetupStatus(w, r, q)
@@ -112,6 +112,12 @@ func spaExportFallback(rel string) string {
 		}
 	}
 	switch {
+	case strings.HasPrefix(rel, "server/security/addons"):
+		return "server/security/addons/index.html"
+	case strings.HasPrefix(rel, "server/security/policy"):
+		return "server/security/policy/index.html"
+	case strings.HasPrefix(rel, "server/security"):
+		return "server/security/index.html"
 	case strings.HasPrefix(rel, "settings/server/email"):
 		return "settings/server/email/index.html"
 	case strings.HasPrefix(rel, "settings/server/channels"):

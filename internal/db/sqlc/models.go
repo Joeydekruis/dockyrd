@@ -8,6 +8,15 @@ import (
 	"database/sql"
 )
 
+type Addon struct {
+	ID          string
+	State       string
+	Version     sql.NullString
+	ConfigJson  sql.NullString
+	InstalledAt sql.NullInt64
+	LastError   sql.NullString
+}
+
 type AlertState struct {
 	DedupKey       string
 	Type           string
@@ -213,6 +222,22 @@ type GitSource struct {
 	CreatedAt        sql.NullInt64
 }
 
+type HostAction struct {
+	ID              string
+	Kind            string
+	State           string
+	PlanJson        sql.NullString
+	RevertJson      sql.NullString
+	ActorUserID     sql.NullString
+	AppliedAt       sql.NullInt64
+	ConfirmDeadline sql.NullInt64
+	ConfirmedAt     sql.NullInt64
+	RevertedAt      sql.NullInt64
+	LastError       sql.NullString
+	CreatedAt       int64
+	UpdatedAt       int64
+}
+
 type InboxNotification struct {
 	ID             string
 	UserID         string
@@ -368,6 +393,27 @@ type RecoveryCode struct {
 	UsedAt   sql.NullInt64
 }
 
+type SecurityCheckCache struct {
+	ID          int64
+	RanAt       int64
+	ResultsJson string
+}
+
+type SecurityPolicy struct {
+	ID             int64
+	DefaultProfile string
+	Lock           int64
+	HeadersJson    string
+	RlDefaultRpm   sql.NullInt64
+	RlLoginRpm     sql.NullInt64
+	CdnMode        string
+	CdnRangesJson  string
+	CdnHeader      string
+	DefaultMemMb   int64
+	DefaultCpu     float64
+	DefaultPids    int64
+}
+
 type Server struct {
 	ID         string
 	Name       sql.NullString
@@ -400,6 +446,25 @@ type ServiceLink struct {
 	ToServiceID   string
 	CreatedBy     sql.NullString
 	CreatedAt     int64
+}
+
+type ServiceSecurity struct {
+	ServiceID       string
+	Profile         string
+	LockExempt      int64
+	Csp             sql.NullString
+	CspReportOnly   int64
+	BasicUser       sql.NullString
+	BasicHash       sql.NullString
+	IpAllowlistJson string
+	Maintenance     int64
+	RlMode          string
+	RlRpm           sql.NullInt64
+	RlLoginRpm      sql.NullInt64
+	WafMode         string
+	MemMb           sql.NullInt64
+	Cpu             sql.NullFloat64
+	Pids            sql.NullInt64
 }
 
 type Session struct {

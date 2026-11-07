@@ -46,16 +46,28 @@ func (d apiDeps) handleDeleteService(w http.ResponseWriter, r *http.Request) {
 		writeJSONError(w, http.StatusInternalServerError, "database error")
 		return
 	}
-	if row.Kind != "postgres" && row.Kind != "redis" {
-		writeJSONError(w, http.StatusBadRequest, "only database services can be deleted from the panel")
-		return
-	}
 	if strings.TrimSpace(body.ConfirmSlug) != row.Slug {
 		writeJSONError(w, http.StatusBadRequest, "confirm_slug must match the service slug")
 		return
 	}
-	if err := serviceops.TeardownDatabase(ctx, d.docker, row.ID, row.Slug, body.DeleteVolume); err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "could not remove database container")
+	switch row.Kind {
+	case "postgres", "redis":
+		if err := serviceops.TeardownDatabase(ctx, d.docker, row.ID, row.Slug, body.DeleteVolume); err != nil {
+			writeJSONError(w, http.StatusInternalServerError, "could not remove database container")
+			return
+		}
+	case "app":
+		if err := serviceops.TeardownApplication(ctx, d.docker, row.ID, 30); err != nil {
+			writeJSONError(w, http.StatusInternalServerError, "could not remove application containers")
+			return
+		}
+	case "static_site":
+		if err := serviceops.TeardownStaticSite(d.cfg.SitesDir(), row.Slug); err != nil {
+			writeJSONError(w, http.StatusInternalServerError, "could not remove static site files")
+			return
+		}
+	default:
+		writeJSONError(w, http.StatusBadRequest, "this service kind cannot be deleted from the panel")
 		return
 	}
 	if err := d.q.DeleteService(ctx, id); err != nil {

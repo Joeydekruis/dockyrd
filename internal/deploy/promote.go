@@ -89,7 +89,7 @@ func (rt *Runtime) promoteAppRelease(ctx context.Context, svc sqlc.Service, depl
 	if err != nil {
 		return err
 	}
-	if err := rt.Docker.WaitTCPHealthy(ctx, containerID, appCfg.Port, healthTimeout); err != nil {
+	if err := rt.Docker.WaitAppHealthy(ctx, containerID, appCfg.Port, appCfg.HealthPath, healthTimeout); err != nil {
 		_ = rt.Docker.StopAndRemove(ctx, containerID, appCfg.StopGrace)
 		return err
 	}

@@ -23,6 +23,7 @@ spa_placeholders=(
   "static-sites/_/index.html"
   "static-sites/_/deployments/_/index.html"
   "applications/_/index.html"
+  "applications/_/deployments/_/index.html"
   "databases/_/index.html"
   "object-storage/_/index.html"
 )

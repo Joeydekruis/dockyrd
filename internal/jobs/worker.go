@@ -36,6 +36,7 @@ type DeployPayload struct {
 type Worker struct {
 	Cfg     config.Config
 	Q       *sqlc.Queries
+	DB      *sql.DB
 	Deploy  *deploy.Runtime
 	Docker  *docker.Client
 	Log     *slog.Logger
@@ -119,6 +120,30 @@ func (w *Worker) ProcessOnce(ctx context.Context) (bool, error) {
 		} else {
 			runner := &backup.Runner{Cfg: w.Cfg, Q: w.Q, Docker: w.Docker, Log: w.Log, Notify: w.Notify, Events: w.Events}
 			runErr = runner.RunJob(ctx, payload)
+		}
+	case row.Kind.Valid && row.Kind.String == KindSecurityAddonInstall:
+		var payload SecurityAddonPayload
+		raw, err := payloadBytes(row.Payload)
+		if err != nil {
+			runErr = err
+		} else if err := json.Unmarshal(raw, &payload); err != nil {
+			runErr = err
+		} else if w.DB == nil {
+			runErr = errors.New("database not configured for security addon job")
+		} else {
+			runErr = RunSecurityAddonInstall(ctx, w.Cfg, w.DB, w.Q, payload)
+		}
+	case row.Kind.Valid && row.Kind.String == KindSecurityAddonUninstall:
+		var payload SecurityAddonPayload
+		raw, err := payloadBytes(row.Payload)
+		if err != nil {
+			runErr = err
+		} else if err := json.Unmarshal(raw, &payload); err != nil {
+			runErr = err
+		} else if w.DB == nil {
+			runErr = errors.New("database not configured for security addon job")
+		} else {
+			runErr = RunSecurityAddonUninstall(ctx, w.Cfg, w.DB, w.Q, payload)
 		}
 	case row.Kind.Valid && row.Kind.String == KindDatabaseRestore:
 		var payload backup.RestoreJobPayload

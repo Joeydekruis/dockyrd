@@ -7,6 +7,7 @@ import (
 
 	"github.com/Joeydekruis/dockyrd/internal/admin"
 	"github.com/Joeydekruis/dockyrd/internal/config"
+	"github.com/Joeydekruis/dockyrd/internal/hostops"
 	"github.com/Joeydekruis/dockyrd/internal/doctor"
 	"github.com/Joeydekruis/dockyrd/internal/server"
 	"github.com/Joeydekruis/dockyrd/internal/setup"
@@ -61,6 +62,11 @@ func main() {
 			fmt.Fprintf(os.Stderr, "admin: %v\n", err)
 			os.Exit(1)
 		}
+	case "host":
+		if err := runHost(cfg, os.Args[2:]); err != nil {
+			fmt.Fprintf(os.Stderr, "host: %v\n", err)
+			os.Exit(1)
+		}
 	case "update":
 		if err := runUpdate(cfg, os.Args[2:]); err != nil {
 			fmt.Fprintf(os.Stderr, "update: %v\n", err)
@@ -111,11 +117,19 @@ func runAdmin(cfg config.Config, args []string) error {
 	}
 }
 
+func runHost(cfg config.Config, args []string) error {
+	if len(args) < 2 || args[0] != "revert" {
+		return fmt.Errorf("usage: dockyard host revert <action-id>")
+	}
+	return hostops.RevertByID(context.Background(), cfg, args[1])
+}
+
 func printUsage() {
-	fmt.Fprintf(os.Stderr, "Usage: dockyard <serve|version|init|setup-token|doctor|update|admin>\n")
+	fmt.Fprintf(os.Stderr, "Usage: dockyard <serve|version|init|setup-token|doctor|update|admin|host>\n")
 	fmt.Fprintf(os.Stderr, "       dockyard update [--check] [--rollback]\n")
 	fmt.Fprintf(os.Stderr, "       dockyard admin reset-password <email> [password]\n")
 	fmt.Fprintf(os.Stderr, "       dockyard admin disable-2fa <email>\n")
+	fmt.Fprintf(os.Stderr, "       dockyard host revert <action-id>\n")
 }
 
 func runUpdate(cfg config.Config, args []string) error {

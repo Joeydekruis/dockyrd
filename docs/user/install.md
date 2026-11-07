@@ -14,7 +14,7 @@ curl -fsSL https://raw.githubusercontent.com/Joeydekruis/dockyrd/development/scr
 
 When `https://get.dockyard.dev` is live, the install one-liner on [dockyrd.io](https://dockyrd.io) will point there instead of the raw GitHub script URL.
 
-The installer checks the OS, installs **Docker Engine** on Debian/Ubuntu when missing, installs `/usr/local/bin/dockyard`, registers `dockyard.service`, and prints a **one-time setup token**.
+The installer checks the OS, installs **Docker Engine** on Debian/Ubuntu when missing, installs `/usr/local/bin/dockyard` (server) and `/usr/local/bin/dy` (API CLI for tokens/CI), registers `dockyard.service`, and prints a **one-time setup token**.
 
 Skip automatic Docker install: `DOCKYARD_SKIP_DOCKER_INSTALL=1` or pass `--no-docker-install` when piping the script.
 

@@ -20,7 +20,7 @@ main() {
 		rm -f /etc/systemd/system/dockyard.service
 		systemctl daemon-reload
 	fi
-	rm -f /usr/local/bin/dockyard
+	rm -f /usr/local/bin/dockyard /usr/local/bin/dy
 	log "Dockyard platform removed. Data under /var/lib/dockyard and /etc/dockyard was kept."
 	log "Re-run with DOCKYARD_PURGE_DATA=1 support in a later release to delete data."
 }

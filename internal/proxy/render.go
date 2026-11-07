@@ -3,12 +3,15 @@ package proxy
 import (
 	"encoding/json"
 	"sort"
+
+	"github.com/Joeydekruis/dockyrd/internal/securitypolicy"
 )
 
 // AppRoute is one HTTPS host → container upstream mapping.
 type AppRoute struct {
 	Hostname     string
 	UpstreamDial string
+	Security     *securitypolicy.RouteSnapshot
 }
 
 // StaticRoute serves files from a host filesystem root (static sites).
@@ -18,6 +21,7 @@ type StaticRoute struct {
 	IndexNames  []string
 	ErrorPage   string
 	SpaFallback bool
+	Security    *securitypolicy.RouteSnapshot
 }
 
 // RenderInput controls global Caddy options.
@@ -29,6 +33,7 @@ type RenderInput struct {
 	StaticRoutes  []StaticRoute
 	AdminListen   string
 	AccessLog     string
+	Trusted       TrustedProxyConfig
 }
 
 // Render builds the full Caddy JSON document (briefing bijlage B).
@@ -48,10 +53,10 @@ func Render(in RenderInput) ([]byte, error) {
 	if in.PanelHost != "" && in.PanelUpstream != "" {
 		routes = append(routes, map[string]any{
 			"match": []any{map[string]any{"host": []string{in.PanelHost}}},
-			"handle": []any{map[string]any{
-				"handler": "reverse_proxy",
+			"handle": prependBaseline([]any{map[string]any{
+				"handler":   "reverse_proxy",
 				"upstreams": []any{map[string]any{"dial": in.PanelUpstream}},
-			}},
+			}}),
 			"terminal": true,
 		})
 	}
@@ -61,13 +66,15 @@ func Render(in RenderInput) ([]byte, error) {
 		return sortedApps[i].Hostname < sortedApps[j].Hostname
 	})
 	for _, r := range sortedApps {
+		upstream := []any{map[string]any{
+			"handler": "reverse_proxy",
+			"upstreams": []any{map[string]any{"dial": r.UpstreamDial}},
+			"load_balancing": map[string]any{"try_duration": "5s"},
+		}}
+		handles := routeHandles(r.Security, upstream)
 		routes = append(routes, map[string]any{
-			"match": []any{map[string]any{"host": []string{r.Hostname}}},
-			"handle": []any{map[string]any{
-				"handler": "reverse_proxy",
-				"upstreams": []any{map[string]any{"dial": r.UpstreamDial}},
-				"load_balancing": map[string]any{"try_duration": "5s"},
-			}},
+			"match":    []any{map[string]any{"host": []string{r.Hostname}}},
+			"handle":   handles,
 			"terminal": true,
 		})
 	}
@@ -108,11 +115,11 @@ func Render(in RenderInput) ([]byte, error) {
 		"apps": map[string]any{
 			"http": map[string]any{
 				"servers": map[string]any{
-					"dy": map[string]any{
+					"dy": mergeServerConfig(map[string]any{
 						"listen": []string{":443", ":80"},
 						"logs":   map[string]any{"default_logger_name": "dy"},
 						"routes": routes,
-					},
+					}, in.Trusted),
 				},
 			},
 			"tls": map[string]any{
@@ -132,4 +139,11 @@ func Render(in RenderInput) ([]byte, error) {
 		},
 	}
 	return json.MarshalIndent(doc, "", "  ")
+}
+
+func routeHandles(snap *securitypolicy.RouteSnapshot, upstream []any) []any {
+	if snap == nil {
+		return prependBaseline(upstream)
+	}
+	return prependSecurity(*snap, upstream)
 }

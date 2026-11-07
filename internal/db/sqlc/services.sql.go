@@ -697,6 +697,22 @@ func (q *Queries) SetServiceLiveDeployment(ctx context.Context, arg SetServiceLi
 	return err
 }
 
+const touchServiceUpdatedAt = `-- name: TouchServiceUpdatedAt :exec
+UPDATE services
+SET updated_at = ?
+WHERE id = ?
+`
+
+type TouchServiceUpdatedAtParams struct {
+	UpdatedAt sql.NullInt64
+	ID        string
+}
+
+func (q *Queries) TouchServiceUpdatedAt(ctx context.Context, arg TouchServiceUpdatedAtParams) error {
+	_, err := q.db.ExecContext(ctx, touchServiceUpdatedAt, arg.UpdatedAt, arg.ID)
+	return err
+}
+
 const updatePreviewPushMeta = `-- name: UpdatePreviewPushMeta :exec
 UPDATE services
 SET preview_head_sha = ?, preview_last_push_at = ?, updated_at = ?

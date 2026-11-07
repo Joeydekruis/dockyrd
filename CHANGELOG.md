@@ -6,6 +6,26 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-07
+
+_Finished: 2026-11-07_
+
+### Added
+
+- **M7 Security (P0–P1d)** — epic [#74](https://github.com/Joeydekruis/dockyrd/issues/74): container hardening (`no-new-privileges`, `cap_drop`, pids/CPU limits), Caddy baseline encode/headers/timeouts, Valkey cache/queue presets (`docs/project/SECURITY_BRIEFING.md`)
+- **#75 / hostops** — typed host actions, SQLite journal, lockout timers, confirm/revert API, `dockyard host revert` — https://github.com/Joeydekruis/dockyrd/issues/75
+- **#76 / Server Security** — baseline checks, firewall/SSH/unattended add-ons, Overview + Add-ons UI — https://github.com/Joeydekruis/dockyrd/issues/76
+- **#77 / policy + site Security** — `security_policy`, `service_security`, instance Policy UI, per-service Security tab (CSP, access, resources) — https://github.com/Joeydekruis/dockyrd/issues/77
+- **#78 / CDN trust** — Cloudflare range fetch on policy save, `trusted_proxies` + `client_ip_headers` in Caddy render — https://github.com/Joeydekruis/dockyrd/issues/78
+
+### Changed
+
+- **Security design contract** — `docs/dockyrd-security-design.html`, sidebar **Security** under Server (between Analytics and Terminal)
+
+### Note
+
+- **P2–P3** (proxybuild WAF/rate limit, CrowdSec) remain on issues [#79](https://github.com/Joeydekruis/dockyrd/issues/79)–[#82](https://github.com/Joeydekruis/dockyrd/issues/82); catalog entries are visible in UI but not installable yet.
+
 ## [0.6.4] - 2026-11-07
 
 _Finished: 2026-11-07_

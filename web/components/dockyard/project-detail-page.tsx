@@ -4,7 +4,7 @@ import { Layers, Plus } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AddProjectResourceModal } from "@/components/dockyard/add-project-resource-modal";
-import { CreateApplicationModal } from "@/components/dockyard/create-application-modal";
+import { CreateApplicationWizard } from "@/components/dockyard/create-application-wizard";
 import { CreateBucketModal } from "@/components/dockyard/create-bucket-modal";
 import { CreateComposeModal } from "@/components/dockyard/create-compose-modal";
 import { CreateDatabaseModal } from "@/components/dockyard/create-database-modal";
@@ -388,7 +388,7 @@ export function ProjectDetailPage() {
         onChanged={() => void refresh()}
       />
 
-      <CreateApplicationModal
+      <CreateApplicationWizard
         open={createAppOpen}
         defaultProjectId={project?.id}
         onClose={() => setCreateAppOpen(false)}

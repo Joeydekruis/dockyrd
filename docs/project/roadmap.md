@@ -12,6 +12,7 @@ From briefing §15. Update when a milestone closes.
 | **M5 · v0.1.0 release** | Self-update, doctor, docs, e2e green | Public release | **Released** — **`v0.0.22`** on `main`; §19 polish ongoing |
 | **M6 · Resource links** | Directed links, ref enforcement, per-link networks, project map | #58–#61 shipped @ **v0.0.49** | **Done** (2026-11-05) |
 | **M6.1 · Panel terminal** | Container web terminal (admin), psql/valkey shortcuts | #72 @ **v0.6.0** | **Done** (2026-11-07) |
+| **M7 · Security & performance** | P0–P1d shipped @ **v0.7.0**; P2 proxybuild/WAF/RL + P3 CrowdSec (#79–#82) | Epic **#74** (open) | **P1 done** |
 
 **Gate:** `./scripts/verify-m5-smoke.sh`, `./scripts/verify-install.sh`, `make e2e` (Docker host).
 

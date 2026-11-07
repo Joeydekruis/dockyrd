@@ -15,7 +15,7 @@
 <meta name="twitter:title" content="CLI reference · Dockyrd">
 <meta name="twitter:description" content="The dockyrd binary is both the server and its admin tool. Run commands as root on the server.">
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../assets/site.css?v=0.0.54">
+<link rel="stylesheet" href="../assets/site.css?v=0.6.3">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -64,7 +64,7 @@
       <button class="search-btn" type="button" id="searchBtn" aria-label="Search documentation">
         <svg width="16" height="16" aria-hidden="true"><use href="#i-search"/></svg><span>Search docs</span><kbd>⌘K</kbd>
       </button>
-      <span class="version">v0.0.54</span>
+      <span class="version">v0.6.3</span>
       <a class="btn btn-outline gh-btn" href="https://github.com/Joeydekruis/dockyrd" target="_blank" rel="noopener noreferrer" aria-label="Star Dockyrd on GitHub">
         <svg width="16" height="16" aria-hidden="true"><use href="#i-github"/></svg>
         <span class="gh-label">Star</span>
@@ -78,7 +78,7 @@
     <nav id="docnav"><div class="group"><span class="eyebrow">Getting started</span><a href="introduction.html">Introduction</a><a href="installation.html">Installation</a><a href="quick-start.html">Quick start</a></div><div class="group"><span class="eyebrow">Guides</span><a href="nextjs.html">Next.js apps</a><a href="static-sites.html">Static sites</a><a href="databases.html">Databases</a><a href="object-storage.html">Object storage</a><a href="domains.html">Domains & HTTPS</a><a href="variables.html">Environment variables</a></div><div class="group"><span class="eyebrow">Operations</span><a href="updates.html">Updates</a><a href="cli.html" aria-current="page">CLI reference</a><a href="troubleshooting.html">Troubleshooting</a></div><div class="group"><span class="eyebrow">Concepts</span><a href="architecture.html">Architecture</a><a href="security.html">Users & security</a></div></nav>
     <div class="side-foot">
       <span class="status warn">Pre-release</span>
-      <span style="color:var(--ink-2)">These docs track v0.0.54. Details can change before the next release.</span>
+      <span style="color:var(--ink-2)">These docs track v0.6.3. Details can change before the next release.</span>
     </div>
   </aside>
   <main class="article" id="main">
@@ -99,9 +99,19 @@
 <tr><td><code>dockyard backup</code></td><td>Writes a snapshot of the control-plane database.</td></tr>
 <tr><td><code>dockyard version</code></td><td>Prints version, commit and build date.</td></tr>
 </tbody></table></div>
+<h2 id="cli-dy">API client (<code>dy</code>)</h2>
+<p>Installed next to <code>dockyrd</code> for tokens and CI. Log in with an API token from Settings → Account → API tokens, then run deploy and log commands from SSH or scripts.</p>
+<div class="tbl"><table><thead><tr><th>Command</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>dy login &lt;url&gt; &lt;token&gt;</code></td><td>Saves panel URL and API token under <code>~/.config/dy</code>.</td></tr>
+<tr><td><code>dy whoami</code></td><td>Prints the authenticated user.</td></tr>
+<tr><td><code>dy services &lt;project-id&gt;</code></td><td>Lists services in a project.</td></tr>
+<tr><td><code>dy deploy &lt;service-id&gt;</code></td><td>Triggers a new deployment.</td></tr>
+<tr><td><code>dy logs &lt;service-id&gt; [runtime|access] [tail]</code></td><td>Fetches recent logs.</td></tr>
+</tbody></table></div>
 <h2 id="cli-paths">Files and paths</h2>
 <div class="tbl"><table><thead><tr><th>Path</th><th>Contents</th></tr></thead><tbody>
-<tr><td><code>/usr/local/bin/dockyard</code></td><td>The binary</td></tr>
+<tr><td><code>/usr/local/bin/dockyard</code></td><td>Server binary (<code>dockyard serve</code>, …)</td></tr>
+<tr><td><code>/usr/local/bin/dy</code></td><td>API client for tokens and automation</td></tr>
 <tr><td><code>/etc/dockyard/</code></td><td>Master key and optional <code>dockyrd.env</code></td></tr>
 <tr><td><code>/var/lib/dockyard/dockyrd.db</code></td><td>Control-plane database (SQLite)</td></tr>
 <tr><td><code>/var/lib/dockyard/backups/</code></td><td>Daily snapshots, seven kept</td></tr>
@@ -112,7 +122,7 @@
     <nav class="pager" aria-label="Previous and next page"><a class="prev" href="updates.html"><span class="eyebrow">Previous</span><span>Updates</span></a><a class="next" href="troubleshooting.html"><span class="eyebrow">Next</span><span>Troubleshooting</span></a></nav>
     <div class="edit"><a href="https://github.com/Joeydekruis/dockyrd/tree/development/site/source.html" target="_blank" rel="noopener noreferrer">Edit this page on GitHub</a><span>Apache-2.0 licensed</span></div>
   </main>
-  <aside class="toc" aria-label="On this page"><span class="eyebrow">On this page</span><ol><li><a href="#cli-commands">Commands</a></li><li><a href="#cli-paths">Files and paths</a></li></ol></aside>
+  <aside class="toc" aria-label="On this page"><span class="eyebrow">On this page</span><ol><li><a href="#cli-commands">Commands</a></li><li><a href="#cli-dy">API client (</a></li><li><a href="#cli-paths">Files and paths</a></li></ol></aside>
 </div>
 <footer class="site">
   <div class="in">

@@ -387,6 +387,34 @@ export function deleteDatabaseService(
   });
 }
 
+export function deletePanelService(
+  serviceId: string,
+  input: { confirm_slug: string; delete_volume?: boolean },
+) {
+  return deleteDatabaseService(serviceId, input);
+}
+
+export function getServiceDeployTokenStatus(serviceId: string) {
+  return apiFetch<{ configured: boolean; service_id: string }>(
+    `/api/v1/services/${serviceId}/deploy-token`,
+  );
+}
+
+export function createServiceDeployToken(serviceId: string) {
+  return apiFetch<{ token: string; scope: string; service_id: string }>(
+    `/api/v1/services/${serviceId}/deploy-token`,
+    { method: "POST", json: {} },
+  );
+}
+
+export function getServiceGitHubWorkflow(serviceId: string) {
+  return apiFetch<{
+    workflow: string;
+    yaml: string;
+    secrets: { name: string; value?: string; description?: string }[];
+  }>(`/api/v1/services/${serviceId}/github-workflow`);
+}
+
 export function restartDatabaseService(serviceId: string) {
   return apiFetch<void>(`/api/v1/services/${serviceId}/restart`, {
     method: "POST",

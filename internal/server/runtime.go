@@ -7,7 +7,9 @@ import (
 	"os"
 	"time"
 
+	"github.com/Joeydekruis/dockyrd/internal/audit"
 	"github.com/Joeydekruis/dockyrd/internal/config"
+	"github.com/Joeydekruis/dockyrd/internal/hostops"
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
 	"github.com/Joeydekruis/dockyrd/internal/deploy"
 	"github.com/Joeydekruis/dockyrd/internal/docker"
@@ -58,7 +60,7 @@ func startBackground(ctx context.Context, cfg config.Config, db *sql.DB, q *sqlc
 		Notify:    notifier,
 	}
 
-	worker := &jobs.Worker{Cfg: cfg, Q: q, Deploy: deployRT, Docker: dockerCli, Log: log, Notify: notifier, Events: eventLog}
+	worker := &jobs.Worker{Cfg: cfg, Q: q, DB: db, Deploy: deployRT, Docker: dockerCli, Log: log, Notify: notifier, Events: eventLog}
 
 	go metrics.RunHostCollector(ctx, cfg, q, log, 10*time.Second)
 	if dockerCli != nil {
@@ -96,6 +98,12 @@ func startBackground(ctx context.Context, cfg config.Config, db *sql.DB, q *sqlc
 	go watch.RunHeartbeat(ctx, q, log, 5*time.Minute)
 
 	go links.BackfillAllProjects(ctx, q, cfg.SecretKeyPath(), log)
+
+	reg := hostops.DefaultRegistry(cfg)
+	hr := hostops.NewRunner(db, q, reg, audit.Logger{Q: q}, hostops.NewSystemdLockoutTimer())
+	if _, err := hostops.Reconcile(ctx, hr, log); err != nil && log != nil {
+		log.Warn("hostops startup reconcile", "err", err)
+	}
 
 	updater.StartAutoRefresh(ctx, updater.AutoRefreshInterval, func() string {
 		return BuildVersion()

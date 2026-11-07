@@ -6,6 +6,7 @@ import (
 	"errors"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/oklog/ulid/v2"
 
@@ -164,5 +165,10 @@ func (d apiDeps) handlePutVariables(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+	now := time.Now().Unix()
+	_ = d.q.TouchServiceUpdatedAt(ctx, sqlc.TouchServiceUpdatedAtParams{
+		UpdatedAt: sql.NullInt64{Int64: now, Valid: true},
+		ID:        serviceID,
+	})
 	w.WriteHeader(http.StatusNoContent)
 }

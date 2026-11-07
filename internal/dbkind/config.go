@@ -33,6 +33,7 @@ type RedisConfig struct {
 	Version     int    `json:"version"`
 	PasswordEnc string `json:"password_enc"`
 	Persistence bool   `json:"persistence"`
+	Preset      string `json:"preset,omitempty"` // cache | queue
 	MaxMemoryMB int    `json:"max_memory_mb"`
 }
 
@@ -81,6 +82,7 @@ func NewRedisConfigJSON(masterKey []byte, version int) (json.RawMessage, error) 
 		Version:     version,
 		PasswordEnc: base64.StdEncoding.EncodeToString(enc),
 		Persistence: true,
+		Preset:      RedisPresetQueue,
 		MaxMemoryMB: 256,
 	}
 	raw, err := json.Marshal(cfg)

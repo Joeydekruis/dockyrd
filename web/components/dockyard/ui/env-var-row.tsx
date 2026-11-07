@@ -13,13 +13,7 @@ type EnvVarRowProps = {
   linkId?: string;
 };
 
-const refPattern = /\$\{\{([a-z0-9][a-z0-9-]*)\.([A-Z][A-Z0-9_]*)\}\}/;
-
-function refHint(value: string): { slug: string; key: string } | null {
-  const m = refPattern.exec(value);
-  if (!m) return null;
-  return { slug: m[1], key: m[2] };
-}
+import { parseEnvVarRef } from "@/lib/env-var-ref";
 
 export function EnvVarRow({
   name,
@@ -30,7 +24,7 @@ export function EnvVarRow({
   const [revealed, setRevealed] = useState(false);
   const copyToClipboard = useCopyToClipboard();
   const display = secret && !revealed ? "••••••••" : value;
-  const ref = refHint(value);
+  const ref = parseEnvVarRef(value);
   const unresolved = value.includes("${{") && !ref;
   const canCopy = !secret || revealed;
   return (

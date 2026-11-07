@@ -200,6 +200,11 @@ UPDATE services
 SET config = ?, updated_at = ?
 WHERE id = ?;
 
+-- name: TouchServiceUpdatedAt :exec
+UPDATE services
+SET updated_at = ?
+WHERE id = ?;
+
 -- name: UpdateServiceName :exec
 UPDATE services
 SET name = ?, updated_at = ?

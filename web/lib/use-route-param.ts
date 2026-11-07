@@ -31,6 +31,14 @@ export function useRouteParam(name: string, indexFromEnd = 0): string {
     ) {
       return parts[3] === "_" ? "" : parts[3];
     }
+    if (
+      name === "deploymentId" &&
+      parts[0] === "applications" &&
+      parts[2] === "deployments" &&
+      parts[3]
+    ) {
+      return parts[3] === "_" ? "" : parts[3];
+    }
     const idx = parts.length - 1 - indexFromEnd;
     if (idx < 0) {
       return "";

@@ -5,9 +5,11 @@ set -e
 DOCKYARD_VERSION="${DOCKYARD_VERSION:-dev}"
 DOCKYARD_INSTALL_REF="${DOCKYARD_INSTALL_REF:-development}"
 INSTALL_BIN="${DOCKYARD_INSTALL_BIN:-}"
+INSTALL_DY_BIN="${DOCKYARD_INSTALL_DY_BIN:-}"
 CONFIG_DIR="${DOCKYARD_CONFIG_DIR:-/etc/dockyard}"
 DATA_DIR="${DOCKYARD_DATA_DIR:-/var/lib/dockyard}"
 BIN_DEST="${DOCKYARD_BIN_DEST:-/usr/local/bin/dockyard}"
+DY_BIN_DEST="${DOCKYARD_DY_BIN_DEST:-/usr/local/bin/dy}"
 UNIT_SRC="${DOCKYARD_UNIT_SRC:-}"
 SKIP_SYSTEMD="${DOCKYARD_SKIP_SYSTEMD:-0}"
 SKIP_ROOT="${DOCKYARD_SKIP_ROOT:-0}"
@@ -189,10 +191,26 @@ ensure_paths() {
 	chmod 750 "$DATA_DIR"
 }
 
+install_dy_cli() {
+	dy_src="$1"
+	if [ -z "$dy_src" ] || [ ! -f "$dy_src" ]; then
+		log "Warning: dy API CLI not installed (binary missing from release or build)." >&2
+		return 0
+	fi
+	mkdir -p "$(dirname "$DY_BIN_DEST")"
+	install -m 755 "$dy_src" "$DY_BIN_DEST"
+	log "✓ Installed API CLI: $DY_BIN_DEST"
+}
+
 install_binary() {
 	mkdir -p "$(dirname "$BIN_DEST")"
 	if [ -n "$INSTALL_BIN" ]; then
 		install -m 755 "$INSTALL_BIN" "$BIN_DEST"
+		if [ -n "$INSTALL_DY_BIN" ]; then
+			install_dy_cli "$INSTALL_DY_BIN"
+		else
+			install_dy_cli "$(dirname "$INSTALL_BIN")/dy"
+		fi
 		return 0
 	fi
 	if download_release_binary; then
@@ -200,7 +218,7 @@ install_binary() {
 	fi
 	log "Could not download a release binary." >&2
 	log "Build locally (make build) and re-run with:" >&2
-	log "  DOCKYARD_INSTALL_BIN=/path/to/dockyard $0" >&2
+	log "  DOCKYARD_INSTALL_BIN=/path/to/dockyard DOCKYARD_INSTALL_DY_BIN=/path/to/dy $0" >&2
 	exit 1
 }
 
@@ -257,6 +275,11 @@ download_release_binary() {
 	fi
 	tar -xzf "${tmp}/${asset}" -C "$tmp" dockyard || return 1
 	install -m 755 "${tmp}/dockyard" "$BIN_DEST"
+	if tar -xzf "${tmp}/${asset}" -C "$tmp" dy 2>/dev/null; then
+		install_dy_cli "${tmp}/dy"
+	else
+		install_dy_cli ""
+	fi
 	return 0
 }
 

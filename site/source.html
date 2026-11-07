@@ -592,7 +592,7 @@ dialog.search::backdrop{background:rgba(11,31,58,.28)}
 <li>Check the OS, architecture, ports and free disk space.</li>
 <li>Install Docker Engine from Docker's official repository if it is missing (version 27 or newer is required).</li>
 <li>Set log rotation and <code>live-restore</code> in <code>/etc/docker/daemon.json</code>, merging with what is already there.</li>
-<li>Download the binary, verify its checksum and signature, and install it to <code>/usr/local/bin/dockyrd</code>.</li>
+<li>Download the release tarball, verify its checksum, and install <code>dockyrd</code> to <code>/usr/local/bin/dockyrd</code> plus the API client <code>dy</code> to <code>/usr/local/bin/dy</code>.</li>
 <li>Run <code>dockyrd init</code>, start the proxy and BuildKit containers and enable the systemd service.</li>
 <li>Open ports 22, 80, 443 and 8000 if <code>ufw</code> is active.</li>
 </ol>
@@ -808,9 +808,19 @@ sudo dockyrd update --version v0.1.3</pre>
 <tr><td><code>dockyrd backup</code></td><td>Writes a snapshot of the control-plane database.</td></tr>
 <tr><td><code>dockyrd version</code></td><td>Prints version, commit and build date.</td></tr>
 </tbody></table></div>
+<h2 id="cli-dy">API client (<code>dy</code>)</h2>
+<p>Installed next to <code>dockyrd</code> for tokens and CI. Log in with an API token from Settings → Account → API tokens, then run deploy and log commands from SSH or scripts.</p>
+<div class="tbl"><table><thead><tr><th>Command</th><th>What it does</th></tr></thead><tbody>
+<tr><td><code>dy login &lt;url&gt; &lt;token&gt;</code></td><td>Saves panel URL and API token under <code>~/.config/dy</code>.</td></tr>
+<tr><td><code>dy whoami</code></td><td>Prints the authenticated user.</td></tr>
+<tr><td><code>dy services &lt;project-id&gt;</code></td><td>Lists services in a project.</td></tr>
+<tr><td><code>dy deploy &lt;service-id&gt;</code></td><td>Triggers a new deployment.</td></tr>
+<tr><td><code>dy logs &lt;service-id&gt; [runtime|access] [tail]</code></td><td>Fetches recent logs.</td></tr>
+</tbody></table></div>
 <h2 id="cli-paths">Files and paths</h2>
 <div class="tbl"><table><thead><tr><th>Path</th><th>Contents</th></tr></thead><tbody>
-<tr><td><code>/usr/local/bin/dockyrd</code></td><td>The binary</td></tr>
+<tr><td><code>/usr/local/bin/dockyrd</code></td><td>Server binary (<code>dockyrd serve</code>, …)</td></tr>
+<tr><td><code>/usr/local/bin/dy</code></td><td>API client for tokens and automation</td></tr>
 <tr><td><code>/etc/dockyrd/</code></td><td>Master key and optional <code>dockyrd.env</code></td></tr>
 <tr><td><code>/var/lib/dockyrd/dockyrd.db</code></td><td>Control-plane database (SQLite)</td></tr>
 <tr><td><code>/var/lib/dockyrd/backups/</code></td><td>Daily snapshots, seven kept</td></tr>

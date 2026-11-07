@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -23,6 +24,8 @@ type RunAppInput struct {
 	Identity     Identity
 	ProjectSlug  string
 	MemLimitMB   int
+	NanoCPUs     int64
+	PidsLimit    *int64
 	AttachEdge   bool
 	SkipProjectNetwork bool
 }
@@ -66,6 +69,13 @@ func (c *Client) RunApp(ctx context.Context, in RunAppInput) (string, error) {
 			Memory: int64(in.MemLimitMB) * 1024 * 1024,
 		},
 	}
+	if in.NanoCPUs > 0 {
+		hostConfig.Resources.NanoCPUs = in.NanoCPUs
+	}
+	if in.PidsLimit != nil && *in.PidsLimit > 0 {
+		hostConfig.Resources.PidsLimit = in.PidsLimit
+	}
+	applyUserContainerHardening(hostConfig, in.MemLimitMB, false)
 	applyAppsCgroup(hostConfig)
 
 	portKey := nat.Port(fmt.Sprintf("%d/tcp", in.Port))
@@ -143,6 +153,57 @@ func (c *Client) WaitTCPHealthy(ctx context.Context, containerID string, port in
 		time.Sleep(2 * time.Second)
 	}
 	return fmt.Errorf("health check timed out after %s", timeout)
+}
+
+// WaitAppHealthy waits for TCP on port, then optionally HTTP GET healthPath (2xx/3xx).
+func (c *Client) WaitAppHealthy(ctx context.Context, containerID string, port int, healthPath string, timeout time.Duration) error {
+	started := time.Now()
+	if err := c.WaitTCPHealthy(ctx, containerID, port, timeout); err != nil {
+		return err
+	}
+	path := strings.TrimSpace(healthPath)
+	if path == "" {
+		return nil
+	}
+	if !strings.HasPrefix(path, "/") {
+		path = "/" + path
+	}
+	left := timeout - time.Since(started)
+	if left < 5*time.Second {
+		left = 5 * time.Second
+	}
+	deadline := time.Now().Add(left)
+	client := &http.Client{Timeout: 5 * time.Second}
+	for time.Now().Before(deadline) {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+		}
+		inspect, err := c.moby.ContainerInspect(ctx, containerID)
+		if err != nil {
+			return err
+		}
+		ip := containerIP(inspect)
+		if ip == "" {
+			time.Sleep(2 * time.Second)
+			continue
+		}
+		url := fmt.Sprintf("http://%s%s", net.JoinHostPort(ip, strconv.Itoa(port)), path)
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+		if err != nil {
+			return err
+		}
+		resp, err := client.Do(req)
+		if err == nil {
+			_ = resp.Body.Close()
+			if resp.StatusCode >= 200 && resp.StatusCode < 400 {
+				return nil
+			}
+		}
+		time.Sleep(2 * time.Second)
+	}
+	return fmt.Errorf("http health check timed out for path %q", path)
 }
 
 func containerIP(inspect container.InspectResponse) string {

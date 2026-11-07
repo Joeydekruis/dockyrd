@@ -329,6 +329,9 @@ func deployHref(kind, slug, deploymentID string) string {
 	case "static_site":
 		return "/static-sites/" + slug + "/deployments/" + deploymentID
 	case "app":
+		if deploymentID != "" {
+			return "/applications/" + slug + "/deployments/" + deploymentID
+		}
 		return "/applications/" + slug
 	default:
 		return ""

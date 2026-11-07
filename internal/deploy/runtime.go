@@ -22,6 +22,7 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/proxy"
 	"github.com/Joeydekruis/dockyrd/internal/refs"
 	"github.com/Joeydekruis/dockyrd/internal/resources"
+	"github.com/Joeydekruis/dockyrd/internal/securitypolicy"
 )
 
 const healthTimeout = 60 * time.Second
@@ -213,6 +214,10 @@ func (rt *Runtime) runAppDeployment(ctx context.Context, deploymentID string, de
 	if err != nil {
 		return rt.fail(ctx, deploymentID, err)
 	}
+	memMB, nanoCPUs, pids := securitypolicy.DeployLimits(ctx, rt.Q, dep.ServiceID)
+	if memMB > 0 {
+		appCfg.MemLimitMB = memMB
+	}
 	containerID, err := rt.Docker.RunApp(ctx, docker.RunAppInput{
 		Name:               containerName,
 		Image:              imageRef,
@@ -221,6 +226,8 @@ func (rt *Runtime) runAppDeployment(ctx context.Context, deploymentID string, de
 		Identity:           identity,
 		ProjectSlug:        ctxRow.ProjectSlug,
 		MemLimitMB:         appCfg.MemLimitMB,
+		NanoCPUs:           nanoCPUs,
+		PidsLimit:          pids,
 		AttachEdge:         attachEdge,
 		SkipProjectNetwork: skipProjectNet,
 	})
@@ -238,7 +245,7 @@ func (rt *Runtime) runAppDeployment(ctx context.Context, deploymentID string, de
 		return err
 	}
 
-	if err := rt.Docker.WaitTCPHealthy(ctx, containerID, appCfg.Port, healthTimeout); err != nil {
+	if err := rt.Docker.WaitAppHealthy(ctx, containerID, appCfg.Port, appCfg.HealthPath, healthTimeout); err != nil {
 		_ = rt.Docker.StopAndRemove(ctx, containerID, appCfg.StopGrace)
 		return rt.fail(ctx, deploymentID, fmt.Errorf("health: %w", err))
 	}

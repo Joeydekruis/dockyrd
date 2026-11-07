@@ -231,7 +231,7 @@ func deployCTA(serviceKind, serviceSlug, deploymentID string) (string, string) {
 	case "static_site":
 		return "View build log", "/static-sites/" + serviceSlug + "/deployments/" + deploymentID
 	case "app":
-		return "View build log", "/applications/" + serviceSlug
+		return "View build log", "/applications/" + serviceSlug + "/deployments/" + deploymentID
 	default:
 		return "", ""
 	}

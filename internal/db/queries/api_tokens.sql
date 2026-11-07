@@ -1,6 +1,9 @@
 -- name: DeleteAPITokensByScope :exec
 DELETE FROM api_tokens WHERE scope = ?;
 
+-- name: CountAPITokensByScope :one
+SELECT COUNT(*) FROM api_tokens WHERE scope = ? AND revoked_at IS NULL;
+
 -- name: InsertAPIToken :exec
 INSERT INTO api_tokens (
   id, name, token_hash, scope, created_by, created_at, project_id

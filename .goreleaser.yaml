@@ -22,10 +22,25 @@ builds:
     ldflags:
       - -s -w
       - -X main.version={{.Version}}
+  - id: dy
+    main: ./cmd/dy
+    binary: dy
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
 
 archives:
   - id: default
     format: tar.gz
+    builds:
+      - dockyard
+      - dy
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     files:
       - LICENSE

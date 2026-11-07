@@ -6,6 +6,7 @@ import { AddEnvVariableModal } from "@/components/dockyard/add-env-variable-moda
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import { ServiceDomainsTab } from "@/components/dockyard/service-domains-tab";
+import { ServiceSecurityTab } from "@/components/dockyard/service-security-tab";
 import {
   ServiceAccessLogsPanel,
   ServiceTrafficAnalyticsPanel,
@@ -48,6 +49,7 @@ const DETAIL_TABS = [
   { id: "analytics", label: "Analytics" },
   { id: "environment", label: "Environment" },
   { id: "domains", label: "Domains" },
+  { id: "security", label: "Security" },
   { id: "settings", label: "Settings" },
 ] as const;
 
@@ -493,6 +495,10 @@ export function StaticSiteDetailPage() {
               layout="static"
               cardClassName={cardClassName()}
             />
+          ) : null}
+
+          {tab === "security" && row ? (
+            <ServiceSecurityTab serviceId={row.service.id} kind="static_site" />
           ) : null}
 
           {tab === "settings" && cfg ? (

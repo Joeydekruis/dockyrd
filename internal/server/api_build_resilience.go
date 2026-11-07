@@ -3,6 +3,7 @@ package server
 import (
 	"database/sql"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"strings"
@@ -22,6 +23,7 @@ import (
 func registerBuildResilienceRoutes(mux *http.ServeMux, deps apiDeps) {
 	mux.HandleFunc("GET /api/v1/server/build-budget", deps.handleBuildBudget)
 	mux.HandleFunc("GET /api/v1/services/{id}/github-workflow", deps.handleGitHubWorkflow)
+	mux.HandleFunc("GET /api/v1/services/{id}/deploy-token", deps.handleGetDeployTokenStatus)
 	mux.HandleFunc("POST /api/v1/services/{id}/deploy-token", deps.handleCreateDeployToken)
 	mux.HandleFunc("POST /api/v1/hooks/deploy/{service_id}", deps.handleDeployHook)
 	mux.HandleFunc("GET /api/v1/builders", deps.handleListBuilders)
@@ -95,6 +97,31 @@ func (d apiDeps) handleGitHubWorkflow(w http.ResponseWriter, r *http.Request) {
 			{"name": "DOCKYARD_URL", "value": base},
 			{"name": "DOCKYARD_DEPLOY_TOKEN", "description": "Create via POST /api/v1/services/{id}/deploy-token"},
 		},
+	})
+}
+
+func (d apiDeps) handleGetDeployTokenStatus(w http.ResponseWriter, r *http.Request) {
+	if _, ok := d.requireUser(w, r); !ok {
+		return
+	}
+	serviceID := r.PathValue("id")
+	if _, err := d.q.GetServiceByID(r.Context(), serviceID); err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeJSONError(w, http.StatusNotFound, "service not found")
+			return
+		}
+		writeJSONError(w, http.StatusInternalServerError, "database error")
+		return
+	}
+	scope := apitoken.DeployScope(serviceID)
+	n, err := d.q.CountAPITokensByScope(r.Context(), scope)
+	if err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "database error")
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{
+		"configured": n > 0,
+		"service_id": serviceID,
 	})
 }
 

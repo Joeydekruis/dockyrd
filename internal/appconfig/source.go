@@ -9,11 +9,31 @@ import (
 const (
 	BuilderDockerfile = "dockerfile"
 	BuilderRailpack   = "railpack"
+	// UI/store aliases mapped at build time (not separate pipelines yet).
+	builderBuildpacks = "buildpacks"
+	builderNixpacks   = "nixpacks"
 )
+
+// NormalizeBuilder maps dashboard builder names to a supported build pipeline.
+func NormalizeBuilder(raw string) string {
+	b := strings.ToLower(strings.TrimSpace(raw))
+	switch b {
+	case builderBuildpacks:
+		return BuilderDockerfile
+	case builderNixpacks:
+		return BuilderRailpack
+	case BuilderDockerfile, BuilderRailpack:
+		return b
+	case "":
+		return ""
+	default:
+		return b
+	}
+}
 
 // EffectiveBuilder picks dockerfile vs railpack after clone (briefing §11.1).
 func (c AppConfig) EffectiveBuilder(contextDir string) string {
-	explicit := strings.ToLower(strings.TrimSpace(c.Builder))
+	explicit := NormalizeBuilder(c.Builder)
 	if explicit == BuilderDockerfile || explicit == BuilderRailpack {
 		return explicit
 	}
@@ -29,10 +49,12 @@ func (c AppConfig) validateGitBuilder() error {
 	if builder == "" {
 		return nil
 	}
-	if builder != BuilderDockerfile && builder != BuilderRailpack {
+	switch builder {
+	case BuilderDockerfile, BuilderRailpack, builderBuildpacks, builderNixpacks:
+		return nil
+	default:
 		return errUnsupportedBuilder(c.Builder)
 	}
-	return nil
 }
 
 func errUnsupportedBuilder(b string) error {

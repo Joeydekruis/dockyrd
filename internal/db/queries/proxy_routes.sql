@@ -19,6 +19,7 @@ LIMIT 1;
 -- name: ListLiveAppProxyRoutes :many
 SELECT
   d.hostname,
+  s.id AS service_id,
   s.slug AS service_slug,
   dep.id AS deployment_id,
   s.config AS service_config
@@ -30,6 +31,7 @@ WHERE s.kind = 'app' AND dep.status = 'live';
 -- name: ListLiveStaticProxyRoutes :many
 SELECT
   d.hostname,
+  s.id AS service_id,
   s.slug AS service_slug,
   s.config AS service_config,
   dep.release_path

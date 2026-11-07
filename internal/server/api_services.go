@@ -11,6 +11,7 @@ import (
 	"github.com/oklog/ulid/v2"
 
 	"github.com/Joeydekruis/dockyrd/internal/apitoken"
+	"github.com/Joeydekruis/dockyrd/internal/appconfig"
 	"github.com/Joeydekruis/dockyrd/internal/compose"
 	"github.com/Joeydekruis/dockyrd/internal/crypto"
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
@@ -54,6 +55,7 @@ func registerServiceRoutes(mux *http.ServeMux, deps apiDeps) {
 	registerServiceLifecycleRoutes(mux, deps)
 	registerDatabaseServiceRoutes(mux, deps)
 	registerPreviewRoutes(mux, deps)
+	registerServiceSecurityRoutes(mux, deps)
 }
 
 func (d apiDeps) handleListServices(w http.ResponseWriter, r *http.Request) {
@@ -285,41 +287,51 @@ func (d apiDeps) handlePatchService(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if hasName || hasConfig {
+	if hasName {
 		if row.Kind != "static_site" {
-			writeJSONError(w, http.StatusBadRequest, "name and config updates apply to static_site only")
+			writeJSONError(w, http.StatusBadRequest, "name updates apply to static_site only")
 			return
 		}
 		now := time.Now().Unix()
+		if err := d.q.UpdateServiceName(ctx, sqlc.UpdateServiceNameParams{
+			Name:      body.Name,
+			UpdatedAt: sql.NullInt64{Int64: now, Valid: true},
+			ID:        id,
+		}); err != nil {
+			writeJSONError(w, http.StatusInternalServerError, "update error")
+			return
+		}
+	}
+	if hasConfig {
+		now := time.Now().Unix()
 		cfgJSON := serviceConfigJSON(row.Config)
-		if hasConfig {
-			merged, err := mergeServiceConfig(cfgJSON, body.Config)
-			if err != nil {
-				writeJSONError(w, http.StatusBadRequest, "invalid config")
-				return
-			}
+		merged, err := mergeServiceConfig(cfgJSON, body.Config)
+		if err != nil {
+			writeJSONError(w, http.StatusBadRequest, "invalid config")
+			return
+		}
+		switch row.Kind {
+		case "static_site":
 			if _, err := staticsite.Parse(merged); err != nil {
 				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
-			if err := d.q.UpdateServiceConfig(ctx, sqlc.UpdateServiceConfigParams{
-				Config:    merged,
-				UpdatedAt: sql.NullInt64{Int64: now, Valid: true},
-				ID:        id,
-			}); err != nil {
-				writeJSONError(w, http.StatusInternalServerError, "update error")
+		case "app":
+			if _, err := appconfig.Parse(merged); err != nil {
+				writeJSONError(w, http.StatusBadRequest, err.Error())
 				return
 			}
+		default:
+			writeJSONError(w, http.StatusBadRequest, "config updates apply to app and static_site only")
+			return
 		}
-		if hasName {
-			if err := d.q.UpdateServiceName(ctx, sqlc.UpdateServiceNameParams{
-				Name:      body.Name,
-				UpdatedAt: sql.NullInt64{Int64: now, Valid: true},
-				ID:        id,
-			}); err != nil {
-				writeJSONError(w, http.StatusInternalServerError, "update error")
-				return
-			}
+		if err := d.q.UpdateServiceConfig(ctx, sqlc.UpdateServiceConfigParams{
+			Config:    merged,
+			UpdatedAt: sql.NullInt64{Int64: now, Valid: true},
+			ID:        id,
+		}); err != nil {
+			writeJSONError(w, http.StatusInternalServerError, "update error")
+			return
 		}
 	}
 

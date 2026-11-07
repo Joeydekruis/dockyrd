@@ -10,6 +10,17 @@ import (
 	"database/sql"
 )
 
+const countAPITokensByScope = `-- name: CountAPITokensByScope :one
+SELECT COUNT(*) FROM api_tokens WHERE scope = ? AND revoked_at IS NULL
+`
+
+func (q *Queries) CountAPITokensByScope(ctx context.Context, scope string) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countAPITokensByScope, scope)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const deleteAPITokensByScope = `-- name: DeleteAPITokensByScope :exec
 DELETE FROM api_tokens WHERE scope = ?
 `

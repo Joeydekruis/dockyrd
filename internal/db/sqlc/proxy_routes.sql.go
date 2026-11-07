@@ -61,6 +61,7 @@ func (q *Queries) GetServiceDeployContext(ctx context.Context, id string) (GetSe
 const listLiveAppProxyRoutes = `-- name: ListLiveAppProxyRoutes :many
 SELECT
   d.hostname,
+  s.id AS service_id,
   s.slug AS service_slug,
   dep.id AS deployment_id,
   s.config AS service_config
@@ -72,6 +73,7 @@ WHERE s.kind = 'app' AND dep.status = 'live'
 
 type ListLiveAppProxyRoutesRow struct {
 	Hostname      string
+	ServiceID     string
 	ServiceSlug   string
 	DeploymentID  string
 	ServiceConfig interface{}
@@ -88,6 +90,7 @@ func (q *Queries) ListLiveAppProxyRoutes(ctx context.Context) ([]ListLiveAppProx
 		var i ListLiveAppProxyRoutesRow
 		if err := rows.Scan(
 			&i.Hostname,
+			&i.ServiceID,
 			&i.ServiceSlug,
 			&i.DeploymentID,
 			&i.ServiceConfig,
@@ -160,6 +163,7 @@ func (q *Queries) ListLiveComposeProxyRoutes(ctx context.Context) ([]ListLiveCom
 const listLiveStaticProxyRoutes = `-- name: ListLiveStaticProxyRoutes :many
 SELECT
   d.hostname,
+  s.id AS service_id,
   s.slug AS service_slug,
   s.config AS service_config,
   dep.release_path
@@ -171,6 +175,7 @@ WHERE s.kind = 'static_site' AND dep.status = 'live' AND dep.release_path IS NOT
 
 type ListLiveStaticProxyRoutesRow struct {
 	Hostname      string
+	ServiceID     string
 	ServiceSlug   string
 	ServiceConfig interface{}
 	ReleasePath   sql.NullString
@@ -187,6 +192,7 @@ func (q *Queries) ListLiveStaticProxyRoutes(ctx context.Context) ([]ListLiveStat
 		var i ListLiveStaticProxyRoutesRow
 		if err := rows.Scan(
 			&i.Hostname,
+			&i.ServiceID,
 			&i.ServiceSlug,
 			&i.ServiceConfig,
 			&i.ReleasePath,

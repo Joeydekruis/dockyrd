@@ -1,22 +1,30 @@
 "use client";
 
+import { Monitor } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { AddEnvVariableModal } from "@/components/dockyard/add-env-variable-modal";
+import { ApplicationConnectionsFlow } from "@/components/dockyard/application-connections-flow";
+import { ApplicationEnvironmentTab } from "@/components/dockyard/application-environment-tab";
+import { ApplicationProcessesTab } from "@/components/dockyard/application-processes-tab";
+import { ApplicationSettingsTab } from "@/components/dockyard/application-settings-tab";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import { DeploymentResourceStrip } from "@/components/dockyard/deployment-resource-strip";
 import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
-import { ServiceBuildLocationPanel } from "@/components/dockyard/service-build-location-panel";
-import { ServiceConnectionsPanel } from "@/components/dockyard/service-connections-panel";
+import { PendingEnvRedeployBanner } from "@/components/dockyard/pending-env-redeploy-banner";
 import { ServiceDomainsTab } from "@/components/dockyard/service-domains-tab";
-import { ServiceLogsPanel } from "@/components/dockyard/service-logs-panel";
-import { ServicePreviewSettingsCard } from "@/components/dockyard/service-preview-settings-card";
 import { ServicePreviewsTab } from "@/components/dockyard/service-previews-tab";
+import { ServiceSecurityTab } from "@/components/dockyard/service-security-tab";
+import {
+  ServiceAccessLogsPanel,
+  ServiceTrafficAnalyticsPanel,
+} from "@/components/dockyard/service-traffic-panel";
+import { ApplicationDeploymentTable } from "@/components/dockyard/ui/application-deployment-table";
 import { Button } from "@/components/dockyard/ui/button";
-import { CommitChip } from "@/components/dockyard/ui/commit-chip";
 import { EmptyState } from "@/components/dockyard/ui/empty-state";
-import { EnvVarRow } from "@/components/dockyard/ui/env-var-row";
-import { KeyValueRow } from "@/components/dockyard/ui/key-value-row";
+import {
+  SettingsBranchPill,
+  SettingsCopyPill,
+} from "@/components/dockyard/ui/settings-detail-block";
 import { StatusBadge } from "@/components/dockyard/ui/status-badge";
 import { Tabs } from "@/components/dockyard/ui/tabs";
 import {
@@ -25,15 +33,18 @@ import {
   listDeployments,
   listProjects,
   listServiceDomains,
+  listServiceLinks,
   listServices,
   listServiceVariables,
   type Project,
   putServiceVariables,
   type Service,
   type ServiceDomain,
+  type ServiceLink,
   type ServiceVariable,
 } from "@/lib/api";
 import { hasDeploymentResourceMetrics } from "@/lib/build-resilience";
+import { hasPendingEnvRedeploy } from "@/lib/env-var-ref";
 import {
   formatTimeAgo,
   projectPathLabel,
@@ -46,20 +57,22 @@ import {
   resourceDetailCardStyle,
 } from "@/lib/resource-detail-page";
 import {
-  deploymentDurationSec,
-  deploymentStatusDisplay,
-  formatDeploymentWhen,
-  formatDurationSec,
+  deploymentCommitShaShort,
+  deploymentSourceTitle,
+  staticSiteDeploymentStatusDisplay,
 } from "@/lib/static-site-display";
 import { useRouteParam } from "@/lib/use-route-param";
 
 const DETAIL_TABS = [
   { id: "overview", label: "Overview" },
   { id: "deployments", label: "Deployments" },
-  { id: "logs", label: "Logs" },
+  { id: "processes", label: "Processes" },
   { id: "environment", label: "Environment" },
   { id: "domains", label: "Domains" },
+  { id: "logs", label: "Logs" },
+  { id: "analytics", label: "Analytics" },
   { id: "previews", label: "Previews" },
+  { id: "security", label: "Security" },
   { id: "settings", label: "Settings" },
 ] as const;
 
@@ -71,6 +84,7 @@ type AppRow = {
   deployments: Deployment[];
   domains: ServiceDomain[];
   variables: ServiceVariable[];
+  links: ServiceLink[];
 };
 
 function appSourceSummary(config: Record<string, unknown>): string {
@@ -86,48 +100,9 @@ function appSourceSummary(config: Record<string, unknown>): string {
   return "—";
 }
 
-function appPort(config: Record<string, unknown>): string {
+function appPort(config: Record<string, unknown>): number {
   const port = (config as { port?: number }).port;
-  return port ? String(port) : "—";
-}
-
-function DeploymentRow({ deployment }: { deployment: Deployment }) {
-  const st = deploymentStatusDisplay(deployment.status);
-  const dur = deploymentDurationSec(deployment);
-  const when = formatDeploymentWhen(
-    deployment.finished_at ?? deployment.started_at ?? deployment.queued_at,
-  );
-  const meta = `${deployment.trigger}${dur !== undefined ? ` · ${formatDurationSec(dur)}` : ""}`;
-
-  return (
-    <div
-      className="border-t first:border-t-0"
-      style={{ borderColor: "var(--border)" }}
-    >
-      <div className="flex flex-wrap items-center gap-3 py-4">
-        <StatusBadge label={st.label} variant={st.variant} />
-        <CommitChip
-          sha={deployment.commit_sha ?? deployment.image_ref ?? "—"}
-          message={deployment.branch ?? deployment.trigger}
-        />
-        <span
-          className="min-w-0 flex-1 truncate text-[13px]"
-          style={{ color: "var(--muted-text)" }}
-        >
-          {meta}
-        </span>
-        <span
-          className="shrink-0 font-mono text-[12px] tabular-nums"
-          style={{ color: "var(--muted-text)" }}
-        >
-          {when}
-        </span>
-      </div>
-      {hasDeploymentResourceMetrics(deployment) ? (
-        <DeploymentResourceStrip deployment={deployment} className="mb-4" />
-      ) : null}
-    </div>
-  );
+  return port && port > 0 ? port : 80;
 }
 
 export function ApplicationDetailPage() {
@@ -137,8 +112,8 @@ export function ApplicationDetailPage() {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<TabId>("overview");
   const [revealedSecrets, setRevealedSecrets] = useState(false);
-  const [addVarOpen, setAddVarOpen] = useState(false);
   const [deployBusy, setDeployBusy] = useState(false);
+  const [bannerDismissed, setBannerDismissed] = useState(false);
 
   const refresh = useCallback(async () => {
     if (!slug) {
@@ -152,14 +127,21 @@ export function ApplicationDetailPage() {
         const { services } = await listServices(project.id, "app");
         const service = services.find((s) => s.slug === slug);
         if (!service) continue;
-        const [{ deployments }, { domains }, { variables }] = await Promise.all(
-          [
+        const [{ deployments }, { domains }, { variables }, linksRes] =
+          await Promise.all([
             listDeployments(service.id),
             listServiceDomains(service.id),
             listServiceVariables(service.id, revealedSecrets),
-          ],
-        );
-        setRow({ project, service, deployments, domains, variables });
+            listServiceLinks(service.id),
+          ]);
+        setRow({
+          project,
+          service,
+          deployments,
+          domains,
+          variables,
+          links: linksRes.outgoing,
+        });
         setError(null);
         setLoading(false);
         return;
@@ -177,18 +159,36 @@ export function ApplicationDetailPage() {
   }, [refresh]);
 
   useEffect(() => {
-    setTab(
-      readInitialDetailTab(
-        DETAIL_TABS.map((t) => t.id),
-        "overview",
-      ),
-    );
+    const params = new URLSearchParams(window.location.search);
+    const t = params.get("tab") as TabId | null;
+    if (t && DETAIL_TABS.some((x) => x.id === t)) {
+      setTab(t);
+    } else {
+      setTab(
+        readInitialDetailTab(
+          DETAIL_TABS.map((x) => x.id),
+          "overview",
+        ),
+      );
+    }
   }, []);
 
   function selectTab(next: TabId) {
     setTab(next);
     persistDetailTab(next);
+    const url = new URL(window.location.href);
+    url.searchParams.set("tab", next);
+    window.history.replaceState(
+      null,
+      "",
+      `${url.pathname}?${url.searchParams.toString()}`,
+    );
   }
+
+  const linkedSlugs = useMemo(
+    () => new Set(row?.links.map((l) => l.peer.slug) ?? []),
+    [row?.links],
+  );
 
   const appStatus = useMemo(
     () =>
@@ -200,6 +200,23 @@ export function ApplicationDetailPage() {
 
   const primaryHost = row?.domains.find((d) => d.is_primary)?.hostname;
   const latest = row?.deployments[0];
+  const port = row ? appPort(row.service.config) : 80;
+  const source = row?.service.config.source as
+    | { repo?: string; branch?: string }
+    | undefined;
+
+  const showOverviewBanner = useMemo(() => {
+    if (!row || bannerDismissed) return false;
+    const live = row.deployments[0];
+    const liveAt =
+      live?.finished_at ?? live?.started_at ?? live?.queued_at ?? 0;
+    return hasPendingEnvRedeploy({
+      variables: row.variables,
+      linkedSlugs,
+      serviceUpdatedAt: row.service.updated_at,
+      liveDeploymentAt: liveAt,
+    });
+  }, [bannerDismissed, linkedSlugs, row]);
 
   async function onDeployNow() {
     if (!row) return;
@@ -270,41 +287,58 @@ export function ApplicationDetailPage() {
         </p>
       ) : (
         <div className="space-y-6">
+          {showOverviewBanner ? (
+            <PendingEnvRedeployBanner
+              onDeploy={() => void onDeployNow()}
+              deployBusy={deployBusy}
+              onDismiss={() => setBannerDismissed(true)}
+            />
+          ) : null}
+
           <header className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <div className="flex flex-wrap items-center gap-3">
-                <h1 className="text-2xl font-semibold tracking-tight">
-                  {row.service.name}
-                </h1>
-                <StatusBadge
-                  label={appStatus.label}
-                  variant={appStatus.variant}
-                />
-              </div>
-              <p
-                className="mt-2 flex flex-wrap items-center gap-2 text-[13px] font-mono uppercase tracking-wide"
-                style={{ color: "var(--muted-text)" }}
+            <div className="flex flex-wrap items-start gap-4">
+              <span
+                className="flex size-14 shrink-0 items-center justify-center rounded-2xl"
+                style={{ background: "#E3F0FF", color: "#0B57C9" }}
+                aria-hidden
               >
-                <span>{appSourceSummary(row.service.config)}</span>
-                {primaryHost ? (
-                  <>
-                    <span>·</span>
-                    <span className="normal-case">{primaryHost}</span>
-                  </>
-                ) : null}
-              </p>
-              <p
-                className="mt-1 text-[13px]"
-                style={{ color: "var(--muted-text)" }}
-              >
-                <Link
-                  href={`/projects/${row.project.slug}`}
-                  className="hover:underline"
-                  style={{ color: "var(--link-blue)" }}
+                <Monitor className="size-7" strokeWidth={1.8} />
+              </span>
+              <div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <h1 className="text-3xl font-semibold tracking-tight">
+                    {row.service.name}
+                  </h1>
+                  <StatusBadge
+                    label={appStatus.label}
+                    variant={appStatus.variant}
+                  />
+                </div>
+                <p
+                  className="mt-2 flex flex-wrap items-center gap-2 text-[13px] font-mono uppercase tracking-wide"
+                  style={{ color: "var(--muted-text)" }}
                 >
-                  {projectPathLabel(row.project.name)}
-                </Link>
-              </p>
+                  <span>{appSourceSummary(row.service.config)}</span>
+                  {primaryHost ? (
+                    <>
+                      <span>·</span>
+                      <span className="normal-case">{primaryHost}</span>
+                    </>
+                  ) : null}
+                </p>
+                <p
+                  className="mt-1 text-[13px]"
+                  style={{ color: "var(--muted-text)" }}
+                >
+                  <Link
+                    href={`/projects/${row.project.slug}`}
+                    className="hover:underline"
+                    style={{ color: "var(--link-blue)" }}
+                  >
+                    {projectPathLabel(row.project.name)}
+                  </Link>
+                </p>
+              </div>
             </div>
             <div className="flex flex-wrap gap-2">
               <Button
@@ -324,55 +358,76 @@ export function ApplicationDetailPage() {
           />
 
           {tab === "overview" ? (
-            <div className="grid gap-6 lg:grid-cols-2">
-              <section
-                className={RESOURCE_DETAIL_CARD}
-                style={resourceDetailCardStyle()}
-                aria-label="Details"
-              >
-                <h2 className="text-lg font-semibold tracking-tight">
-                  Details
-                </h2>
-                <dl className="mt-4">
-                  <KeyValueRow
-                    label="Source"
-                    value={appSourceSummary(row.service.config)}
-                  />
-                  <KeyValueRow
-                    label="Port"
-                    value={appPort(row.service.config)}
-                  />
-                  <KeyValueRow
-                    label="Project"
-                    value={
-                      <Link
-                        href={`/projects/${row.project.slug}`}
-                        className="hover:underline"
-                        style={{ color: "var(--link-blue)" }}
+            <div className="space-y-6">
+              {latest ? (
+                <section
+                  className={RESOURCE_DETAIL_CARD}
+                  style={resourceDetailCardStyle()}
+                  aria-label="Current deployment"
+                >
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <h2 className="text-lg font-semibold tracking-tight">
+                        Current deployment
+                      </h2>
+                      <p
+                        className="mt-1 text-sm"
+                        style={{ color: "var(--muted-text)" }}
                       >
-                        {row.project.name}
-                      </Link>
-                    }
-                  />
-                  <KeyValueRow
-                    label="Status"
-                    value={
-                      <StatusBadge
-                        label={appStatus.label}
-                        variant={appStatus.variant}
-                      />
-                    }
-                  />
-                  <KeyValueRow
-                    label="Last deploy"
-                    value={
-                      latest?.commit_sha || latest?.image_ref
-                        ? `${(latest.commit_sha ?? latest.image_ref ?? "").slice(0, 7)} · ${formatTimeAgo(latest.finished_at ?? latest.started_at) ?? "—"}`
-                        : "—"
-                    }
-                  />
-                </dl>
-              </section>
+                        {deploymentSourceTitle(latest)}
+                      </p>
+                    </div>
+                    <StatusBadge
+                      label={
+                        staticSiteDeploymentStatusDisplay(latest.status).label
+                      }
+                      variant={
+                        staticSiteDeploymentStatusDisplay(latest.status).variant
+                      }
+                    />
+                  </div>
+                  <div className="mt-4 flex flex-wrap items-center gap-2 font-mono text-[12px]">
+                    <SettingsBranchPill
+                      branch={latest.branch?.trim() || "main"}
+                    />
+                    <SettingsCopyPill
+                      value={deploymentCommitShaShort(latest)}
+                    />
+                    <span style={{ color: "var(--muted-text)" }}>
+                      {formatTimeAgo(
+                        latest.finished_at ??
+                          latest.started_at ??
+                          latest.queued_at,
+                      ) ?? "—"}
+                    </span>
+                  </div>
+                  {hasDeploymentResourceMetrics(latest) ? (
+                    <DeploymentResourceStrip
+                      deployment={latest}
+                      className="mt-4"
+                    />
+                  ) : null}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="mt-4"
+                    href={`/applications/${row.service.slug}/deployments/${latest.id}`}
+                  >
+                    View deployment
+                  </Button>
+                </section>
+              ) : null}
+
+              <ApplicationConnectionsFlow
+                service={row.service}
+                project={row.project}
+                domains={row.domains}
+                port={port}
+                onChanged={() => void refresh()}
+                onGoDomains={() => selectTab("domains")}
+                onGoLogs={() => selectTab("logs")}
+              />
+
               <section
                 className={RESOURCE_DETAIL_CARD}
                 style={resourceDetailCardStyle()}
@@ -385,16 +440,19 @@ export function ApplicationDetailPage() {
                   <Button
                     type="button"
                     variant="outline"
-                    disabled={deployBusy}
-                    onClick={() => void onDeployNow()}
+                    onClick={() => selectTab("deployments")}
                   >
-                    Deploy now
+                    View all
                   </Button>
                 </div>
                 <div className="mt-2">
-                  {row.deployments.slice(0, 5).map((d) => (
-                    <DeploymentRow key={d.id} deployment={d} />
-                  ))}
+                  <ApplicationDeploymentTable
+                    deployments={row.deployments.slice(0, 5)}
+                    appSlug={row.service.slug}
+                    sourceRepo={source?.repo}
+                    defaultBranch={source?.branch ?? "main"}
+                    compact
+                  />
                   {row.deployments.length === 0 ? (
                     <p
                       className="py-6 text-sm"
@@ -405,13 +463,33 @@ export function ApplicationDetailPage() {
                   ) : null}
                 </div>
               </section>
-              <div className="lg:col-span-2">
-                <ServiceConnectionsPanel
-                  serviceId={row.service.id}
-                  project={row.project}
-                  onChanged={() => void refresh()}
-                />
-              </div>
+
+              <section
+                className={RESOURCE_DETAIL_CARD}
+                style={resourceDetailCardStyle()}
+                aria-label="Processes teaser"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h2 className="text-lg font-semibold tracking-tight">
+                      Processes
+                    </h2>
+                    <p
+                      className="mt-1 text-sm"
+                      style={{ color: "var(--muted-text)" }}
+                    >
+                      Primary web process on port {port}.
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => selectTab("processes")}
+                  >
+                    Open processes
+                  </Button>
+                </div>
+              </section>
             </div>
           ) : null}
 
@@ -433,9 +511,12 @@ export function ApplicationDetailPage() {
                 </Button>
               </div>
               <div className="mt-2">
-                {row.deployments.map((d) => (
-                  <DeploymentRow key={d.id} deployment={d} />
-                ))}
+                <ApplicationDeploymentTable
+                  deployments={row.deployments}
+                  appSlug={row.service.slug}
+                  sourceRepo={source?.repo}
+                  defaultBranch={source?.branch ?? "main"}
+                />
                 {row.deployments.length === 0 ? (
                   <div className="py-8 text-center">
                     <EmptyState
@@ -456,63 +537,36 @@ export function ApplicationDetailPage() {
             </section>
           ) : null}
 
-          {tab === "logs" ? (
-            <ServiceLogsPanel serviceId={row.service.id} />
+          {tab === "processes" ? (
+            <ApplicationProcessesTab
+              service={row.service}
+              port={port}
+              onViewLogs={() => selectTab("logs")}
+            />
           ) : null}
 
           {tab === "environment" ? (
-            <section
-              className={RESOURCE_DETAIL_CARD}
-              style={resourceDetailCardStyle()}
-            >
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div>
-                  <h2 className="text-lg font-semibold tracking-tight">
-                    Environment variables
-                  </h2>
-                  <p
-                    className="mt-1 text-sm"
-                    style={{ color: "var(--muted-text)" }}
-                  >
-                    Injected at runtime in the container.
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setRevealedSecrets((v) => !v)}
-                  >
-                    {revealedSecrets ? "Hide secrets" : "Reveal secrets"}
-                  </Button>
-                  <Button type="button" onClick={() => setAddVarOpen(true)}>
-                    Add variable
-                  </Button>
-                </div>
-              </div>
-              <div className="mt-4">
-                {row.variables.map((v) => (
-                  <EnvVarRow
-                    key={v.key}
-                    name={v.key}
-                    value={v.value ?? ""}
-                    secret={v.is_secret}
-                    linkId={v.link_id}
-                  />
-                ))}
-                {row.variables.length === 0 ? (
-                  <p
-                    className="py-4 text-sm"
-                    style={{ color: "var(--muted-text)" }}
-                  >
-                    No variables yet.
-                  </p>
-                ) : null}
-              </div>
-            </section>
+            <ApplicationEnvironmentTab
+              service={row.service}
+              variables={row.variables}
+              linkedSlugs={linkedSlugs}
+              liveDeploymentAt={
+                row.deployments[0]?.finished_at ??
+                row.deployments[0]?.started_at ??
+                row.deployments[0]?.queued_at
+              }
+              revealedSecrets={revealedSecrets}
+              onToggleRevealSecrets={() => setRevealedSecrets((v) => !v)}
+              onAddVariables={onAddVariables}
+              onRefresh={refresh}
+              onDeploy={() => void onDeployNow()}
+              deployBusy={deployBusy}
+              bannerDismissed={bannerDismissed}
+              onDismissBanner={() => setBannerDismissed(true)}
+            />
           ) : null}
 
-          {tab === "domains" && row ? (
+          {tab === "domains" ? (
             <ServiceDomainsTab
               serviceId={row.service.id}
               domains={row.domains}
@@ -524,62 +578,30 @@ export function ApplicationDetailPage() {
             />
           ) : null}
 
-          {tab === "previews" && row ? (
+          {tab === "logs" ? (
+            <ServiceAccessLogsPanel serviceId={row.service.id} />
+          ) : null}
+
+          {tab === "analytics" ? (
+            <ServiceTrafficAnalyticsPanel serviceId={row.service.id} />
+          ) : null}
+
+          {tab === "previews" ? (
             <ServicePreviewsTab serviceId={row.service.id} onError={setError} />
           ) : null}
 
-          {tab === "settings" ? (
-            <>
-              <section
-                className={RESOURCE_DETAIL_CARD}
-                style={resourceDetailCardStyle()}
-              >
-                <h2 className="text-lg font-semibold tracking-tight">
-                  Settings
-                </h2>
-                <p
-                  className="mt-2 text-sm"
-                  style={{ color: "var(--muted-text)" }}
-                >
-                  Image, GitHub, and health-check settings for container apps
-                  will expand here. Configure deploy source from the{" "}
-                  <Link
-                    href={`/projects/${row.project.slug}`}
-                    className="underline"
-                    style={{ color: "var(--link-blue)" }}
-                  >
-                    project page
-                  </Link>{" "}
-                  for now.
-                </p>
-                <dl className="mt-4">
-                  <KeyValueRow label="Slug" value={row.service.slug} />
-                  <KeyValueRow
-                    label="Desired state"
-                    value={row.service.desired_state}
-                  />
-                </dl>
-              </section>
-              <ServicePreviewSettingsCard
-                service={row.service}
-                onSaved={() => void refresh()}
-                onError={setError}
-              />
-              <ServiceBuildLocationPanel
-                service={row.service}
-                onSaved={() => void refresh()}
-                cardClassName={RESOURCE_DETAIL_CARD}
-                cardStyle={resourceDetailCardStyle()}
-              />
-            </>
+          {tab === "security" ? (
+            <ServiceSecurityTab serviceId={row.service.id} kind="app" />
           ) : null}
 
-          <AddEnvVariableModal
-            open={addVarOpen}
-            existingKeys={row.variables.map((v) => v.key)}
-            onClose={() => setAddVarOpen(false)}
-            onAdd={onAddVariables}
-          />
+          {tab === "settings" ? (
+            <ApplicationSettingsTab
+              service={row.service}
+              project={row.project}
+              onUpdated={refresh}
+              onError={setError}
+            />
+          ) : null}
         </div>
       )}
     </DashboardShell>

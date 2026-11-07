@@ -95,7 +95,7 @@ func Apply(ctx context.Context, cfg config.Config, current string, opts Options)
 			return ApplyResult{}, err
 		}
 	}
-	binPath, err := extractDockyardBinary(archivePath, tmpDir)
+	binPath, dyPath, err := extractReleaseBinaries(archivePath, tmpDir)
 	if err != nil {
 		return ApplyResult{}, err
 	}
@@ -119,6 +119,18 @@ func Apply(ctx context.Context, cfg config.Config, current string, opts Options)
 	}
 	if err := installBinary(binPath, dest); err != nil {
 		return ApplyResult{}, err
+	}
+	dyDest := os.Getenv("DOCKYARD_DY_BIN")
+	if dyDest == "" {
+		dyDest = "/usr/local/bin/dy"
+	}
+	if dyPath != "" {
+		if err := installBinary(dyPath, dyDest); err != nil {
+			return ApplyResult{}, fmt.Errorf("install dy: %w", err)
+		}
+		if !opts.Quiet {
+			fmt.Printf("Installed dy to %s\n", dyDest)
+		}
 	}
 	if !opts.Quiet {
 		fmt.Printf("Installed %s to %s\n", rel.Tag, dest)
@@ -198,15 +210,15 @@ func parseChecksumLine(body, assetName string) string {
 	return ""
 }
 
-func extractDockyardBinary(archivePath, destDir string) (string, error) {
+func extractReleaseBinaries(archivePath, destDir string) (dockyardPath string, dyPath string, err error) {
 	f, err := os.Open(archivePath)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	defer f.Close()
 	gz, err := gzip.NewReader(f)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	defer gz.Close()
 	tr := tar.NewReader(gz)
@@ -216,28 +228,49 @@ func extractDockyardBinary(archivePath, destDir string) (string, error) {
 			break
 		}
 		if err != nil {
-			return "", err
+			return "", "", err
 		}
 		if hdr.Typeflag != tar.TypeReg {
 			continue
 		}
 		base := filepath.Base(hdr.Name)
-		if base != "dockyard" && !strings.HasPrefix(base, "dockyard") {
-			continue
+		switch base {
+		case "dockyard":
+			out := filepath.Join(destDir, "dockyard")
+			if err := writeTarEntry(tr, out); err != nil {
+				return "", "", err
+			}
+			dockyardPath = out
+		case "dy":
+			out := filepath.Join(destDir, "dy")
+			if err := writeTarEntry(tr, out); err != nil {
+				return "", "", err
+			}
+			dyPath = out
+		default:
+			if strings.HasPrefix(base, "dockyard") && dockyardPath == "" {
+				out := filepath.Join(destDir, "dockyard")
+				if err := writeTarEntry(tr, out); err != nil {
+					return "", "", err
+				}
+				dockyardPath = out
+			}
 		}
-		out := filepath.Join(destDir, "dockyard")
-		w, err := os.OpenFile(out, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o755)
-		if err != nil {
-			return "", err
-		}
-		if _, err := io.Copy(w, tr); err != nil {
-			_ = w.Close()
-			return "", err
-		}
-		if err := w.Close(); err != nil {
-			return "", err
-		}
-		return out, nil
 	}
-	return "", fmt.Errorf("dockyard binary not found in archive")
+	if dockyardPath == "" {
+		return "", "", fmt.Errorf("dockyard binary not found in archive")
+	}
+	return dockyardPath, dyPath, nil
+}
+
+func writeTarEntry(r io.Reader, dest string) error {
+	w, err := os.OpenFile(dest, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o755)
+	if err != nil {
+		return err
+	}
+	if _, err := io.Copy(w, r); err != nil {
+		_ = w.Close()
+		return err
+	}
+	return w.Close()
 }

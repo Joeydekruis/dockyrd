@@ -25,6 +25,7 @@ var searchNavPages = []searchHit{
 	{Kind: "page", Label: "Static sites", Href: "/static-sites"},
 	{Kind: "page", Label: "Object storage", Href: "/object-storage"},
 	{Kind: "page", Label: "Analytics", Href: "/analytics"},
+	{Kind: "page", Label: "Security", Href: "/server/security"},
 	{Kind: "page", Label: "Notification inbox", Href: "/notifications"},
 	{Kind: "page", Label: "Account profile", Href: "/settings/account/profile"},
 	{Kind: "page", Label: "Password & 2FA", Href: "/settings/account/password"},

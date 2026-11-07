@@ -162,3 +162,19 @@ Milestone: **M6 · Resource links** — #58–#61
 | #61 | Project map + ⌘K |
 
 Briefing: `docs/project/briefings/resource-linking.md`
+
+## M7 · Security & performance — in progress
+
+Milestone: **M7 · Security & performance** — epic **#74**, phased **#75–#82**
+
+| Phase | Issue | Notes |
+|-------|--------|--------|
+| P0 | (Direct) | Container hardening, Caddy encode/headers — before Feature slices |
+| P1a | #75 | `internal/hostops` — spec in `docs/project/issues/75/` |
+| P1b | #76 | Baseline checks + add-ons UI |
+| P1c | #77 | Policy + Application Security tab |
+| P1d | #78 | CDN / trusted proxies |
+| P2 | #79–#81 | Proxybuild, rate limit, Coraza |
+| P3 | #82 | CrowdSec |
+
+Briefing: `docs/project/SECURITY_BRIEFING.md` · Design: `docs/dockyrd-security-design.html`

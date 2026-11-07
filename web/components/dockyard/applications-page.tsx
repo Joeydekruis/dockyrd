@@ -2,7 +2,7 @@
 
 import { Box, Plus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CreateApplicationModal } from "@/components/dockyard/create-application-modal";
+import { CreateApplicationWizard } from "@/components/dockyard/create-application-wizard";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import {
@@ -184,7 +184,7 @@ export function ApplicationsPage() {
         </ResourceListSection>
       )}
 
-      <CreateApplicationModal
+      <CreateApplicationWizard
         open={createOpen}
         onClose={() => setCreateOpen(false)}
         onCreated={(ctx) => {

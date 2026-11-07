@@ -6,9 +6,18 @@ func staticFileHandles(r StaticRoute) []any {
 	if len(indexNames) == 0 {
 		indexNames = []string{"index.html"}
 	}
-	return []any{map[string]any{
+	fs := map[string]any{
 		"handler":     "file_server",
 		"root":        r.Root,
 		"index_names": indexNames,
-	}}
+	}
+	tail := []any{
+		staticImmutableCacheHandler(),
+		staticHTMLNoCacheHandler(),
+		fs,
+	}
+	if r.Security != nil {
+		return prependSecurity(*r.Security, tail)
+	}
+	return prependBaseline(tail)
 }

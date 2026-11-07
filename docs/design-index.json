@@ -106,7 +106,7 @@
        "logo link",
        "nav aria-label=\"Main\": Dashboard, Projects",
        "div role=\"group\" aria-label=\"Project sections\": Applications, Databases, Static sites, Object storage (full menu items, margin-bottom 28px)",
-       "mono label \"Server\" then Analytics (href Server.dc.html) and Terminal",
+       "mono label \"Server\" then Analytics (href Server.dc.html), Security (/server/security), and Terminal",
        "Settings (href Settings.dc.html)",
        "server health card at bottom (green dot, v0.1.0 chip)"
       ],

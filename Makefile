@@ -8,6 +8,7 @@ site:
 
 build: web-build
 	go build -ldflags "$(LDFLAGS)" -o bin/dockyard ./cmd/dockyard
+	go build -ldflags "$(LDFLAGS)" -o bin/dy ./cmd/dy
 
 web-build:
 	pnpm --dir web install

@@ -28,6 +28,22 @@ func TestDeploymentImageRefGit(t *testing.T) {
 	}
 }
 
+func TestNormalizeBuilderAliases(t *testing.T) {
+	if NormalizeBuilder("buildpacks") != BuilderDockerfile {
+		t.Fatalf("buildpacks")
+	}
+	if NormalizeBuilder("nixpacks") != BuilderRailpack {
+		t.Fatalf("nixpacks")
+	}
+	cfg, err := Parse([]byte(`{"source":{"type":"github","repo":"acme/api"},"builder":"buildpacks","port":80}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := cfg.DeploymentImageRef("api", "01ARZ3NDEK"); err != nil {
+		t.Fatalf("git build with buildpacks alias: %v", err)
+	}
+}
+
 func TestEffectiveBuilderDefaultsRailpack(t *testing.T) {
 	cfg, _ := Parse([]byte(`{"source":{"type":"git","url":"https://x"},"port":80}`))
 	if cfg.EffectiveBuilder("/tmp/nodf") != BuilderRailpack {

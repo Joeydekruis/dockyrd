@@ -123,14 +123,11 @@ func startDatabase(ctx context.Context, q *sqlc.Queries, dc *docker.Client, key 
 			return err
 		}
 		image := fmt.Sprintf("valkey/valkey:%d", redisCfg.Version)
-		cmd := []string{"valkey-server", "--requirepass", pw}
-		if redisCfg.Persistence {
-			cmd = append(cmd, "--appendonly", "yes")
-		}
 		mem := redisCfg.MaxMemoryMB
 		if mem <= 0 {
 			mem = 256
 		}
+		cmd := dbkind.ValkeyServerArgs(redisCfg, pw, mem)
 		_, err = dc.RunDatabase(ctx, docker.RunDatabaseInput{
 			Name:               name,
 			Image:              image,
