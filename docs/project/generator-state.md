@@ -1,10 +1,10 @@
 # Generator state
 
-**Updated:** 2026-11-05
+**Updated:** 2026-11-07
 
 ## In progress
 
-None — v0.2 slice **#68–#70** ready for maintainer verify on `development` after push.
+**#71** — Apps domain verify + default URLs. Generator pass on `development` (backend + Instance/Domains UI + setup step); handoff/tests pending maintainer verify.
 
 ## Last ship
 

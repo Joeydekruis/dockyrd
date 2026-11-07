@@ -12,7 +12,6 @@ import (
 	"github.com/oklog/ulid/v2"
 
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
-	"github.com/Joeydekruis/dockyrd/internal/proxy"
 	"github.com/Joeydekruis/dockyrd/internal/watch"
 )
 
@@ -106,8 +105,8 @@ func (d apiDeps) handleCreateDomain(w http.ResponseWriter, r *http.Request) {
 	hostname := normalizeHostname(body.Hostname)
 	isPlatform := body.Platform || hostname == ""
 	if isPlatform {
-		publicIP := d.cfg.EffectivePublicIPv4()
-		hostname, err = proxy.PlatformHostname(svc.Slug, publicIP)
+		var err error
+		hostname, err = d.platformHostname(ctx, svc.Slug)
 		if err != nil {
 			writeJSONError(w, http.StatusInternalServerError, "platform hostname error")
 			return
@@ -344,8 +343,7 @@ func staticSiteCustomDomain(cfg json.RawMessage) string {
 }
 
 func (d apiDeps) insertPlatformDomain(ctx context.Context, serviceID, serviceSlug string, isPrimary bool) (sqlc.Domain, error) {
-	publicIP := d.cfg.EffectivePublicIPv4()
-	hostname, err := proxy.PlatformHostname(serviceSlug, publicIP)
+	hostname, err := d.platformHostname(ctx, serviceSlug)
 	if err != nil {
 		return sqlc.Domain{}, err
 	}

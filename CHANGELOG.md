@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.55] - 2026-11-07
+
+_Finished: 2026-11-07_
+
+### Added
+
+- **#71 / Apps domain + default URLs** — verify wildcard DNS (`POST /api/v1/settings/instance/verify-wildcard`), suggested `*.apps.<apex>`, platform hostnames on verified wildcard; auto default URL on create for apps/compose; Instance **Apps on your domain** block, Domains **Default URL** / **Your domains**, setup optional step, admin nudge — https://github.com/Joeydekruis/dockyrd/issues/71
+
 ## [0.0.54] - 2026-11-05
 
 _Finished: 2026-11-05_

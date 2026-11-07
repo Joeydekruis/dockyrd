@@ -1103,6 +1103,8 @@ button.btn-text:disabled {
 }
 
 .dockyrd-logo .dockyrd-wave {
+  transform-box: fill-box;
+  transform-origin: 0 0;
   transition: transform 0.9s cubic-bezier(0.4, 0, 0.2, 1);
 }
 

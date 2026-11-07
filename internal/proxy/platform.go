@@ -24,18 +24,46 @@ func IPv4ToSSLIPBase(ip string) (string, error) {
 	return fmt.Sprintf("%d-%d-%d-%d", v4[0], v4[1], v4[2], v4[3]), nil
 }
 
-// PlatformHostname builds <slug>-<rand4>.<ip-dashes>.sslip.io .
+// PlatformHostInput selects sslip.io vs a verified apps wildcard suffix.
+type PlatformHostInput struct {
+	ServiceSlug      string
+	PublicIPv4       string
+	WildcardPattern  string
+	WildcardVerified bool
+}
+
+// PlatformHostname builds <slug>-<rand4>.<ip-dashes>.sslip.io (legacy wrapper).
 func PlatformHostname(serviceSlug, publicIPv4 string) (string, error) {
-	base, err := IPv4ToSSLIPBase(publicIPv4)
-	if err != nil {
-		return "", err
-	}
-	slug := sanitizeSlugPart(serviceSlug)
+	return PlatformHostnameFor(PlatformHostInput{
+		ServiceSlug: serviceSlug,
+		PublicIPv4:  publicIPv4,
+	})
+}
+
+// PlatformHostnameFor builds <slug>-<rand4>.<suffix> where suffix is wildcard base or sslip.io.
+func PlatformHostnameFor(in PlatformHostInput) (string, error) {
+	slug := sanitizeSlugPart(in.ServiceSlug)
 	rand4, err := randomHex4()
 	if err != nil {
 		return "", err
 	}
+	if in.WildcardVerified {
+		suffix := wildcardSuffix(in.WildcardPattern)
+		if suffix != "" {
+			return fmt.Sprintf("%s-%s.%s", slug, rand4, suffix), nil
+		}
+	}
+	base, err := IPv4ToSSLIPBase(in.PublicIPv4)
+	if err != nil {
+		return "", err
+	}
 	return fmt.Sprintf("%s-%s.%s.sslip.io", slug, rand4, base), nil
+}
+
+func wildcardSuffix(pattern string) string {
+	p := strings.TrimSpace(pattern)
+	p = strings.TrimPrefix(p, "*.")
+	return strings.Trim(p, ".")
 }
 
 func sanitizeSlugPart(s string) string {

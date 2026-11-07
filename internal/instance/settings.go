@@ -21,10 +21,12 @@ const (
 
 // Panel holds instance-level dashboard settings.
 type Panel struct {
-	PublicURL       string `json:"public_url,omitempty"`
-	AcmeEmail       string `json:"acme_email,omitempty"`
-	Wildcard        string `json:"wildcard_domain,omitempty"`
-	Require2FAAll   bool   `json:"require_2fa_all,omitempty"`
+	PublicURL            string `json:"public_url,omitempty"`
+	AcmeEmail            string `json:"acme_email,omitempty"`
+	Wildcard             string `json:"wildcard_domain,omitempty"`
+	WildcardVerifiedAt   int64  `json:"wildcard_verified_at,omitempty"`
+	WildcardProbeHost    string `json:"wildcard_probe_host,omitempty"`
+	Require2FAAll        bool   `json:"require_2fa_all,omitempty"`
 }
 
 // SMTPPublic is returned to clients (no secrets).

@@ -222,7 +222,8 @@ func (d apiDeps) handleCreateService(w http.ResponseWriter, r *http.Request) {
 		writeJSONError(w, http.StatusInternalServerError, "database error")
 		return
 	}
-	if body.Kind == "static_site" {
+	switch body.Kind {
+	case "static_site", "app", "compose":
 		d.provisionServiceDomains(ctx, row, cfg)
 	}
 	writeJSON(w, http.StatusCreated, serviceFromRow(row))

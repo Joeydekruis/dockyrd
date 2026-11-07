@@ -9,6 +9,17 @@
     a.rel = "noopener";
   });
 
+  if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    document.querySelectorAll(".dockyrd-logo").forEach(function (logo) {
+      logo.addEventListener("pointerenter", function () {
+        logo.classList.add("dockyrd-logo--hover");
+      });
+      logo.addEventListener("pointerleave", function () {
+        logo.classList.remove("dockyrd-logo--hover");
+      });
+    });
+  }
+
   function fmt(n) {
     return n >= 1000
       ? (n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(/\.0$/, "") + "k"

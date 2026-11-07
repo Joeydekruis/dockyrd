@@ -15,6 +15,7 @@ func registerInstanceSettingsRoutes(mux *http.ServeMux, deps apiDeps) {
 	mux.HandleFunc("GET /api/v1/settings/instance", deps.handleGetInstanceSettings)
 	mux.HandleFunc("PATCH /api/v1/settings/instance", deps.handlePatchInstanceSettings)
 	mux.HandleFunc("POST /api/v1/settings/smtp/test", deps.handleSMTPTest)
+	registerInstanceWildcardRoute(mux, deps)
 }
 
 func (d apiDeps) handleSettingsPublic(w http.ResponseWriter, r *http.Request) {
@@ -47,13 +48,7 @@ func (d apiDeps) handleGetInstanceSettings(w http.ResponseWriter, r *http.Reques
 		writeJSONError(w, http.StatusInternalServerError, "database error")
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{
-		"public_url":       panel.PublicURL,
-		"acme_email":       panel.AcmeEmail,
-		"wildcard_domain":  panel.Wildcard,
-		"require_2fa_all":  panel.Require2FAAll,
-		"smtp":             smtp,
-	})
+	writeJSON(w, http.StatusOK, d.instanceSettingsPayload(ctx, panel, smtp))
 }
 
 func (d apiDeps) handlePatchInstanceSettings(w http.ResponseWriter, r *http.Request) {
@@ -84,18 +79,8 @@ func (d apiDeps) handlePatchInstanceSettings(w http.ResponseWriter, r *http.Requ
 		writeJSONError(w, http.StatusInternalServerError, "database error")
 		return
 	}
-	if body.PublicURL != nil {
-		panel.PublicURL = strings.TrimSpace(*body.PublicURL)
-	}
-	if body.AcmeEmail != nil {
-		panel.AcmeEmail = strings.TrimSpace(*body.AcmeEmail)
-	}
-	if body.WildcardDomain != nil {
-		panel.Wildcard = strings.TrimSpace(*body.WildcardDomain)
-	}
-	if body.Require2FAAll != nil {
-		panel.Require2FAAll = *body.Require2FAAll
-	}
+	prev := panel
+	applyInstancePanelPatch(&panel, prev, body.WildcardDomain, body.PublicURL, body.AcmeEmail, body.Require2FAAll)
 	if err := instance.SavePanel(ctx, d.q, panel); err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "database error")
 		return

@@ -6,6 +6,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { dockyrdLogoLink } from "./public-site-logo.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const siteDir = path.join(root, "site");
@@ -214,7 +215,7 @@ function headMeta({ title, description, canonical, ogType = "website", depth = 0
 <meta name="twitter:title" content="${t}">
 <meta name="twitter:description" content="${desc}">
 <link rel="icon" href="${assets}favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="${assets}site.css">
+<link rel="stylesheet" href="${assets}site.css?v=${VERSION}">
 </head>
 <body>`;
 }
@@ -236,7 +237,7 @@ function shellHeader(activeNav, depth = 0) {
 <header class="topbar">
   <div class="topbar-in">
     <button class="menu-btn" type="button" id="menuBtn" aria-label="Open documentation menu" aria-expanded="false" aria-controls="sidebar"><svg width="20" height="20"><use href="#i-menu"/></svg></button>
-    <a class="logo" href="${home}" aria-label="Dockyrd home"><svg viewBox="0 -1 505.7 105.53" role="img" aria-label="Dockyrd"><use href="#wordmark"/></svg></a>
+    ${dockyrdLogoLink(home, "site-logo-h")}
     <nav class="topnav" aria-label="Primary">
       ${navItem("home", home, "Product")}
       ${navItem("docs", docHref(depth, "introduction"), "Docs")}
@@ -267,7 +268,7 @@ function shellFooter(depth = 0) {
   const home = homeHref(depth);
   return `<footer class="site">
   <div class="in">
-    <a class="logo" href="${home}" aria-label="Dockyrd home"><svg viewBox="0 -1 505.7 105.53" width="104" height="22" role="img" aria-label="Dockyrd"><use href="#wordmark"/></svg></a>
+    ${dockyrdLogoLink(home, "site-logo-f", 104)}
     <nav aria-label="Footer">
       <a href="${docHref(depth, "introduction")}">Docs</a>
       <a href="${docHref(depth, "installation")}">Install</a>

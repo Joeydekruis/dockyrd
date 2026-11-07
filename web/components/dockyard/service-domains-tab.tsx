@@ -3,6 +3,7 @@
 import { Plus } from "lucide-react";
 import { type CSSProperties, useEffect, useState } from "react";
 import { AddCustomDomainModal } from "@/components/dockyard/add-custom-domain-modal";
+import { AppsDomainNudge } from "@/components/dockyard/apps-domain-nudge";
 import { DomainDnsRecordsModal } from "@/components/dockyard/domain-dns-records-modal";
 import { Button } from "@/components/dockyard/ui/button";
 import { ConfirmDialog } from "@/components/dockyard/ui/confirm-dialog";
@@ -317,137 +318,70 @@ export function ServiceDomainsTab({
     </Button>
   );
 
-  if (layout === "static") {
-    return (
-      <div className="space-y-6">
-        {modals}
-        <div className={cardClassName} style={surfaceStyle}>
-          <DomainSection
-            title="Platform domains"
-            description="Free addresses Dockyard gives this site. Remove them only if you rely on custom domains."
-            domains={platformDomains}
-            busy={busy}
-            onShowDns={setDnsDomain}
-            onDelete={setDeleteTarget}
-            onMakePrimary={handleMakePrimary}
-            emptyMessage={
-              <div className="mt-5">
-                <p className="text-sm" style={{ color: "var(--muted-text)" }}>
-                  No platform domain yet — HTTPS routing may not work until one
-                  is added.
-                </p>
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="mt-3"
-                  disabled={busy}
-                  onClick={() => void ensurePlatformDomain()}
-                >
-                  Add platform domain
-                </Button>
-              </div>
-            }
-          />
-        </div>
-        <div className={cardClassName} style={surfaceStyle}>
-          <DomainSection
-            title="Custom domains"
-            description="Domains you own, pointed at this site. Verified and served over HTTPS."
-            action={addCustomButton}
-            domains={customDomains}
-            busy={busy}
-            onShowDns={setDnsDomain}
-            onDelete={setDeleteTarget}
-            onMakePrimary={handleMakePrimary}
-          />
-        </div>
-      </div>
-    );
-  }
+  const addPlatformButton =
+    platformDomains.length > 0 ? (
+      <Button
+        type="button"
+        variant="outline"
+        disabled={busy}
+        onClick={() => void ensurePlatformDomain()}
+      >
+        Add default URL
+      </Button>
+    ) : null;
 
-  const platform = platformDomains;
-  const custom = customDomains;
-  const mixed = [...platform, ...custom];
-  const showSplit = platform.length > 0 && custom.length > 0;
+  const platformEmpty = (
+    <div className="mt-5 space-y-3">
+      <p className="text-sm" style={{ color: "var(--muted-text)" }}>
+        No default URL yet. HTTPS routing needs at least one platform hostname.
+      </p>
+      <Button
+        type="button"
+        variant="outline"
+        disabled={busy}
+        onClick={() => void ensurePlatformDomain()}
+      >
+        Add default URL
+      </Button>
+    </div>
+  );
 
-  if (layout === "compose") {
-    return (
+  const composeLead =
+    layout === "compose"
+      ? composeTarget
+        ? `HTTPS routes to compose service “${composeTarget.service}” on port ${composeTarget.port}.`
+        : "Set target service and port before adding domains."
+      : "Dockyard-generated hostname for this service. Uses your apps domain when verified, otherwise sslip.io.";
+
+  return (
+    <div className="space-y-6">
+      {modals}
+      <AppsDomainNudge scope="service" />
       <div className={cardClassName} style={surfaceStyle}>
-        {modals}
         <DomainSection
-          title="Domains"
-          description={
-            composeTarget
-              ? `HTTPS routes to compose service “${composeTarget.service}” on port ${composeTarget.port}. Adjust targets above before adding a domain.`
-              : "HTTPS routes to a compose service and port. Set target service and port before adding domains."
-          }
-          action={addCustomButton}
-          domains={mixed}
+          title="Default URL"
+          description={composeLead}
+          action={addPlatformButton}
+          domains={platformDomains}
           busy={busy}
           onShowDns={setDnsDomain}
           onDelete={setDeleteTarget}
           onMakePrimary={handleMakePrimary}
-          emptyMessage={
-            <p className="mt-5 text-sm" style={{ color: "var(--muted-text)" }}>
-              No domains yet. Set target service/port, then add a custom or
-              platform domain.
-            </p>
-          }
+          emptyMessage={platformEmpty}
         />
       </div>
-    );
-  }
-
-  if (showSplit) {
-    return (
-      <div className="space-y-6">
-        {modals}
-        <div className={cardClassName} style={surfaceStyle}>
-          <DomainSection
-            title="Platform domains"
-            description="Default hostname for this service on Dockyard."
-            domains={platform}
-            busy={busy}
-            onShowDns={setDnsDomain}
-            onDelete={setDeleteTarget}
-            onMakePrimary={handleMakePrimary}
-          />
-        </div>
-        <div className={cardClassName} style={surfaceStyle}>
-          <DomainSection
-            title="Custom domains"
-            description="Your hostnames, verified and served over HTTPS."
-            action={addCustomButton}
-            domains={custom}
-            busy={busy}
-            onShowDns={setDnsDomain}
-            onDelete={setDeleteTarget}
-            onMakePrimary={handleMakePrimary}
-          />
-        </div>
+      <div className={cardClassName} style={surfaceStyle}>
+        <DomainSection
+          title="Your domains"
+          description="Hostnames you own, verified with DNS and served over HTTPS."
+          action={addCustomButton}
+          domains={customDomains}
+          busy={busy}
+          onShowDns={setDnsDomain}
+          onDelete={setDeleteTarget}
+          onMakePrimary={handleMakePrimary}
+        />
       </div>
-    );
-  }
-
-  return (
-    <div className={cardClassName} style={surfaceStyle}>
-      {modals}
-      <DomainSection
-        title="Domains"
-        description="Hostnames routed to this service through Caddy."
-        action={addCustomButton}
-        domains={mixed}
-        busy={busy}
-        onShowDns={setDnsDomain}
-        onDelete={setDeleteTarget}
-        onMakePrimary={handleMakePrimary}
-        emptyMessage={
-          <p className="mt-5 text-sm" style={{ color: "var(--muted-text)" }}>
-            No domains yet. Add a custom domain or deploy to get a platform
-            hostname.
-          </p>
-        }
-      />
     </div>
   );
 }

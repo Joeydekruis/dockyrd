@@ -2,12 +2,17 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { AppsOnYourDomainSection } from "@/components/dockyard/apps-on-your-domain-section";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import { SettingsPageBody } from "@/components/dockyard/settings-page-body";
 import { Button } from "@/components/dockyard/ui/button";
 import { SnackbarViewport } from "@/components/dockyard/ui/snackbar";
-import { getInstanceSettings, patchInstanceSettings } from "@/lib/api";
+import {
+  getInstanceSettings,
+  type InstanceSettings,
+  patchInstanceSettings,
+} from "@/lib/api";
 
 type SnackbarState = {
   message: string;
@@ -20,12 +25,7 @@ const settingsCardClass =
 export function InstanceSettingsPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [instance, setInstance] = useState<{
-    public_url: string;
-    acme_email: string;
-    wildcard_domain: string;
-    require_2fa_all: boolean;
-  } | null>(null);
+  const [instance, setInstance] = useState<InstanceSettings | null>(null);
   const [snackbar, setSnackbar] = useState<SnackbarState>(null);
 
   const dismissSnackbar = useCallback(() => setSnackbar(null), []);
@@ -68,7 +68,6 @@ export function InstanceSettingsPage() {
       const updated = await patchInstanceSettings({
         public_url: instance.public_url,
         acme_email: instance.acme_email,
-        wildcard_domain: instance.wildcard_domain,
         require_2fa_all: instance.require_2fa_all,
       });
       setInstance(updated);
@@ -82,7 +81,7 @@ export function InstanceSettingsPage() {
     <DashboardShell title="General" breadcrumb="Server settings">
       <SettingsPageBody>
         <section aria-label="Public URL and TLS" className={settingsCardClass}>
-          <h2 className="text-lg font-medium">Public URL &amp; TLS</h2>
+          <h2 className="text-lg font-medium">Dashboard URL &amp; TLS</h2>
           <p className="text-sm text-[var(--muted-foreground)]">
             HTTPS address of this Dockyrd dashboard (via Caddy). Used in
             password-reset and invite links. Configure outbound email under{" "}
@@ -99,7 +98,7 @@ export function InstanceSettingsPage() {
             >
               <label className="block text-sm">
                 <span className="text-[var(--muted-foreground)]">
-                  Public URL
+                  Dashboard URL
                 </span>
                 <input
                   className="field-input mt-1 w-full"
@@ -124,22 +123,6 @@ export function InstanceSettingsPage() {
                   }
                 />
               </label>
-              <label className="block text-sm">
-                <span className="text-[var(--muted-foreground)]">
-                  Wildcard domain
-                </span>
-                <input
-                  className="field-input mt-1 w-full"
-                  value={instance.wildcard_domain}
-                  onChange={(e) =>
-                    setInstance({
-                      ...instance,
-                      wildcard_domain: e.target.value,
-                    })
-                  }
-                  placeholder="*.apps.example.com"
-                />
-              </label>
               <label className="flex items-center gap-2 text-sm">
                 <input
                   type="checkbox"
@@ -154,6 +137,11 @@ export function InstanceSettingsPage() {
                 Require 2FA for all users (owners always require 2FA)
               </label>
               <Button type="submit">Save URL settings</Button>
+              <AppsOnYourDomainSection
+                instance={instance}
+                onInstanceChange={setInstance}
+                onMessage={showSnackbar}
+              />
             </form>
           ) : loading ? (
             <DockyrdPageLoading className="py-2" cubeSize={28} />

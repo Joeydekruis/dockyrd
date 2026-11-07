@@ -28,6 +28,24 @@ func TestPlatformHostnameShape(t *testing.T) {
 	}
 }
 
+func TestPlatformHostnameForVerifiedWildcard(t *testing.T) {
+	host, err := PlatformHostnameFor(PlatformHostInput{
+		ServiceSlug:      "web-api",
+		PublicIPv4:       "203.0.113.5",
+		WildcardPattern:  "*.apps.clientx.nl",
+		WildcardVerified: true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.HasSuffix(host, ".apps.clientx.nl") {
+		t.Fatalf("suffix: %q", host)
+	}
+	if strings.Contains(host, "sslip.io") {
+		t.Fatalf("should not use sslip: %q", host)
+	}
+}
+
 func TestRenderContainsPanelRoute(t *testing.T) {
 	raw, err := Render(RenderInput{
 		ACMEEmail:     "ops@example.com",

@@ -1306,6 +1306,12 @@ export type InstanceSettings = {
   public_url: string;
   acme_email: string;
   wildcard_domain: string;
+  wildcard_verified_at?: number;
+  wildcard_verified?: boolean;
+  wildcard_dns_status?: string;
+  wildcard_probe_hostname?: string;
+  suggested_apps_domain?: string;
+  public_ipv4?: string;
   require_2fa_all: boolean;
   smtp: {
     host: string;
@@ -1319,6 +1325,16 @@ export type InstanceSettings = {
 
 export function getInstanceSettings() {
   return apiFetch<InstanceSettings>("/api/v1/settings/instance");
+}
+
+export function verifyInstanceWildcard() {
+  return apiFetch<{
+    dns_status: string;
+    wildcard_verified: boolean;
+    wildcard_verified_at?: number;
+    wildcard_probe_hostname?: string;
+    expected_ipv4?: string;
+  }>("/api/v1/settings/instance/verify-wildcard", { method: "POST" });
 }
 
 export function patchInstanceSettings(body: {
