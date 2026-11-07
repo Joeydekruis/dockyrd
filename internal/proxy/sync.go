@@ -15,7 +15,8 @@ import (
 )
 
 // SyncFromDB renders and loads Caddy config for live app and static routes.
-func SyncFromDB(ctx context.Context, q *sqlc.Queries, cfg config.Config) error {
+// When docker is non-nil, app upstream hostnames (dy-*) resolve to container IPs for host-networked dy-proxy.
+func SyncFromDB(ctx context.Context, q *sqlc.Queries, cfg config.Config, dock *docker.Client) error {
 	appRows, err := q.ListLiveAppProxyRoutes(ctx)
 	if err != nil {
 		return err
@@ -79,6 +80,12 @@ func SyncFromDB(ctx context.Context, q *sqlc.Queries, cfg config.Config) error {
 			Hostname:     row.Hostname,
 			UpstreamDial: compose.UpstreamDial(row.ServiceID, target, port),
 		})
+	}
+
+	if dock != nil {
+		for i := range appRoutes {
+			appRoutes[i].UpstreamDial = dock.ResolveHostUpstreamDial(ctx, appRoutes[i].UpstreamDial)
+		}
 	}
 
 	panel, err := instance.LoadPanel(ctx, q)

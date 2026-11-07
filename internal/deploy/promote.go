@@ -118,5 +118,5 @@ func (rt *Runtime) promoteAppRelease(ctx context.Context, svc sqlc.Service, depl
 		return err
 	}
 	rt.stopSupersededContainers(ctx, svc.ID, deploymentID, appCfg.StopGrace)
-	return proxy.SyncFromDB(ctx, rt.Q, rt.Cfg)
+	return proxy.SyncFromDB(ctx, rt.Q, rt.Cfg, rt.Docker)
 }

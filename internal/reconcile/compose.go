@@ -85,7 +85,7 @@ func SyncComposeServices(ctx context.Context, cfg config.Config, q *sqlc.Queries
 			maybeHealCompose(ctx, row.ID, cfgJSON, releaseDir, composeFile, runner, log)
 		}
 	}
-	_ = proxy.SyncFromDB(ctx, q, cfg)
+	_ = proxy.SyncFromDB(ctx, q, cfg, cli)
 }
 
 func maybeHealCompose(ctx context.Context, serviceID string, cfg compose.Config, releaseDir, composeFile string, runner compose.CLIRunner, log *slog.Logger) {

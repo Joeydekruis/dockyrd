@@ -110,7 +110,7 @@ func (rt *Runtime) runComposeDeployment(ctx context.Context, deploymentID string
 		appendLog("proxy network: " + err.Error())
 		return rt.fail(ctx, deploymentID, err)
 	}
-	if err := proxy.SyncFromDB(deployCtx, rt.Q, rt.Cfg); err != nil {
+	if err := proxy.SyncFromDB(deployCtx, rt.Q, rt.Cfg, rt.Docker); err != nil {
 		appendLog("proxy sync: " + err.Error())
 		return rt.fail(ctx, deploymentID, err)
 	}

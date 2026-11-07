@@ -18,7 +18,7 @@ func (d apiDeps) syncEdgeProxy(ctx context.Context) {
 		log.Warn("ensure dy-proxy", "err", err)
 		return
 	}
-	if err := proxy.SyncFromDB(ctx, d.q, d.cfg); err != nil {
+	if err := proxy.SyncFromDB(ctx, d.q, d.cfg, d.docker); err != nil {
 		log.Warn("proxy sync", "err", err)
 	}
 }

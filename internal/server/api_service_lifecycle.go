@@ -62,7 +62,7 @@ func (d apiDeps) handleDeleteService(w http.ResponseWriter, r *http.Request) {
 		writeJSONError(w, http.StatusInternalServerError, "delete error")
 		return
 	}
-	if err := proxy.SyncFromDB(ctx, d.q, d.cfg); err != nil {
+	if err := proxy.SyncFromDB(ctx, d.q, d.cfg, d.docker); err != nil {
 		// Best-effort; reconciler will reload Caddy on the next tick.
 		_ = err
 	}

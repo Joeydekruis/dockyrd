@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.0.56] - 2026-11-07
+
+_Finished: 2026-11-07_
+
+### Fixed
+
+- **`dy-proxy` app upstreams** — resolve `dy-*` container hostnames to `dy-edge` IPs at proxy sync so host-networked Caddy can reach app containers (fixes 502 / `lookup dy-… on 127.0.0.53: server misbehaving`)
+
 ## [0.0.55] - 2026-11-07
 
 _Finished: 2026-11-07_

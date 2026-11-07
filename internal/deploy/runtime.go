@@ -269,7 +269,7 @@ func (rt *Runtime) runAppDeployment(ctx context.Context, deploymentID string, de
 	}
 
 	rt.stopSupersededContainers(ctx, dep.ServiceID, deploymentID, appCfg.StopGrace)
-	if err := proxy.SyncFromDB(ctx, rt.Q, rt.Cfg); err != nil && rt.Log != nil {
+	if err := proxy.SyncFromDB(ctx, rt.Q, rt.Cfg, rt.Docker); err != nil && rt.Log != nil {
 		rt.Log.Warn("proxy sync after deploy", "err", err)
 	}
 	if rt.Notify != nil {

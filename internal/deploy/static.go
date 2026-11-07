@@ -149,7 +149,7 @@ func (rt *Runtime) RunStaticSiteDeployment(ctx context.Context, deploymentID str
 		return err
 	}
 
-	if err := proxy.SyncFromDB(ctx, rt.Q, rt.Cfg); err != nil && rt.Log != nil {
+	if err := proxy.SyncFromDB(ctx, rt.Q, rt.Cfg, rt.Docker); err != nil && rt.Log != nil {
 		rt.Log.Warn("proxy sync after static deploy", "err", err)
 	}
 	if rt.Notify != nil {
@@ -214,5 +214,5 @@ func (rt *Runtime) promoteStaticOnly(ctx context.Context, serviceID, deploymentI
 	}); err != nil {
 		return err
 	}
-	return proxy.SyncFromDB(ctx, rt.Q, rt.Cfg)
+	return proxy.SyncFromDB(ctx, rt.Q, rt.Cfg, rt.Docker)
 }
