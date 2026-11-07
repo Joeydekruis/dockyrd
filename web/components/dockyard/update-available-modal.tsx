@@ -1,9 +1,11 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Alert } from "@/components/dockyard/ui/alert";
 import { Button } from "@/components/dockyard/ui/button";
 import { getServerInfo, type ServerInfo } from "@/lib/api";
+import { isServerUpdatesSettingsPath } from "@/lib/nav";
 
 type Props = {
   open: boolean;
@@ -56,6 +58,7 @@ export function UpdateAvailableModal({ open, onClose, info }: Props) {
 
 /** Admin/owner banner + modal when a newer GitHub release exists. */
 export function UpdateAvailableNotifier() {
+  const pathname = usePathname();
   const [info, setInfo] = useState<ServerInfo | null>(null);
   const [open, setOpen] = useState(false);
 
@@ -65,6 +68,7 @@ export function UpdateAvailableNotifier() {
       .catch(() => setInfo(null));
   }, []);
 
+  if (isServerUpdatesSettingsPath(pathname)) return null;
   if (!info?.update_available) return null;
 
   return (

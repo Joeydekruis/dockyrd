@@ -163,6 +163,13 @@ export function isServerSettingsPath(pathname: string): boolean {
   return pathname.startsWith("/settings/server");
 }
 
+export function isServerUpdatesSettingsPath(pathname: string): boolean {
+  return (
+    pathname === "/settings/server/updates" ||
+    pathname.startsWith("/settings/server/updates/")
+  );
+}
+
 export function isSettingsPath(pathname: string): boolean {
   return isAccountSettingsPath(pathname) || isServerSettingsPath(pathname);
 }
