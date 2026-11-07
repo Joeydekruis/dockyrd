@@ -4,11 +4,11 @@ import { useCallback, useEffect, useState } from "react";
 import {
   SettingsErrorBanner,
   SettingsSection,
-} from "@/components/dockyard/account-settings-shared";
-import { DashboardShell } from "@/components/dockyard/dashboard-shell";
-import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
-import { SettingsPageBody } from "@/components/dockyard/settings-page-body";
-import { Button } from "@/components/dockyard/ui/button";
+} from "@/components/dockyrd/account-settings-shared";
+import { DashboardShell } from "@/components/dockyrd/dashboard-shell";
+import { DockyrdPageLoading } from "@/components/dockyrd/dockyrd-page-loading";
+import { SettingsPageBody } from "@/components/dockyrd/settings-page-body";
+import { Button } from "@/components/dockyrd/ui/button";
 import {
   type AuthSession,
   listAuthSessions,

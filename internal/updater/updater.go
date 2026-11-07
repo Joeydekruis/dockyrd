@@ -73,14 +73,14 @@ func Apply(ctx context.Context, cfg config.Config, current string, opts Options)
 		return ApplyResult{}, fmt.Errorf("already up to date (%s)", current)
 	}
 
-	if opts.DryRun || os.Getenv("DOCKYARD_UPDATE_DRY_RUN") == "1" {
+	if opts.DryRun || os.Getenv("dockyrd_UPDATE_DRY_RUN") == "1" {
 		if !opts.Quiet {
 			fmt.Printf("dry-run: would install %s from %s\n", rel.Tag, rel.AssetName)
 		}
 		return ApplyResult{InstalledTag: rel.Tag}, nil
 	}
 
-	tmpDir, err := os.MkdirTemp("", "dockyard-update-*")
+	tmpDir, err := os.MkdirTemp("", "dockyrd-update-*")
 	if err != nil {
 		return ApplyResult{}, err
 	}
@@ -112,15 +112,15 @@ func Apply(ctx context.Context, cfg config.Config, current string, opts Options)
 
 	dest := opts.BinaryPath
 	if dest == "" {
-		dest = os.Getenv("DOCKYARD_BIN")
+		dest = os.Getenv("dockyrd_BIN")
 	}
 	if dest == "" {
-		dest = "/usr/local/bin/dockyard"
+		dest = "/usr/local/bin/dockyrd"
 	}
 	if err := installBinary(binPath, dest); err != nil {
 		return ApplyResult{}, err
 	}
-	dyDest := os.Getenv("DOCKYARD_DY_BIN")
+	dyDest := os.Getenv("dockyrd_DY_BIN")
 	if dyDest == "" {
 		dyDest = "/usr/local/bin/dy"
 	}
@@ -134,7 +134,7 @@ func Apply(ctx context.Context, cfg config.Config, current string, opts Options)
 	}
 	if !opts.Quiet {
 		fmt.Printf("Installed %s to %s\n", rel.Tag, dest)
-		fmt.Println("Restart the dockyard service: systemctl restart dockyard")
+		fmt.Println("Restart the dockyrd service: systemctl restart dockyrd")
 	}
 	return ApplyResult{InstalledTag: rel.Tag}, nil
 }
@@ -210,7 +210,7 @@ func parseChecksumLine(body, assetName string) string {
 	return ""
 }
 
-func extractReleaseBinaries(archivePath, destDir string) (dockyardPath string, dyPath string, err error) {
+func extractReleaseBinaries(archivePath, destDir string) (dockyrdPath string, dyPath string, err error) {
 	f, err := os.Open(archivePath)
 	if err != nil {
 		return "", "", err
@@ -235,12 +235,12 @@ func extractReleaseBinaries(archivePath, destDir string) (dockyardPath string, d
 		}
 		base := filepath.Base(hdr.Name)
 		switch base {
-		case "dockyard":
-			out := filepath.Join(destDir, "dockyard")
+		case "dockyrd":
+			out := filepath.Join(destDir, "dockyrd")
 			if err := writeTarEntry(tr, out); err != nil {
 				return "", "", err
 			}
-			dockyardPath = out
+			dockyrdPath = out
 		case "dy":
 			out := filepath.Join(destDir, "dy")
 			if err := writeTarEntry(tr, out); err != nil {
@@ -248,19 +248,19 @@ func extractReleaseBinaries(archivePath, destDir string) (dockyardPath string, d
 			}
 			dyPath = out
 		default:
-			if strings.HasPrefix(base, "dockyard") && dockyardPath == "" {
-				out := filepath.Join(destDir, "dockyard")
+			if strings.HasPrefix(base, "dockyrd") && dockyrdPath == "" {
+				out := filepath.Join(destDir, "dockyrd")
 				if err := writeTarEntry(tr, out); err != nil {
 					return "", "", err
 				}
-				dockyardPath = out
+				dockyrdPath = out
 			}
 		}
 	}
-	if dockyardPath == "" {
-		return "", "", fmt.Errorf("dockyard binary not found in archive")
+	if dockyrdPath == "" {
+		return "", "", fmt.Errorf("dockyrd binary not found in archive")
 	}
-	return dockyardPath, dyPath, nil
+	return dockyrdPath, dyPath, nil
 }
 
 func writeTarEntry(r io.Reader, dest string) error {

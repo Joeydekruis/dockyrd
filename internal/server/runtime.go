@@ -108,7 +108,7 @@ func startBackground(ctx context.Context, cfg config.Config, db *sql.DB, q *sqlc
 	updater.StartAutoRefresh(ctx, updater.AutoRefreshInterval, func() string {
 		return BuildVersion()
 	}, func() updater.Options {
-		return updater.Options{Repo: os.Getenv("DOCKYARD_GITHUB_REPO")}
+		return updater.Options{Repo: os.Getenv("dockyrd_GITHUB_REPO")}
 	})
 
 	_ = hub

@@ -2,15 +2,15 @@
 
 import { Check } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { DashboardShell } from "@/components/dockyard/dashboard-shell";
-import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
+import { DashboardShell } from "@/components/dockyrd/dashboard-shell";
+import { DockyrdPageLoading } from "@/components/dockyrd/dockyrd-page-loading";
 import {
   groupNotificationsByDay,
   type InboxFilter,
   NotificationFilterPills,
   NotificationRow,
-} from "@/components/dockyard/notifications-ui";
-import { Button } from "@/components/dockyard/ui/button";
+} from "@/components/dockyrd/notifications-ui";
+import { Button } from "@/components/dockyrd/ui/button";
 import {
   getInboxSummary,
   type InboxNotification,

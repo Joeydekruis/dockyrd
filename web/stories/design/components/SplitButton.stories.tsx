@@ -4,7 +4,7 @@ import {
   SplitButton,
   type SplitButtonMenuItem,
   type SplitButtonVariant,
-} from "@/components/dockyard/ui/split-button";
+} from "@/components/dockyrd/ui/split-button";
 
 const deployMenuItems: SplitButtonMenuItem[] = [
   { id: "latest", label: "Deploy latest commit", icon: ArrowDownToLine },
@@ -14,7 +14,7 @@ const deployMenuItems: SplitButtonMenuItem[] = [
 
 const variants: SplitButtonVariant[] = ["primary", "outline", "secondary"];
 
-/** **Source:** `web/components/dockyard/ui/split-button.tsx` */
+/** **Source:** `web/components/dockyrd/ui/split-button.tsx` */
 const meta = {
   title: "Design/Components/Split button",
   component: SplitButton,

@@ -122,7 +122,7 @@ func TestPasswordChangeWrongCurrent(t *testing.T) {
 
 func testMuxWithOwnerSession(t *testing.T) (*http.ServeMux, *http.Cookie) {
 	t.Helper()
-	t.Setenv("DOCKYARD_REQUIRE_OWNER_2FA", "0")
+	t.Setenv("dockyrd_REQUIRE_OWNER_2FA", "0")
 	dir := t.TempDir()
 	cfg := config.Config{
 		DataDir:   filepath.Join(dir, "data"),

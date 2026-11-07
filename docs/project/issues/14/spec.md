@@ -7,7 +7,7 @@ size: M
 
 ## Goal
 
-Thin `internal/docker` wrapper: moby client, Dockyard label contract, deterministic resource names, idempotent `dy-edge` / project network ensure.
+Thin `internal/docker` wrapper: moby client, dockyrd label contract, deterministic resource names, idempotent `dy-edge` / project network ensure.
 
 ## Acceptance criteria
 
@@ -15,7 +15,7 @@ Thin `internal/docker` wrapper: moby client, Dockyard label contract, determinis
 - [x] Naming helpers: edge network, project network, app container name
 - [x] Client connects via `DOCKER_HOST` or default unix socket; `Ping` for health
 - [x] `EnsureEdgeNetwork`, `EnsureProjectNetwork` idempotent (create if missing)
-- [x] `ListManaged` filters containers with `dev.dockyard.managed=true`
+- [x] `ListManaged` filters containers with `dev.dockyrd.managed=true`
 - [x] Unit tests for labels/names; optional `integration` test when Docker available
 
 ## References

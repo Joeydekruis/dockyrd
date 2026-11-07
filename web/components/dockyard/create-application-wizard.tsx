@@ -3,17 +3,17 @@
 import { Container, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { ResourceProvisionContext } from "@/components/dockyard/resource-provisioning-modal";
-import { Button } from "@/components/dockyard/ui/button";
-import { Field } from "@/components/dockyard/ui/field";
-import { IconButton } from "@/components/dockyard/ui/icon-button";
-import { SearchSelectField } from "@/components/dockyard/ui/search-select-field";
-import { SelectField } from "@/components/dockyard/ui/select-field";
-import { Switch } from "@/components/dockyard/ui/switch";
+import type { ResourceProvisionContext } from "@/components/dockyrd/resource-provisioning-modal";
+import { Button } from "@/components/dockyrd/ui/button";
+import { Field } from "@/components/dockyrd/ui/field";
+import { IconButton } from "@/components/dockyrd/ui/icon-button";
+import { SearchSelectField } from "@/components/dockyrd/ui/search-select-field";
+import { SelectField } from "@/components/dockyrd/ui/select-field";
+import { Switch } from "@/components/dockyrd/ui/switch";
 import {
   WizardModalShell,
   type WizardStepDef,
-} from "@/components/dockyard/ui/wizard-modal-shell";
+} from "@/components/dockyrd/ui/wizard-modal-shell";
 import {
   createService,
   createServiceDomain,
@@ -505,7 +505,7 @@ function StepBuild({
           hint="Image-based apps skip the build step."
         />
         <p className="text-sm" style={{ color: "var(--muted-text)" }}>
-          Dockyard pulls <code className="font-mono">{draft.imageRef}</code>{" "}
+          dockyrd pulls <code className="font-mono">{draft.imageRef}</code>{" "}
           directly.
         </p>
       </>

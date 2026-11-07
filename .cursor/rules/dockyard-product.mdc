@@ -1,9 +1,9 @@
 ---
-description: Dockyard MVP product truth — briefing, milestones, Definition of Done
+description: dockyrd MVP product truth — briefing, milestones, Definition of Done
 alwaysApply: true
 ---
 
-# Dockyard product
+# dockyrd product
 
 **Source of truth:** `docs/BRIEFING.md` (architecture, API, milestones, NFRs). Shorter index: `docs/project/project.md`, phases: `docs/project/roadmap.md`.
 

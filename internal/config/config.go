@@ -14,13 +14,13 @@ import (
 
 const (
 	defaultListen    = ":8000"
-	defaultDataDir   = "/var/lib/dockyard"
-	defaultConfigDir = "/etc/dockyard"
-	envDataDir       = "DOCKYARD_DATA_DIR"
-	envConfigDir     = "DOCKYARD_CONFIG_DIR"
-	envListen        = "DOCKYARD_LISTEN"
-	envPublicIPv4    = "DOCKYARD_PUBLIC_IPV4"
-	envPublicURL     = "DOCKYARD_PUBLIC_URL"
+	defaultDataDir   = "/var/lib/dockyrd"
+	defaultConfigDir = "/etc/dockyrd"
+	envDataDir       = "dockyrd_DATA_DIR"
+	envConfigDir     = "dockyrd_CONFIG_DIR"
+	envListen        = "dockyrd_LISTEN"
+	envPublicIPv4    = "dockyrd_PUBLIC_IPV4"
+	envPublicURL     = "dockyrd_PUBLIC_URL"
 )
 
 // Config holds process-level paths and network binding.
@@ -65,9 +65,9 @@ func Load() Config {
 
 func devBaseDir() string {
 	if dir, err := os.UserConfigDir(); err == nil {
-		return filepath.Join(dir, "dockyard")
+		return filepath.Join(dir, "dockyrd")
 	}
-	return filepath.Join(os.TempDir(), "dockyard")
+	return filepath.Join(os.TempDir(), "dockyrd")
 }
 
 // EnsureLayout creates config and data directories with safe permissions.
@@ -157,13 +157,13 @@ func (c Config) DatabaseBackupsDir() string {
 
 // EnvFilePath is the optional systemd EnvironmentFile.
 func (c Config) EnvFilePath() string {
-	return filepath.Join(c.ConfigDir, "dockyard.env")
+	return filepath.Join(c.ConfigDir, "dockyrd.env")
 }
 
 const (
 	defaultBuildTimeout = 20 * time.Minute
-	envBuildTimeout     = "DOCKYARD_BUILD_TIMEOUT"
-	envMinFreeDiskPct   = "DOCKYARD_MIN_FREE_DISK_PERCENT"
+	envBuildTimeout     = "dockyrd_BUILD_TIMEOUT"
+	envMinFreeDiskPct   = "dockyrd_MIN_FREE_DISK_PERCENT"
 )
 
 // BuildTimeout is the maximum duration for clone/build steps (default 20m).
@@ -195,9 +195,9 @@ func (c Config) MinFreeDiskPercent() int {
 	return 10
 }
 
-const envBuildIsolation = "DOCKYARD_BUILD_ISOLATION"
+const envBuildIsolation = "dockyrd_BUILD_ISOLATION"
 
-// BuildIsolationEnabled is true on Linux unless DOCKYARD_BUILD_ISOLATION=0.
+// BuildIsolationEnabled is true on Linux unless dockyrd_BUILD_ISOLATION=0.
 func (c Config) BuildIsolationEnabled() bool {
 	if runtime.GOOS != "linux" {
 		return false

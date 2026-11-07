@@ -49,7 +49,7 @@ func checkBuildResilience(ctx context.Context, cfg config.Config) []Check {
 		out = append(out, Check{
 			Name:   "Build resource driver",
 			Status: StatusWarn,
-			Detail: "inactive (DOCKYARD_BUILD_ISOLATION=0 or no cgroup v2)",
+			Detail: "inactive (dockyrd_BUILD_ISOLATION=0 or no cgroup v2)",
 		})
 	} else {
 		freezePath := filepath.Join(resources.SliceBuildPath(), "cgroup.freeze")
@@ -61,7 +61,7 @@ func checkBuildResilience(ctx context.Context, cfg config.Config) []Check {
 				Name:    "Build slice freeze",
 				Status:  StatusFail,
 				Detail:  "frozen while no build should run",
-				FixHint: "Restart dockyard.service to thaw dy-build.slice",
+				FixHint: "Restart dockyrd.service to thaw dy-build.slice",
 			})
 		} else {
 			out = append(out, Check{Name: "Build slice freeze", Status: StatusOK, Detail: "thawed"})
@@ -73,7 +73,7 @@ func checkBuildResilience(ctx context.Context, cfg config.Config) []Check {
 			Name:    "BuildKit config",
 			Status:  StatusWarn,
 			Detail:  "not rendered yet",
-			FixHint: "Start dockyard serve (EnsureBuildkit renders buildkitd.toml)",
+			FixHint: "Start dockyrd serve (EnsureBuildkit renders buildkitd.toml)",
 		})
 	} else {
 		out = append(out, Check{Name: "BuildKit config", Status: StatusOK, Detail: toml})

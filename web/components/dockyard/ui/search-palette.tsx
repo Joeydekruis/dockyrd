@@ -4,7 +4,7 @@ import type { LucideIcon } from "lucide-react";
 import { FileText, Layers, Search } from "lucide-react";
 import Link from "next/link";
 import { forwardRef, type Ref, useMemo } from "react";
-import { Kbd } from "@/components/dockyard/ui/kbd";
+import { Kbd } from "@/components/dockyrd/ui/kbd";
 import { palettePages } from "@/lib/nav";
 
 export type SearchResultRow = {

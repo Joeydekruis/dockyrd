@@ -60,7 +60,7 @@ func buildPlainMessage(from, to, encodedSubject, messageID, body string) []byte 
 func messageID(host string) string {
 	host = strings.TrimSpace(host)
 	if host == "" {
-		host = "dockyard.local"
+		host = "dockyrd.local"
 	}
 	var rnd [12]byte
 	_, _ = rand.Read(rnd[:])

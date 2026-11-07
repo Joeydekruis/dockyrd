@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { TemplateCard } from "@/components/dockyard/ui/template-card";
+import { TemplateCard } from "@/components/dockyrd/ui/template-card";
 
-/** **Source:** `web/components/dockyard/ui/template-card.tsx` */
+/** **Source:** `web/components/dockyrd/ui/template-card.tsx` */
 const meta = {
   title: "Design/Components/Template card",
   component: TemplateCard,
@@ -15,7 +15,7 @@ const meta = {
   },
   args: {
     name: "Next.js",
-    description: "App Router with static export ready for Dockyard.",
+    description: "App Router with static export ready for dockyrd.",
     stack: "Node 20",
     recommended: true,
     href: "#",

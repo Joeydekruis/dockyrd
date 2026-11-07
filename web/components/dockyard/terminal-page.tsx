@@ -3,14 +3,15 @@
 import { FitAddon } from "@xterm/addon-fit";
 import { Terminal as XTerm } from "@xterm/xterm";
 import "@xterm/xterm/css/xterm.css";
+import { Settings } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
-import { DashboardShell } from "@/components/dockyard/dashboard-shell";
-import { TerminalSettingsDialog } from "@/components/dockyard/terminal-settings-dialog";
-import { Button } from "@/components/dockyard/ui/button";
-import { Chip } from "@/components/dockyard/ui/chip";
-import { EmptyState } from "@/components/dockyard/ui/empty-state";
-import { PageHeader } from "@/components/dockyard/ui/page-header";
+import { DashboardShell } from "@/components/dockyrd/dashboard-shell";
+import { TerminalSettingsDialog } from "@/components/dockyrd/terminal-settings-dialog";
+import { Button } from "@/components/dockyrd/ui/button";
+import { Chip } from "@/components/dockyrd/ui/chip";
+import { EmptyState } from "@/components/dockyrd/ui/empty-state";
+import { PageHeader } from "@/components/dockyrd/ui/page-header";
 import {
   createTerminalSession,
   getMe,
@@ -567,7 +568,7 @@ export function TerminalPage() {
                     aria-selected={selected}
                     onClick={() => selectTab(tab.id)}
                     className="inline-flex min-h-11 min-w-0 items-center gap-2 px-3 text-sm font-medium"
-                    style={{ color: "var(--text)" }}
+                    style={{ color: shellTheme.chrome.fg }}
                   >
                     <span
                       className="h-2 w-2 shrink-0 rounded-full"
@@ -602,7 +603,8 @@ export function TerminalPage() {
                       type="button"
                       aria-label={`Close ${tab.label}`}
                       onClick={() => closeTab(tab.id)}
-                      className="inline-flex h-11 w-8 items-center justify-center text-[var(--muted-foreground)]"
+                      className="inline-flex h-11 w-8 items-center justify-center"
+                      style={{ color: shellTheme.chrome.muted }}
                     >
                       ×
                     </button>
@@ -617,7 +619,8 @@ export function TerminalPage() {
                 aria-haspopup="menu"
                 aria-expanded={menuOpen}
                 onClick={() => setMenuOpen((v) => !v)}
-                className="flex h-11 w-11 items-center justify-center rounded-[10px] text-[var(--muted-foreground)]"
+                className="flex h-11 w-11 items-center justify-center rounded-[10px] text-lg"
+                style={{ color: shellTheme.chrome.muted }}
               >
                 +
               </button>
@@ -725,23 +728,38 @@ export function TerminalPage() {
             </div>
           </div>
           <div className="flex items-center gap-1">
-            <Button
+            <button
               type="button"
-              variant="outline"
               onClick={() => void copyPlainSelection()}
+              className="inline-flex min-h-11 items-center justify-center rounded-[10px] border px-3.5 font-mono text-[11px] font-medium uppercase tracking-wide hover:brightness-110"
+              style={{
+                color: shellTheme.chrome.fg,
+                borderColor: shellTheme.chrome.border,
+                background: "transparent",
+              }}
             >
               Copy plain
-            </Button>
-            <Button type="button" variant="outline" onClick={clear}>
+            </button>
+            <button
+              type="button"
+              onClick={clear}
+              className="inline-flex min-h-11 items-center justify-center rounded-[10px] border px-3.5 font-mono text-[11px] font-medium uppercase tracking-wide hover:brightness-110"
+              style={{
+                color: shellTheme.chrome.fg,
+                borderColor: shellTheme.chrome.border,
+                background: "transparent",
+              }}
+            >
               Clear
-            </Button>
+            </button>
             <button
               type="button"
               aria-label="Terminal settings"
               onClick={() => setSettingsOpen(true)}
-              className="flex h-11 w-11 items-center justify-center rounded-[10px] text-[var(--muted-foreground)]"
+              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-[10px] hover:brightness-110"
+              style={{ color: shellTheme.chrome.muted }}
             >
-              ⚙
+              <Settings aria-hidden size={22} strokeWidth={1.75} />
             </button>
           </div>
         </div>
@@ -753,7 +771,7 @@ export function TerminalPage() {
             style={{
               background: shellTheme.bar,
               borderColor: shellTheme.border,
-              color: "var(--muted-foreground)",
+              color: shellTheme.chrome.muted,
             }}
           >
             <strong style={{ color: warning.tone }}>{warning.lead}</strong>
@@ -789,10 +807,11 @@ export function TerminalPage() {
         </div>
 
         <div
-          className="flex flex-wrap items-center justify-between gap-2 border-t px-5 py-2.5 font-mono text-xs text-[var(--muted-foreground)]"
+          className="flex flex-wrap items-center justify-between gap-2 border-t px-5 py-2.5 font-mono text-xs"
           style={{
             background: shellTheme.bar,
             borderColor: shellTheme.border,
+            color: shellTheme.chrome.muted,
           }}
         >
           <span>

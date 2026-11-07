@@ -66,9 +66,9 @@ func (d apiDeps) handleUpdatesApply(w http.ResponseWriter, r *http.Request) {
 	defer cancel()
 
 	opts := updater.Options{
-		Repo:   os.Getenv("DOCKYARD_GITHUB_REPO"),
+		Repo:   os.Getenv("dockyrd_GITHUB_REPO"),
 		Quiet:  true,
-		DryRun: os.Getenv("DOCKYARD_UPDATE_DRY_RUN") == "1",
+		DryRun: os.Getenv("dockyrd_UPDATE_DRY_RUN") == "1",
 	}
 	if err := updater.DefaultReleaseCache.RefreshForce(ctx, BuildVersion(), opts); err != nil {
 		// Apply still re-checks; continue with best-effort cache refresh.
@@ -82,7 +82,7 @@ func (d apiDeps) handleUpdatesApply(w http.ResponseWriter, r *http.Request) {
 
 	_ = d.audit.Record(ctx, audit.Entry{
 		UserID:     user.ID,
-		Action:     "dockyard.update.apply",
+		Action:     "dockyrd.update.apply",
 		TargetKind: "server",
 		Meta:       map[string]any{"from": BuildVersion(), "to": result.InstalledTag},
 		IP:         clientIP(r),
@@ -94,7 +94,7 @@ func (d apiDeps) handleUpdatesApply(w http.ResponseWriter, r *http.Request) {
 		msg = "Dry run: update would be installed."
 	} else {
 		restarting = true
-		msg = "Update installed. Restarting Dockyard…"
+		msg = "Update installed. Restarting dockyrd…"
 		updater.ScheduleServiceRestart()
 	}
 
@@ -117,7 +117,7 @@ func (d apiDeps) buildUpdatesStatus(ctx context.Context, manualRefresh bool) upd
 	ctx, cancel := context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
-	opts := updater.Options{Repo: os.Getenv("DOCKYARD_GITHUB_REPO")}
+	opts := updater.Options{Repo: os.Getenv("dockyrd_GITHUB_REPO")}
 	var snap updater.ReleaseSnapshot
 	if manualRefresh {
 		snap = updater.DefaultReleaseCache.RefreshManual(ctx, BuildVersion(), opts)

@@ -2,16 +2,16 @@
 
 import { Plus } from "lucide-react";
 import { type CSSProperties, useEffect, useState } from "react";
-import { AddCustomDomainModal } from "@/components/dockyard/add-custom-domain-modal";
-import { AppsDomainNudge } from "@/components/dockyard/apps-domain-nudge";
-import { DomainDnsRecordsModal } from "@/components/dockyard/domain-dns-records-modal";
-import { Button } from "@/components/dockyard/ui/button";
-import { ConfirmDialog } from "@/components/dockyard/ui/confirm-dialog";
+import { AddCustomDomainModal } from "@/components/dockyrd/add-custom-domain-modal";
+import { AppsDomainNudge } from "@/components/dockyrd/apps-domain-nudge";
+import { DomainDnsRecordsModal } from "@/components/dockyrd/domain-dns-records-modal";
+import { Button } from "@/components/dockyrd/ui/button";
+import { ConfirmDialog } from "@/components/dockyrd/ui/confirm-dialog";
 import {
   PopoverMenu,
   type PopoverMenuItem,
-} from "@/components/dockyard/ui/popover-menu";
-import { StatusBadge } from "@/components/dockyard/ui/status-badge";
+} from "@/components/dockyrd/ui/popover-menu";
+import { StatusBadge } from "@/components/dockyrd/ui/status-badge";
 import {
   createServiceDomain,
   deleteServiceDomain,
@@ -351,7 +351,7 @@ export function ServiceDomainsTab({
       ? composeTarget
         ? `HTTPS routes to compose service “${composeTarget.service}” on port ${composeTarget.port}.`
         : "Set target service and port before adding domains."
-      : "Dockyard-generated hostname for this service. Uses your apps domain when verified, otherwise sslip.io.";
+      : "dockyrd-generated hostname for this service. Uses your apps domain when verified, otherwise sslip.io.";
 
   return (
     <div className="space-y-6">

@@ -6,7 +6,7 @@ Backlog and sprints live on **GitHub** ([workflow](github-workflow.md)). Use **m
 |--|--|--|--|
 | **1** | `M0 · Sprint 1 — Monorepo & CI` | Legal, Go skeleton, Makefile, CI, Next static export + embed | `make build` on CI; binary serves embedded placeholder UI |
 | **2** | `M0 · Sprint 2 — SQLite & auth bootstrap` | goose + sqlc, config paths, session/auth stubs | `go test ./internal/db/...`; auth paths stubbed |
-| **3** | `M0 · Sprint 3 — Install & setup-token` | `install.sh` skeleton, systemd, `dockyard init`, setup-token | Local `init` + token in logs |
+| **3** | `M0 · Sprint 3 — Install & setup-token` | `install.sh` skeleton, systemd, `dockyrd init`, setup-token | Local `init` + token in logs |
 | **4** | `M0 · Sprint 4 — Dashboard shell` | AppShell, sidebar, login/setup, ⌘K skeleton, empty states | Login to empty dashboard (M0 done) |
 
 Later sprints follow `roadmap.md` milestones **M1–M5**.
@@ -83,7 +83,7 @@ Milestone: **M5 · Sprint 1 — Doctor & admin CLI** — #35–#38
 
 | Issue | Title |
 |--|--|
-| #35 | `dockyard doctor` |
+| #35 | `dockyrd doctor` |
 | #36 | Admin reset-password / disable-2fa |
 | #37 | CI workflow (`ci.yml`) |
 | #38 | Self-update + rollback CLI |
@@ -131,7 +131,7 @@ Issue numbers may differ after creation — update this table and rename `docs/p
 |--|--|--|
 | #7 | [foundation] install.sh skeleton and paths | `docs/project/issues/7/` |
 | #8 | [foundation] systemd unit and service install | `docs/project/issues/8/` |
-| #9 | [foundation] dockyard init and setup-token | `docs/project/issues/9/` |
+| #9 | [foundation] dockyrd init and setup-token | `docs/project/issues/9/` |
 
 ## Sprint 4 issues (GitHub)
 

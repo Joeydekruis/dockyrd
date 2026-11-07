@@ -52,7 +52,7 @@ Only build runner + watchdog call `SetBuildLimits` / `FreezeBuild`; reconciler t
 
 - Unit: budget table, PSI parse, watchdog FSM with fake `Resources`, workflow YAML golden files.
 - Integration: 1 GB VM scenarios in briefing (memhog, cpuhog, spiky-app, etc.) under `e2e/fixtures/` (#57).
-- `dockyard doctor`: cgroup v2, slices, freeze=0, BuildKit config, OOM outside build slice.
+- `dockyrd doctor`: cgroup v2, slices, freeze=0, BuildKit config, OOM outside build slice.
 
 ## Related
 

@@ -8,14 +8,14 @@ import * as IntroductionStories from "./Introduction.stories";
 <Subtitle>Component catalog (not full pages)</Subtitle>
 
 Stories mirror **`docs/design-index.json`** tokens and briefing §9.3 primitives.
-Each story imports **`web/components/dockyard/ui/*`** (or composites that compose `ui/`) — the same modules the panel uses. See **`.cursor/rules/storybook-ui-source.mdc`**. Run with **`pnpm --dir web storybook`** on port 6006.
+Each story imports **`web/components/dockyrd/ui/*`** (or composites that compose `ui/`) — the same modules the panel uses. See **`.cursor/rules/storybook-ui-source.mdc`**. Run with **`pnpm --dir web storybook`** on port 6006.
 
 Design boards live in **`docs/design/component-boards/*.dc.html`** (see **`docs/design/components-catalog.json`**). Storybook has two layers:
 
 | Layer | Sidebar | Use |
 | --- | --- | --- |
 | **Board overview** | `Design/1 · …` through `Design/4 · …` | Section snapshots vs the HTML artboards |
-| **Component reference** | **`Design/Components/*`** | One file per primitive — **Playground** + Controls match `web/components/dockyard/ui/*` props (start here to align UI with design). The full primitive list lives under **`Design/Components/`** (alphabetically in the sidebar). |
+| **Component reference** | **`Design/Components/*`** | One file per primitive — **Playground** + Controls match `web/components/dockyrd/ui/*` props (start here to align UI with design). The full primitive list lives under **`Design/Components/`** (alphabetically in the sidebar). |
 
 Example: **`Design/Components/Button`** → `Playground` for variant / icons / disabled; **`All variants`** for the full matrix.
 
@@ -29,4 +29,4 @@ Example: **`Design/Components/Button`** → `Playground` for variant / icons / d
 | **4 · Forms & overlays** — selection, text entry, menus, upload, messages, progress, overlays | `Design/4 · Forms & overlays` |
 | **Component APIs** (Button, Split button, …) | **`Design/Components/*`** |
 
-**Single source:** primitives in `web/components/dockyard/ui/`; composites in `web/components/dockyard/` compose `ui/` only. Rule: `.cursor/rules/storybook-ui-source.mdc`.
+**Single source:** primitives in `web/components/dockyrd/ui/`; composites in `web/components/dockyrd/` compose `ui/` only. Rule: `.cursor/rules/storybook-ui-source.mdc`.

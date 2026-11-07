@@ -183,8 +183,8 @@ func (d *Dispatcher) insertForUser(ctx context.Context, p insertParams) error {
 		if p.baseURL != "" {
 			link = p.baseURL + openPath
 		}
-		subject := "Dockyard: " + p.title
-		text := fmt.Sprintf("%s\n\n%s\n\n%s\n\nOpen in Dockyard (marks as read):\n%s\n",
+		subject := "dockyrd: " + p.title
+		text := fmt.Sprintf("%s\n\n%s\n\n%s\n\nOpen in dockyrd (marks as read):\n%s\n",
 			p.title, p.body, p.sourceLabel, link)
 		if err := mail.SendPlain(p.smtpCfg, p.userEmail, subject, text); err != nil {
 			if d.Log != nil {

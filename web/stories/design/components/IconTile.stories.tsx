@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Box, Settings } from "lucide-react";
-import { IconTile } from "@/components/dockyard/ui/icon-tile";
+import { IconTile } from "@/components/dockyrd/ui/icon-tile";
 
 const iconArgType = {
   control: "select" as const,

@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-11-07
+
+_Finished: 2026-11-07_
+
+### Fixed
+
+- **Terminal / dark themes** — Copy plain, Clear, tabs, and status bar use per-theme `chrome` colors (no dashboard `--text` on dark toolbar); settings control uses Lucide icon at 22px
+
 ## [0.7.0] - 2026-11-07
 
 _Finished: 2026-11-07_
@@ -13,7 +21,7 @@ _Finished: 2026-11-07_
 ### Added
 
 - **M7 Security (P0–P1d)** — epic [#74](https://github.com/Joeydekruis/dockyrd/issues/74): container hardening (`no-new-privileges`, `cap_drop`, pids/CPU limits), Caddy baseline encode/headers/timeouts, Valkey cache/queue presets (`docs/project/SECURITY_BRIEFING.md`)
-- **#75 / hostops** — typed host actions, SQLite journal, lockout timers, confirm/revert API, `dockyard host revert` — https://github.com/Joeydekruis/dockyrd/issues/75
+- **#75 / hostops** — typed host actions, SQLite journal, lockout timers, confirm/revert API, `dockyrd host revert` — https://github.com/Joeydekruis/dockyrd/issues/75
 - **#76 / Server Security** — baseline checks, firewall/SSH/unattended add-ons, Overview + Add-ons UI — https://github.com/Joeydekruis/dockyrd/issues/76
 - **#77 / policy + site Security** — `security_policy`, `service_security`, instance Policy UI, per-service Security tab (CSP, access, resources) — https://github.com/Joeydekruis/dockyrd/issues/77
 - **#78 / CDN trust** — Cloudflare range fetch on policy save, `trusted_proxies` + `client_ip_headers` in Caddy render — https://github.com/Joeydekruis/dockyrd/issues/78
@@ -175,7 +183,7 @@ _Finished: 2026-11-05_
 ### Added
 
 - **#56** — Deployment build metrics on `GET …/deployments` (peak memory, budget, wait/freeze, failure kind); dashboard **Waiting** badge; deployment resource strip; Analytics **Build capacity** card; service **Build location** settings; **Server settings → Builders** (remote BuildKit CRUD/test) — https://github.com/Joeydekruis/dockyrd/issues/56
-- **#57** — Remote BuildKit API (`internal/build/remote.go`, builders table), `dockyard doctor` build-resilience checks, peak sampler + metrics on successful builds, e2e fixtures `memhog` / `cpuhog` / `spiky-app` — https://github.com/Joeydekruis/dockyrd/issues/57
+- **#57** — Remote BuildKit API (`internal/build/remote.go`, builders table), `dockyrd doctor` build-resilience checks, peak sampler + metrics on successful builds, e2e fixtures `memhog` / `cpuhog` / `spiky-app` — https://github.com/Joeydekruis/dockyrd/issues/57
 
 ### Changed
 
@@ -187,7 +195,7 @@ _Finished: 2026-11-05_
 
 ### Added
 
-- **#52** — Static site builds via BuildKit (`Dockerfile.dockyard` + `buildx --output type=local`) under `dy-buildkit` limits
+- **#52** — Static site builds via BuildKit (`Dockerfile.dockyrd` + `buildx --output type=local`) under `dy-buildkit` limits
 - **#53** — PSI build watchdog (freeze/thaw build slice) during app and static builds
 - **#54** — `MergeBuildArgs` / `InjectBuildEnv` wired into Railpack and Dockerfile deploy builds
 - **#55** — GitHub Actions workflow generator, deploy hook token + `POST /api/v1/hooks/deploy/{service_id}`, push webhook skips server build when `buildLocation=github_actions` — https://github.com/Joeydekruis/dockyrd/issues/55
@@ -206,7 +214,7 @@ _Finished: 2026-11-05_
 
 ### Changed
 
-- **`packaging/dockyard.service`** — `dy-system.slice`, `GOMEMLIMIT`, OOM score — #50
+- **`packaging/dockyrd.service`** — `dy-system.slice`, `GOMEMLIMIT`, OOM score — #50
 
 ## [0.0.45] - 2026-11-04
 
@@ -214,7 +222,7 @@ _Finished: 2026-11-04_
 
 ### Added
 
-- **Dockyrd logo dobber** — inline SVG wordmark with hover wave + cube tilt on sidebar and auth surfaces (`web/components/dockyard/dockyrd-logo.tsx`, `globals.css`).
+- **Dockyrd logo dobber** — inline SVG wordmark with hover wave + cube tilt on sidebar and auth surfaces (`web/components/dockyrd/dockyrd-logo.tsx`, `globals.css`).
 - **Branded page loader** — five-cube staggered bob animation for dashboard shell and page fetch states (`DockyrdPageLoading`, `dockyrd-cube-icon.tsx`).
 
 ### Changed
@@ -228,8 +236,8 @@ _Finished: 2026-11-04_
 ### Added
 
 - **#48 Database platform** — scheduled and manual Postgres/Redis backups (local + S3), remote retention prune, restore succeeded Postgres runs from local or S3 (`internal/backup/`, `POST …/backup-runs/{runId}/restore`).
-- **Query Studio** — read-only SQL proxy with audit log and schema sidebar (`POST …/query`, `GET …/schema`, `web/components/dockyard/database-query-panel.tsx`).
-- **Database connection UX** — internal/external connection cards and Postgres public access toggle (`PATCH …/public-access`, `web/components/dockyard/database-connection-cards.tsx`).
+- **Query Studio** — read-only SQL proxy with audit log and schema sidebar (`POST …/query`, `GET …/schema`, `web/components/dockyrd/database-query-panel.tsx`).
+- **Database connection UX** — internal/external connection cards and Postgres public access toggle (`PATCH …/public-access`, `web/components/dockyrd/database-connection-cards.tsx`).
 - **Database lifecycle** — delete/restart managed databases from detail UI (`DELETE`/`POST …/restart`, settings danger zone).
 
 ### Changed
@@ -242,9 +250,9 @@ _Finished: 2026-11-04_
 
 ### Added
 
-- **Static site access logs** — `GET /api/v1/services/{id}/logs?stream=access` tails Caddy JSON access logs filtered by service domains; Logs tab on static sites shows HTTP access lines with refresh (`internal/accesslog`, `web/components/dockyard/service-traffic-panel.tsx`).
+- **Static site access logs** — `GET /api/v1/services/{id}/logs?stream=access` tails Caddy JSON access logs filtered by service domains; Logs tab on static sites shows HTTP access lines with refresh (`internal/accesslog`, `web/components/dockyrd/service-traffic-panel.tsx`).
 - **Static site traffic analytics** — `GET /api/v1/services/{id}/analytics?range=` aggregates requests, bandwidth, status codes, and latency from access logs; Analytics tab charts on static site detail (`internal/server/api_logs.go`).
-- **Domains UX (Sevalla-style)** — platform/custom domain tables, Verification status, Show DNS records modal with copyable A record and server `public_ipv4`, add-domain modal, ⋮ menu (make primary, delete), `PATCH /api/v1/domains/{id}` for primary (`web/components/dockyard/service-domains-tab.tsx`, `internal/server/api_domains.go`).
+- **Domains UX (Sevalla-style)** — platform/custom domain tables, Verification status, Show DNS records modal with copyable A record and server `public_ipv4`, add-domain modal, ⋮ menu (make primary, delete), `PATCH /api/v1/domains/{id}` for primary (`web/components/dockyrd/service-domains-tab.tsx`, `internal/server/api_domains.go`).
 - **Server backup target settings** — S3-compatible backup target API and Instance → Backups UI (foundation for database backups).
 
 ### Changed
@@ -291,7 +299,7 @@ _Finished: 2026-11-04_
 
 ### Added
 
-- **Static site build settings (Sevalla-style)** — section headings with icons, read-only meta grid, **Update** actions; build modal with **Build site before publishing**, root/publish dirs, Node LTS, **index file** / **error file** (`web/components/dockyard/static-site-settings-tab.tsx`, `settings-detail-block.tsx`)
+- **Static site build settings (Sevalla-style)** — section headings with icons, read-only meta grid, **Update** actions; build modal with **Build site before publishing**, root/publish dirs, Node LTS, **index file** / **error file** (`web/components/dockyrd/static-site-settings-tab.tsx`, `settings-detail-block.tsx`)
 - **`buildEnabled` config** — skip Docker build when off; empty install/build commands persist without defaulting to `npm ci` (`internal/staticsite/buildcmd.go`, `ResolveBuildCommand`)
 - **Static site index in Caddy** — `indexFile` → `file_server.index_names` via service config on live static routes (`proxy_routes.sql`, `internal/proxy/sync.go`)
 - **Resource provisioning helpers** — shared create/reveal flows for databases, buckets, and apps (`web/lib/resource-provisioning.ts`)
@@ -312,9 +320,9 @@ _Finished: 2026-11-04_
 
 ### Added
 
-- **Static site settings** — read-only Settings tab with **Edit** actions and modals (display name, source, build, auto-deploy, SPA fallback); `SettingsDetailBlock` UI primitive (`web/components/dockyard/static-site-settings-tab.tsx`)
+- **Static site settings** — read-only Settings tab with **Edit** actions and modals (display name, source, build, auto-deploy, SPA fallback); `SettingsDetailBlock` UI primitive (`web/components/dockyrd/static-site-settings-tab.tsx`)
 - **Static site PATCH API** — `PATCH /api/v1/services/{id}` accepts `name` and merged `config` for `static_site` services (`UpdateServiceName`, `internal/server/api_services.go`)
-- **In-app notifications** — inbox table, dispatch on auth events, `GET|PATCH /api/v1/inbox`, header bell, `/notifications` page (`internal/inbox/`, `web/components/dockyard/notifications-*`)
+- **In-app notifications** — inbox table, dispatch on auth events, `GET|PATCH /api/v1/inbox`, header bell, `/notifications` page (`internal/inbox/`, `web/components/dockyrd/notifications-*`)
 - **Server email settings** — `/settings/server/email` SMTP form and outbound **email log** (`00003_email_log` migration, `api_email_log.go`)
 
 ### Changed
@@ -368,7 +376,7 @@ _Finished: 2026-11-04_
 - **Account settings** — separate sidenav and routes: Profile (`/settings/account/profile`), Password & 2FA, Notifications, Security (sessions); no server tabs in account area
 - **Server settings** — separate sidenav: General, Team, Git providers, Updates under `/settings/server/*`
 - **Account API** — `PATCH /api/v1/auth/account`, `POST /api/v1/auth/password/change`, `GET|PATCH /api/v1/auth/notifications` (Go + `web/lib/api.ts`)
-- **SearchSelectField** — searchable select primitive + Storybook (`web/components/dockyard/ui/search-select*.tsx`)
+- **SearchSelectField** — searchable select primitive + Storybook (`web/components/dockyrd/ui/search-select*.tsx`)
 - **Public site** — `site/source.html`, `scripts/build-public-site.mjs`, `docs/user/README.md`; `make site` output
 
 ### Changed
@@ -418,7 +426,7 @@ _Finished: 2026-11-04_
 
 - **Self-update UX** — full-screen backdrop + progress overlay on Settings → Updates apply; health polling until panel returns (`update-applying-overlay.tsx`, `wait-for-panel-health.ts`)
 - **GitHub release cache** — background check every 5 minutes; manual **Check again** capped at 40/hour without token; `GET /api/v1/updates?refresh=1`; server banner reads cache only (`internal/updater/release_cache.go`)
-- **`DOCKYARD_GITHUB_TOKEN`** — authenticated GitHub API for update checks and `install.sh` (`internal/updater/github_http.go`, `packaging/dockyard.env.example`)
+- **`dockyrd_GITHUB_TOKEN`** — authenticated GitHub API for update checks and `install.sh` (`internal/updater/github_http.go`, `packaging/dockyrd.env.example`)
 - **Resource catalogs** — create flows (applications, databases, buckets, static sites) with wizard/provisioning modals; hero promo cards and list add links
 - **Web icons** — favicon, PWA manifest, apple-touch-icon under `web/public/`
 - **Host metrics** — normalized CPU fraction helper for Linux analytics (`internal/metrics/cpu_fraction.go`)
@@ -436,7 +444,7 @@ _Finished: 2026-11-04_
 ### Added
 
 - **Settings → Integrations (GitHub)** — connect wizard (`ConnectGitHubWizard`), disconnect with confirm, enriched status (public URL, account hints); **`DELETE /api/v1/github/connection`**; manifest POST accepts `app_name` / `public_url` (`internal/github/status_enrich.go`, `urls.go`)
-- **Search palette** — grouped results, keyboard navigation, and Storybook coverage updates (`web/components/dockyard/ui/search-palette.tsx`)
+- **Search palette** — grouped results, keyboard navigation, and Storybook coverage updates (`web/components/dockyrd/ui/search-palette.tsx`)
 - **`SnackbarViewport`** — fixed-bottom save/test confirmations on General settings; Storybook **Viewport** story
 - **Auth** — server reset hint when SMTP is off (`auth-server-reset-hint.tsx`); **`DockyrdMark`** logo mark; **`openExternalUrl`** helper
 
@@ -455,7 +463,7 @@ _Finished: 2026-11-04_
 
 - **Resource catalog pages** — Applications, Databases, Static sites, and Object storage overviews use design **`PageHeader`**, summary **`StatCard`** tiles, filterable **`ResourceListSection`**, and **`ResourceRow`** lists (`web/lib/service-display.ts`)
 - **Settings → Integrations** — GitHub App install/callback and manifest setup URL point to `/settings/integrations`; search palette entry; shared **`SettingsPageBody`** wrapper for settings screens
-- **User menu** — header account menu component + Storybook (`web/components/dockyard/user-menu.tsx`)
+- **User menu** — header account menu component + Storybook (`web/components/dockyrd/user-menu.tsx`)
 - **Self-update UX** — **`UpdateApplyingOverlay`** and panel health wait helper during apply/restart
 
 ### Changed
@@ -471,7 +479,7 @@ _Finished: 2026-11-04_
 ### Added
 
 - **Design component catalog** — `docs/design/component-boards/` HTML exports + `components-catalog.json`; **Storybook** `Design/Components/*` playgrounds (63 primitives) and board stories (`FoundationsAtoms`, `Molecules`, `Organisms`, `FormsOverlays`)
-- **UI primitives (`web/components/dockyard/ui/`)** — custom **Select** / **SelectField**, **SplitButton** with deploy menu, navy **Tooltip** (placements + inline icon chip), **TextareaField**, menus (`.dockyard-menu-panel`), and dozens of molecules/organisms aligned to design boards
+- **UI primitives (`web/components/dockyrd/ui/`)** — custom **Select** / **SelectField**, **SplitButton** with deploy menu, navy **Tooltip** (placements + inline icon chip), **TextareaField**, menus (`.dockyrd-menu-panel`), and dozens of molecules/organisms aligned to design boards
 
 ### Changed
 
@@ -490,7 +498,7 @@ _Finished: 2026-11-04_
 ### Added
 
 - **Dashboard UI shell** — TopBar announcement, fixed sidebar/header (232px), settings sidebar variant with icons, scroll-hide top bar, wider white search trigger, command palette dismiss on backdrop click
-- **Design system (`web/components/dockyard/ui/`)** — shared Button, status badges, stat tiles, resource rows, modals, snackbar, search palette, auth fields, empty state; **Storybook 10** catalog (`pnpm --dir web storybook`) with single-source rule `.cursor/rules/storybook-ui-source.mdc`
+- **Design system (`web/components/dockyrd/ui/`)** — shared Button, status badges, stat tiles, resource rows, modals, snackbar, search palette, auth fields, empty state; **Storybook 10** catalog (`pnpm --dir web storybook`) with single-source rule `.cursor/rules/storybook-ui-source.mdc`
 - **Self-update API** — `GET /api/v1/updates`, `POST /api/v1/updates/apply`; Settings → Updates page and update-available banner in dashboard
 - **Auth** — `GET /api/v1/auth/me` returns `mfa_required` for pending 2FA sessions; `probeAuthState()` in web client
 
@@ -518,7 +526,7 @@ _Finished: 2026-11-04_
 ### Fixed
 
 - **`dy-proxy`** — host networking so 80/443 bind on the VPS; recreate outdated bridge containers; pull image before start; panel upstream `127.0.0.1:8000`
-- **`dockyard doctor`** — checks `dy-proxy` container and localhost 80/443 listeners
+- **`dockyrd doctor`** — checks `dy-proxy` container and localhost 80/443 listeners
 
 ## [0.0.25] - 2026-11-04
 
@@ -540,8 +548,8 @@ _Finished: 2026-11-03_
 
 ### Changed
 
-- **`scripts/install.sh`** — auto-install Docker Engine on Debian/Ubuntu; fetch `dockyard.service` when run via `curl | sh`; `DOCKYARD_SKIP_DOCKER_INSTALL` / `--no-docker-install`
-- **README** and **`docs/user/install.md`** — interim install URL (raw GitHub) until `get.dockyard.dev` is live
+- **`scripts/install.sh`** — auto-install Docker Engine on Debian/Ubuntu; fetch `dockyrd.service` when run via `curl | sh`; `dockyrd_SKIP_DOCKER_INSTALL` / `--no-docker-install`
+- **README** and **`docs/user/install.md`** — interim install URL (raw GitHub) until `get.dockyrd.dev` is live
 
 ## [0.0.23] - 2026-11-03
 
@@ -552,11 +560,11 @@ _Finished: 2026-11-03_
 - **Production validation** — `docs/user/production-validation.md`, `scripts/verify-production-local.sh`, `scripts/measure-rss.sh`, `e2e/scripts/load-health.sh`, `e2e/fixtures/hello-static`
 - **Install matrix CI** — `.github/workflows/install-matrix.yml` (ubuntu amd64 + arm64)
 - **Update modal** — dashboard banner + release notes from `GET /api/v1/server`
-- **`packaging/dockyard.env.example`** — `DOCKYARD_REQUIRE_OWNER_2FA=1`
+- **`packaging/dockyrd.env.example`** — `dockyrd_REQUIRE_OWNER_2FA=1`
 
 ### Changed
 
-- **Owner 2FA mandate** — when `DOCKYARD_REQUIRE_OWNER_2FA=1` (recommended production); instance `require_2fa_all` for all users
+- **Owner 2FA mandate** — when `dockyrd_REQUIRE_OWNER_2FA=1` (recommended production); instance `require_2fa_all` for all users
 - **Databases UI** — service detail panel + reference var hints
 - **Post-M5 backlog** — `docs/project/post-m5-backlog.md`
 
@@ -613,13 +621,13 @@ _Finished: 2026-11-03_
 
 ### Added
 
-- **#43 / Install preflight** — arch/curl checks, `DOCKYARD_SKIP_*`, `verify-install.sh` — https://github.com/Joeydekruis/dockyrd/issues/43
+- **#43 / Install preflight** — arch/curl checks, `dockyrd_SKIP_*`, `verify-install.sh` — https://github.com/Joeydekruis/dockyrd/issues/43
 - **#44 / User docs** — `docs/user/nextjs.md`, `domains-dns.md` — https://github.com/Joeydekruis/dockyrd/issues/44
 - **E2E setup flow** — Playwright API setup + login; `uptime_sec` on `GET /api/v1/server`
 
 ### Changed
 
-- **`install.sh`** — configurable `DOCKYARD_BIN_DEST`; checksum verify fix
+- **`install.sh`** — configurable `dockyrd_BIN_DEST`; checksum verify fix
 
 ## [0.0.17] - 2026-11-03
 
@@ -629,7 +637,7 @@ _Finished: 2026-11-03_
 
 - **#41 / Playwright** — `e2e/` UI tests, `make e2e-ui`, CI Playwright job — https://github.com/Joeydekruis/dockyrd/issues/41
 - **#42 / Server info API** — `GET /api/v1/server`, instance settings version block — https://github.com/Joeydekruis/dockyrd/issues/42
-- **`packaging/dockyard-rollback.service`** — oneshot rollback unit stub
+- **`packaging/dockyrd-rollback.service`** — oneshot rollback unit stub
 
 ### Fixed
 
@@ -654,7 +662,7 @@ _Finished: 2026-11-03_
 
 ### Added
 
-- **#35 / `dockyard doctor`** — host and control-plane diagnostics — https://github.com/Joeydekruis/dockyrd/issues/35
+- **#35 / `dockyrd doctor`** — host and control-plane diagnostics — https://github.com/Joeydekruis/dockyrd/issues/35
 - **#36 / Admin CLI** — `admin reset-password`, `admin disable-2fa` — https://github.com/Joeydekruis/dockyrd/issues/36
 - **#37 / CI** — GitHub Actions `ci.yml`, `./scripts/verify-m5-smoke.sh` — https://github.com/Joeydekruis/dockyrd/issues/37
 - **#38 / Self-update** — `update --check`, apply with checksum + DB backup, `--rollback` on Linux — https://github.com/Joeydekruis/dockyrd/issues/38
@@ -770,7 +778,7 @@ _Finished: 2026-11-03_
 ### Added
 
 - **#13 / projects API** — local server bootstrap on setup, `GET|POST|PATCH|DELETE /api/v1/projects`, default `production` environment — https://github.com/Joeydekruis/dockyrd/issues/13
-- **#14 / Docker layer** — `internal/docker` moby client, Dockyard labels, `dy-edge` / project network ensure, `ListManaged` — https://github.com/Joeydekruis/dockyrd/issues/14
+- **#14 / Docker layer** — `internal/docker` moby client, dockyrd labels, `dy-edge` / project network ensure, `ListManaged` — https://github.com/Joeydekruis/dockyrd/issues/14
 - **#15 / proxy + domains** — Caddy JSON render/load, sslip.io platform hostnames, services + domains REST — https://github.com/Joeydekruis/dockyrd/issues/15
 
 ## [0.0.4] - 2026-11-03
@@ -790,8 +798,8 @@ _Finished: 2026-11-03_
 ### Added
 
 - **#7 / install skeleton** — `scripts/install.sh`, `scripts/uninstall.sh`, path layout — https://github.com/Joeydekruis/dockyrd/issues/7
-- **#8 / systemd** — `packaging/dockyard.service`, install enables unit — https://github.com/Joeydekruis/dockyrd/issues/8
-- **#9 / init + setup-token** — master key, `dockyard init`, `dockyard setup-token`, setup status from DB — https://github.com/Joeydekruis/dockyrd/issues/9
+- **#8 / systemd** — `packaging/dockyrd.service`, install enables unit — https://github.com/Joeydekruis/dockyrd/issues/8
+- **#9 / init + setup-token** — master key, `dockyrd init`, `dockyrd setup-token`, setup status from DB — https://github.com/Joeydekruis/dockyrd/issues/9
 
 ## [0.0.2] - 2026-11-03
 
@@ -800,7 +808,7 @@ _Finished: 2026-11-03_
 ### Added
 
 - **#4 / SQLite** — goose `00001_init` migration, sqlc settings queries, `internal/db.Open` — https://github.com/Joeydekruis/dockyrd/issues/4
-- **#5 / config** — `DOCKYARD_DATA_DIR`, `DOCKYARD_LISTEN`, database path helper — https://github.com/Joeydekruis/dockyrd/issues/5
+- **#5 / config** — `dockyrd_DATA_DIR`, `dockyrd_LISTEN`, database path helper — https://github.com/Joeydekruis/dockyrd/issues/5
 - **#6 / auth stubs** — session types, `RequireAuth` pass-through, `GET /api/v1/setup/status` — https://github.com/Joeydekruis/dockyrd/issues/6
 
 ## [0.0.1] - 2026-11-03
@@ -810,5 +818,5 @@ _Finished: 2026-11-03_
 ### Added
 
 - **#1 / legal + CI** — Apache-2.0 baseline, README, GitHub Actions CI, GitHub-only workflow docs — https://github.com/Joeydekruis/dockyrd/issues/1
-- **#2 / Go skeleton** — `dockyard serve|version|init`, health API — https://github.com/Joeydekruis/dockyrd/issues/2
+- **#2 / Go skeleton** — `dockyrd serve|version|init`, health API — https://github.com/Joeydekruis/dockyrd/issues/2
 - **#3 / web embed** — Next.js static export scaffold embedded in binary — https://github.com/Joeydekruis/dockyrd/issues/3

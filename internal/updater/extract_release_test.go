@@ -12,9 +12,9 @@ import (
 func TestExtractReleaseBinaries(t *testing.T) {
 	t.Parallel()
 	dir := t.TempDir()
-	archive := filepath.Join(dir, "dockyard_0.0.0_linux_amd64.tar.gz")
+	archive := filepath.Join(dir, "dockyrd_0.0.0_linux_amd64.tar.gz")
 	if err := writeTestArchive(archive, map[string]string{
-		"dockyard": "#!/bin/sh\necho panel\n",
+		"dockyrd": "#!/bin/sh\necho panel\n",
 		"dy":       "#!/bin/sh\necho cli\n",
 	}); err != nil {
 		t.Fatal(err)
@@ -23,12 +23,12 @@ func TestExtractReleaseBinaries(t *testing.T) {
 	if err := os.MkdirAll(outDir, 0o755); err != nil {
 		t.Fatal(err)
 	}
-	dockyard, dy, err := extractReleaseBinaries(archive, outDir)
+	dockyrd, dy, err := extractReleaseBinaries(archive, outDir)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if dockyard == "" || dy == "" {
-		t.Fatalf("expected both binaries, got dockyard=%q dy=%q", dockyard, dy)
+	if dockyrd == "" || dy == "" {
+		t.Fatalf("expected both binaries, got dockyrd=%q dy=%q", dockyrd, dy)
 	}
 	if _, err := os.Stat(dy); err != nil {
 		t.Fatal(err)

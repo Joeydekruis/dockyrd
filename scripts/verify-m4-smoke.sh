@@ -13,7 +13,7 @@ cat <<'MANUAL'
 
 == Manual M4 slice (local serve) ==
 
-1. make build && ./bin/dockyard serve
+1. make build && ./bin/dockyrd serve
 2. Analytics → range pills show CPU/memory/disk/load sparklines after ~1 min
 3. Home → project/service counts; Applications lists app services
 4. Trigger a deploy → Important events shows deploy row → Dismiss acks it; warning/error rows link via Open service

@@ -2,7 +2,7 @@ web/out/
 web/node_modules/
 web/.next/
 bin/
-/dockyard
+/dockyrd
 *.test
 web/tsconfig.tsbuildinfo
 

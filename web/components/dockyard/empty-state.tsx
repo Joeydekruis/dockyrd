@@ -1,1 +1,1 @@
-export { EmptyState } from "@/components/dockyard/ui/empty-state";
+export { EmptyState } from "@/components/dockyrd/ui/empty-state";

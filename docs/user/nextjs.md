@@ -1,10 +1,10 @@
-# Next.js on Dockyard
+# Next.js on dockyrd
 
-Dockyard deploys Node apps with **Railpack** (Git push) or a **Dockerfile**. Next.js App Router projects work well with Railpack defaults.
+dockyrd deploys Node apps with **Railpack** (Git push) or a **Dockerfile**. Next.js App Router projects work well with Railpack defaults.
 
 ## Recommended stack
 
-- Managed **Postgres** in Dockyard (see [first app](./first-app.md))
+- Managed **Postgres** in dockyrd (see [first app](./first-app.md))
 - Environment variables for `DATABASE_URL` at **runtime**
 - GitHub App connected under **Instance settings**
 
@@ -57,7 +57,7 @@ The **Dockyrd dashboard** itself uses `output: 'export'` because it is a static 
 | Variable | Typical source |
 |----------|----------------|
 | `DATABASE_URL` | Postgres service connection string |
-| `NEXTAUTH_SECRET` / session secrets | Dockyard secret variable |
+| `NEXTAUTH_SECRET` / session secrets | dockyrd secret variable |
 | Public URL | Derived from assigned domain |
 
 Use reference variables (`${{postgres-slug.DATABASE_URL}}`) between services in the same project.

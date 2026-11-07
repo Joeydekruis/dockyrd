@@ -1,4 +1,4 @@
-# Deploying `site/` on Dockyard
+# Deploying `site/` on dockyrd
 
 Point a **static site** service at this directory’s build output (repository root: **`site/`** after `make site`).
 
@@ -21,7 +21,7 @@ Requires `web/node_modules/geist` for self-hosted fonts (`pnpm --dir web install
 
 Publish the **generated** files: `index.html`, `docs/`, `assets/`, `robots.txt`, `sitemap.xml`.
 
-**Important:** the **`assets/`** folder (CSS, fonts, JS) must ship with the HTML. If only `index.html` is published, the page will look unstyled. In Dockyard, point the static site at the **`site/`** directory (or copy the whole folder to the publish root).
+**Important:** the **`assets/`** folder (CSS, fonts, JS) must ship with the HTML. If only `index.html` is published, the page will look unstyled. In dockyrd, point the static site at the **`site/`** directory (or copy the whole folder to the publish root).
 
 ## Paths
 

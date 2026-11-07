@@ -1,5 +1,5 @@
 ---
-description: Dockyard vs Dockyrd spelling — binary/docs vs UI
+description: dockyrd vs Dockyrd spelling — binary/docs vs UI
 alwaysApply: true
 ---
 
@@ -7,7 +7,7 @@ alwaysApply: true
 
 | Context | Name | Examples |
 |--|--|--|
-| CLI, binary, systemd, Go module, domains, installer | **Dockyard** | `dockyard serve`, `get.dockyard.dev`, Apache NOTICE |
+| CLI, binary, systemd, Go module, domains, installer | **dockyrd** | `dockyrd serve`, `get.dockyrd.dev`, Apache NOTICE |
 | Dashboard UI, logo, aria-labels, marketing copy in app | **Dockyrd** | sidebar wordmark, `aria-label="Dockyrd home"` |
 | Repo folder | `dockyrd` | GitHub path only — do not show "dockyrd" in user-facing UI |
 

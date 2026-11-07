@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Box, Database } from "lucide-react";
-import { ResourceRow } from "@/components/dockyard/ui/resource-row";
+import { ResourceRow } from "@/components/dockyrd/ui/resource-row";
 
 const iconArgType = {
   control: "select" as const,

@@ -9,7 +9,7 @@ import {
   NotificationFilterPills,
   NotificationRow,
   NotificationsPanelHeader,
-} from "@/components/dockyard/notifications-ui";
+} from "@/components/dockyrd/notifications-ui";
 import {
   getInboxSummary,
   type InboxNotification,
@@ -152,7 +152,7 @@ export function NotificationsBell({ className }: NotificationsBellProps) {
                 role="dialog"
                 aria-modal="true"
                 aria-label="Notifications"
-                className="absolute top-[calc(var(--dockyard-announcement-height,44px)+4.5rem)] right-8 z-10 flex max-h-[min(680px,calc(100dvh-7rem))] w-[min(500px,calc(100vw-2rem))] flex-col overflow-hidden rounded-[20px] border shadow-lg"
+                className="absolute top-[calc(var(--dockyrd-announcement-height,44px)+4.5rem)] right-8 z-10 flex max-h-[min(680px,calc(100dvh-7rem))] w-[min(500px,calc(100vw-2rem))] flex-col overflow-hidden rounded-[20px] border shadow-lg"
                 style={{
                   background: "var(--surface)",
                   borderColor: "var(--border)",

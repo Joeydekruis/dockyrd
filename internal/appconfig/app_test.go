@@ -23,7 +23,7 @@ func TestDeploymentImageRefGit(t *testing.T) {
 		t.Fatal(err)
 	}
 	ref, build, err := cfg.DeploymentImageRef("my-app", "01ARZ3NDEK")
-	if err != nil || !build || ref != "dockyard/my-app:01ARZ3NDEK" {
+	if err != nil || !build || ref != "dockyrd/my-app:01ARZ3NDEK" {
 		t.Fatalf("got ref=%q build=%v err=%v", ref, build, err)
 	}
 }

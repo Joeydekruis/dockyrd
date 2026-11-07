@@ -11,7 +11,7 @@ Write **only** `docs/project/feedback/<id>/frontend-eval-i<n>.md`. Do not implem
 
 ## Inputs (minimal)
 
-Design HTML / wireframe **when artefacts exist** + **`docs/design-index.json`** for existing routes + must-pass flows from rubric. If design was skipped, score against spec + design-index tokens + `web/components/dockyard/*`. Live app URL from `setup.md`. Playwright when available.
+Design HTML / wireframe **when artefacts exist** + **`docs/design-index.json`** for existing routes + must-pass flows from rubric. If design was skipped, score against spec + design-index tokens + `web/components/dockyrd/*`. Live app URL from `setup.md`. Playwright when available.
 
 ## Focus
 

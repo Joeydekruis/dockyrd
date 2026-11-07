@@ -145,7 +145,7 @@ func (d apiDeps) handleComposeContainers(w http.ResponseWriter, r *http.Request)
 		return
 	}
 	releaseDir := filepath.Join(compose.StackDataDir(d.cfg.DataDir, serviceID), "releases", svc.LiveDeploymentID.String)
-	composeFile := filepath.Join(releaseDir, "compose.dockyard.json")
+	composeFile := filepath.Join(releaseDir, "compose.dockyrd.json")
 	runner := compose.CLIRunner{}
 	statuses, err := runner.PS(ctx, cfg.ProjectName, releaseDir, composeFile)
 	if err != nil {

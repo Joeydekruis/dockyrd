@@ -1,4 +1,4 @@
-import type { StatusVariant } from "@/components/dockyard/ui/status-badge";
+import type { StatusVariant } from "@/components/dockyrd/ui/status-badge";
 
 export function formatResourceCount(count: number, noun: string): string {
   const label = count === 1 ? noun : `${noun}s`;

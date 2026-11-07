@@ -106,7 +106,7 @@ func ensureGarageBackupKey(ctx context.Context, dc *docker.Client, bucket string
 	if err != nil || garageID == "" {
 		return "", "", fmt.Errorf("dy-garage is not running")
 	}
-	keyName := "dy-backups-dockyard"
+	keyName := "dy-backups-dockyrd"
 	var buf strings.Builder
 	show := []string{"garage", "key", "info", keyName}
 	if err := dc.ExecStream(ctx, garageID, show, &buf); err == nil {
@@ -169,7 +169,7 @@ func TestBackupTarget(ctx context.Context, cfg config.Config, q *sqlc.Queries) (
 	}
 	tmpPath := tmp.Name()
 	defer os.Remove(tmpPath)
-	payload := []byte("dockyard-backup-probe")
+	payload := []byte("dockyrd-backup-probe")
 	if _, err := tmp.Write(payload); err != nil {
 		_ = tmp.Close()
 		return err

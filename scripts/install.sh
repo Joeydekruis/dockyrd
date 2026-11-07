@@ -1,19 +1,19 @@
 #!/bin/sh
-# Dockyard installer: paths, Docker (Debian/Ubuntu), release binary, init, systemd.
+# dockyrd installer: paths, Docker (Debian/Ubuntu), release binary, init, systemd.
 set -e
 
-DOCKYARD_VERSION="${DOCKYARD_VERSION:-dev}"
-DOCKYARD_INSTALL_REF="${DOCKYARD_INSTALL_REF:-development}"
-INSTALL_BIN="${DOCKYARD_INSTALL_BIN:-}"
-INSTALL_DY_BIN="${DOCKYARD_INSTALL_DY_BIN:-}"
-CONFIG_DIR="${DOCKYARD_CONFIG_DIR:-/etc/dockyard}"
-DATA_DIR="${DOCKYARD_DATA_DIR:-/var/lib/dockyard}"
-BIN_DEST="${DOCKYARD_BIN_DEST:-/usr/local/bin/dockyard}"
-DY_BIN_DEST="${DOCKYARD_DY_BIN_DEST:-/usr/local/bin/dy}"
-UNIT_SRC="${DOCKYARD_UNIT_SRC:-}"
-SKIP_SYSTEMD="${DOCKYARD_SKIP_SYSTEMD:-0}"
-SKIP_ROOT="${DOCKYARD_SKIP_ROOT:-0}"
-DOCKYARD_SKIP_DOCKER_INSTALL="${DOCKYARD_SKIP_DOCKER_INSTALL:-0}"
+dockyrd_VERSION="${dockyrd_VERSION:-dev}"
+dockyrd_INSTALL_REF="${dockyrd_INSTALL_REF:-development}"
+INSTALL_BIN="${dockyrd_INSTALL_BIN:-}"
+INSTALL_DY_BIN="${dockyrd_INSTALL_DY_BIN:-}"
+CONFIG_DIR="${dockyrd_CONFIG_DIR:-/etc/dockyrd}"
+DATA_DIR="${dockyrd_DATA_DIR:-/var/lib/dockyrd}"
+BIN_DEST="${dockyrd_BIN_DEST:-/usr/local/bin/dockyrd}"
+DY_BIN_DEST="${dockyrd_DY_BIN_DEST:-/usr/local/bin/dy}"
+UNIT_SRC="${dockyrd_UNIT_SRC:-}"
+SKIP_SYSTEMD="${dockyrd_SKIP_SYSTEMD:-0}"
+SKIP_ROOT="${dockyrd_SKIP_ROOT:-0}"
+dockyrd_SKIP_DOCKER_INSTALL="${dockyrd_SKIP_DOCKER_INSTALL:-0}"
 
 log() {
 	printf '%s\n' "$*"
@@ -24,7 +24,7 @@ require_root() {
 		return 0
 	fi
 	if [ "$(id -u)" -ne 0 ]; then
-		log "This installer must run as root (or use DOCKYARD_* paths for local dev)." >&2
+		log "This installer must run as root (or use dockyrd_* paths for local dev)." >&2
 		exit 1
 	fi
 }
@@ -51,7 +51,7 @@ preflight() {
 parse_args() {
 	for arg in "$@"; do
 		case "$arg" in
-		--no-docker-install) DOCKYARD_SKIP_DOCKER_INSTALL=1 ;;
+		--no-docker-install) dockyrd_SKIP_DOCKER_INSTALL=1 ;;
 		esac
 	done
 }
@@ -120,7 +120,7 @@ install_docker_via_apt() {
 }
 
 merge_docker_daemon_defaults() {
-	if [ "$SKIP_ROOT" = "1" ] || [ "$DOCKYARD_SKIP_DOCKER_INSTALL" = "1" ]; then
+	if [ "$SKIP_ROOT" = "1" ] || [ "$dockyrd_SKIP_DOCKER_INSTALL" = "1" ]; then
 		return 0
 	fi
 	if ! command -v python3 >/dev/null 2>&1; then
@@ -165,7 +165,7 @@ PY
 }
 
 ensure_docker() {
-	if [ "$DOCKYARD_SKIP_DOCKER_INSTALL" = "1" ] || [ "$SKIP_ROOT" = "1" ]; then
+	if [ "$dockyrd_SKIP_DOCKER_INSTALL" = "1" ] || [ "$SKIP_ROOT" = "1" ]; then
 		if ! command -v docker >/dev/null 2>&1; then
 			log "Warning: Docker not installed (install skipped)." >&2
 		fi
@@ -218,13 +218,13 @@ install_binary() {
 	fi
 	log "Could not download a release binary." >&2
 	log "Build locally (make build) and re-run with:" >&2
-	log "  DOCKYARD_INSTALL_BIN=/path/to/dockyard DOCKYARD_INSTALL_DY_BIN=/path/to/dy $0" >&2
+	log "  dockyrd_INSTALL_BIN=/path/to/dockyrd dockyrd_INSTALL_DY_BIN=/path/to/dy $0" >&2
 	exit 1
 }
 
 github_api_curl() {
 	# shellcheck disable=SC2086
-	token="${DOCKYARD_GITHUB_TOKEN:-${GITHUB_TOKEN:-}}"
+	token="${dockyrd_GITHUB_TOKEN:-${GITHUB_TOKEN:-}}"
 	if [ -n "$token" ]; then
 		curl -sf -H "Authorization: Bearer $token" \
 			-H "Accept: application/vnd.github+json" \
@@ -241,8 +241,8 @@ github_latest_tag() {
 }
 
 download_release_binary() {
-	repo="${DOCKYARD_GITHUB_REPO:-Joeydekruis/dockyrd}"
-	tag="${DOCKYARD_VERSION:-}"
+	repo="${dockyrd_GITHUB_REPO:-Joeydekruis/dockyrd}"
+	tag="${dockyrd_VERSION:-}"
 	if [ -z "$tag" ] || [ "$tag" = "dev" ]; then
 		tag=$(github_latest_tag "$repo") || return 1
 	fi
@@ -258,7 +258,7 @@ download_release_binary() {
 	aarch64 | arm64) arch=arm64 ;;
 	*) return 1 ;;
 	esac
-	asset="dockyard_${ver}_${os_name}_${arch}.tar.gz"
+	asset="dockyrd_${ver}_${os_name}_${arch}.tar.gz"
 	base="https://github.com/${repo}/releases/download/${tag}"
 	tmp=$(mktemp -d) || return 1
 	trap 'rm -rf "$tmp"' EXIT
@@ -273,8 +273,8 @@ download_release_binary() {
 			return 1
 		fi
 	fi
-	tar -xzf "${tmp}/${asset}" -C "$tmp" dockyard || return 1
-	install -m 755 "${tmp}/dockyard" "$BIN_DEST"
+	tar -xzf "${tmp}/${asset}" -C "$tmp" dockyrd || return 1
+	install -m 755 "${tmp}/dockyrd" "$BIN_DEST"
 	if tar -xzf "${tmp}/${asset}" -C "$tmp" dy 2>/dev/null; then
 		install_dy_cli "${tmp}/dy"
 	else
@@ -289,15 +289,15 @@ resolve_unit_src() {
 		return 0
 	fi
 	script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-	local_path="$script_dir/../packaging/dockyard.service"
+	local_path="$script_dir/../packaging/dockyrd.service"
 	if [ -f "$local_path" ]; then
 		printf '%s' "$local_path"
 		return 0
 	fi
-	repo="${DOCKYARD_GITHUB_REPO:-Joeydekruis/dockyrd}"
-	ref="${DOCKYARD_INSTALL_REF:-development}"
+	repo="${dockyrd_GITHUB_REPO:-Joeydekruis/dockyrd}"
+	ref="${dockyrd_INSTALL_REF:-development}"
 	tmp=$(mktemp) || return 1
-	if ! curl -sfL "https://raw.githubusercontent.com/${repo}/${ref}/packaging/dockyard.service" -o "$tmp"; then
+	if ! curl -sfL "https://raw.githubusercontent.com/${repo}/${ref}/packaging/dockyrd.service" -o "$tmp"; then
 		rm -f "$tmp"
 		return 1
 	fi
@@ -310,15 +310,15 @@ install_systemd() {
 	fi
 	install_build_resilience
 	unit_src=$(resolve_unit_src) || {
-		log "Missing unit file (set DOCKYARD_UNIT_SRC or run from a git checkout)." >&2
+		log "Missing unit file (set dockyrd_UNIT_SRC or run from a git checkout)." >&2
 		exit 1
 	}
-	install -m 644 "$unit_src" /etc/systemd/system/dockyard.service
+	install -m 644 "$unit_src" /etc/systemd/system/dockyrd.service
 	case "$unit_src" in
 	/tmp/* | /var/tmp/*) rm -f "$unit_src" ;;
 	esac
 	systemctl daemon-reload
-	systemctl enable dockyard.service
+	systemctl enable dockyrd.service
 }
 
 install_build_resilience() {
@@ -357,27 +357,27 @@ install_build_resilience() {
 		fi
 	fi
 	sysctl -w vm.swappiness=10 >/dev/null 2>&1 || true
-	grep -q '^vm.swappiness' /etc/sysctl.d/99-dockyard.conf 2>/dev/null || echo 'vm.swappiness=10' >/etc/sysctl.d/99-dockyard.conf
+	grep -q '^vm.swappiness' /etc/sysctl.d/99-dockyrd.conf 2>/dev/null || echo 'vm.swappiness=10' >/etc/sysctl.d/99-dockyrd.conf
 	mem_kb=$(awk '/MemTotal:/ {print $2}' /proc/meminfo 2>/dev/null || echo 0)
 	if [ "$mem_kb" -lt 8388608 ] 2>/dev/null && [ -d /sys/module/zswap ]; then
-		cat >/etc/tmpfiles.d/dockyard-zswap.conf <<'EOF'
+		cat >/etc/tmpfiles.d/dockyrd-zswap.conf <<'EOF'
 w /sys/module/zswap/parameters/enabled          - - - - Y
 w /sys/module/zswap/parameters/compressor       - - - - zstd
 w /sys/module/zswap/parameters/max_pool_percent - - - - 20
 EOF
-		systemd-tmpfiles --create /etc/tmpfiles.d/dockyard-zswap.conf 2>/dev/null || true
+		systemd-tmpfiles --create /etc/tmpfiles.d/dockyrd-zswap.conf 2>/dev/null || true
 	fi
 	systemctl daemon-reload
 }
 
 run_init() {
-	DOCKYARD_CONFIG_DIR="$CONFIG_DIR" DOCKYARD_DATA_DIR="$DATA_DIR" \
+	dockyrd_CONFIG_DIR="$CONFIG_DIR" dockyrd_DATA_DIR="$DATA_DIR" \
 		"$BIN_DEST" init
 }
 
 main() {
 	parse_args "$@"
-	log "Dockyard install, version ${DOCKYARD_VERSION}"
+	log "dockyrd install, version ${dockyrd_VERSION}"
 	require_root
 	preflight
 	ensure_docker
@@ -386,12 +386,12 @@ main() {
 	run_init
 	install_systemd
 	if [ "$SKIP_SYSTEMD" != "1" ] && command -v systemctl >/dev/null 2>&1; then
-		systemctl restart dockyard.service || systemctl start dockyard.service
+		systemctl restart dockyrd.service || systemctl start dockyrd.service
 	fi
 	if [ "$SKIP_SYSTEMD" = "1" ]; then
-		log "✓ Dockyard installed (systemd skipped). Run: $BIN_DEST serve"
+		log "✓ dockyrd installed (systemd skipped). Run: $BIN_DEST serve"
 	else
-		log "✓ Dockyard service installed. See init output above for the setup token."
+		log "✓ dockyrd service installed. See init output above for the setup token."
 	fi
 }
 

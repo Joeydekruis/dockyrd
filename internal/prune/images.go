@@ -9,7 +9,7 @@ import (
 
 const imageKeep = 5
 
-// AllAppServiceImages prunes dockyard/<slug> tags for every app service.
+// AllAppServiceImages prunes dockyrd/<slug> tags for every app service.
 func AllAppServiceImages(ctx context.Context, q *sqlc.Queries, c *docker.Client, keep int) {
 	if q == nil || c == nil {
 		return

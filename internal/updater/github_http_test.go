@@ -9,7 +9,7 @@ import (
 )
 
 func TestFetchLatestSendsGitHubToken(t *testing.T) {
-	t.Setenv("DOCKYARD_GITHUB_TOKEN", "ghp_test_token")
+	t.Setenv("dockyrd_GITHUB_TOKEN", "ghp_test_token")
 	t.Setenv("GITHUB_TOKEN", "ignored")
 
 	var gotAuth string
@@ -35,16 +35,16 @@ func TestFetchLatestSendsGitHubToken(t *testing.T) {
 	}
 }
 
-func TestGitHubTokenPrefersDockyardEnv(t *testing.T) {
-	t.Setenv("DOCKYARD_GITHUB_TOKEN", "dockyard_pat")
+func TestGitHubTokenPrefersdockyrdEnv(t *testing.T) {
+	t.Setenv("dockyrd_GITHUB_TOKEN", "dockyrd_pat")
 	t.Setenv("GITHUB_TOKEN", "generic")
-	if got := GitHubToken(); got != "dockyard_pat" {
+	if got := GitHubToken(); got != "dockyrd_pat" {
 		t.Fatalf("GitHubToken()=%q", got)
 	}
 }
 
 func TestGitHubTokenFallback(t *testing.T) {
-	t.Setenv("DOCKYARD_GITHUB_TOKEN", "")
+	t.Setenv("dockyrd_GITHUB_TOKEN", "")
 	t.Setenv("GITHUB_TOKEN", "generic")
 	if got := GitHubToken(); got != "generic" {
 		t.Fatalf("GitHubToken()=%q", got)
@@ -56,7 +56,7 @@ func TestGithubRateLimitHint(t *testing.T) {
 	if h == "" {
 		t.Fatal("expected hint")
 	}
-	if !strings.Contains(h, "DOCKYARD_GITHUB_TOKEN") {
+	if !strings.Contains(h, "dockyrd_GITHUB_TOKEN") {
 		t.Fatalf("hint=%q", h)
 	}
 }

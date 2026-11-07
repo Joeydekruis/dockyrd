@@ -82,7 +82,7 @@ After section 5, follow [release-ship](../../../.cursor/rules/release-ship.mdc) 
 
 1. Push tag **`v$(node -p "require('./package.json').version")`** to `origin` (triggers GoReleaser).
 2. **Wait** for `.github/workflows/release.yml` **success**.
-3. **Verify** both `dockyard_{version}_linux_amd64.tar.gz` and `dockyard_{version}_linux_arm64.tar.gz` (+ `checksums.txt`) on the GitHub Release.
+3. **Verify** both `dockyrd_{version}_linux_amd64.tar.gz` and `dockyrd_{version}_linux_arm64.tar.gz` (+ `checksums.txt`) on the GitHub Release.
 
 Do **not** tell Joey the release is ready for self-update until step 3 passes.
 

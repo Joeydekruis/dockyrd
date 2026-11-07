@@ -1,7 +1,7 @@
 import {
   StatusBadge,
   type StatusVariant,
-} from "@/components/dockyard/ui/status-badge";
+} from "@/components/dockyrd/ui/status-badge";
 
 export type ServerContainersTableRow = {
   id: string;
@@ -68,7 +68,7 @@ export function ServerContainersTable({
                 colSpan={6}
                 className="px-4 py-8 text-center text-[var(--muted-text)]"
               >
-                No running Dockyard containers.
+                No running dockyrd containers.
               </td>
             </tr>
           ) : (

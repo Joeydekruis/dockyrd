@@ -48,7 +48,7 @@ func (r Report) HasFailures() bool {
 	return false
 }
 
-// Run executes host and Dockyard readiness checks.
+// Run executes host and dockyrd readiness checks.
 func Run(ctx context.Context, cfg config.Config, version string) Report {
 	rep := Report{Version: version}
 	rep.Checks = append(rep.Checks, checkLayout(cfg)...)
@@ -67,7 +67,7 @@ func Run(ctx context.Context, cfg config.Config, version string) Report {
 
 // Print writes a human-readable report.
 func Print(w io.Writer, rep Report) {
-	fmt.Fprintf(w, "Dockyard doctor (v%s)\n\n", rep.Version)
+	fmt.Fprintf(w, "dockyrd doctor (v%s)\n\n", rep.Version)
 	for _, c := range rep.Checks {
 		icon := "✓"
 		switch c.Status {
@@ -103,7 +103,7 @@ func checkLayout(cfg config.Config) []Check {
 				Name:    item.name,
 				Status:  StatusFail,
 				Detail:  err.Error(),
-				FixHint: fmt.Sprintf("Run `dockyard init` or create %s", item.path),
+				FixHint: fmt.Sprintf("Run `dockyrd init` or create %s", item.path),
 			})
 			continue
 		}
@@ -123,7 +123,7 @@ func checkLayout(cfg config.Config) []Check {
 			Name:    "Master key",
 			Status:  StatusFail,
 			Detail:  "missing",
-			FixHint: "Run `dockyard init` to create the encryption key",
+			FixHint: "Run `dockyrd init` to create the encryption key",
 		})
 	} else {
 		out = append(out, Check{Name: "Master key", Status: StatusOK, Detail: keyPath})
@@ -138,7 +138,7 @@ func checkDatabase(cfg config.Config) []Check {
 			Name:    "Control-plane database",
 			Status:  StatusWarn,
 			Detail:  "not created yet",
-			FixHint: "Complete setup in the UI or run `dockyard init`",
+			FixHint: "Complete setup in the UI or run `dockyrd init`",
 		}}
 	}
 	conn, _, err := db.Open(path)
@@ -204,7 +204,7 @@ func checkProxyContainer(ctx context.Context) []Check {
 			Name:    "dy-proxy container",
 			Status:  StatusWarn,
 			Detail:  detail,
-			FixHint: "Restart `dockyard.service`; check `journalctl -u dockyard` for ensure dy-proxy errors",
+			FixHint: "Restart `dockyrd.service`; check `journalctl -u dockyrd` for ensure dy-proxy errors",
 		}}
 	}
 	return []Check{{Name: "dy-proxy container", Status: StatusOK, Detail: detail}}
@@ -219,7 +219,7 @@ func checkHTTPSPorts(ctx context.Context) []Check {
 				Name:    "HTTPS edge (443/80)",
 				Status:  StatusWarn,
 				Detail:  fmt.Sprintf("nothing listening on %s", addr),
-				FixHint: "Set Public URL + ACME email in Instance settings and save; open firewall 80/443; restart dockyard",
+				FixHint: "Set Public URL + ACME email in Instance settings and save; open firewall 80/443; restart dockyrd",
 			}}
 		}
 		_ = conn.Close()
@@ -234,7 +234,7 @@ func checkProxySocket(cfg config.Config) []Check {
 			Name:    "Caddy admin socket",
 			Status:  StatusWarn,
 			Detail:  "not present",
-			FixHint: "Start Dockyard (`dockyard serve`) so dy-proxy loads; live traffic uses the proxy container",
+			FixHint: "Start dockyrd (`dockyrd serve`) so dy-proxy loads; live traffic uses the proxy container",
 		}}
 	}
 	return []Check{{Name: "Caddy admin socket", Status: StatusOK, Detail: sock}}

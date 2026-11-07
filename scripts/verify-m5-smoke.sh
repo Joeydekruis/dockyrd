@@ -12,6 +12,6 @@ go test ./...
 pnpm --dir web build
 
 echo "== doctor (expect Docker fail on dev Mac OK) =="
-go run ./cmd/dockyard doctor || true
+go run ./cmd/dockyrd doctor || true
 
 echo "M5 smoke gates passed."

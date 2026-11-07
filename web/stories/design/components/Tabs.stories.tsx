@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
-import { Tabs } from "@/components/dockyard/ui/tabs";
+import { Tabs } from "@/components/dockyrd/ui/tabs";
 
 const tabs = [
   { id: "overview", label: "Overview" },

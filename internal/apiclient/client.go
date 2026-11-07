@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-// Client calls Dockyard HTTP APIs with a stored Bearer token.
+// Client calls dockyrd HTTP APIs with a stored Bearer token.
 type Client struct {
 	BaseURL string
 	Token   string
@@ -70,9 +70,9 @@ func SaveBaseURL(base string) error {
 	return os.WriteFile(filepath.Join(dir, "base_url"), []byte(strings.TrimRight(strings.TrimSpace(base), "/")+"\n"), 0o600)
 }
 
-// LoadBaseURL reads the saved panel URL or DOCKYARD_URL.
+// LoadBaseURL reads the saved panel URL or dockyrd_URL.
 func LoadBaseURL() (string, error) {
-	if v := strings.TrimSpace(os.Getenv("DOCKYARD_URL")); v != "" {
+	if v := strings.TrimSpace(os.Getenv("dockyrd_URL")); v != "" {
 		return strings.TrimRight(v, "/"), nil
 	}
 	dir, err := ConfigDir()

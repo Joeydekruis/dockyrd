@@ -82,7 +82,7 @@ func (c AppConfig) DeploymentImageRef(serviceSlug, deployShort string) (ref stri
 		if serviceSlug == "" || deployShort == "" {
 			return "", false, errors.New("service slug and deploy id required for git builds")
 		}
-		tag := fmt.Sprintf("dockyard/%s:%s", serviceSlug, deployShort)
+		tag := fmt.Sprintf("dockyrd/%s:%s", serviceSlug, deployShort)
 		return tag, true, nil
 	default:
 		return "", false, fmt.Errorf("unsupported source type %q", c.Source.Type)

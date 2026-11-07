@@ -62,7 +62,7 @@ Post **after** push.
 ```
 
 **UI / dashboard** (when visual AC applies)
-- Local: `make dev` / `make build` + `./bin/dockyard serve` → steps
+- Local: `make dev` / `make build` + `./bin/dockyrd serve` → steps
 - OR preview URL / recording when available
 
 ### Reviewer verdicts (Feature track, when reviewers ran)

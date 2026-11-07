@@ -2,17 +2,17 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { DashboardShell } from "@/components/dockyard/dashboard-shell";
-import { DeploymentResourceStrip } from "@/components/dockyard/deployment-resource-strip";
-import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
-import { Button } from "@/components/dockyard/ui/button";
+import { DashboardShell } from "@/components/dockyrd/dashboard-shell";
+import { DeploymentResourceStrip } from "@/components/dockyrd/deployment-resource-strip";
+import { DockyrdPageLoading } from "@/components/dockyrd/dockyrd-page-loading";
+import { Button } from "@/components/dockyrd/ui/button";
 import {
   SettingsBranchPill,
   SettingsCopyPill,
   SettingsMetaField,
   SettingsMetaGrid,
-} from "@/components/dockyard/ui/settings-detail-block";
-import { StatusBadge } from "@/components/dockyard/ui/status-badge";
+} from "@/components/dockyrd/ui/settings-detail-block";
+import { StatusBadge } from "@/components/dockyrd/ui/status-badge";
 import {
   type Deployment,
   fetchDeploymentLog,

@@ -67,7 +67,7 @@ func (d apiDeps) handlePasswordForgot(w http.ResponseWriter, r *http.Request) {
 			link = base + link
 		}
 		text := "Use this link within one hour to choose a new password:\n\n" + link + "\n"
-		subject := "Reset your Dockyard password"
+		subject := "Reset your dockyrd password"
 		if err := d.sendPlainWithLog(ctx, emailKindPasswordReset, smtpCfg, body.Email, subject, text); err != nil {
 			writeJSONError(w, http.StatusBadGateway, "could not send reset email")
 			return

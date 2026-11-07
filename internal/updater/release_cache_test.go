@@ -10,7 +10,7 @@ import (
 )
 
 func TestReleaseCacheManualRateLimitWithoutToken(t *testing.T) {
-	t.Setenv("DOCKYARD_GITHUB_TOKEN", "")
+	t.Setenv("dockyrd_GITHUB_TOKEN", "")
 	t.Setenv("GITHUB_TOKEN", "")
 
 	var calls atomic.Int32
@@ -21,7 +21,7 @@ func TestReleaseCacheManualRateLimitWithoutToken(t *testing.T) {
 			"tag_name": "v9.9.9",
 			"body": "notes",
 			"assets": [
-				{"name": "dockyard_9.9.9_linux_amd64.tar.gz", "browser_download_url": "https://example.com/a.tar.gz"},
+				{"name": "dockyrd_9.9.9_linux_amd64.tar.gz", "browser_download_url": "https://example.com/a.tar.gz"},
 				{"name": "checksums.txt", "browser_download_url": "https://example.com/c.txt"}
 			]
 		}`))
@@ -56,7 +56,7 @@ func TestReleaseCacheSnapshotWithoutFetch(t *testing.T) {
 }
 
 func TestManualLimitSkippedWithToken(t *testing.T) {
-	t.Setenv("DOCKYARD_GITHUB_TOKEN", "ghp_test")
+	t.Setenv("dockyrd_GITHUB_TOKEN", "ghp_test")
 	cache := NewReleaseCache()
 	for i := 0; i < MaxManualRefreshPerHour+5; i++ {
 		cache.recordManualRefresh()

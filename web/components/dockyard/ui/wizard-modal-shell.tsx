@@ -2,7 +2,7 @@
 
 import { Check, X } from "lucide-react";
 import type { ReactNode } from "react";
-import { Button } from "@/components/dockyard/ui/button";
+import { Button } from "@/components/dockyrd/ui/button";
 
 export type WizardStepDef = {
   id: string;

@@ -2,9 +2,9 @@
 
 import { Check, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import { Button } from "@/components/dockyard/ui/button";
-import { Chip } from "@/components/dockyard/ui/chip";
-import { Spinner } from "@/components/dockyard/ui/spinner";
+import { Button } from "@/components/dockyrd/ui/button";
+import { Chip } from "@/components/dockyrd/ui/chip";
+import { Spinner } from "@/components/dockyrd/ui/spinner";
 import { getServerContainers, getService } from "@/lib/api";
 import { resolveDatabaseProvisionStep } from "@/lib/resource-provisioning";
 

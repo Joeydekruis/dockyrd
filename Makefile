@@ -7,7 +7,7 @@ site:
 	node scripts/build-public-site.mjs
 
 build: web-build
-	go build -ldflags "$(LDFLAGS)" -o bin/dockyard ./cmd/dockyard
+	go build -ldflags "$(LDFLAGS)" -o bin/dockyrd ./cmd/dockyrd
 	go build -ldflags "$(LDFLAGS)" -o bin/dy ./cmd/dy
 
 web-build:
@@ -23,7 +23,7 @@ lint: ensure-ui-stub
 	@./scripts/check-no-radix.sh
 
 dev:
-	@echo "Run: DOCKYARD_DEV_UI=http://localhost:3000 go run ./cmd/dockyard serve & pnpm --dir web dev"
+	@echo "Run: dockyrd_DEV_UI=http://localhost:3000 go run ./cmd/dockyrd serve & pnpm --dir web dev"
 
 ensure-ui-stub:
 	@./scripts/ensure-ui-stub.sh

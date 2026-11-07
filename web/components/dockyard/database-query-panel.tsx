@@ -1,9 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Button } from "@/components/dockyard/ui/button";
-import { Field } from "@/components/dockyard/ui/field";
-import { Tabs } from "@/components/dockyard/ui/tabs";
+import { Button } from "@/components/dockyrd/ui/button";
+import { Field } from "@/components/dockyrd/ui/field";
+import { Tabs } from "@/components/dockyrd/ui/tabs";
 import {
   type DatabaseQueryResult,
   type DatabaseSchemaTable,

@@ -2,7 +2,7 @@
 
 > Status: korte bouwbriefing · Datum: 7 november 2026 · Eigenaar: Joey de Kruis
 > Bron design: Claude Design-canvas, artboard `Terminal.dc.html`
-> Let op: in `DOCKYARD_BRIEFING` §1.2 en §15 staat de web-terminal in **v0.2** ("WebSocket + security review"). Deze briefing beschrijft de smalle versie die we eerder willen doen. Pas die twee plekken aan als dit doorgaat.
+> Let op: in `dockyrd_BRIEFING` §1.2 en §15 staat de web-terminal in **v0.2** ("WebSocket + security review"). Deze briefing beschrijft de smalle versie die we eerder willen doen. Pas die twee plekken aan als dit doorgaat.
 
 ---
 
@@ -43,7 +43,7 @@ Waarom deze indeling: het panel draait al als root met de Docker-socket, dus een
 
 - Bestanden uploaden/downloaden, port-forwarding, gedeelde sessies, sessie-opnames.
 - Vrije commando's via de API (geen "run dit commando"-endpoint).
-- Multi-server (komt met `dockyard agent`, v0.3).
+- Multi-server (komt met `dockyrd agent`, v0.3).
 
 ## 6. Open punten
 

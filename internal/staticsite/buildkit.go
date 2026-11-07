@@ -38,7 +38,7 @@ func exportWithBuildkit(ctx context.Context, dockerBin string, in BuildInput, wo
 	defer logFile.Close()
 
 	copyRel := staticOutputCopyRel(in.OutputDir)
-	dfPath := filepath.Join(workDir, "Dockerfile.dockyard")
+	dfPath := filepath.Join(workDir, "Dockerfile.dockyrd")
 	if err := os.WriteFile(dfPath, []byte(renderStaticDockerfile(in.NodeImage, shellCmd, copyRel, buildEnv)), 0o644); err != nil {
 		return "", err
 	}

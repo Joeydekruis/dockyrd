@@ -11,7 +11,7 @@ import (
 
 const (
 	defaultPostgresVersion = 17
-	defaultPostgresUser    = "dockyard"
+	defaultPostgresUser    = "dockyrd"
 	defaultPostgresDB      = "app"
 	defaultMemLimitMB      = 512
 	defaultRedisVersion    = 8

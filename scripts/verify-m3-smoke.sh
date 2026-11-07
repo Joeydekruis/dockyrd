@@ -13,7 +13,7 @@ cat <<'MANUAL'
 
 == Manual M3 exit (Docker host) ==
 
-1. make build && ./bin/dockyard serve (Docker running)
+1. make build && ./bin/dockyrd serve (Docker running)
 2. Databases → create Postgres → Reveal connection → copy DATABASE_URL
 3. App env: DATABASE_URL=${{db-slug.DATABASE_URL}} → deploy
 4. Object storage → Install Garage → create bucket in a project

@@ -204,8 +204,8 @@ func (d apiDeps) handleCreateInvite(w http.ResponseWriter, r *http.Request) {
 		if base != "" {
 			link = base + link
 		}
-		subject := "Dockyard team invite"
-		text := "You have been invited to join this Dockyard panel.\n\nAccept the invite:\n" + link + "\n"
+		subject := "dockyrd team invite"
+		text := "You have been invited to join this dockyrd panel.\n\nAccept the invite:\n" + link + "\n"
 		if err := d.sendPlainWithLog(ctx, emailKindTeamInvite, smtpCfg, body.Email, subject, text); err == nil {
 			emailSent = true
 		}

@@ -11,7 +11,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
-import { Avatar } from "@/components/dockyard/ui/avatar";
+import { Avatar } from "@/components/dockyrd/ui/avatar";
 import { logout, type MeResponse } from "@/lib/api";
 import { PUBLIC_DOCS_INTRO_URL } from "@/lib/public-links";
 
@@ -116,7 +116,7 @@ export function UserMenu({ user, defaultOpen = false }: UserMenuProps) {
         <div
           id={menuId}
           role="menu"
-          className="dockyard-menu-panel user-menu-panel"
+          className="dockyrd-menu-panel user-menu-panel"
         >
           <div className="user-menu-header">
             <Avatar initials={initials} size="md" />
@@ -136,7 +136,7 @@ export function UserMenu({ user, defaultOpen = false }: UserMenuProps) {
           />
           {menuLinks.map((item) => {
             const Icon = item.icon;
-            const className = "dockyard-menu-item";
+            const className = "dockyrd-menu-item";
             if (item.external) {
               return (
                 <a
@@ -181,7 +181,7 @@ export function UserMenu({ user, defaultOpen = false }: UserMenuProps) {
           <button
             type="button"
             role="menuitem"
-            className="dockyard-menu-item dockyard-menu-item-danger"
+            className="dockyrd-menu-item dockyrd-menu-item-danger"
             onClick={() => void onSignOut()}
           >
             <LogOut strokeWidth={1.8} className="size-4 shrink-0" aria-hidden />

@@ -4,10 +4,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   areaLineOption,
   stackedBarOption,
-} from "@/components/dockyard/analytics/chart-options";
-import { Button } from "@/components/dockyard/ui/button";
-import { EChart } from "@/components/dockyard/ui/echart";
-import { Tabs } from "@/components/dockyard/ui/tabs";
+} from "@/components/dockyrd/analytics/chart-options";
+import { Button } from "@/components/dockyrd/ui/button";
+import { EChart } from "@/components/dockyrd/ui/echart";
+import { Tabs } from "@/components/dockyrd/ui/tabs";
 import { formatBytes } from "@/lib/analytics-stats";
 import {
   fetchServiceLogs,
@@ -272,7 +272,7 @@ export function ServiceTrafficAnalyticsPanel({
         >
           <p className="text-sm" style={{ color: "var(--muted-text)" }}>
             No traffic recorded in this range yet. Open the site in a browser or
-            check that domains route through Dockyard.
+            check that domains route through dockyrd.
           </p>
         </section>
       ) : (

@@ -1,14 +1,14 @@
-# AGENTS.md — Dockyard (dockyrd repo)
+# AGENTS.md — dockyrd (dockyrd repo)
 
 Instructions for AI coding agents working in this repository.
 
 ## What this repo is
 
-**Dockyard** is a self-hosted deploy platform: one Go binary (systemd), Docker workloads, Caddy edge proxy, SQLite control plane, and an embedded **Next.js static export** dashboard.
+**dockyrd** is a self-hosted deploy platform: one Go binary (systemd), Docker workloads, Caddy edge proxy, SQLite control plane, and an embedded **Next.js static export** dashboard.
 
 | Surface | Name |
 |---------|------|
-| CLI, binary, installer, domains | **Dockyard** |
+| CLI, binary, installer, domains | **dockyrd** |
 | Dashboard UI, logo, in-app copy | **Dockyrd** |
 
 **Product truth:** [`docs/BRIEFING.md`](docs/BRIEFING.md)  
@@ -19,13 +19,13 @@ Instructions for AI coding agents working in this repository.
 **Public site (dockyrd.io):** [`site/`](site/) — run `make site` after editing `site/source.html`  
 **Milestones:** [`docs/project/roadmap.md`](docs/project/roadmap.md)
 
-This is **not** a WordPress theme, Studio, or Atelier project. Ignore rules from other Cursor plugins if they conflict (see [`.cursor/rules/dockyard-scope.mdc`](.cursor/rules/dockyard-scope.mdc)).
+This is **not** a WordPress theme, Studio, or Atelier project. Ignore rules from other Cursor plugins if they conflict (see [`.cursor/rules/dockyrd-scope.mdc`](.cursor/rules/dockyrd-scope.mdc)).
 
 ## Stack (short)
 
 - **Go:** `net/http` + Huma v2, sqlc, goose, modernc SQLite, moby Docker client, embedded UI via `go:embed` of `web/out`
 - **Web:** Next.js App Router, `output: 'export'`, shadcn on **Base UI** (no `@radix-ui/*`), Tailwind v4, TanStack Query, openapi-fetch, Biome, pnpm, self-hosted Geist
-- **Details:** [`.cursor/rules/dockyard-stack.mdc`](.cursor/rules/dockyard-stack.mdc), skill [`.cursor/skills/dockyard-dev/SKILL.md`](.cursor/skills/dockyard-dev/SKILL.md)
+- **Details:** [`.cursor/rules/dockyrd-stack.mdc`](.cursor/rules/dockyrd-stack.mdc), skill [`.cursor/skills/dockyrd-dev/SKILL.md`](.cursor/skills/dockyrd-dev/SKILL.md)
 
 ## Git
 
@@ -79,9 +79,9 @@ Feature feedback files: `docs/project/feedback/<n>/<type>-i<iter>.md`. Generator
 ## UI implementation
 
 - Match [`docs/design-index.json`](docs/design-index.json) (nav, tokens, shared blocks).
-- **Primitives:** [`web/components/dockyard/ui/`](web/components/dockyard/ui/) — same modules as Storybook (`pnpm --dir web storybook`); rule [`.cursor/rules/storybook-ui-source.mdc`](.cursor/rules/storybook-ui-source.mdc).
-- Build composites in [`web/components/dockyard/`](web/components/dockyard/) per briefing §9.3 when code exists.
-- New/changed screens: [`.cursor/rules/dockyard-design-contract.mdc`](.cursor/rules/dockyard-design-contract.mdc), [`.cursor/rules/web/design-quality.mdc`](.cursor/rules/web/design-quality.mdc).
+- **Primitives:** [`web/components/dockyrd/ui/`](web/components/dockyrd/ui/) — same modules as Storybook (`pnpm --dir web storybook`); rule [`.cursor/rules/storybook-ui-source.mdc`](.cursor/rules/storybook-ui-source.mdc).
+- Build composites in [`web/components/dockyrd/`](web/components/dockyrd/) per briefing §9.3 when code exists.
+- New/changed screens: [`.cursor/rules/dockyrd-design-contract.mdc`](.cursor/rules/dockyrd-design-contract.mdc), [`.cursor/rules/web/design-quality.mdc`](.cursor/rules/web/design-quality.mdc).
 - Static export routing: [`docs/project/patterns/static-export-routing.md`](docs/project/patterns/static-export-routing.md).
 
 ## Testing & quality
@@ -96,7 +96,7 @@ Feature feedback files: `docs/project/feedback/<n>/<type>-i<iter>.md`. Generator
 |------|---------|
 | `.cursor/rules/*.mdc` | Always-on and scoped rules |
 | `.cursor/agents/*.md` | Subagent prompts |
-| `.cursor/skills/` | Deep playbooks (`dockyard-dev`, TDD, push-to-main, …) |
+| `.cursor/skills/` | Deep playbooks (`dockyrd-dev`, TDD, push-to-main, …) |
 | `.cursor/hooks/` | e.g. block feature branches |
 
 ## When to pause and ask Joey

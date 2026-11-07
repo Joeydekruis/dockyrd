@@ -14,8 +14,8 @@ import {
   Settings,
 } from "lucide-react";
 import type { ReactNode } from "react";
-import { DockyrdLogo } from "@/components/dockyard/dockyrd-logo";
-import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
+import { DockyrdLogo } from "@/components/dockyrd/dockyrd-logo";
+import { DockyrdPageLoading } from "@/components/dockyrd/dockyrd-page-loading";
 import {
   Alert,
   Avatar,
@@ -32,7 +32,7 @@ import {
   StatusBadge,
   TokenSwatch,
   TypographySample,
-} from "@/components/dockyard/ui";
+} from "@/components/dockyrd/ui";
 import { CatalogCanvas, CatalogGrid, CatalogRow } from "./catalog-layout";
 
 const meta = {

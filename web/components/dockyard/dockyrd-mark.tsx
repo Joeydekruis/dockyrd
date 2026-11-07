@@ -1,4 +1,4 @@
-import { DockyrdCubeIcon } from "@/components/dockyard/dockyrd-cube-icon";
+import { DockyrdCubeIcon } from "@/components/dockyrd/dockyrd-cube-icon";
 
 type DockyrdMarkProps = {
   className?: string;

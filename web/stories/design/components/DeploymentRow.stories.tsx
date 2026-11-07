@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { DeploymentRow } from "@/components/dockyard/ui/deployment-row";
+import { DeploymentRow } from "@/components/dockyrd/ui/deployment-row";
 
-/** **Source:** `web/components/dockyard/ui/deployment-row.tsx` */
+/** **Source:** `web/components/dockyrd/ui/deployment-row.tsx` */
 const meta = {
   title: "Design/Components/Deployment row",
   component: DeploymentRow,

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
-import { TextareaField } from "@/components/dockyard/ui/textarea-field";
+import { TextareaField } from "@/components/dockyrd/ui/textarea-field";
 
 const meta = {
   title: "Design/Components/Textarea field",

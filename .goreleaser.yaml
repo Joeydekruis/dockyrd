@@ -1,6 +1,6 @@
 version: 2
 
-project_name: dockyard
+project_name: dockyrd
 
 before:
   hooks:
@@ -9,9 +9,9 @@ before:
     - pnpm --dir web build
 
 builds:
-  - id: dockyard
-    main: ./cmd/dockyard
-    binary: dockyard
+  - id: dockyrd
+    main: ./cmd/dockyrd
+    binary: dockyrd
     env:
       - CGO_ENABLED=0
     goos:
@@ -39,7 +39,7 @@ archives:
   - id: default
     format: tar.gz
     builds:
-      - dockyard
+      - dockyrd
       - dy
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     files:
@@ -57,7 +57,7 @@ release:
   github:
     owner: Joeydekruis
     name: dockyrd
-  name_template: "Dockyard {{.Version}}"
+  name_template: "dockyrd {{.Version}}"
 
 changelog:
   disable: true

@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { Button } from "@/components/dockyard/ui/button";
-import { StatusBadge } from "@/components/dockyard/ui/status-badge";
+import { Button } from "@/components/dockyrd/ui/button";
+import { StatusBadge } from "@/components/dockyrd/ui/status-badge";
 import {
   getInstanceSettings,
   type InstanceSettings,
@@ -99,7 +99,7 @@ export function AppsOnYourDomainSection({
           <h3 className="text-base font-medium">Apps on your domain</h3>
           <p className="mt-1 text-sm text-[var(--muted-foreground)]">
             Point a wildcard DNS record at this server so new apps get default
-            URLs on your domain. Until verified, Dockyard uses sslip.io.
+            URLs on your domain. Until verified, dockyrd uses sslip.io.
           </p>
         </div>
         <StatusBadge label={pill.label} variant={pill.variant} />

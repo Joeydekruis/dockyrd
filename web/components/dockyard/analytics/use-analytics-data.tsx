@@ -1,12 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { TimeRange } from "@/components/dockyard/ui/time-range-toggle";
+import type { TimeRange } from "@/components/dockyrd/ui/time-range-toggle";
 import {
   ackEvent,
   type CleanupSummary,
   type ContainerMetricSnapshot,
-  type DockyardEvent,
+  type dockyrdEvent,
   getMe,
   getServerCleanup,
   getServerContainerMetrics,
@@ -27,8 +27,8 @@ export type AnalyticsData = {
   range: TimeRange;
   metrics: ServerMetricsResponse | null;
   serverInfo: ServerInfo | null;
-  events: DockyardEvent[];
-  allEvents: DockyardEvent[];
+  events: dockyrdEvent[];
+  allEvents: dockyrdEvent[];
   containers: ServerContainer[];
   containerMetrics: ContainerMetricSnapshot[];
   cleanup: CleanupSummary | null;
@@ -53,7 +53,7 @@ export function useAnalyticsData(): AnalyticsData {
   const [range, setRange] = useState<TimeRange>("24h");
   const [metrics, setMetrics] = useState<ServerMetricsResponse | null>(null);
   const [serverInfo, setServerInfo] = useState<ServerInfo | null>(null);
-  const [events, setEvents] = useState<DockyardEvent[]>([]);
+  const [events, setEvents] = useState<dockyrdEvent[]>([]);
   const [eventFilter, setEventFilter] = useState("all");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);

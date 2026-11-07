@@ -10,13 +10,13 @@ alwaysApply: false
 
 1. **`docs/design-index.json`** — routes, navigation, tokens, shared blocks (sidebar, header, pills, list rows), sample data conventions.
 2. **`docs/dockyrd-design.html`** — consolidated design export; per-screen `.dc.html` semantics in the index.
-3. **`docs/BRIEFING.md` §9–10** — component library list (`web/components/dockyard/*`) and route → API map.
+3. **`docs/BRIEFING.md` §9–10** — component library list (`web/components/dockyrd/*`) and route → API map.
 
 Existing artboards are the default contract. Do not invent alternate information architecture (e.g. removed "Add service" header button stays removed).
 
 ## Implementation rules
 
-- Reuse **`web/components/dockyard/ui/*`** primitives (Storybook catalog) and **`web/components/dockyard/*`** composites before one-off page markup; extend `ui/` when a pattern repeats. See [storybook-ui-source](storybook-ui-source.mdc) — **stories and product import the same components**.
+- Reuse **`web/components/dockyrd/ui/*`** primitives (Storybook catalog) and **`web/components/dockyrd/*`** composites before one-off page markup; extend `ui/` when a pattern repeats. See [storybook-ui-source](storybook-ui-source.mdc) — **stories and product import the same components**.
 - Match **tokens** (colors, radii, Geist/Geist Mono roles) from design-index — implement as CSS variables in `globals.css`.
 - **Accessibility:** real `<button>` / `<a>`, `aria-current="page"`, icon-only controls with `aria-label`, touch targets ≥ 44px where design specifies.
 - **English UI copy** in the product (design language).

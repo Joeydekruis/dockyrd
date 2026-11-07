@@ -1,7 +1,7 @@
 import {
   StatusBadge,
   type StatusVariant,
-} from "@/components/dockyard/ui/status-badge";
+} from "@/components/dockyrd/ui/status-badge";
 
 export type ContainerTableRow = {
   id: string;

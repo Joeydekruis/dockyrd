@@ -11,7 +11,7 @@ const meta = {
     docs: {
       description: {
         component:
-          "Stories mirror design-index tokens and briefing primitives. Each story imports web/components/dockyard/ui/* — the same modules the panel uses.",
+          "Stories mirror design-index tokens and briefing primitives. Each story imports web/components/dockyrd/ui/* — the same modules the panel uses.",
       },
     },
   },

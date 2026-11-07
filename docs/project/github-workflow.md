@@ -1,6 +1,6 @@
 # GitHub workflow (open source)
 
-Dockyard is managed **entirely on GitHub**: issues, milestones, discussions, and pull requests. There is **no Linear** (or other external PM tool).
+dockyrd is managed **entirely on GitHub**: issues, milestones, discussions, and pull requests. There is **no Linear** (or other external PM tool).
 
 ## Backlog
 

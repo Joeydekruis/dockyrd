@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { ChartPanel } from "@/components/dockyard/ui/chart-panel";
+import { ChartPanel } from "@/components/dockyrd/ui/chart-panel";
 import {
   type TimeRange,
   TimeRangeToggle,
-} from "@/components/dockyard/ui/time-range-toggle";
+} from "@/components/dockyrd/ui/time-range-toggle";
 
 type ProjectHardwareUsageSectionProps = {
   projectName: string;

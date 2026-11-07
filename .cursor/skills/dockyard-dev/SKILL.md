@@ -1,11 +1,11 @@
 ---
-name: dockyard-dev
+name: dockyrd-dev
 description: >-
-  Dockyard monorepo dev loop — embed build, code generation, local serve,
+  dockyrd monorepo dev loop — embed build, code generation, local serve,
   Radix check. Use when touching Go API, SQLite, web UI, or Makefile.
 ---
 
-# Dockyard development
+# dockyrd development
 
 Read **`docs/BRIEFING.md` §5–6** and **`docs/project/setup.md`**.
 
@@ -23,7 +23,7 @@ make lint
 ```bash
 pnpm --dir web install
 pnpm --dir web build    # → web/out
-go build -o dockyard ./cmd/dockyard
+go build -o dockyrd ./cmd/dockyrd
 ```
 
 Never commit `web/out`.
@@ -45,9 +45,9 @@ Base UI only — no `@radix-ui/*`, avoid cmdk/vaul.
 
 ## UI work
 
-- Contract: `docs/design-index.json`, components in `web/components/dockyard/`
+- Contract: `docs/design-index.json`, components in `web/components/dockyrd/`
 - Tokens: `web/styles/globals.css`
-- Rule: [dockyard-design-contract](../../rules/dockyard-design-contract.mdc)
+- Rule: [dockyrd-design-contract](../../rules/dockyrd-design-contract.mdc)
 
 ## Integration / e2e
 

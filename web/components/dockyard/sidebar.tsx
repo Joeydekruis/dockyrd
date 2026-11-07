@@ -3,7 +3,7 @@
 import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { DockyrdLogo } from "@/components/dockyard/dockyrd-logo";
+import { DockyrdLogo } from "@/components/dockyrd/dockyrd-logo";
 import {
   accountSettingsBackNav,
   accountSettingsNav,
@@ -35,7 +35,7 @@ function NavLink({
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
-      className="dockyard-nav-link"
+      className="dockyrd-nav-link"
     >
       <Icon strokeWidth={1.8} className="size-[18px] shrink-0" aria-hidden />
       <span>{label}</span>
@@ -50,7 +50,7 @@ function SettingsNavLink({ href, label, icon: Icon }: SettingsNavItem) {
     <Link
       href={href}
       aria-current={active ? "page" : undefined}
-      className="dockyard-nav-link"
+      className="dockyrd-nav-link"
     >
       <Icon strokeWidth={1.8} className="size-[18px] shrink-0" aria-hidden />
       <span>{label}</span>
@@ -70,7 +70,7 @@ function SettingsSidebarShell({
   const BackIcon = back.icon;
   return (
     <nav aria-label="Settings" className="flex flex-col gap-1">
-      <Link href={back.href} className="dockyard-nav-link">
+      <Link href={back.href} className="dockyrd-nav-link">
         <BackIcon
           strokeWidth={1.8}
           className="size-[18px] shrink-0"
@@ -156,7 +156,7 @@ export function Sidebar() {
 
   return (
     <aside
-      className="fixed bottom-0 left-0 z-40 flex w-[232px] shrink-0 flex-col overflow-y-auto border-r px-4 py-6 top-[var(--dockyard-announcement-height,44px)]"
+      className="fixed bottom-0 left-0 z-40 flex w-[232px] shrink-0 flex-col overflow-y-auto border-r px-4 py-6 top-[var(--dockyrd-announcement-height,44px)]"
       style={{ background: "var(--page-bg)", borderColor: "var(--border)" }}
     >
       <Link href="/" className="mb-8 inline-block" aria-label="Dockyrd home">

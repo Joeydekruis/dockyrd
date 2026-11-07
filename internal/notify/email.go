@@ -47,9 +47,9 @@ func (s *EmailSender) Render(ev EventView, _ ChannelConfig, publicBase string) (
 }
 
 func emailSubject(ev EventView) string {
-	prefix := "[Dockyard]"
+	prefix := "[dockyrd]"
 	if ev.State == StateResolved {
-		prefix = "[Dockyard] [RESOLVED]"
+		prefix = "[dockyrd] [RESOLVED]"
 	}
 	level := strings.ToUpper(string(ev.Level))
 	title := strings.TrimSpace(ev.Title)
@@ -69,11 +69,11 @@ func emailBody(ev EventView, publicBase string) string {
 	}
 	link := absoluteURL(publicBase, ev.Href)
 	if link != "" {
-		b.WriteString("Open in Dockyard:\n")
+		b.WriteString("Open in dockyrd:\n")
 		b.WriteString(link)
 		b.WriteString("\n")
 	}
-	b.WriteString("\nSent by Dockyard.\n")
+	b.WriteString("\nSent by dockyrd.\n")
 	return b.String()
 }
 
@@ -91,7 +91,7 @@ func (s *EmailSender) Send(ctx context.Context, _ ChannelConfig, _ ChannelSecret
 	}
 	subject := r.Headers["Subject"]
 	if subject == "" {
-		subject = "Dockyard notification"
+		subject = "dockyrd notification"
 	}
 	from := smtpFromAddress(smtpCfg)
 	sendErr := mail.SendPlain(smtpCfg, to, subject, string(r.Body))

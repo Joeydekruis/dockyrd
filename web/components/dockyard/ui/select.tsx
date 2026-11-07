@@ -13,7 +13,7 @@ import { createPortal } from "react-dom";
 import {
   isSelectMenuOutsideClick,
   useSelectMenuPosition,
-} from "@/components/dockyard/ui/use-select-menu-position";
+} from "@/components/dockyrd/ui/use-select-menu-position";
 
 export type SelectOption = {
   value: string;

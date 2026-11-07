@@ -1,6 +1,6 @@
 # Your first app
 
-This guide assumes Dockyard is installed and you completed setup.
+This guide assumes dockyrd is installed and you completed setup.
 
 ## 1. Create a project
 
@@ -14,7 +14,7 @@ In the dashboard, open **Projects → Create project**. Projects group services 
 - **Docker image** — deploy a public image (M1 path).
 - **Static site** — build output from Git or upload (M2 path).
 
-Set a subdomain or custom domain under **Domains**. Dockyard configures HTTPS via Caddy.
+Set a subdomain or custom domain under **Domains**. dockyrd configures HTTPS via Caddy.
 
 ## 3. Add Postgres (optional)
 
@@ -30,6 +30,6 @@ Trigger a deploy from the app detail or via `git push`. Watch build logs and the
 
 ## Next.js
 
-Use App Router with environment variables pointing at the managed Postgres URL. Ensure `output: 'standalone'` or Railpack defaults for Node apps — see briefing §4 for the recommended static-export pattern for the **Dockyard panel itself** (not necessarily your apps).
+Use App Router with environment variables pointing at the managed Postgres URL. Ensure `output: 'standalone'` or Railpack defaults for Node apps — see briefing §4 for the recommended static-export pattern for the **dockyrd panel itself** (not necessarily your apps).
 
 For DNS and TLS tips, see [troubleshooting](./troubleshooting.md).

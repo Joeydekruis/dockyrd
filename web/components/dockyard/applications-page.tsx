@@ -2,18 +2,18 @@
 
 import { Box, Plus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CreateApplicationWizard } from "@/components/dockyard/create-application-wizard";
-import { DashboardShell } from "@/components/dockyard/dashboard-shell";
-import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
+import { CreateApplicationWizard } from "@/components/dockyrd/create-application-wizard";
+import { DashboardShell } from "@/components/dockyrd/dashboard-shell";
+import { DockyrdPageLoading } from "@/components/dockyrd/dockyrd-page-loading";
 import {
   type ResourceProvisionContext,
   ResourceProvisioningModal,
-} from "@/components/dockyard/resource-provisioning-modal";
-import { Button } from "@/components/dockyard/ui/button";
-import { PageHeader } from "@/components/dockyard/ui/page-header";
-import { ResourceListSection } from "@/components/dockyard/ui/resource-list-section";
-import { ResourceRow } from "@/components/dockyard/ui/resource-row";
-import { StatCard } from "@/components/dockyard/ui/stat-card";
+} from "@/components/dockyrd/resource-provisioning-modal";
+import { Button } from "@/components/dockyrd/ui/button";
+import { PageHeader } from "@/components/dockyrd/ui/page-header";
+import { ResourceListSection } from "@/components/dockyrd/ui/resource-list-section";
+import { ResourceRow } from "@/components/dockyrd/ui/resource-row";
+import { StatCard } from "@/components/dockyrd/ui/stat-card";
 import { type ApplicationRow, listApplications } from "@/lib/api";
 import {
   formatResourceCount,

@@ -1,4 +1,4 @@
-# Dockyard — project
+# dockyrd — project
 
 Self-hosted, open-source deploy platform: one Go binary, Docker workloads, Caddy edge, SQLite control plane, embedded Next.js dashboard.
 
@@ -26,9 +26,9 @@ Self-hosted, open-source deploy platform: one Go binary, Docker workloads, Caddy
 
 ## Naming
 
-- Product/binary/docs: **Dockyard**
+- Product/binary/docs: **dockyrd**
 - Dashboard UI / logo: **Dockyrd** (see `.cursor/rules/product-naming.mdc`)
 
 ## Quality bar (summary)
 
-Briefing §19 Definition of Done + stack rules in `.cursor/rules/dockyard-*.mdc`. No `@radix-ui/*` in `web/`. Panel must not depend on external font CDNs.
+Briefing §19 Definition of Done + stack rules in `.cursor/rules/dockyrd-*.mdc`. No `@radix-ui/*` in `web/`. Panel must not depend on external font CDNs.

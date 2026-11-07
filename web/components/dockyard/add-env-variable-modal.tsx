@@ -1,11 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Button } from "@/components/dockyard/ui/button";
-import { Field } from "@/components/dockyard/ui/field";
-import { Modal } from "@/components/dockyard/ui/modal";
-import { Switch } from "@/components/dockyard/ui/switch";
-import { Tabs } from "@/components/dockyard/ui/tabs";
+import { Button } from "@/components/dockyrd/ui/button";
+import { Field } from "@/components/dockyrd/ui/field";
+import { Modal } from "@/components/dockyrd/ui/modal";
+import { Switch } from "@/components/dockyrd/ui/switch";
+import { Tabs } from "@/components/dockyrd/ui/tabs";
 import { parseEnvPaste } from "@/lib/parse-env";
 
 export type NewEnvVariable = {

@@ -10,16 +10,16 @@ import {
   NetworkTab,
   OverviewTab,
   rangeLabelFromRange,
-} from "@/components/dockyard/analytics/analytics-tab-views";
+} from "@/components/dockyrd/analytics/analytics-tab-views";
 import {
   type AnalyticsTabId,
   useAnalyticsData,
-} from "@/components/dockyard/analytics/use-analytics-data";
-import { DashboardShell } from "@/components/dockyard/dashboard-shell";
-import { Chip } from "@/components/dockyard/ui/chip";
-import { PageHeader } from "@/components/dockyard/ui/page-header";
-import { Tabs } from "@/components/dockyard/ui/tabs";
-import { TimeRangeToggle } from "@/components/dockyard/ui/time-range-toggle";
+} from "@/components/dockyrd/analytics/use-analytics-data";
+import { DashboardShell } from "@/components/dockyrd/dashboard-shell";
+import { Chip } from "@/components/dockyrd/ui/chip";
+import { PageHeader } from "@/components/dockyrd/ui/page-header";
+import { Tabs } from "@/components/dockyrd/ui/tabs";
+import { TimeRangeToggle } from "@/components/dockyrd/ui/time-range-toggle";
 import { formatBytes, formatUptime } from "@/lib/analytics-stats";
 import { useUserLocale } from "@/lib/user-locale-context";
 

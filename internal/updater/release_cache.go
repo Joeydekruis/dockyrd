@@ -65,7 +65,7 @@ func (c *ReleaseCache) RefreshManual(ctx context.Context, current string, opts O
 		snap := c.Snapshot()
 		snap.ManualRateLimited = true
 		snap.Err = fmt.Errorf(
-			"manual update check limit reached (%d per hour without a GitHub token). Try again in %s or set DOCKYARD_GITHUB_TOKEN in dockyard.env",
+			"manual update check limit reached (%d per hour without a GitHub token). Try again in %s or set dockyrd_GITHUB_TOKEN in dockyrd.env",
 			MaxManualRefreshPerHour,
 			retryAfter.Round(time.Minute),
 		)

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { Snackbar, SnackbarViewport } from "@/components/dockyard/ui/snackbar";
+import { Snackbar, SnackbarViewport } from "@/components/dockyrd/ui/snackbar";
 
 const meta = {
   title: "Design/Components/Snackbar",
@@ -72,7 +72,7 @@ export const AllVariants: Story = {
         <Snackbar
           tone="info"
           title="Update available"
-          description="Dockyard v0.0.28 is ready to install."
+          description="dockyrd v0.0.28 is ready to install."
           actionLabel="View"
           onAction={() => undefined}
           progress={72}

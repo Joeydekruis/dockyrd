@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
-import { Button } from "@/components/dockyard/ui/button";
-import { ConfirmDialog } from "@/components/dockyard/ui/confirm-dialog";
+import { Button } from "@/components/dockyrd/ui/button";
+import { ConfirmDialog } from "@/components/dockyrd/ui/confirm-dialog";
 
 const meta = {
   title: "Design/Components/Confirm dialog",

@@ -2,16 +2,16 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AppHeader } from "@/components/dockyard/app-header";
+import { AppHeader } from "@/components/dockyrd/app-header";
 import {
   CommandPalette,
   useCommandPalette,
-} from "@/components/dockyard/command-palette";
-import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
-import { Sidebar } from "@/components/dockyard/sidebar";
-import { BANNER_HEIGHT_PX, TopBar } from "@/components/dockyard/top-bar";
-import { isAnnouncementDismissed } from "@/components/dockyard/ui/announcement-banner";
-import { UpdateAvailableNotifier } from "@/components/dockyard/update-available-modal";
+} from "@/components/dockyrd/command-palette";
+import { DockyrdPageLoading } from "@/components/dockyrd/dockyrd-page-loading";
+import { Sidebar } from "@/components/dockyrd/sidebar";
+import { BANNER_HEIGHT_PX, TopBar } from "@/components/dockyrd/top-bar";
+import { isAnnouncementDismissed } from "@/components/dockyrd/ui/announcement-banner";
+import { UpdateAvailableNotifier } from "@/components/dockyrd/update-available-modal";
 import { getMe, type MeResponse } from "@/lib/api";
 import { isAccountSettingsPath, isSettingsPath } from "@/lib/nav";
 import { SnackbarProvider } from "@/lib/snackbar-context";
@@ -45,7 +45,7 @@ export function DashboardShell({
           ? `${BANNER_HEIGHT_PX}px`
           : "0px";
       document.documentElement.style.setProperty(
-        "--dockyard-announcement-height",
+        "--dockyrd-announcement-height",
         px,
       );
     },
@@ -106,14 +106,14 @@ export function DashboardShell({
             className="flex min-h-dvh flex-col pl-[232px]"
             style={{
               paddingTop: bannerVisible
-                ? "var(--dockyard-announcement-height, 44px)"
+                ? "var(--dockyrd-announcement-height, 44px)"
                 : 0,
             }}
           >
             <div
               className="sticky z-20 shrink-0"
               style={{
-                top: "var(--dockyard-announcement-height, 44px)",
+                top: "var(--dockyrd-announcement-height, 44px)",
                 background: "var(--page-bg)",
               }}
             >

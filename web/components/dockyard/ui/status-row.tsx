@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { StatusBadge } from "@/components/dockyard/ui/status-badge";
+import { StatusBadge } from "@/components/dockyrd/ui/status-badge";
 
 type StatusRowProps = {
   title: string;

@@ -1,4 +1,4 @@
-import { EmailSettingsPage } from "@/components/dockyard/email-settings-page";
+import { EmailSettingsPage } from "@/components/dockyrd/email-settings-page";
 
 export default function ServerEmailSettingsPage() {
   return <EmailSettingsPage />;

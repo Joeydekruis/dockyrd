@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import {
   ContainerTable,
   type ContainerTableRow,
-} from "@/components/dockyard/ui/container-table";
+} from "@/components/dockyrd/ui/container-table";
 
 const sampleRows: ContainerTableRow[] = [
   {

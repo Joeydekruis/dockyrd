@@ -7,7 +7,7 @@ import (
 
 const appsCgroupParent = "dy-apps.slice"
 
-// MutateInput controls dockyard-specific compose mutations.
+// MutateInput controls dockyrd-specific compose mutations.
 type MutateInput struct {
 	ServiceID      string
 	DeploymentID   string
@@ -61,7 +61,7 @@ func mutateService(name string, svc map[string]any, in MutateInput) (map[string]
 			warnings = append(warnings, Issue{
 				Rule:    "ports",
 				Warning: true,
-				Message: fmt.Sprintf("service %q: stripped host ports (use a Dockyard domain)", name),
+				Message: fmt.Sprintf("service %q: stripped host ports (use a dockyrd domain)", name),
 			})
 		}
 	}
@@ -69,12 +69,12 @@ func mutateService(name string, svc map[string]any, in MutateInput) (map[string]
 	if labels == nil {
 		labels = map[string]any{}
 	}
-	labels["dev.dockyard.managed"] = "true"
-	labels["dev.dockyard.server"] = in.ServerID
-	labels["dev.dockyard.project"] = in.ProjectID
-	labels["dev.dockyard.service"] = in.ServiceID
-	labels["dev.dockyard.kind"] = "compose"
-	labels["dev.dockyard.deployment"] = in.DeploymentID
+	labels["dev.dockyrd.managed"] = "true"
+	labels["dev.dockyrd.server"] = in.ServerID
+	labels["dev.dockyrd.project"] = in.ProjectID
+	labels["dev.dockyrd.service"] = in.ServiceID
+	labels["dev.dockyrd.kind"] = "compose"
+	labels["dev.dockyrd.deployment"] = in.DeploymentID
 	labels["com.docker.compose.service"] = name
 	labels["com.docker.compose.project"] = ProjectName(in.ServiceID)
 	svc["labels"] = labels

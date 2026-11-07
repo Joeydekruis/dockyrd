@@ -4,20 +4,20 @@ import { Hammer, Rocket, Settings } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { ServiceBuildLocationPanel } from "@/components/dockyard/service-build-location-panel";
-import { ServicePreviewSettingsCard } from "@/components/dockyard/service-preview-settings-card";
-import { Button } from "@/components/dockyard/ui/button";
-import { DangerZone } from "@/components/dockyard/ui/danger-zone";
-import { Field } from "@/components/dockyard/ui/field";
-import { Modal } from "@/components/dockyard/ui/modal";
-import { SelectField } from "@/components/dockyard/ui/select-field";
+import { ServiceBuildLocationPanel } from "@/components/dockyrd/service-build-location-panel";
+import { ServicePreviewSettingsCard } from "@/components/dockyrd/service-preview-settings-card";
+import { Button } from "@/components/dockyrd/ui/button";
+import { DangerZone } from "@/components/dockyrd/ui/danger-zone";
+import { Field } from "@/components/dockyrd/ui/field";
+import { Modal } from "@/components/dockyrd/ui/modal";
+import { SelectField } from "@/components/dockyrd/ui/select-field";
 import {
   SettingsCopyPill,
   SettingsDetailBlock,
   SettingsEnabledStatus,
   SettingsGroupHeading,
-} from "@/components/dockyard/ui/settings-detail-block";
-import { Switch } from "@/components/dockyard/ui/switch";
+} from "@/components/dockyrd/ui/settings-detail-block";
+import { Switch } from "@/components/dockyrd/ui/switch";
 import {
   createServiceDeployToken,
   deletePanelService,
@@ -149,7 +149,7 @@ export function ApplicationSettingsTab({
       const tail = res.workflow.includes("/")
         ? res.workflow.split("/").pop()
         : null;
-      const name = tail && tail.length > 0 ? tail : "dockyard.yml";
+      const name = tail && tail.length > 0 ? tail : "dockyrd.yml";
       const anchor = document.createElement("a");
       anchor.href = url;
       anchor.download = name;
@@ -298,7 +298,7 @@ export function ApplicationSettingsTab({
               rows={[
                 {
                   label: "File",
-                  value: ".github/workflows/dockyard.yml",
+                  value: ".github/workflows/dockyrd.yml",
                   span: 2,
                 },
               ]}

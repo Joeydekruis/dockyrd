@@ -1,4 +1,4 @@
-import { InstanceSettingsPage } from "@/components/dockyard/instance-settings-page";
+import { InstanceSettingsPage } from "@/components/dockyrd/instance-settings-page";
 
 export default function ServerGeneralSettingsPage() {
   return <InstanceSettingsPage />;

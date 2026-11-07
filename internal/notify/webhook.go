@@ -54,7 +54,7 @@ func (w *WebhookSender) Render(ev EventView, cfg ChannelConfig, publicBase strin
 	}
 	link := absoluteURL(publicBase, ev.Href)
 	payload := map[string]any{
-		"schema":      "dockyard.notification.v1",
+		"schema":      "dockyrd.notification.v1",
 		"id":          ev.ID,
 		"type":        ev.Type,
 		"level":       string(ev.Level),
@@ -91,11 +91,11 @@ func (w *WebhookSender) Send(ctx context.Context, cfg ChannelConfig, secret Chan
 	}
 	req.Header.Set("Content-Type", r.ContentType)
 	req.Header.Set("User-Agent", userAgent(deps.Version))
-	req.Header.Set("X-Dockyard-Event", meta.EventType)
-	req.Header.Set("X-Dockyard-Delivery", meta.DeliveryID)
-	req.Header.Set("X-Dockyard-Timestamp", ts)
+	req.Header.Set("X-dockyrd-Event", meta.EventType)
+	req.Header.Set("X-dockyrd-Delivery", meta.DeliveryID)
+	req.Header.Set("X-dockyrd-Timestamp", ts)
 	if signingSecret != "" {
-		req.Header.Set("X-Dockyard-Signature", "sha256="+sig)
+		req.Header.Set("X-dockyrd-Signature", "sha256="+sig)
 	}
 	if headers, ok := secret["headers"].(map[string]any); ok {
 		for k, v := range headers {
@@ -115,7 +115,7 @@ func (w *WebhookSender) Send(ctx context.Context, cfg ChannelConfig, secret Chan
 	return classifyHTTPResult(resp, targetURL, meta)
 }
 
-// VerifyWebhookSignature validates dockyard.notification.v1 HMAC (for tests/docs).
+// VerifyWebhookSignature validates dockyrd.notification.v1 HMAC (for tests/docs).
 func VerifyWebhookSignature(secret string, ts string, body []byte, sigHex string, now time.Time) bool {
 	mac := hmac.New(sha256.New, []byte(secret))
 	_, _ = mac.Write([]byte(ts + "."))
@@ -151,7 +151,7 @@ func MaskWebhookURL(raw string) string {
 // WebhookPayloadForTest builds a test.ping body.
 func WebhookPayloadForTest(deliveryID string, now time.Time) ([]byte, error) {
 	payload := map[string]any{
-		"schema":      "dockyard.notification.v1",
+		"schema":      "dockyrd.notification.v1",
 		"id":          deliveryID,
 		"type":        TypeTestPing,
 		"level":       string(LevelInfo),

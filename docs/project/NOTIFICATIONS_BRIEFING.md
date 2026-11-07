@@ -1,8 +1,8 @@
 # Dockyrd: briefing "Notificatiekanalen" (Slack, Discord, e-mail, webhook)
 
 > Status: bouwbriefing, Feature-track · Datum: 5 november 2026 · Eigenaar: Joey de Kruis
-> Aanleiding: een mislukte deploy, volle disk, verlopen certificaat of mislukte backup moet je bereiken zonder dat het dashboard open staat. Briefing `DOCKYARD_BRIEFING.md` §1.2 (v0.2: "Events-tabel bestaat al; alleen kanalen toevoegen").
-> Bronnen: codebase `dockyrd` (branch `development`, v0.0.45), `DOCKYARD_BRIEFING.md` §3, §8.3, §11.4, §15, `RESOURCE_LINKING_BRIEFING.md` (conventies), externe docs (bijlage D).
+> Aanleiding: een mislukte deploy, volle disk, verlopen certificaat of mislukte backup moet je bereiken zonder dat het dashboard open staat. Briefing `dockyrd_BRIEFING.md` §1.2 (v0.2: "Events-tabel bestaat al; alleen kanalen toevoegen").
+> Bronnen: codebase `dockyrd` (branch `development`, v0.0.45), `dockyrd_BRIEFING.md` §3, §8.3, §11.4, §15, `RESOURCE_LINKING_BRIEFING.md` (conventies), externe docs (bijlage D).
 
 ---
 
@@ -43,7 +43,7 @@ Per-user kanalen, Slack/Discord-OAuth-apps en interactieve knoppen (ack vanuit S
 
 | Eis | Meetbare invulling |
 |---|---|
-| Lightweight | **Geen nieuwe Go-dependencies.** Alleen `net/http`, `net/smtp`, `crypto/hmac`. Idle: dispatcher is één goroutine met een tick van 2 s + wake-channel; Dockyard blijft < 60 MB RSS (`scripts/measure-rss.sh` voor/na) |
+| Lightweight | **Geen nieuwe Go-dependencies.** Alleen `net/http`, `net/smtp`, `crypto/hmac`. Idle: dispatcher is één goroutine met een tick van 2 s + wake-channel; dockyrd blijft < 60 MB RSS (`scripts/measure-rss.sh` voor/na) |
 | Stabiel | `Emit` blokkeert nooit en faalt nooit een deploy/backup: alleen een korte DB-transactie, geen netwerk-IO, nil-safe |
 | Betrouwbaar | Een event dat is gecommit wordt bezorgd of expliciet `dead` gemarkeerd (zichtbaar in UI). Na `kill -9` geen verlies, hooguit een dubbel bericht (at-least-once, delivery-ID als idempotentiesleutel) |
 | Veilig | Secrets versleuteld (AES-GCM, bestaande master-key), nooit in API/logs; SSRF-guard; geen redirects; geen secret-waarden in berichten |
@@ -64,14 +64,14 @@ Alles hieronder is gelezen in de repo (branch `development`, `package.json` v0.0
 | SMTP | Instance-instelling `smtp` in `settings` (wachtwoord AES-GCM met `crypto.LoadMasterKey(cfg.SecretKeyPath())`), test-endpoint, `email_log` (+API `settings/email/log`). `recordEmailLog` zit in package `server`, niet in `inbox` | `instance/settings.go`, `server/api_instance.go`, `server/api_email_log.go` |
 | Mail-versturen | `smtp.SendMail`/eigen TLS-pad. **Geen dial-/totaal-timeout**, headers worden niet gesaneerd (CRLF), subject niet RFC 2047-gecodeerd, geen `Date`/`Message-ID` | `mail/smtp.go` |
 | Job-queue | SQLite `jobs`, **één serieel loop** (`RunLoop`, 2 s). `FailJob` zet `failed` zonder retry; `RequeueJob` bestaat maar wordt niet gebruikt; een `running` job na crash wordt niet teruggezet. Deploy-builds mogen 20 min duren | `jobs/worker.go`, `db/queries/jobs.sql` |
-| Disk | Host-collector schrijft elke 10 s `metric_host` (`disk_used/total` van `cfg.DataDir`). Enige drempel: build-guard `DOCKYARD_MIN_FREE_DISK_PERCENT` (10 %). **Geen alert** | `metrics/collector.go`, `build/guard.go` |
+| Disk | Host-collector schrijft elke 10 s `metric_host` (`disk_used/total` van `cfg.DataDir`). Enige drempel: build-guard `dockyrd_MIN_FREE_DISK_PERCENT` (10 %). **Geen alert** | `metrics/collector.go`, `build/guard.go` |
 | Certificaat | Kolommen `domains.cert_status`/`cert_expires_at` bestaan; **niets vult ze** (alleen het API-antwoord leest ze) | `migrations/00001`, `server/api_domains.go` |
 | Backup | `backup.Runner.runDestination` schrijft `database_backup_runs.status='failed'` en geeft de fout terug; `ProcessOnce` logt alleen ("job failed"). Runner heeft geen Events/Inbox-veld | `backup/runner.go:110-156` |
 | Container-restarts | `metric_container.restarts` wordt hard op `0` gezet | `metrics/container_collector.go:50` |
 | Reconciler | Elke 30 s. `Tick` roept **onvoorwaardelijk** `MarkInterruptedDeployments` aan: een bulk-`UPDATE` die elke deployment met status `building`/`starting`/`healthchecking` op `failed` + `error='interrupted'` zet (geen guard zoals `thawed`, geen lease-check). De deploy-runtime zet precies die statussen tijdens een lopende build (`runtime.go:88/109/211`, `static.go:49`). **Dit lijkt een bug** (de briefing §3.3 bedoelt dit alleen bij herstart); zie §2.1 gat 7. Er gaat geen notificatie uit | `reconcile/reconcile.go:29-37`, `db/queries/deployments.sql:127`, `deploy/runtime.go` |
 | Housekeeping | Reconciler ruimt elke 10e tick images op; er is geen prune van `events` of bezorglogs | `reconcile/reconcile.go` |
 | API-stijl | **Plain `net/http` `ServeMux` + `writeJSON`/`writeJSONError`, `requireAdmin`/`requireUser`**, tests via `testMuxWithOwnerSession`. Huma staat wel in de briefing en `AGENTS.md`, maar **niet in `go.mod`** | `server/api_*.go`, `go.mod` |
-| UI | Settings → Server → Email (`email-settings-page.tsx`) is het patroon (cards, `Modal`, `StatusBadge`, log-modal). Inbox-UI heet `notifications-*` (let op naamconflict) | `web/components/dockyard/` |
+| UI | Settings → Server → Email (`email-settings-page.tsx`) is het patroon (cards, `Modal`, `StatusBadge`, log-modal). Inbox-UI heet `notifications-*` (let op naamconflict) | `web/components/dockyrd/` |
 | Wiring | Alle achtergrondtaken starten in `server/runtime.go: startBackground` | `server/runtime.go` |
 
 ### 2.1 Gaten die dit oplevert (belangrijk)
@@ -171,9 +171,9 @@ internal/
 ├── db/queries/notifications.sql
 └── server/api_notifications.go   # registerNotificationRoutes (mux), admin only
 web/
-├── components/dockyard/notification-channels-settings-page.tsx   # NIET "notifications-*" (inbox)
-├── components/dockyard/notification-channel-modal.tsx
-├── components/dockyard/notification-delivery-log-modal.tsx
+├── components/dockyrd/notification-channels-settings-page.tsx   # NIET "notifications-*" (inbox)
+├── components/dockyrd/notification-channel-modal.tsx
+├── components/dockyrd/notification-delivery-log-modal.tsx
 └── app/settings/server/channels/page.tsx
 docs/user/notifications.md
 scripts/verify-notify-smoke.sh
@@ -191,7 +191,7 @@ type Event struct {
     Type         string         // stabiele sleutel, bv. "backup.failed" (verplicht)
     Level        Level
     State        State          // alleen voor stateful types
-    DedupKey     string         // verplicht bij stateful, bv. "disk:/var/lib/dockyard", "backup:<serviceID>:remote"
+    DedupKey     string         // verplicht bij stateful, bv. "disk:/var/lib/dockyrd", "backup:<serviceID>:remote"
     Title        string         // kort, zonder markup
     Detail       string         // ≤ 500 tekens, gescrubd (zie §8.5)
     ProjectID    string
@@ -322,7 +322,7 @@ CREATE TABLE alert_state (
 );
 
 CREATE TABLE notification_deliveries (
-  id              TEXT PRIMARY KEY,                           -- = X-Dockyard-Delivery (idempotentiesleutel)
+  id              TEXT PRIMARY KEY,                           -- = X-dockyrd-Delivery (idempotentiesleutel)
   event_id        TEXT NOT NULL REFERENCES events(id) ON DELETE CASCADE,
   channel_id      TEXT NOT NULL REFERENCES notification_channels(id) ON DELETE CASCADE,
   target          TEXT NOT NULL DEFAULT '',                   -- e-mail: ontvanger; anders ''
@@ -478,7 +478,7 @@ type Result struct { OK bool; HTTPStatus int; RetryAfter time.Duration; Permanen
 
 Registry: `map[string]Sender`, vast ingebouwd. Geen plugin-systeem.
 
-**Gedeelde HTTP-client** (`netsafe.go`): één `http.Client` per proces met `Timeout: 10s`, `CheckRedirect: return http.ErrUseLastResponse`, een `Transport` met `DialContext` die **na DNS-resolutie** het IP checkt (zie §8.1), `MaxIdleConns` klein, `ForceAttemptHTTP2: true`, en een expliciete `User-Agent: Dockyard/<version> (+https://dockyrd.io)`. **Fouten worden omgezet naar een redactie-veilige string** (Go's `*url.Error` bevat de volledige URL, dus het Slack-/Discord-token, in `err.Error()`; nooit ruw loggen of opslaan, §8.2).
+**Gedeelde HTTP-client** (`netsafe.go`): één `http.Client` per proces met `Timeout: 10s`, `CheckRedirect: return http.ErrUseLastResponse`, een `Transport` met `DialContext` die **na DNS-resolutie** het IP checkt (zie §8.1), `MaxIdleConns` klein, `ForceAttemptHTTP2: true`, en een expliciete `User-Agent: dockyrd/<version> (+https://dockyrd.io)`. **Fouten worden omgezet naar een redactie-veilige string** (Go's `*url.Error` bevat de volledige URL, dus het Slack-/Discord-token, in `err.Error()`; nooit ruw loggen of opslaan, §8.2).
 
 ### 7.2 Slack (incoming webhook)
 
@@ -541,18 +541,18 @@ Registry: `map[string]Sender`, vast ingebouwd. Geen plugin-systeem.
 
 | Header | Inhoud |
 |---|---|
-| `User-Agent` | `Dockyard/<versie> (+https://dockyrd.io)` |
-| `X-Dockyard-Event` | bv. `backup.failed` |
-| `X-Dockyard-Delivery` | delivery-ID (ULID) = idempotentiesleutel |
-| `X-Dockyard-Timestamp` | unix-seconden |
-| `X-Dockyard-Signature` | `sha256=<hex>` = HMAC-SHA256(`signing_secret`, `timestamp + "." + body`) |
+| `User-Agent` | `dockyrd/<versie> (+https://dockyrd.io)` |
+| `X-dockyrd-Event` | bv. `backup.failed` |
+| `X-dockyrd-Delivery` | delivery-ID (ULID) = idempotentiesleutel |
+| `X-dockyrd-Timestamp` | unix-seconden |
+| `X-dockyrd-Signature` | `sha256=<hex>` = HMAC-SHA256(`signing_secret`, `timestamp + "." + body`) |
 | eigen headers | uit `secret_enc.headers` (bv. `Authorization`); nooit gelogd |
 
-- **Payload `dockyard.notification.v1`:**
+- **Payload `dockyrd.notification.v1`:**
 
 ```json
 {
-  "schema": "dockyard.notification.v1",
+  "schema": "dockyrd.notification.v1",
   "id": "01JC9K2M7Q…",
   "type": "disk.high",
   "level": "warning",
@@ -584,7 +584,7 @@ ok := hmac.Equal(mac.Sum(nil), sigBytes) && abs(now-ts) < 300
 Hergebruikt de instance-SMTP (`instance.LoadSMTPConfig`); geen eigen SMTP per kanaal in v1. Het kanaal is **uitgeschakeld/waarschuwend** zolang SMTP niet geconfigureerd is (UI: "Configure SMTP first" met link naar `/settings/server/email`).
 
 - **Ontvangers:** `admins` (alle actieve owner/admin-users, `disabled_at IS NULL`), `user_ids`, `extra` (vrije adressen, gevalideerd met `net/mail.ParseAddress`, max. 20). Eén delivery per ontvanger.
-- **Inhoud:** `Subject: [Dockyard] <niveau-label> <titel>`; bijv. `[Dockyard] Backup failed · uploads-db`. Body `text/plain` (v1; HTML optioneel later) met: wat/waar, detail, deep-link, "Sent by Dockyard <instance>". Voor `firing`/`resolved` in de subject: `[RESOLVED]`-prefix.
+- **Inhoud:** `Subject: [dockyrd] <niveau-label> <titel>`; bijv. `[dockyrd] Backup failed · uploads-db`. Body `text/plain` (v1; HTML optioneel later) met: wat/waar, detail, deep-link, "Sent by dockyrd <instance>". Voor `firing`/`resolved` in de subject: `[RESOLVED]`-prefix.
 - **Headers:** `Date`, `Message-ID` (`<delivery-id@<host>>`), `Auto-Submitted: auto-generated`, `X-Auto-Response-Suppress: All`, `MIME-Version`, `Content-Type: text/plain; charset=UTF-8`, `Content-Transfer-Encoding: 8bit` (of quoted-printable). Subject met `mime.QEncoding.Encode("utf-8", s)`.
 - **Hardening in `mail` (F0):** zie §8.3. De e-mailsender gebruikt dezelfde `mail.Send…` met timeouts en logt elk verzonden/mislukt bericht in **`email_log`** met `kind = "notification"` (nu staat de log-aanroep in `server`; verplaats `recordEmailLog` naar een pakket dat zowel `server` als `notify` kan gebruiken, of geef `notify` een kleine `MailLog`-interface).
 - **Deliverability-beperking (eerlijk melden in docs):** alerts van een vers VPS-IP via eigen SMTP belanden makkelijk in spam. Advies: gebruik een transactionele SMTP-provider met eigen domein (SPF/DKIM); `From` hoort bij een domein dat die provider mag gebruiken.
@@ -658,11 +658,11 @@ Build-/foutmeldingen kunnen env-waarden bevatten. Hergebruik de **bestaande scru
 
 ### 9.2 Andere beperkingen
 
-- **At-least-once:** zeldzame dubbele berichten bij crash tussen verzenden en commit; webhooks kunnen dedupliceren op `X-Dockyard-Delivery`.
+- **At-least-once:** zeldzame dubbele berichten bij crash tussen verzenden en commit; webhooks kunnen dedupliceren op `X-dockyrd-Delivery`.
 - **Slack/Discord-rate-limits** kunnen bij een alert-storm berichten vertragen; dedup + pacing maken dit zeldzaam. Een digest (F4) is de echte oplossing.
 - **E-mail-deliverability** hangt af van de SMTP-provider (§7.5).
 - **Tijdzones:** berichten in UTC met ISO-8601 (webhook) of leesbare UTC (Slack/Discord/e-mail); geen locale-gedoe in v1.
-- **Meerdere Dockyard-servers naar één Slack-kanaal:** daarom `instance.name` (setting, default hostname) in elke footer/subject/payload.
+- **Meerdere dockyrd-servers naar één Slack-kanaal:** daarom `instance.name` (setting, default hostname) in elke footer/subject/payload.
 
 ---
 
@@ -705,7 +705,7 @@ POST   /api/v1/settings/notifications/deliveries/{id}/retry  (dead → pending)
 
 ## 11. UI
 
-Principes uit het design-contract blijven: Base UI (geen Radix), tokens, control-hoogte 44 px, mono-uppercase knoppen, UI-copy **Dockyrd**, primitives uit `web/components/dockyard/ui/`.
+Principes uit het design-contract blijven: Base UI (geen Radix), tokens, control-hoogte 44 px, mono-uppercase knoppen, UI-copy **Dockyrd**, primitives uit `web/components/dockyrd/ui/`.
 
 ### 11.1 Route en navigatie
 
@@ -789,7 +789,7 @@ Toon (ook in alle kanalen) wélke instance het is en tijd in UTC.
 - **Klaar als:**
   - mislukte deploy → bericht in Slack, Discord en webhook **binnen 10 s** (met echte test-kanalen), met correcte kleur/escaping/link;
   - kanaal geeft 500 → retries volgens schema; 429 + `Retry-After` wordt gerespecteerd; 404 → kanaal `disabled` + `channel_failed`-melding via inbox;
-  - `kill -9 dockyard` tijdens bezorging → na herstart wordt de delivery alsnog verstuurd (max. één dubbel);
+  - `kill -9 dockyrd` tijdens bezorging → na herstart wordt de delivery alsnog verstuurd (max. één dubbel);
   - secrets komen nergens in API/logs/DB-plaintext voor (test met token-URL);
   - SSRF-tests: `http://127.0.0.1`, `169.254.169.254`, `10.0.0.1`, DNS-naam die naar loopback wijst, redirect naar intern: **alle geweigerd**;
   - Footprint: idle RSS binnen +2 MB van de baseline.
@@ -919,7 +919,7 @@ volgende succesvolle backup ──► Emit(backup.succeeded, resolved) ──►
 | `internal/inbox/dispatch.go` | aanroepbaar vanuit `Notifier`; ontvanger-set teruggeven voor e-mail-dedup; later mail via outbox |
 | `internal/server/api_notifications.go`, `server/api_auth.go:82` | routes registreren |
 | `internal/server/api_events.go` (`eventNeedsAttention`, categorie-filter) | nieuwe types/categorieën meenemen |
-| `web/lib/api.ts`, `web/components/dockyard/notification-channels-*`, settings-zijnav, `web/app/settings/server/channels` | UI |
+| `web/lib/api.ts`, `web/components/dockyrd/notification-channels-*`, settings-zijnav, `web/app/settings/server/channels` | UI |
 | `docs/user/notifications.md`, `docs/BRIEFING.md` §1.2/§15, `CHANGELOG.md`, `docs/project/roadmap.md` | docs |
 
 ## Bijlage D: bronnen en wat is geverifieerd
@@ -937,4 +937,4 @@ Geverifieerd tijdens het schrijven:
 - Discord-gedrag rond `User-Agent` voor webhooks (we zetten er altijd een expliciete).
 - SQLite-versie-eigenschappen (`UPDATE … RETURNING`) voor `modernc.org/sqlite v1.36.0`; controleren met een unit-test.
 
-Intern: `internal/eventlog`, `internal/inbox`, `internal/mail`, `internal/jobs`, `internal/backup`, `internal/metrics`, `internal/instance`, `internal/reconcile`, `internal/server/api_*`, migraties `00001`–`00005`, `DOCKYARD_BRIEFING.md` §1.2, §3, §8.3, §11.4, §14, §15, `AGENTS.md`, `CLAUDE.md`.
+Intern: `internal/eventlog`, `internal/inbox`, `internal/mail`, `internal/jobs`, `internal/backup`, `internal/metrics`, `internal/instance`, `internal/reconcile`, `internal/server/api_*`, migraties `00001`–`00005`, `dockyrd_BRIEFING.md` §1.2, §3, §8.3, §11.4, §14, §15, `AGENTS.md`, `CLAUDE.md`.

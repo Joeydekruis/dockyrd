@@ -21,7 +21,7 @@ export default defineConfig({
     timeout: 120_000,
     env: {
       ...process.env,
-      E2E_SETUP_TOKEN_FILE: "/tmp/dockyard-e2e/etc/e2e-setup-token",
+      E2E_SETUP_TOKEN_FILE: "/tmp/dockyrd-e2e/etc/e2e-setup-token",
     },
   },
 });

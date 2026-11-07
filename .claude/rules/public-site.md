@@ -42,10 +42,10 @@ Build emits per-page `<title>`, description, canonical, Open Graph, `sitemap.xml
 
 ## Hosting
 
-Deploy the **`site/`** directory as a Dockyard **static site** (see `site/README.md`). Self-hosting Dockyrd on the same VPS is the expected setup.
+Deploy the **`site/`** directory as a dockyrd **static site** (see `site/README.md`). Self-hosting Dockyrd on the same VPS is the expected setup.
 
 ## Install command
 
-Until `get.dockyard.dev` is live, the public install one-liner uses the **raw GitHub** `scripts/install.sh` on **`development`**. Do not switch to `get.dockyrd.io` / `get.dockyard.dev` without an explicit product decision.
+Until `get.dockyrd.dev` is live, the public install one-liner uses the **raw GitHub** `scripts/install.sh` on **`development`**. Do not switch to `get.dockyrd.io` / `get.dockyrd.dev` without an explicit product decision.
 
-Cross-ref: [product-naming](../../.cursor/rules/product-naming.mdc) (Dockyard CLI vs Dockyrd UI).
+Cross-ref: [product-naming](../../.cursor/rules/product-naming.mdc) (dockyrd CLI vs Dockyrd UI).

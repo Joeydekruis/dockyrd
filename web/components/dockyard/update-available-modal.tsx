@@ -2,8 +2,8 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Alert } from "@/components/dockyard/ui/alert";
-import { Button } from "@/components/dockyard/ui/button";
+import { Alert } from "@/components/dockyrd/ui/alert";
+import { Button } from "@/components/dockyrd/ui/button";
 import { getServerInfo, type ServerInfo } from "@/lib/api";
 import { isServerUpdatesSettingsPath } from "@/lib/nav";
 

@@ -28,13 +28,13 @@ export function Switch({
         aria-label={label}
         disabled={disabled}
         onClick={() => onChange(!checked)}
-        className="dockyard-switch-track relative inline-flex h-6 w-11 shrink-0 rounded-full border-0 p-0"
+        className="dockyrd-switch-track relative inline-flex h-6 w-11 shrink-0 rounded-full border-0 p-0"
         style={{
           background: checked ? "var(--primary-button)" : "var(--input-border)",
         }}
       >
         <span
-          className="dockyard-switch-thumb absolute top-0.5 left-0.5 size-5 rounded-full bg-white shadow-sm"
+          className="dockyrd-switch-thumb absolute top-0.5 left-0.5 size-5 rounded-full bg-white shadow-sm"
           style={{ transform: checked ? "translateX(20px)" : "translateX(0)" }}
           aria-hidden
         />

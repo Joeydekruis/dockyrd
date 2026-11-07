@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { DomainRow } from "@/components/dockyard/ui/domain-row";
+import { DomainRow } from "@/components/dockyrd/ui/domain-row";
 
-/** **Source:** `web/components/dockyard/ui/domain-row.tsx` */
+/** **Source:** `web/components/dockyrd/ui/domain-row.tsx` */
 const meta = {
   title: "Design/Components/Domain row",
   component: DomainRow,

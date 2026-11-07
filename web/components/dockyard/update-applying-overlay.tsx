@@ -1,12 +1,12 @@
 "use client";
 
-import { Backdrop, ProgressBar } from "@/components/dockyard/ui";
+import { Backdrop, ProgressBar } from "@/components/dockyrd/ui";
 
 export type UpdateApplyPhase = "applying" | "restarting" | "complete" | "error";
 
 const phaseTitles: Record<UpdateApplyPhase, string> = {
   applying: "Installing update",
-  restarting: "Restarting Dockyard",
+  restarting: "Restarting dockyrd",
   complete: "Update complete",
   error: "Update failed",
 };

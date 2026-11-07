@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { ProgressBar } from "@/components/dockyard/ui/progress-bar";
+import { ProgressBar } from "@/components/dockyrd/ui/progress-bar";
 
 const variants = ["determinate", "complete", "error", "indeterminate"] as const;
 

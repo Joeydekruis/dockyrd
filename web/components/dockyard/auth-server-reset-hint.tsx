@@ -5,7 +5,7 @@ type AuthServerResetHintProps = {
 /** Forgot-password fallback when SMTP is not configured (design card). */
 export function AuthServerResetHint({ email }: AuthServerResetHintProps) {
   const address = email.trim() || "you@company.nl";
-  const command = `dockyard admin reset-password ${address}`;
+  const command = `dockyrd admin reset-password ${address}`;
 
   return (
     <div className="auth-cli-card">

@@ -79,7 +79,7 @@ func TestPolicyBindMountOutsideStack(t *testing.T) {
 			},
 		},
 	}
-	issues := compose.CheckPolicy(doc, compose.PolicyOptions{StackDataDir: "/var/lib/dockyard/compose/svc1"})
+	issues := compose.CheckPolicy(doc, compose.PolicyOptions{StackDataDir: "/var/lib/dockyrd/compose/svc1"})
 	if !compose.HasBlockingErrors(issues) {
 		t.Fatal("expected bind mount outside stack to be blocked")
 	}

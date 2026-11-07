@@ -2,7 +2,7 @@
 
 > Status: bouwbriefing, Feature-track · Datum: 5 november 2026 · Eigenaar: Joey de Kruis
 > Aanleiding: Sevalla's "Internal connections" / "Connected services" vonden we sterk.
-> Bronnen: Sevalla-docs (zie bijlage A), codebase `dockyrd` (branch `development`), design-canvas "Dockyrd Dashboard", `DOCKYARD_BRIEFING.md` §3.4, §7.3, §8.3.
+> Bronnen: Sevalla-docs (zie bijlage A), codebase `dockyrd` (branch `development`), design-canvas "Dockyrd Dashboard", `dockyrd_BRIEFING.md` §3.4, §7.3, §8.3.
 
 ---
 
@@ -66,7 +66,7 @@ Overview is een **kaart met drie kolommen** op een stippelraster: *Networking* (
 | Referenties `${{slug.VAR}}` | Werkt, deploy-tijd resolutie, cycli geweigerd, **hele project** is catalogus | `internal/refs`, `internal/deploy/catalog.go`, `runtime.go` (`runtimeEnv`, `buildArgs`) |
 | Netwerk per project | `dy-p-<slug>`; elke app/db zit op het projectnetwerk met alias = slug | `internal/docker/run.go`, `database.go`, `names.go` |
 | Garage | `dy-garage` wordt aan het **hele** projectnetwerk gehangen zodra het project een bucket heeft | `internal/docker/garage_network.go`, `reconcile/buckets.go` |
-| UI database | `ServiceConnectionPanel` (waarden, reveal, copy) met tekst "same project network" | `web/components/dockyard/service-connection-panel.tsx` |
+| UI database | `ServiceConnectionPanel` (waarden, reveal, copy) met tekst "same project network" | `web/components/dockyrd/service-connection-panel.tsx` |
 | UI app | Tabs Overview/Deployments/Logs/Environment/Domains/Settings; geen Connections/Networking | `application-detail-page.tsx` |
 | Env-editor | Toevoegen/paste `.env`; geen referentie-picker | `add-env-variable-modal.tsx` |
 | Design-canvas | Heeft Application Overview/Processes/Environment, **geen** connections-scherm | canvas "Dockyrd Dashboard" |
@@ -148,8 +148,8 @@ app (met domein)── dy-edge ── dy-proxy (Caddy)
 - Blue/green (briefing §3.6): de **nieuwe** container wordt vóór de healthcheck aan dezelfde link-netwerken gehangen; oude container verlaat ze bij het afbouwen. Alias-verplaatsing zoals nu.
 - Aanbieders (db/redis) worden aan elk link-netwerk gehangen via `NetworkConnect` (database.go heeft dat patroon al voor het projectnetwerk).
 - **Garage:** `dy-garage` wordt per bucket-link aan het link-netwerk gehangen (vervangt `SyncBucketNetworks` op projectniveau).
-- **Reconciler:** link-netwerken zijn "desired state" uit `service_links`; reconciler maakt ontbrekende netwerken aan, koppelt containers opnieuw na restart, en ruimt verweesde `dy-l-*` netwerken op (label `dev.dockyard.link=<id>`).
-- **Adresruimte (risico):** Docker heeft een beperkt aantal standaard subnetten. Installer moet `default-address-pools` in `daemon.json` meezetten (bijv. `10.200.0.0/16` in /27-blokken: ruim honderden netwerken). De installer merget `daemon.json` al; dit hoort daar bij. Documenteer de limiet in `dockyard doctor`.
+- **Reconciler:** link-netwerken zijn "desired state" uit `service_links`; reconciler maakt ontbrekende netwerken aan, koppelt containers opnieuw na restart, en ruimt verweesde `dy-l-*` netwerken op (label `dev.dockyrd.link=<id>`).
+- **Adresruimte (risico):** Docker heeft een beperkt aantal standaard subnetten. Installer moet `default-address-pools` in `daemon.json` meezetten (bijv. `10.200.0.0/16` in /27-blokken: ruim honderden netwerken). De installer merget `daemon.json` al; dit hoort daar bij. Documenteer de limiet in `dockyrd doctor`.
 - Volgorde bij `strict`: projectnetwerk `dy-p-<slug>` verdwijnt voor nieuwe deploys; in `open` blijft het bestaan naast de link-netwerken.
 
 ### 4.3 Variabelen en referenties
@@ -244,7 +244,7 @@ Gespiegeld paneel boven of onder het bestaande `ServiceConnectionPanel`:
 
 ### 5.5 Create-flows
 
-- **Create database/Redis/bucket** binnen een project: optionele stap "Koppel aan applicaties" (checkboxlijst + de standaardvariabelen). Dit staat al in de briefing §7.3 ("bij Create database biedt Dockyard aan…"); controleer of `create-database-modal.tsx` dit al doet (niet gevonden bij een snelle grep).
+- **Create database/Redis/bucket** binnen een project: optionele stap "Koppel aan applicaties" (checkboxlijst + de standaardvariabelen). Dit staat al in de briefing §7.3 ("bij Create database biedt dockyrd aan…"); controleer of `create-database-modal.tsx` dit al doet (niet gevonden bij een snelle grep).
 - **Create application**: optionele stap "Koppel aan bestaande resources".
 
 ### 5.6 Project-pagina: zichtbaarheid (Fase 3)
@@ -273,7 +273,7 @@ Gespiegeld paneel boven of onder het bestaande `ServiceConnectionPanel`:
 
 **Fase 0 · Voorwaarden (Direct-track, klein)**
 - Controleer en herstel: alleen apps **met domein** op `dy-edge` (`RunApp`). Test: twee apps in twee projecten kunnen elkaar niet via naam bereiken.
-- Installer: `default-address-pools` in `daemon.json`; `dockyard doctor` meldt resterende netwerkruimte.
+- Installer: `default-address-pools` in `daemon.json`; `dockyrd doctor` meldt resterende netwerkruimte.
 
 **Fase 1 · Links + gemak (Feature-track)**
 - Migratie `service_links`, `variables.link_id`, `projects.links_mode` (default `open` voor bestaand).
@@ -283,7 +283,7 @@ Gespiegeld paneel boven of onder het bestaande `ServiceConnectionPanel`:
 
 **Fase 2 · Afdwingen**
 - Per-link netwerken, blue/green-compatibel, Garage per link, reconciler (4.2), `links_mode = strict`.
-- Klaar als: in `strict` kan app A de database van app B (zonder link) niet bereiken (integratietest met echte Docker), een redeploy onder load heeft geen mislukte requests, `kill -9 dockyard` laat links intact, reconciler herstelt een handmatig verwijderd link-netwerk binnen 60 s.
+- Klaar als: in `strict` kan app A de database van app B (zonder link) niet bereiken (integratietest met echte Docker), een redeploy onder load heeft geen mislukte requests, `kill -9 dockyrd` laat links intact, reconciler herstelt een handmatig verwijderd link-netwerk binnen 60 s.
 
 **Fase 3 · Zichtbaarheid**
 - Project-Map (5.6), ⌘K-acties, link-teller in lijsten.
@@ -319,4 +319,4 @@ Gespiegeld paneel boven of onder het bestaande `ServiceConnectionPanel`:
 - Sevalla, Connect to a database (internal vs external): https://docs.sevalla.com/databases/connect
 - Sevalla, Environment variables (connectievariabelen, `${KEY}`-referenties): https://docs.sevalla.com/applications/environment-variables.md
 - Sevalla API, Create internal connection: https://api-docs.sevalla.com/v3/applications/create-internal-connection
-- Intern: `DOCKYARD_BRIEFING.md` §3.4, §3.6, §7.3, §8.3; code `internal/refs`, `internal/deploy/catalog.go`, `internal/docker/run.go`, `internal/docker/database.go`, `web/components/dockyard/service-connection-panel.tsx`, `application-detail-page.tsx`.
+- Intern: `dockyrd_BRIEFING.md` §3.4, §3.6, §7.3, §8.3; code `internal/refs`, `internal/deploy/catalog.go`, `internal/docker/run.go`, `internal/docker/database.go`, `web/components/dockyrd/service-connection-panel.tsx`, `application-detail-page.tsx`.

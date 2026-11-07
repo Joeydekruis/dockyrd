@@ -1,6 +1,6 @@
 # Notification channels
 
-Dockyard can deliver platform alerts to Slack, Discord, email, and signed HTTPS webhooks without keeping the dashboard open.
+dockyrd can deliver platform alerts to Slack, Discord, email, and signed HTTPS webhooks without keeping the dashboard open.
 
 ## Setup (admin)
 
@@ -13,12 +13,12 @@ SMTP must be configured under **Settings → Server → Email** before email cha
 
 ## Webhook verification
 
-Outbound webhooks use schema `dockyard.notification.v1` with headers:
+Outbound webhooks use schema `dockyrd.notification.v1` with headers:
 
-- `X-Dockyard-Event` — event type (e.g. `deploy.failed`)
-- `X-Dockyard-Delivery` — unique delivery id (idempotency key)
-- `X-Dockyard-Timestamp` — unix seconds
-- `X-Dockyard-Signature` — `sha256=` HMAC over `timestamp + "." + body`
+- `X-dockyrd-Event` — event type (e.g. `deploy.failed`)
+- `X-dockyrd-Delivery` — unique delivery id (idempotency key)
+- `X-dockyrd-Timestamp` — unix seconds
+- `X-dockyrd-Signature` — `sha256=` HMAC over `timestamp + "." + body`
 
 Reject replays older than five minutes. Verify with the signing secret configured on the channel.
 

@@ -2,16 +2,16 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { DashboardShell } from "@/components/dockyard/dashboard-shell";
-import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
-import { ServiceDomainsTab } from "@/components/dockyard/service-domains-tab";
-import { ServiceLogsPanel } from "@/components/dockyard/service-logs-panel";
-import { Button } from "@/components/dockyard/ui/button";
-import { EmptyState } from "@/components/dockyard/ui/empty-state";
-import { Field } from "@/components/dockyard/ui/field";
-import { SelectField } from "@/components/dockyard/ui/select-field";
-import { StatusBadge } from "@/components/dockyard/ui/status-badge";
-import { Tabs } from "@/components/dockyard/ui/tabs";
+import { DashboardShell } from "@/components/dockyrd/dashboard-shell";
+import { DockyrdPageLoading } from "@/components/dockyrd/dockyrd-page-loading";
+import { ServiceDomainsTab } from "@/components/dockyrd/service-domains-tab";
+import { ServiceLogsPanel } from "@/components/dockyrd/service-logs-panel";
+import { Button } from "@/components/dockyrd/ui/button";
+import { EmptyState } from "@/components/dockyrd/ui/empty-state";
+import { Field } from "@/components/dockyrd/ui/field";
+import { SelectField } from "@/components/dockyrd/ui/select-field";
+import { StatusBadge } from "@/components/dockyrd/ui/status-badge";
+import { Tabs } from "@/components/dockyrd/ui/tabs";
 import {
   createDeployment,
   type Deployment,

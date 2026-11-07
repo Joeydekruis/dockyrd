@@ -40,7 +40,7 @@ func TestLoadOverrides(t *testing.T) {
 
 func TestDevDataDirNonLinux(t *testing.T) {
 	if runtime.GOOS == "linux" {
-		t.Skip("linux uses /var/lib/dockyard by default")
+		t.Skip("linux uses /var/lib/dockyrd by default")
 	}
 	t.Setenv(envDataDir, "")
 	t.Setenv(envConfigDir, "")

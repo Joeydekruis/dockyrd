@@ -42,7 +42,7 @@ func Render(in RenderInput) ([]byte, error) {
 		in.AdminListen = "unix//run/caddy/admin.sock"
 	}
 	if in.AccessLog == "" {
-		in.AccessLog = "/var/lib/dockyard/caddy/access.log"
+		in.AccessLog = "/var/lib/dockyrd/caddy/access.log"
 	}
 	if in.ACMEEmail == "" {
 		in.ACMEEmail = "ops@localhost"
@@ -95,7 +95,7 @@ func Render(in RenderInput) ([]byte, error) {
 	doc := map[string]any{
 		"storage": map[string]any{
 			"module": "file_system",
-			"root":   "/var/lib/dockyard/caddy/certificates",
+			"root":   "/var/lib/dockyrd/caddy/certificates",
 		},
 		"admin": map[string]any{"listen": in.AdminListen},
 		"logging": map[string]any{

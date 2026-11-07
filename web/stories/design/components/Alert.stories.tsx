@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { Alert, type AlertTone } from "@/components/dockyard/ui/alert";
-import { Button } from "@/components/dockyard/ui/button";
+import { Alert, type AlertTone } from "@/components/dockyrd/ui/alert";
+import { Button } from "@/components/dockyrd/ui/button";
 
 const tones: AlertTone[] = ["info", "success", "warning", "error"];
 

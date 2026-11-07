@@ -40,7 +40,7 @@ Gevonden met zoeken en lezen. Elk punt is klein en hoort in de Direct-track (gee
 | 4 | Geen `Cache-Control` voor statische assets en geen security headers. | idem | Onnodige herhaalde downloads, geen HSTS/nosniff/referrer-policy. | P0 |
 | 5 | Geen server-timeouts of request-limieten in de proxyconfig. | idem | Slowloris en grote bodies zijn niet begrensd. **(niet bevestigd)** dat er niets elders staat. | P0 |
 | 6 | Geen rate limiting op sites. Login-brute-force op het panel is wel afgedekt. | `internal/auth`, `internal/proxy` | Sites zijn onbeschermd tegen floods en credential stuffing op eigen loginpaden. | P2 |
-| 7 | **`dockyard.service` heeft geen `User=`, dus de service draait als root** (met `NoNewPrivileges=true`, `ProtectSystem=full`). Het panel heeft bovendien de Docker-socket. | `packaging/dockyard.service` | Zie §3.3: een aparte "helper zonder root" levert nu geen privilege-scheiding op. | ADR |
+| 7 | **`dockyrd.service` heeft geen `User=`, dus de service draait als root** (met `NoNewPrivileges=true`, `ProtectSystem=full`). Het panel heeft bovendien de Docker-socket. | `packaging/dockyrd.service` | Zie §3.3: een aparte "helper zonder root" levert nu geen privilege-scheiding op. | ADR |
 | 8 | De host-firewall ziet gepubliceerde Docker-poorten niet: Docker DNAT't in `PREROUTING`, die verkeer komt nooit door de `INPUT`-keten waar UFW zit. | Docker-gedrag, zie bijlage A | Een "firewall aan"-vinkje geeft schijnveiligheid. Dockyrd moet gepubliceerde poorten zelf controleren. | P1 |
 
 ## 3. Architectuur
@@ -82,7 +82,7 @@ Elke actie implementeert:
 
 **Acties v1:** `firewall.ensure`, `ssh.passwordauth.disable`, `unattended.enable`, `crowdsec.bouncer.install` (route: zie §11), `proxy.swap`. Geen generieke "voer commando uit".
 
-**Lockout-bescherming** (SSH en firewall). Na `Apply()` start Dockyrd een **tijdelijke systemd-timer** (`systemd-run --on-active=120 dockyard host revert <id>`). De gebruiker bevestigt via de UI ("Keep change"). Zonder bevestiging draait de timer de actie terug. Omdat de timer in systemd leeft, werkt het ook als het panel crasht of herstart. Bij opstart reconcilieert Dockyrd openstaande acties met hun deadline.
+**Lockout-bescherming** (SSH en firewall). Na `Apply()` start Dockyrd een **tijdelijke systemd-timer** (`systemd-run --on-active=120 dockyrd host revert <id>`). De gebruiker bevestigt via de UI ("Keep change"). Zonder bevestiging draait de timer de actie terug. Omdat de timer in systemd leeft, werkt het ook als het panel crasht of herstart. Bij opstart reconcilieert Dockyrd openstaande acties met hun deadline.
 
 **SSH-details.**
 
@@ -102,7 +102,7 @@ Een add-on is een Go-struct in de Dockyrd-binary (geen door gebruikers aangeleve
 | `Requires` | Bijv. distro-ondersteuning, ander add-on |
 | `Plan()` | Lijst host actions en containerstappen voor de preview |
 | `Install()`, `Uninstall()` | Idempotent, met rollback bij falen |
-| `Health()` | Voor `dockyard doctor` en de status op de pagina |
+| `Health()` | Voor `dockyrd doctor` en de status op de pagina |
 
 **Toestanden:** `not_installed` → `installing` → `installed` | `failed` → `uninstalling` → `not_installed`. Elke overgang schrijft een event en een audit-regel. Mislukte installaties laten de host terug in de oude toestand en tonen de logregels in de UI.
 
@@ -139,7 +139,7 @@ WAF en rate limiting delen één proxybuild. De tweede installeren vraagt geen p
 
 ### 4.3 CrowdSec
 
-- **Runtime:** container `dy-crowdsec` (gepinde digest) op een systeemnetwerk. Collections: `crowdsecurity/sshd`, `crowdsecurity/caddy`, `crowdsecurity/linux`. **(niet bevestigd)** exacte collectienamen en of de Caddy-collectie onze JSON access log (`/var/lib/dockyard/caddy/access.log`) zonder aanpassing parsed.
+- **Runtime:** container `dy-crowdsec` (gepinde digest) op een systeemnetwerk. Collections: `crowdsecurity/sshd`, `crowdsecurity/caddy`, `crowdsecurity/linux`. **(niet bevestigd)** exacte collectienamen en of de Caddy-collectie onze JSON access log (`/var/lib/dockyrd/caddy/access.log`) zonder aanpassing parsed.
 - **SSH-logs:** CrowdSec heeft toegang nodig tot de auth-log of journald. Op Debian 12 kan alleen journald beschikbaar zijn. **(niet bevestigd)** welke datasource per distro werkt.
 - **Simulatiemodus:** CrowdSec kent per scenario `cscli simulation enable <scenario>`. Gesimuleerde beslissingen verschijnen in `cscli decisions list` als `(simul)ban` en "won't be effective". **(niet bevestigd)** of bouncers gesimuleerde beslissingen ook echt niet krijgen. Dat moet in een test staan voordat we "Start in simulation mode" beloven. Vallen we hierop terug, dan draait de bouncer pas bij "Start enforcing".
 - **Altijd toegestaan (allowlist):** het huidige IP van de installerende gebruiker, de IP's van de server, en recente admin-sign-in-IP's (30 dagen). Dockyrd vult dit automatisch en toont het onder "Never blocked". **(niet bevestigd)** welk allowlist-mechanisme de gebruikte CrowdSec-versie heeft (`cscli allowlists` of een parser-whitelist).
@@ -224,7 +224,7 @@ Altijd: wachtwoord (bestaat), geen host-poort, `protected-mode yes`. De preset i
 | Proxy zonder downtime | Bestaat (blue/green). |
 | Micro-cache voor dynamische apps | Niet nu. Mogelijk v0.3 met een cache-module en Valkey als opslag. |
 
-### 4.10 `dockyard doctor`
+### 4.10 `dockyrd doctor`
 
 Voegt toe: de baseline-checks (§4.1), distro-ondersteuning per add-on, proxybuild-versie, CrowdSec-gezondheid, en gepubliceerde poorten. Uitvoer in dezelfde vorm als de bestaande checks, met een `FixHint` en de bijbehorende host action.
 
@@ -297,7 +297,7 @@ Canvas-pagina **Security** in "Dockyrd Dashboard":
 
 **Navigatie:** de sidebar-groep "Server" krijgt "Security" tussen Analytics en Settings. Dat staat nu alleen op de nieuwe borden. De overige borden en de tab "Security" op de overige applicatieborden en op de static-site-borden moeten nog volgen.
 
-**Nieuwe UI-primitives** (Base UI, in `web/components/dockyard/ui/`, ook in Storybook): `Switch`, `RadioCard`, `Segmented`, `CodeBlock` met diff-kleuring, `StatusRow` (check of waarschuwing), `StepList` (voortgang). Geen `@radix-ui/*`.
+**Nieuwe UI-primitives** (Base UI, in `web/components/dockyrd/ui/`, ook in Storybook): `Switch`, `RadioCard`, `Segmented`, `CodeBlock` met diff-kleuring, `StatusRow` (check of waarschuwing), `StepList` (voortgang). Geen `@radix-ui/*`.
 
 ## 9. Fases
 

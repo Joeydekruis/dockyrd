@@ -3,8 +3,8 @@
 import type { LucideIcon } from "lucide-react";
 import { Circle, CircleCheck, Copy, GitBranch } from "lucide-react";
 import type { ReactNode } from "react";
-import { Button } from "@/components/dockyard/ui/button";
-import { IconButton } from "@/components/dockyard/ui/icon-button";
+import { Button } from "@/components/dockyrd/ui/button";
+import { IconButton } from "@/components/dockyrd/ui/icon-button";
 import { useCopyToClipboard } from "@/lib/snackbar-context";
 
 export type SettingsDetailRow = {

@@ -1,12 +1,12 @@
-import { AnalyticsPage } from "@/components/dockyard/analytics-page";
-import { ApplicationsPage } from "@/components/dockyard/applications-page";
-import { DashboardShell } from "@/components/dockyard/dashboard-shell";
-import { DatabasesPage } from "@/components/dockyard/databases-page";
-import { EmptyState } from "@/components/dockyard/empty-state";
-import { ObjectStoragePage } from "@/components/dockyard/object-storage-page";
-import { ProjectsPage } from "@/components/dockyard/projects-page";
-import { StaticSitesPage } from "@/components/dockyard/static-sites-page";
-import { TerminalPage } from "@/components/dockyard/terminal-page";
+import { AnalyticsPage } from "@/components/dockyrd/analytics-page";
+import { ApplicationsPage } from "@/components/dockyrd/applications-page";
+import { DashboardShell } from "@/components/dockyrd/dashboard-shell";
+import { DatabasesPage } from "@/components/dockyrd/databases-page";
+import { EmptyState } from "@/components/dockyrd/empty-state";
+import { ObjectStoragePage } from "@/components/dockyrd/object-storage-page";
+import { ProjectsPage } from "@/components/dockyrd/projects-page";
+import { StaticSitesPage } from "@/components/dockyrd/static-sites-page";
+import { TerminalPage } from "@/components/dockyrd/terminal-page";
 
 const pages = [
   {

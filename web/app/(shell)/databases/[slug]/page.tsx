@@ -1,4 +1,4 @@
-import { DatabaseDetailPage } from "@/components/dockyard/database-detail-page";
+import { DatabaseDetailPage } from "@/components/dockyrd/database-detail-page";
 
 export function generateStaticParams() {
   return [{ slug: "_" }];

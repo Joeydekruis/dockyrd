@@ -52,7 +52,7 @@ After M2 backend/UI changes on `development`:
 ./scripts/verify-m2-smoke.sh
 ```
 
-Optional env for builds: `DOCKYARD_BUILD_TIMEOUT` (default `20m`), `DOCKYARD_MIN_FREE_DISK_PERCENT` (default `10`), `DOCKYARD_BUILDX_BUILDER` (default `dy-buildkit`), `DOCKYARD_PUBLIC_URL` for GitHub App callbacks/webhooks.
+Optional env for builds: `dockyrd_BUILD_TIMEOUT` (default `20m`), `dockyrd_MIN_FREE_DISK_PERCENT` (default `10`), `dockyrd_BUILDX_BUILDER` (default `dy-buildkit`), `dockyrd_PUBLIC_URL` for GitHub App callbacks/webhooks.
 
 ## M3 slice (Postgres, Valkey, Garage, refs)
 
@@ -71,7 +71,7 @@ Optional env for builds: `DOCKYARD_BUILD_TIMEOUT` (default `20m`), `DOCKYARD_MIN
 ```bash
 ./scripts/verify-m5-smoke.sh
 ./scripts/verify-install.sh
-go run ./cmd/dockyard doctor
+go run ./cmd/dockyrd doctor
 ```
 
 ## Production validation (§19)

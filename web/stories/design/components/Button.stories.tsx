@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ArrowRight, Plus, X } from "lucide-react";
-import { Button, type ButtonVariant } from "@/components/dockyard/ui/button";
+import { Button, type ButtonVariant } from "@/components/dockyrd/ui/button";
 
 const iconArgType = {
   control: "select" as const,
@@ -24,7 +24,7 @@ const variants: ButtonVariant[] = [
 ];
 
 /**
- * **Source:** `web/components/dockyard/ui/button.tsx` — same import path as the panel.
+ * **Source:** `web/components/dockyrd/ui/button.tsx` — same import path as the panel.
  *
  * Use **Playground** (Controls) to tune variant, icons, disabled, and label.
  * Use **All variants** as a visual checklist against the design board.

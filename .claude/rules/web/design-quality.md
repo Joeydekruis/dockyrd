@@ -9,13 +9,13 @@ paths:
 
 # Web design quality (Dockyrd dashboard)
 
-Fits **`frontend-evaluator`** + [dockyard-design-contract](../../../.cursor/rules/dockyard-design-contract.mdc).
+Fits **`frontend-evaluator`** + [dockyrd-design-contract](../../../.cursor/rules/dockyrd-design-contract.mdc).
 
 ## Before implementing UI
 
 1. Read **`docs/design-index.json`** for the route (nav, tokens, shared blocks).
 2. Open the matching artboard in **`docs/dockyrd-design.html`** (or issue wireframe for §17 gaps).
-3. Reuse **`web/components/dockyard/ui/*`** (primitives) and composites under **`web/components/dockyard/*`** before one-off page markup. Storybook stories must import those same modules — [storybook-ui-source](../../../.cursor/rules/storybook-ui-source.mdc).
+3. Reuse **`web/components/dockyrd/ui/*`** (primitives) and composites under **`web/components/dockyrd/*`** before one-off page markup. Storybook stories must import those same modules — [storybook-ui-source](../../../.cursor/rules/storybook-ui-source.mdc).
 4. Align with `docs/project/project.md` and issue spec when on Feature track.
 
 Do **not** wait for design approval. Do **not** freestyle IA that contradicts the design index (e.g. re-add removed header actions).
@@ -33,7 +33,7 @@ Push for: hierarchy, spacing rhythm, semantic status pills, intentional hover/fo
 ## Component checklist
 
 - [ ] Matches design-index structure for the route (sidebar, header, tabs, primary CTA)
-- [ ] Status pills / stat tiles / resource rows use shared dockyard components
+- [ ] Status pills / stat tiles / resource rows use shared dockyrd components
 - [ ] Empty / loading / error states when AC requires them
 - [ ] `aria-current`, `aria-label` on icon controls; touch targets ≥ 44px where specified
 - [ ] English UI copy; product name **Dockyrd** in chrome

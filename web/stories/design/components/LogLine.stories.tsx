@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { LogLine } from "@/components/dockyard/ui/log-line";
+import { LogLine } from "@/components/dockyrd/ui/log-line";
 
-/** **Source:** `web/components/dockyard/ui/log-line.tsx` */
+/** **Source:** `web/components/dockyrd/ui/log-line.tsx` */
 const meta = {
   title: "Design/Components/Log line",
   component: LogLine,

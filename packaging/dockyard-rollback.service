@@ -1,10 +1,10 @@
 [Unit]
-Description=Rollback Dockyard after failed service start
-After=dockyard.service
+Description=Rollback dockyrd after failed service start
+After=dockyrd.service
 
 [Service]
 Type=oneshot
-ExecStart=/usr/local/bin/dockyard update --rollback
+ExecStart=/usr/local/bin/dockyrd update --rollback
 RemainAfterExit=yes
 
 [Install]

@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "@/components/dockyard/ui/button";
-import { Modal } from "@/components/dockyard/ui/modal";
-import { StatusBadge } from "@/components/dockyard/ui/status-badge";
+import { Button } from "@/components/dockyrd/ui/button";
+import { Modal } from "@/components/dockyrd/ui/modal";
+import { StatusBadge } from "@/components/dockyrd/ui/status-badge";
 import {
   listNotificationDeliveries,
   type NotificationDelivery,

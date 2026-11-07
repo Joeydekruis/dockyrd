@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { Checkbox } from "@/components/dockyard/ui/checkbox";
+import { Checkbox } from "@/components/dockyrd/ui/checkbox";
 
 const meta = {
   title: "Design/Components/Checkbox",

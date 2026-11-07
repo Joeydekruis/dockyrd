@@ -40,7 +40,7 @@ func main() {
 			os.Exit(1)
 		}
 		if res.AlreadyInitialized {
-			fmt.Println("Dockyard already has a user account.")
+			fmt.Println("dockyrd already has a user account.")
 			os.Exit(0)
 		}
 		setup.PrintInitBanner(res.Token, res.TokenExpiresAt, cfg.Listen)
@@ -80,7 +80,7 @@ func main() {
 
 func runAdmin(cfg config.Config, args []string) error {
 	if len(args) < 1 {
-		return fmt.Errorf("usage: dockyard admin <reset-password|disable-2fa> <email> [new-password]")
+		return fmt.Errorf("usage: dockyrd admin <reset-password|disable-2fa> <email> [new-password]")
 	}
 	switch args[0] {
 	case "reset-password":
@@ -119,22 +119,22 @@ func runAdmin(cfg config.Config, args []string) error {
 
 func runHost(cfg config.Config, args []string) error {
 	if len(args) < 2 || args[0] != "revert" {
-		return fmt.Errorf("usage: dockyard host revert <action-id>")
+		return fmt.Errorf("usage: dockyrd host revert <action-id>")
 	}
 	return hostops.RevertByID(context.Background(), cfg, args[1])
 }
 
 func printUsage() {
-	fmt.Fprintf(os.Stderr, "Usage: dockyard <serve|version|init|setup-token|doctor|update|admin|host>\n")
-	fmt.Fprintf(os.Stderr, "       dockyard update [--check] [--rollback]\n")
-	fmt.Fprintf(os.Stderr, "       dockyard admin reset-password <email> [password]\n")
-	fmt.Fprintf(os.Stderr, "       dockyard admin disable-2fa <email>\n")
-	fmt.Fprintf(os.Stderr, "       dockyard host revert <action-id>\n")
+	fmt.Fprintf(os.Stderr, "Usage: dockyrd <serve|version|init|setup-token|doctor|update|admin|host>\n")
+	fmt.Fprintf(os.Stderr, "       dockyrd update [--check] [--rollback]\n")
+	fmt.Fprintf(os.Stderr, "       dockyrd admin reset-password <email> [password]\n")
+	fmt.Fprintf(os.Stderr, "       dockyrd admin disable-2fa <email>\n")
+	fmt.Fprintf(os.Stderr, "       dockyrd host revert <action-id>\n")
 }
 
 func runUpdate(cfg config.Config, args []string) error {
 	ctx := context.Background()
-	opts := updater.Options{Repo: os.Getenv("DOCKYARD_GITHUB_REPO")}
+	opts := updater.Options{Repo: os.Getenv("dockyrd_GITHUB_REPO")}
 	if len(args) == 0 {
 		_, err := updater.Apply(ctx, cfg, version, opts)
 		return err
@@ -153,14 +153,14 @@ func runUpdate(cfg config.Config, args []string) error {
 			}
 			return nil
 		case "--rollback":
-			dest := os.Getenv("DOCKYARD_BIN")
+			dest := os.Getenv("dockyrd_BIN")
 			if dest == "" {
-				dest = "/usr/local/bin/dockyard"
+				dest = "/usr/local/bin/dockyrd"
 			}
 			if err := updater.RollbackBinary(dest); err != nil {
 				return err
 			}
-			fmt.Println("Restored previous binary. Restart dockyard.service.")
+			fmt.Println("Restored previous binary. Restart dockyrd.service.")
 			return nil
 		case "--dry-run":
 			opts.DryRun = true

@@ -3,7 +3,7 @@
 import type { LucideIcon } from "lucide-react";
 import { Box, Database, Globe, HardDrive } from "lucide-react";
 import { useState } from "react";
-import { Button } from "@/components/dockyard/ui/button";
+import { Button } from "@/components/dockyrd/ui/button";
 
 type ServiceKind = "app" | "db" | "site" | "bucket";
 

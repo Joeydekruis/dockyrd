@@ -1,11 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Button } from "@/components/dockyard/ui/button";
-import { Field } from "@/components/dockyard/ui/field";
-import { Modal } from "@/components/dockyard/ui/modal";
-import { SearchSelect } from "@/components/dockyard/ui/search-select";
-import { Switch } from "@/components/dockyard/ui/switch";
+import { Button } from "@/components/dockyrd/ui/button";
+import { Field } from "@/components/dockyrd/ui/field";
+import { Modal } from "@/components/dockyrd/ui/modal";
+import { SearchSelect } from "@/components/dockyrd/ui/search-select";
+import { Switch } from "@/components/dockyrd/ui/switch";
 import {
   createServiceLink,
   type LinkableCandidate,

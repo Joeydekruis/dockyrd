@@ -35,13 +35,13 @@ export function Modal({
       <div
         role="dialog"
         aria-modal="true"
-        aria-labelledby="dockyard-modal-title"
+        aria-labelledby="dockyrd-modal-title"
         className={`relative z-10 max-h-[85vh] w-full ${maxW} overflow-y-auto rounded-[20px] border p-6 shadow-lg`}
         style={{ background: "var(--surface)", borderColor: "var(--border)" }}
       >
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 id="dockyard-modal-title" className="text-lg font-semibold">
+            <h2 id="dockyrd-modal-title" className="text-lg font-semibold">
               {title}
             </h2>
             {description ? (

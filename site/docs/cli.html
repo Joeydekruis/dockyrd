@@ -88,16 +88,16 @@
 <p class="lead">The <code>dockyrd</code> binary is both the server and its admin tool. Run commands as root on the server.</p>
 <h2 id="cli-commands">Commands</h2>
 <div class="tbl"><table><thead><tr><th>Command</th><th>What it does</th></tr></thead><tbody>
-<tr><td><code>dockyard serve</code></td><td>Starts the server. systemd runs this for you.</td></tr>
-<tr><td><code>dockyard init</code></td><td>First-time setup: keys, database, network, proxy. Safe to rerun.</td></tr>
-<tr><td><code>dockyard setup-token</code></td><td>Prints a new one-time setup link, as long as no owner exists.</td></tr>
-<tr><td><code>dockyard admin reset-password &lt;email&gt;</code></td><td>Resets a user's password from the server.</td></tr>
-<tr><td><code>dockyard admin disable-2fa &lt;email&gt;</code></td><td>Turns off two-factor for a locked-out user.</td></tr>
-<tr><td><code>dockyard update [--version]</code></td><td>Installs the latest or a specific release.</td></tr>
-<tr><td><code>dockyard doctor</code></td><td>Checks Docker, ports, DNS, disk, proxy config and clock, and suggests fixes.</td></tr>
-<tr><td><code>dockyard proxy dump</code></td><td>Prints the Caddy configuration currently loaded.</td></tr>
-<tr><td><code>dockyard backup</code></td><td>Writes a snapshot of the control-plane database.</td></tr>
-<tr><td><code>dockyard version</code></td><td>Prints version, commit and build date.</td></tr>
+<tr><td><code>dockyrd serve</code></td><td>Starts the server. systemd runs this for you.</td></tr>
+<tr><td><code>dockyrd init</code></td><td>First-time setup: keys, database, network, proxy. Safe to rerun.</td></tr>
+<tr><td><code>dockyrd setup-token</code></td><td>Prints a new one-time setup link, as long as no owner exists.</td></tr>
+<tr><td><code>dockyrd admin reset-password &lt;email&gt;</code></td><td>Resets a user's password from the server.</td></tr>
+<tr><td><code>dockyrd admin disable-2fa &lt;email&gt;</code></td><td>Turns off two-factor for a locked-out user.</td></tr>
+<tr><td><code>dockyrd update [--version]</code></td><td>Installs the latest or a specific release.</td></tr>
+<tr><td><code>dockyrd doctor</code></td><td>Checks Docker, ports, DNS, disk, proxy config and clock, and suggests fixes.</td></tr>
+<tr><td><code>dockyrd proxy dump</code></td><td>Prints the Caddy configuration currently loaded.</td></tr>
+<tr><td><code>dockyrd backup</code></td><td>Writes a snapshot of the control-plane database.</td></tr>
+<tr><td><code>dockyrd version</code></td><td>Prints version, commit and build date.</td></tr>
 </tbody></table></div>
 <h2 id="cli-dy">API client (<code>dy</code>)</h2>
 <p>Installed next to <code>dockyrd</code> for tokens and CI. Log in with an API token from Settings → Account → API tokens, then run deploy and log commands from SSH or scripts.</p>
@@ -110,12 +110,12 @@
 </tbody></table></div>
 <h2 id="cli-paths">Files and paths</h2>
 <div class="tbl"><table><thead><tr><th>Path</th><th>Contents</th></tr></thead><tbody>
-<tr><td><code>/usr/local/bin/dockyard</code></td><td>Server binary (<code>dockyard serve</code>, …)</td></tr>
+<tr><td><code>/usr/local/bin/dockyrd</code></td><td>Server binary (<code>dockyrd serve</code>, …)</td></tr>
 <tr><td><code>/usr/local/bin/dy</code></td><td>API client for tokens and automation</td></tr>
-<tr><td><code>/etc/dockyard/</code></td><td>Master key and optional <code>dockyrd.env</code></td></tr>
-<tr><td><code>/var/lib/dockyard/dockyrd.db</code></td><td>Control-plane database (SQLite)</td></tr>
-<tr><td><code>/var/lib/dockyard/backups/</code></td><td>Daily snapshots, seven kept</td></tr>
-<tr><td><code>/var/lib/dockyard/sites/</code></td><td>Static site releases</td></tr>
+<tr><td><code>/etc/dockyrd/</code></td><td>Master key and optional <code>dockyrd.env</code></td></tr>
+<tr><td><code>/var/lib/dockyrd/dockyrd.db</code></td><td>Control-plane database (SQLite)</td></tr>
+<tr><td><code>/var/lib/dockyrd/backups/</code></td><td>Daily snapshots, seven kept</td></tr>
+<tr><td><code>/var/lib/dockyrd/sites/</code></td><td>Static site releases</td></tr>
 </tbody></table></div>
 <p>Logs go to journald: <code>journalctl -u dockyrd -f</code>.</p>
 </article>

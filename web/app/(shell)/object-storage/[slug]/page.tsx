@@ -1,4 +1,4 @@
-import { ObjectStorageDetailPage } from "@/components/dockyard/object-storage-detail-page";
+import { ObjectStorageDetailPage } from "@/components/dockyrd/object-storage-detail-page";
 
 export function generateStaticParams() {
   return [{ slug: "_" }];

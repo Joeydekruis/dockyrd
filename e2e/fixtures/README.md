@@ -13,7 +13,7 @@ Sample apps for manual and future automated deploy smoke (briefing §19).
 
 ## Manual smoke (Docker host)
 
-1. `make build && ./bin/dockyard serve`
+1. `make build && ./bin/dockyrd serve`
 2. Create project → deploy `hello-static` as static site or copy into `SitesDir` per static-site flow
 3. Confirm HTTP 200 on assigned domain/path
 

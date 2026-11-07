@@ -1,4 +1,4 @@
-import type { StatusVariant } from "@/components/dockyard/ui/status-badge";
+import type { StatusVariant } from "@/components/dockyrd/ui/status-badge";
 import type { ServiceDomain } from "@/lib/api";
 
 export type DomainStatusView = {
@@ -26,7 +26,7 @@ export function domainStatusDisplay(domain: ServiceDomain): DomainStatusView {
   };
 }
 
-/** Suggested A record for pointing a custom hostname at Dockyard. */
+/** Suggested A record for pointing a custom hostname at dockyrd. */
 export function aRecordForHostname(hostname: string): {
   name: string;
   nameAlt?: string;

@@ -4,16 +4,16 @@ import { TriangleAlert } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { Button } from "@/components/dockyard/ui/button";
-import { DangerZone } from "@/components/dockyard/ui/danger-zone";
-import { Field } from "@/components/dockyard/ui/field";
-import { Modal } from "@/components/dockyard/ui/modal";
-import { SelectField } from "@/components/dockyard/ui/select-field";
+import { Button } from "@/components/dockyrd/ui/button";
+import { DangerZone } from "@/components/dockyrd/ui/danger-zone";
+import { Field } from "@/components/dockyrd/ui/field";
+import { Modal } from "@/components/dockyrd/ui/modal";
+import { SelectField } from "@/components/dockyrd/ui/select-field";
 import {
   SettingsDetailBlock,
   SettingsEnabledStatus,
   SettingsGroupHeading,
-} from "@/components/dockyard/ui/settings-detail-block";
+} from "@/components/dockyrd/ui/settings-detail-block";
 import {
   type DatabaseBackupPolicy,
   type DatabaseBackupRun,
@@ -356,7 +356,7 @@ export function DatabaseDetailSettings({ row }: DatabaseDetailSettingsProps) {
       <Modal
         open={backupModal}
         title="Backup schedule"
-        description="Dockyard runs pg_dump (Postgres) or Valkey RDB snapshots on this interval."
+        description="dockyrd runs pg_dump (Postgres) or Valkey RDB snapshots on this interval."
         onClose={() => setBackupModal(false)}
         footer={
           <>

@@ -134,7 +134,7 @@ export function SplitButton({
         <div
           id={menuId}
           role="menu"
-          className="dockyard-menu-panel"
+          className="dockyrd-menu-panel"
           style={{ width: menuWidth }}
         >
           {menuItems?.map((item) => {
@@ -144,7 +144,7 @@ export function SplitButton({
                 key={item.id}
                 type="button"
                 role="menuitem"
-                className="dockyard-menu-item"
+                className="dockyrd-menu-item"
                 style={{
                   color: item.destructive ? "var(--danger)" : "var(--ink-navy)",
                 }}

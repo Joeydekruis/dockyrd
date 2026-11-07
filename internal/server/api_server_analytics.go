@@ -118,7 +118,7 @@ func (d apiDeps) enrichContainerRows(ctx context.Context, rows []docker.Containe
 				api.MemoryLimit = nullInt64(m.MemLimit)
 			}
 		} else if row.Kind == "system" {
-			api.ProjectLabel = "Dockyard"
+			api.ProjectLabel = "dockyrd"
 		}
 		out = append(out, api)
 	}

@@ -2,12 +2,12 @@
 
 import { Eye, EyeOff, Link2 } from "lucide-react";
 import { useMemo, useState } from "react";
-import { AddConnectionModal } from "@/components/dockyard/add-connection-modal";
-import { AddEnvVariableModal } from "@/components/dockyard/add-env-variable-modal";
-import { PendingEnvRedeployBanner } from "@/components/dockyard/pending-env-redeploy-banner";
-import { Button } from "@/components/dockyard/ui/button";
-import { Chip } from "@/components/dockyard/ui/chip";
-import { IconButton } from "@/components/dockyard/ui/icon-button";
+import { AddConnectionModal } from "@/components/dockyrd/add-connection-modal";
+import { AddEnvVariableModal } from "@/components/dockyrd/add-env-variable-modal";
+import { PendingEnvRedeployBanner } from "@/components/dockyrd/pending-env-redeploy-banner";
+import { Button } from "@/components/dockyrd/ui/button";
+import { Chip } from "@/components/dockyrd/ui/chip";
+import { IconButton } from "@/components/dockyrd/ui/icon-button";
 import type { Service, ServiceVariable } from "@/lib/api";
 import {
   envVarScopeLabel,

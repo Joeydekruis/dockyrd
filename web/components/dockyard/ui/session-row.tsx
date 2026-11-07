@@ -1,4 +1,4 @@
-import { Button } from "@/components/dockyard/ui/button";
+import { Button } from "@/components/dockyrd/ui/button";
 
 type SessionRowProps = {
   device: string;

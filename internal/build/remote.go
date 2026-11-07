@@ -31,7 +31,7 @@ type RemoteCertBundle struct {
 func GenerateRemoteCertBundle(host string) (RemoteCertBundle, error) {
 	host = strings.TrimSpace(host)
 	if host == "" {
-		host = "dockyard-builder"
+		host = "dockyrd-builder"
 	}
 	caKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
@@ -39,7 +39,7 @@ func GenerateRemoteCertBundle(host string) (RemoteCertBundle, error) {
 	}
 	caTmpl := &x509.Certificate{
 		SerialNumber:          big.NewInt(1),
-		Subject:               pkix.Name{CommonName: "Dockyard Build CA"},
+		Subject:               pkix.Name{CommonName: "dockyrd Build CA"},
 		NotBefore:             time.Now().Add(-time.Hour),
 		NotAfter:              time.Now().Add(10 * 365 * 24 * time.Hour),
 		IsCA:                  true,
@@ -77,7 +77,7 @@ func GenerateRemoteCertBundle(host string) (RemoteCertBundle, error) {
 	}
 	clientTmpl := &x509.Certificate{
 		SerialNumber: big.NewInt(3),
-		Subject:      pkix.Name{CommonName: "dockyard-build-client"},
+		Subject:      pkix.Name{CommonName: "dockyrd-build-client"},
 		NotBefore:    time.Now().Add(-time.Hour),
 		NotAfter:     time.Now().Add(825 * 24 * time.Hour),
 		KeyUsage:     x509.KeyUsageDigitalSignature,
@@ -105,8 +105,8 @@ func marshalECKey(key *ecdsa.PrivateKey) []byte {
 // RemoteBuilderRunLine is the docker run snippet for the remote host.
 func RemoteBuilderRunLine(hostPort string) string {
 	return fmt.Sprintf(
-		"docker run -d --name dockyard-builder --privileged --restart unless-stopped "+
-			"-p %s -v /etc/dockyard-builder:/certs:ro -v dockyard-builder-data:/var/lib/buildkit "+
+		"docker run -d --name dockyrd-builder --privileged --restart unless-stopped "+
+			"-p %s -v /etc/dockyrd-builder:/certs:ro -v dockyrd-builder-data:/var/lib/buildkit "+
 			"moby/buildkit:buildx-stable-1 --addr tcp://0.0.0.0:%s "+
 			"--tlscacert /certs/ca.pem --tlscert /certs/cert.pem --tlskey /certs/key.pem",
 		hostPort, strings.TrimPrefix(hostPort, ":"),

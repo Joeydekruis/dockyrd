@@ -12,7 +12,7 @@ Build app services from a public Git URL and Dockerfile before the existing blue
 ## Acceptance criteria
 
 - [x] `AppConfig` supports `source.type=git` (`url`, `branch`, `rootDir`) and `builder=dockerfile` (`dockerfile` path, default `Dockerfile`)
-- [x] Deploy job clones shallow into `{DataDir}/builds/<deployment>/src`, runs `docker buildx build --load`, tags `dockyard/<service-slug>:<deploy-short>`
+- [x] Deploy job clones shallow into `{DataDir}/builds/<deployment>/src`, runs `docker buildx build --load`, tags `dockyrd/<service-slug>:<deploy-short>`
 - [x] Deployment status includes `building`; `build_log_path` set on success or failure
 - [x] Build-time variables (`at_build`) passed as build-args; values scrubbed in log file
 - [x] Source cleanup of build workspace after build (success or fail)

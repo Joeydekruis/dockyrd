@@ -6,7 +6,7 @@ description: >-
   GitHub release.
 ---
 
-# Release ship (Dockyard binaries)
+# Release ship (dockyrd binaries)
 
 Self-update and `scripts/install.sh` download assets from **GitHub Releases** on `Joeydekruis/dockyrd`. CI builds them with **GoReleaser** when a **`v*`** tag is pushed.
 
@@ -59,13 +59,13 @@ Required for panel self-update (`internal/updater/github.go`):
 
 | Asset |
 |-------|
-| `dockyard_${VERSION}_linux_amd64.tar.gz` |
-| `dockyard_${VERSION}_linux_arm64.tar.gz` |
+| `dockyrd_${VERSION}_linux_amd64.tar.gz` |
+| `dockyrd_${VERSION}_linux_arm64.tar.gz` |
 | `checksums.txt` |
 
 Optional cosign artefacts: `checksums.txt.sig`, `checksums.txt.pem`.
 
-If **`/releases/latest`** is this tag but a tarball is missing, Updates in the panel shows **`no release asset matching dockyard_${VERSION}_linux_${arch}`** — wait for CI or fix the broken release; do not ask users to retry update until step 4 passes.
+If **`/releases/latest`** is this tag but a tarball is missing, Updates in the panel shows **`no release asset matching dockyrd_${VERSION}_linux_${arch}`** — wait for CI or fix the broken release; do not ask users to retry update until step 4 passes.
 
 ## 5. Optional release notes
 

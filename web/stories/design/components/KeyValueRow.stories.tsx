@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { KeyValueRow } from "@/components/dockyard/ui/key-value-row";
+import { KeyValueRow } from "@/components/dockyrd/ui/key-value-row";
 
-/** **Source:** `web/components/dockyard/ui/key-value-row.tsx` */
+/** **Source:** `web/components/dockyrd/ui/key-value-row.tsx` */
 const meta = {
   title: "Design/Components/Key value row",
   component: KeyValueRow,

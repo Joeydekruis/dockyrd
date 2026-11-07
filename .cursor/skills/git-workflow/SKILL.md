@@ -5,7 +5,7 @@ description: >-
   Conventional Commits with Fixes #n. Main ship uses push-to-main skill.
 ---
 
-# Git workflow (Dockyard)
+# Git workflow (dockyrd)
 
 ## Branch policy (HARD)
 

@@ -1,15 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { DashboardShell } from "@/components/dockyard/dashboard-shell";
-import { SettingsPageBody } from "@/components/dockyard/settings-page-body";
-import { Button } from "@/components/dockyard/ui/button";
+import { DashboardShell } from "@/components/dockyrd/dashboard-shell";
+import { SettingsPageBody } from "@/components/dockyrd/settings-page-body";
+import { Button } from "@/components/dockyrd/ui/button";
 import {
   UpdateApplyingOverlay,
   type UpdateApplyPhase,
-} from "@/components/dockyard/update-applying-overlay";
+} from "@/components/dockyrd/update-applying-overlay";
 import {
-  applyDockyardUpdate,
+  applydockyrdUpdate,
   getUpdatesStatus,
   type UpdatesStatus,
 } from "@/lib/api";
@@ -59,7 +59,7 @@ export function UpdatesSettingsPage() {
     setMessage(null);
     setError(null);
     try {
-      const res = await applyDockyardUpdate();
+      const res = await applydockyrdUpdate();
       if (res.restarting) {
         setUpdatePhase("restarting");
         setUpdateDetail(res.message);
@@ -67,7 +67,7 @@ export function UpdatesSettingsPage() {
         setUpdatePhase("complete");
         setUpdateDetail(
           res.installed_tag
-            ? `Dockyard ${res.installed_tag} is running.`
+            ? `dockyrd ${res.installed_tag} is running.`
             : res.message,
         );
         await new Promise((resolve) => setTimeout(resolve, 900));
@@ -100,16 +100,16 @@ export function UpdatesSettingsPage() {
       />
       <SettingsPageBody>
         <section
-          aria-label="Dockyard version and updates"
+          aria-label="dockyrd version and updates"
           className="space-y-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6"
         >
-          <h2 className="text-lg font-medium">Dockyard version</h2>
+          <h2 className="text-lg font-medium">dockyrd version</h2>
           <p className="text-sm text-[var(--muted-foreground)]">
-            Dockyard checks GitHub every 5 minutes in the background. This page
+            dockyrd checks GitHub every 5 minutes in the background. This page
             shows the cached result; use Check again to refresh manually (up to
             40 times per hour without a GitHub token). Applying an update
-            replaces the host binary and restarts the Dockyard service; your
-            apps and proxy keep running.
+            replaces the host binary and restarts the dockyrd service; your apps
+            and proxy keep running.
           </p>
 
           {error ? (
@@ -161,7 +161,7 @@ export function UpdatesSettingsPage() {
                 </>
               ) : (
                 <p className="text-[var(--muted-foreground)]">
-                  Dockyard is up to date.
+                  dockyrd is up to date.
                 </p>
               )}
             </dl>
@@ -199,7 +199,7 @@ export function UpdatesSettingsPage() {
             <p className="text-xs text-[var(--muted-foreground)]">
               {status.apply_unsupported_reason} Use{" "}
               <code className="rounded bg-[var(--muted)]/40 px-1">
-                dockyard update
+                dockyrd update
               </code>{" "}
               on a Linux server, or develop locally without applying from the
               UI.

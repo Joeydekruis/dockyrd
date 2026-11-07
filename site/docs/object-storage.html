@@ -87,7 +87,7 @@
 <h1>Object storage</h1>
 <p class="lead">Dockyrd can run Garage, a lightweight S3-compatible server, next to your apps for uploads and assets.</p>
 <h2 id="object-storage-install">Install Garage</h2>
-<p>Open <b>Object storage</b> and choose <b>Install Garage</b>. Dockyrd starts a single-node Garage container, generates its secrets and stores data in <code>/var/lib/dockyard/garage</code>.</p>
+<p>Open <b>Object storage</b> and choose <b>Install Garage</b>. Dockyrd starts a single-node Garage container, generates its secrets and stores data in <code>/var/lib/dockyrd/garage</code>.</p>
 <h2 id="object-storage-buckets">Buckets and keys</h2>
 <p>Create a bucket inside a project. Dockyrd creates an access key for it and connects Garage to that project's network. Apps reference the credentials like any other service:</p>
 <pre data-lang=".env">S3_ENDPOINT=${{uploads.S3_ENDPOINT}}

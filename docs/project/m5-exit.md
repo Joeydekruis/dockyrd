@@ -18,10 +18,10 @@ Optional with Docker: `go test -tags=integration ./...`, `make e2e-ui` (`E2E_FRE
 
 | Area | Location |
 |------|----------|
-| Doctor | `dockyard doctor`, `internal/doctor/` |
-| Admin CLI | `dockyard admin reset-password`, `disable-2fa` |
+| Doctor | `dockyrd doctor`, `internal/doctor/` |
+| Admin CLI | `dockyrd admin reset-password`, `disable-2fa` |
 | CI | `.github/workflows/ci.yml` |
-| Self-update | `dockyard update`, `internal/updater/` |
+| Self-update | `dockyrd update`, `internal/updater/` |
 | E2E | `e2e/smoke.sh`, `.github/workflows/e2e.yml`, `make e2e` |
 | Release | `.goreleaser.yaml`, `.github/workflows/release.yml` |
 | Playwright | `e2e/tests/`, CI job |
@@ -33,7 +33,7 @@ Optional with Docker: `go test -tags=integration ./...`, `make e2e-ui` (`E2E_FRE
 
 - Ubuntu/Debian install matrix in CI
 - `e2e/fixtures/` deploy smoke + load during redeploy
-- Dashboard update modal (CLI `dockyard update` today)
+- Dashboard update modal (CLI `dockyrd update` today)
 - Measured idle RSS targets
 - Owner 2FA mandate
 

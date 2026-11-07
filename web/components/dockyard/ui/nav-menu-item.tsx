@@ -19,7 +19,7 @@ export function NavMenuItem({
     <a
       href={href}
       aria-current={active ? "page" : undefined}
-      className="dockyard-nav-link"
+      className="dockyrd-nav-link"
       onClick={onClick}
     >
       <Icon strokeWidth={1.8} className="size-[18px] shrink-0" aria-hidden />

@@ -2,9 +2,9 @@
 
 import { ArrowLeft, Check, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Button } from "@/components/dockyard/ui/button";
-import { Chip } from "@/components/dockyard/ui/chip";
-import { Spinner } from "@/components/dockyard/ui/spinner";
+import { Button } from "@/components/dockyrd/ui/button";
+import { Chip } from "@/components/dockyrd/ui/chip";
+import { Spinner } from "@/components/dockyrd/ui/spinner";
 import {
   type Deployment,
   fetchDeploymentLog,

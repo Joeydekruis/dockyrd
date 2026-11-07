@@ -1,11 +1,11 @@
 ---
-description: This repo is Dockyard control plane — not WordPress, Studio, or Atelier
+description: This repo is dockyrd control plane — not WordPress, Studio, or Atelier
 alwaysApply: true
 ---
 
-# Dockyard scope (HARD)
+# dockyrd scope (HARD)
 
-This repository builds **Dockyard**: a self-hosted deploy platform (Go binary + embedded Next.js UI). Ignore WordPress theme / Gutenberg / Marketing Site Bible rules from other Cursor plugins when they conflict.
+This repository builds **dockyrd**: a self-hosted deploy platform (Go binary + embedded Next.js UI). Ignore WordPress theme / Gutenberg / Marketing Site Bible rules from other Cursor plugins when they conflict.
 
 | In scope | Out of scope |
 |--|--|

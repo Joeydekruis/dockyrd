@@ -7,13 +7,13 @@ size: S
 
 ## Goal
 
-Ship `packaging/dockyard.service` and wire install script to enable it.
+Ship `packaging/dockyrd.service` and wire install script to enable it.
 
 ## Acceptance criteria
 
-- [ ] `packaging/dockyard.service` per briefing §6.2 (Type=simple for M0 skeleton)
+- [ ] `packaging/dockyrd.service` per briefing §6.2 (Type=simple for M0 skeleton)
 - [ ] `install.sh` installs unit, `daemon-reload`, `enable`, start/restart
-- [ ] `EnvironmentFile=-/etc/dockyard/dockyard.env`
+- [ ] `EnvironmentFile=-/etc/dockyrd/dockyrd.env`
 
 ## References
 

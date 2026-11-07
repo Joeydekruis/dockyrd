@@ -34,4 +34,4 @@ Outputs: `docs/project/issues/<id>/design-direction.md` + `assets/<slug>-wirefra
 - Atelier `docs/components/<id>/` wireflow/design packages  
 - Studio → WordPress section parity gates
 
-UI exit quality: [dockyard-design-contract](dockyard-design-contract.mdc).
+UI exit quality: [dockyrd-design-contract](dockyrd-design-contract.mdc).

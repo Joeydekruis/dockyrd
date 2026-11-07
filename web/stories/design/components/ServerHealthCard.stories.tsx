@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { ServerHealthCard } from "@/components/dockyard/ui/server-health-card";
+import { ServerHealthCard } from "@/components/dockyrd/ui/server-health-card";
 
-/** **Source:** `web/components/dockyard/ui/server-health-card.tsx` */
+/** **Source:** `web/components/dockyrd/ui/server-health-card.tsx` */
 const meta = {
   title: "Design/Components/Server health card",
   component: ServerHealthCard,

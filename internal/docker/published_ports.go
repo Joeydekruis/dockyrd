@@ -43,8 +43,8 @@ func labelSlug(labels map[string]string) string {
 	if labels == nil {
 		return ""
 	}
-	if s := labels["com.dockyard.service_slug"]; s != "" {
+	if s := labels["com.dockyrd.service_slug"]; s != "" {
 		return s
 	}
-	return labels["dockyard.service.slug"]
+	return labels["dockyrd.service.slug"]
 }

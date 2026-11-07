@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { Kbd } from "@/components/dockyard/ui/kbd";
+import { Kbd } from "@/components/dockyrd/ui/kbd";
 
-/** **Source:** `web/components/dockyard/ui/kbd.tsx` */
+/** **Source:** `web/components/dockyrd/ui/kbd.tsx` */
 const meta = {
   title: "Design/Components/Kbd",
   component: Kbd,

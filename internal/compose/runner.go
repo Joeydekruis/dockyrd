@@ -171,9 +171,9 @@ func PrepareReleaseDir(stackDir, deploymentID, yaml string) (releaseDir, inputPa
 	return releaseDir, inputPath, nil
 }
 
-// WriteDockyardJSON writes the generated compose file.
-func WriteDockyardJSON(releaseDir string, doc map[string]any) (string, error) {
-	path := filepath.Join(releaseDir, "compose.dockyard.json")
+// WritedockyrdJSON writes the generated compose file.
+func WritedockyrdJSON(releaseDir string, doc map[string]any) (string, error) {
+	path := filepath.Join(releaseDir, "compose.dockyrd.json")
 	raw, err := json.MarshalIndent(doc, "", "  ")
 	if err != nil {
 		return "", err

@@ -8,9 +8,9 @@
 
 - **Branch:** only `development`. First check `git rev-parse --abbrev-ref HEAD`; if different, `git checkout development` before editing. Never create `feature/*` / `fix/*`. A hook blocks it. No commit/push to `main` except via the `push-to-main` skill when Joey asks.
 - **Commits:** only when Joey asks, except finishing a Feature-track GitHub issue (commit + push `development`, `Fixes #n`/`Refs #n`, then the evidence comment). Never close Feature issues.
-- **Naming:** CLI/binary/installer/domains = **Dockyard**; dashboard UI/logo/in-app copy = **Dockyrd**. Never show "dockyrd" lowercase in UI.
+- **Naming:** CLI/binary/installer/domains = **dockyrd**; dashboard UI/logo/in-app copy = **Dockyrd**. Never show "dockyrd" lowercase in UI.
 - **Scope:** Go control plane + embedded Next.js UI only. No WordPress/Studio/Atelier, no Linear (GitHub Issues only), no Postgres as app DB (SQLite + goose + sqlc).
-- **Web:** Base UI only, never `@radix-ui/*` (`./scripts/check-no-radix.sh`); no external font CDNs; UI primitives come from `web/components/dockyard/ui/` (shared with Storybook).
+- **Web:** Base UI only, never `@radix-ui/*` (`./scripts/check-no-radix.sh`); no external font CDNs; UI primitives come from `web/components/dockyrd/ui/` (shared with Storybook).
 - **Secrets:** none in code, logs, or chat. Validate input at trust boundaries; parameterized SQL only.
 
 ## How to work
@@ -47,7 +47,7 @@
 | Writing feedback/spec files | `.cursor/rules/harness-discipline.mdc`, `harness-artifacts.mdc` |
 | Deciding on reviewers | `.cursor/rules/reviewer-defaults.mdc` |
 
-Scoped rules for Go (`go-patterns`, `dockyard-stack`), web (`web/*`, `dockyard-design-contract`, `storybook-ui-source`) and TS (`typescript/*`) load automatically from `.claude/rules/`.
+Scoped rules for Go (`go-patterns`, `dockyrd-stack`), web (`web/*`, `dockyrd-design-contract`, `storybook-ui-source`) and TS (`typescript/*`) load automatically from `.claude/rules/`.
 
 ## Verify (see `docs/project/setup.md` for the full list)
 

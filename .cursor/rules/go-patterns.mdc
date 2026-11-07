@@ -1,14 +1,14 @@
 ---
-description: Go conventions for Dockyard — internal layout, errors, tests
+description: Go conventions for dockyrd — internal layout, errors, tests
 globs: "**/*.go"
 alwaysApply: false
 ---
 
-# Go patterns (Dockyard)
+# Go patterns (dockyrd)
 
 ## Layout
 
-- Public entry: `cmd/dockyard/main.go` only.
+- Public entry: `cmd/dockyrd/main.go` only.
 - All product code under **`internal/`** — no importable `pkg/` unless an ADR says otherwise.
 - Keep packages small by domain (`internal/proxy`, `internal/reconcile`, …) per briefing §5.
 

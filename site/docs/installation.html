@@ -102,8 +102,8 @@
 <li>Check the OS, architecture, ports and free disk space.</li>
 <li>Install Docker Engine from Docker's official repository if it is missing (version 27 or newer is required).</li>
 <li>Set log rotation and <code>live-restore</code> in <code>/etc/docker/daemon.json</code>, merging with what is already there.</li>
-<li>Download the release tarball, verify its checksum, and install <code>dockyrd</code> to <code>/usr/local/bin/dockyard</code> plus the API client <code>dy</code> to <code>/usr/local/bin/dy</code>.</li>
-<li>Run <code>dockyard init</code>, start the proxy and BuildKit containers and enable the systemd service.</li>
+<li>Download the release tarball, verify its checksum, and install <code>dockyrd</code> to <code>/usr/local/bin/dockyrd</code> plus the API client <code>dy</code> to <code>/usr/local/bin/dy</code>.</li>
+<li>Run <code>dockyrd init</code>, start the proxy and BuildKit containers and enable the systemd service.</li>
 <li>Open ports 22, 80, 443 and 8000 if <code>ufw</code> is active.</li>
 </ol>
 <p>When it finishes you see a setup link:</p>
@@ -111,7 +111,7 @@
 
   Open:   http://203.0.113.10:8000/setup?token=8f3k-29xq-a71m
   Token is valid for 60 minutes and can be used once.
-  Lost it?  sudo dockyard setup-token</pre>
+  Lost it?  sudo dockyrd setup-token</pre>
 <div class="callout warn"><svg width="18" height="18"><use href="#i-warn"/></svg><p><b>Keep the setup link private.</b> Whoever uses the token first becomes the owner of the instance. Without a valid token nobody can claim it.</p></div>
 <h2 id="installation-flags">Installer flags</h2>
 <p>Pass flags after <code>sh -s --</code>:</p>

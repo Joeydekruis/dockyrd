@@ -1,6 +1,6 @@
 # Domains and DNS
 
-Dockyard terminates HTTPS at the edge (**dy-proxy** / Caddy). You point DNS at your server; Dockyard provisions certificates automatically when ACME is configured.
+dockyrd terminates HTTPS at the edge (**dy-proxy** / Caddy). You point DNS at your server; dockyrd provisions certificates automatically when ACME is configured.
 
 ## Dashboard hostname
 
@@ -20,18 +20,18 @@ If the instance wildcard is `*.apps.example.com`, subdomains like `myapp.apps.ex
 
 ### sslip.io (labs)
 
-For quick tests without DNS, Dockyard supports sslip.io-style hostnames that encode your IP. Prefer real domains for production.
+For quick tests without DNS, dockyrd supports sslip.io-style hostnames that encode your IP. Prefer real domains for production.
 
 ## Checks
 
 ```bash
-dockyard doctor
+dockyrd doctor
 ```
 
-Verify system clock (HTTPS) and that **Caddy admin socket** is present while `dockyard serve` runs.
+Verify system clock (HTTPS) and that **Caddy admin socket** is present while `dockyrd serve` runs.
 
 ## Database and internal services
 
-Do **not** publish Postgres or Redis ports to the public internet. Apps connect over the Docker project network using internal hostnames Dockyard injects into variables.
+Do **not** publish Postgres or Redis ports to the public internet. Apps connect over the Docker project network using internal hostnames dockyrd injects into variables.
 
 See [install](./install.md) for firewall notes when `ufw` is enabled.

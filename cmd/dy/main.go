@@ -32,7 +32,7 @@ func main() {
 }
 
 func printUsage() {
-	fmt.Fprintf(os.Stderr, `dy — Dockyard CLI
+	fmt.Fprintf(os.Stderr, `dy — dockyrd CLI
 
 Usage:
   dy login <base-url> <token>
@@ -41,14 +41,14 @@ Usage:
   dy deploy <service-id>
   dy logs <service-id> [runtime|access] [tail]
 
-Env: DOCKYARD_URL overrides saved base URL.
+Env: dockyrd_URL overrides saved base URL.
 `)
 }
 
 func loadClient() (*apiclient.Client, error) {
 	base, err := apiclient.LoadBaseURL()
 	if err != nil {
-		return nil, fmt.Errorf("base URL not configured (dy login or DOCKYARD_URL)")
+		return nil, fmt.Errorf("base URL not configured (dy login or dockyrd_URL)")
 	}
 	tok, err := apiclient.LoadToken()
 	if err != nil {

@@ -19,9 +19,9 @@ import (
 const (
 	ProxyContainerName  = "dy-proxy"
 	ProxyImage          = "caddy:2-alpine"
-	proxySpecLabel      = "dev.dockyard.proxy_spec"
+	proxySpecLabel      = "dev.dockyrd.proxy_spec"
 	proxySpecHostV1     = "host-v1"
-	caddyDirInContainer = "/var/lib/dockyard/caddy"
+	caddyDirInContainer = "/var/lib/dockyrd/caddy"
 )
 
 // EnsureProxy runs the system Caddy container (dy-proxy) with host networking on 80/443.
@@ -167,7 +167,7 @@ func (c *Client) ProxyRunning(ctx context.Context) (bool, string) {
 		return false, "not created"
 	}
 	if inspect.Config.Labels[proxySpecLabel] != proxySpecHostV1 {
-		return false, "outdated spec (restart dockyard to recreate)"
+		return false, "outdated spec (restart dockyrd to recreate)"
 	}
 	if !inspect.State.Running {
 		return false, inspect.State.Status

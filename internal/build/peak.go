@@ -77,7 +77,7 @@ func FailureMessage(kind, detail string) string {
 	case "timeout":
 		return "Build timed out." + hints
 	case "interrupted":
-		return "Build was interrupted (Dockyard restarted or the job was cancelled)."
+		return "Build was interrupted (dockyrd restarted or the job was cancelled)."
 	default:
 		if detail != "" {
 			return detail + hints

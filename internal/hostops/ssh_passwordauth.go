@@ -9,7 +9,7 @@ import (
 
 )
 
-const sshDropInBody = `# Managed by Dockyard — do not edit
+const sshDropInBody = `# Managed by dockyrd — do not edit
 PasswordAuthentication no
 KbdInteractiveAuthentication no
 PermitRootLogin prohibit-password

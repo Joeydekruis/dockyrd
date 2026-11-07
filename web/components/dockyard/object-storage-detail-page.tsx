@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { DashboardShell } from "@/components/dockyrd/dashboard-shell";
 import { getStorageStatus } from "@/lib/api";
 import { useRouteParam } from "@/lib/use-route-param";
 

@@ -1,4 +1,4 @@
-import { ServerBackupSettingsPage } from "@/components/dockyard/server-backup-settings-page";
+import { ServerBackupSettingsPage } from "@/components/dockyrd/server-backup-settings-page";
 
 export default function Page() {
   return <ServerBackupSettingsPage />;

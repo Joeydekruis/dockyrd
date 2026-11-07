@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { SessionRow } from "@/components/dockyard/ui/session-row";
+import { SessionRow } from "@/components/dockyrd/ui/session-row";
 
-/** **Source:** `web/components/dockyard/ui/session-row.tsx` */
+/** **Source:** `web/components/dockyrd/ui/session-row.tsx` */
 const meta = {
   title: "Design/Components/Session row",
   component: SessionRow,

@@ -3,7 +3,7 @@ import { useState } from "react";
 import {
   UploadDropzone,
   type UploadDropzoneState,
-} from "@/components/dockyard/ui/upload-dropzone";
+} from "@/components/dockyrd/ui/upload-dropzone";
 
 const states: UploadDropzoneState[] = ["idle", "uploading", "done", "error"];
 

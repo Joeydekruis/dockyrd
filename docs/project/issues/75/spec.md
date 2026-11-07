@@ -36,7 +36,7 @@ Introduce **`internal/hostops`**: typed host mutations with **Plan → Apply →
 | `internal/db/migrations/00012_host_actions.sql` | Table + indexes |
 | `internal/db/queries/host_actions.sql` | sqlc |
 | `internal/server/api_security_host_actions.go` | Confirm/revert HTTP stubs |
-| `cmd/dockyard` | `dockyard host revert <id>` subcommand for timer callback |
+| `cmd/dockyrd` | `dockyrd host revert <id>` subcommand for timer callback |
 
 ## `Action` contract
 
@@ -101,12 +101,12 @@ sqlc queries: insert row, get by id, update state + timestamps + error, list `aw
 
 ## Lockout timer integration
 
-**Goal:** after `Apply` on lockout actions, a revert runs even if `dockyard serve` crashes (briefing §3.3).
+**Goal:** after `Apply` on lockout actions, a revert runs even if `dockyrd serve` crashes (briefing §3.3).
 
 1. **`LockoutTimer` interface** — `Schedule(ctx, actionID string, notAfter time.Time) error`, `Cancel(ctx, actionID string) error`.
 2. **Production implementation** — schedule transient systemd unit, aligned with briefing:
-   - Prefer `systemd-run --on-active=120s --unit=dockyard-host-revert-<id>` invoking **`dockyard host revert <id>`** (exact CLI spelling in implementation).
-   - Document in code comments: requires Dockyard on `PATH` as installed by packaging; timer runs as root (same as panel today).
+   - Prefer `systemd-run --on-active=120s --unit=dockyrd-host-revert-<id>` invoking **`dockyrd host revert <id>`** (exact CLI spelling in implementation).
+   - Document in code comments: requires dockyrd on `PATH` as installed by packaging; timer runs as root (same as panel today).
    - Reuse existing systemd familiarity (`internal/resources` D-Bus patterns) where it reduces fragility; **fallback to `exec` of `systemd-run`** is acceptable for P1a.
 3. **On Confirm** — cancel timer, set `confirmed_at`, transition `awaiting_confirm` → `confirmed`.
 4. **On manual Revert** (API or timer) — idempotent: if already `reverted`, no-op success.
@@ -140,7 +140,7 @@ Regenerate OpenAPI/TS only if project Makefile already does for new routes (`mak
 
 ## CLI
 
-- `dockyard host revert <id>` — loads config/DB, runs revert for timer; exit non-zero on hard failure (for systemd `OnFailure` logging).
+- `dockyrd host revert <id>` — loads config/DB, runs revert for timer; exit non-zero on hard failure (for systemd `OnFailure` logging).
 - Document in brief code comment; user-facing docs optional until #76.
 
 ## Minimal test action
@@ -172,7 +172,7 @@ Implement **`test.echo`** (or `hostops.test.echo`):
 ### Lockout + reconcile
 
 - [ ] `LockoutTimer` production adapter documented; confirm cancels scheduled revert.
-- [ ] `dockyard host revert <id>` subcommand invokes same revert path as API.
+- [ ] `dockyrd host revert <id>` subcommand invokes same revert path as API.
 - [ ] Startup reconcile reverts expired `awaiting_confirm` rows (unit test with fake clock or injected `now`).
 
 ### Stubs

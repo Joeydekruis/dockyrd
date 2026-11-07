@@ -11,7 +11,7 @@ import (
 
 // Owners must enable 2FA before using the panel (briefing §19 / §8).
 func ownerMustHave2FA(user sqlc.GetUserByIDRow) bool {
-	if os.Getenv("DOCKYARD_REQUIRE_OWNER_2FA") == "0" {
+	if os.Getenv("dockyrd_REQUIRE_OWNER_2FA") == "0" {
 		return false
 	}
 	return user.Role == "owner" && !totpEnabled(user.TotpEnabledAt)

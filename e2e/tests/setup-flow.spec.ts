@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { expect, test } from "@playwright/test";
 
 const tokenFile =
-  process.env.E2E_SETUP_TOKEN_FILE ?? "/tmp/dockyard-e2e/etc/e2e-setup-token";
+  process.env.E2E_SETUP_TOKEN_FILE ?? "/tmp/dockyrd-e2e/etc/e2e-setup-token";
 
 test("setup completes via API", async ({ request }) => {
   let token = process.env.E2E_SETUP_TOKEN ?? "";
@@ -21,7 +21,7 @@ test("setup completes via API", async ({ request }) => {
     data: {
       token,
       name: "E2E Owner",
-      email: "e2e-owner@dockyard.test",
+      email: "e2e-owner@dockyrd.test",
       password: "longpassword12",
     },
   });
@@ -29,7 +29,7 @@ test("setup completes via API", async ({ request }) => {
 
   const login = await request.post("/api/v1/auth/login", {
     data: {
-      email: "e2e-owner@dockyard.test",
+      email: "e2e-owner@dockyrd.test",
       password: "longpassword12",
     },
   });

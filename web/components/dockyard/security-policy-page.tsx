@@ -1,12 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { DashboardShell } from "@/components/dockyard/dashboard-shell";
-import { SecurityNav } from "@/components/dockyard/security-nav";
-import { Button } from "@/components/dockyard/ui/button";
-import { PageHeader } from "@/components/dockyard/ui/page-header";
-import { RadioGroup } from "@/components/dockyard/ui/radio-group";
-import { Switch } from "@/components/dockyard/ui/switch";
+import { DashboardShell } from "@/components/dockyrd/dashboard-shell";
+import { SecurityNav } from "@/components/dockyrd/security-nav";
+import { Button } from "@/components/dockyrd/ui/button";
+import { PageHeader } from "@/components/dockyrd/ui/page-header";
+import { RadioGroup } from "@/components/dockyrd/ui/radio-group";
+import { Switch } from "@/components/dockyrd/ui/switch";
 import {
   getSecurityPolicy,
   type HeaderEntry,

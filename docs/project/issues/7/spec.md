@@ -7,11 +7,11 @@ size: S
 
 ## Goal
 
-POSIX `scripts/install.sh` skeleton: paths, local binary install, calls `dockyard init`.
+POSIX `scripts/install.sh` skeleton: paths, local binary install, calls `dockyrd init`.
 
 ## Acceptance criteria
 
-- [ ] `scripts/install.sh` — root check, `/etc/dockyard` + `/var/lib/dockyard`, `DOCKYARD_INSTALL_BIN` override
+- [ ] `scripts/install.sh` — root check, `/etc/dockyrd` + `/var/lib/dockyrd`, `dockyrd_INSTALL_BIN` override
 - [ ] `scripts/uninstall.sh` — stop/disable unit, remove binary; keep data
 - [ ] Documented dev flow in script header / README
 

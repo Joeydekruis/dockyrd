@@ -2,8 +2,8 @@
 
 import { Copy, Eye, EyeOff, Link2 } from "lucide-react";
 import { useState } from "react";
-import { Chip } from "@/components/dockyard/ui/chip";
-import { IconButton } from "@/components/dockyard/ui/icon-button";
+import { Chip } from "@/components/dockyrd/ui/chip";
+import { IconButton } from "@/components/dockyrd/ui/icon-button";
 import { useCopyToClipboard } from "@/lib/snackbar-context";
 
 type EnvVarRowProps = {

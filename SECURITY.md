@@ -14,9 +14,9 @@ Do not open public GitHub issues for exploitable vulnerabilities.
 
 ## Scope
 
-Dockyard: the `dockyard` binary, embedded dashboard, installer, and documented API surfaces.
+dockyrd: the `dockyrd` binary, embedded dashboard, installer, and documented API surfaces.
 
-User-deployed workloads (your apps, databases, Garage) remain your responsibility; report only issues in Dockyard’s control plane or default templates.
+User-deployed workloads (your apps, databases, Garage) remain your responsibility; report only issues in dockyrd’s control plane or default templates.
 
 ## Response
 

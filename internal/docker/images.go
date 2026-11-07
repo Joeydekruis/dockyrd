@@ -11,12 +11,12 @@ import (
 
 const defaultImageKeep = 5
 
-// PruneServiceImages removes old dockyard/<serviceSlug>: tags, keeping the newest keep tags.
+// PruneServiceImages removes old dockyrd/<serviceSlug>: tags, keeping the newest keep tags.
 func (c *Client) PruneServiceImages(ctx context.Context, serviceSlug string, keep int) error {
 	if keep <= 0 {
 		keep = defaultImageKeep
 	}
-	prefix := "dockyard/" + strings.TrimSpace(serviceSlug) + ":"
+	prefix := "dockyrd/" + strings.TrimSpace(serviceSlug) + ":"
 	list, err := c.moby.ImageList(ctx, image.ListOptions{
 		Filters: filters.NewArgs(filters.Arg("reference", prefix+"*")),
 	})

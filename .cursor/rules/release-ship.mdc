@@ -19,9 +19,9 @@ Deep playbook: [release-ship skill](../skills/release-ship/SKILL.md).
 
 | Consumer | Pattern |
 |----------|---------|
-| `.goreleaser.yaml` archives | `dockyard_{{ .Version }}_{{ .Os }}_{{ .Arch }}.tar.gz` |
-| `internal/updater/github.go` | `dockyard_{version}_{GOOS}_{GOARCH}.tar.gz` (`version` = tag minus `v`) |
-| `scripts/install.sh` | `dockyard_${ver}_${os_name}_${arch}.tar.gz` |
+| `.goreleaser.yaml` archives | `dockyrd_{{ .Version }}_{{ .Os }}_{{ .Arch }}.tar.gz` |
+| `internal/updater/github.go` | `dockyrd_{version}_{GOOS}_{GOARCH}.tar.gz` (`version` = tag minus `v`) |
+| `scripts/install.sh` | `dockyrd_${ver}_${os_name}_${arch}.tar.gz` |
 
 **Do not** rename archives or change `project_name` in GoReleaser without updating updater + install script in the same change.
 
@@ -53,13 +53,13 @@ gh release view "v${VERSION}" --repo Joeydekruis/dockyrd --json assets --jq '.as
 
 Must include at minimum:
 
-- `dockyard_${VERSION}_linux_amd64.tar.gz`
-- `dockyard_${VERSION}_linux_arm64.tar.gz`
+- `dockyrd_${VERSION}_linux_amd64.tar.gz`
+- `dockyrd_${VERSION}_linux_arm64.tar.gz`
 - `checksums.txt`
 
 7. Report: tag, workflow run URL, full asset list, confirmation both linux arches present.
 
-## Updater error: `no release asset matching dockyard_X_linux_arm64`
+## Updater error: `no release asset matching dockyrd_X_linux_arm64`
 
 Usually **not** a wrong name — the panel called `/releases/latest` while:
 

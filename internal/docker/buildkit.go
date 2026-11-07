@@ -73,7 +73,7 @@ func (c *Client) EnsureBuildkit(ctx context.Context, dataDir string) error {
 }
 
 func ensureBuildxBuilder(ctx context.Context) error {
-	name := strings.TrimSpace(os.Getenv("DOCKYARD_BUILDX_BUILDER"))
+	name := strings.TrimSpace(os.Getenv("dockyrd_BUILDX_BUILDER"))
 	if name == "" {
 		name = BuildkitContainerName
 	}

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { DnsRecordBlock } from "@/components/dockyard/ui/dns-record-block";
+import { DnsRecordBlock } from "@/components/dockyrd/ui/dns-record-block";
 
-/** **Source:** `web/components/dockyard/ui/dns-record-block.tsx` */
+/** **Source:** `web/components/dockyrd/ui/dns-record-block.tsx` */
 const meta = {
   title: "Design/Components/DNS record block",
   component: DnsRecordBlock,
@@ -15,7 +15,7 @@ const meta = {
   args: {
     type: "CNAME",
     name: "app",
-    value: "proxy.dockyard.dev",
+    value: "proxy.dockyrd.dev",
     ttl: "3600",
   },
 } satisfies Meta<typeof DnsRecordBlock>;

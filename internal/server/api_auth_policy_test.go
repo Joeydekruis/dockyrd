@@ -15,7 +15,7 @@ import (
 )
 
 func TestOwnerWithout2FABlockedFromProjects(t *testing.T) {
-	t.Setenv("DOCKYARD_REQUIRE_OWNER_2FA", "1")
+	t.Setenv("dockyrd_REQUIRE_OWNER_2FA", "1")
 	dir := t.TempDir()
 	cfg := config.Config{
 		DataDir:   filepath.Join(dir, "data"),

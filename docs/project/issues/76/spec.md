@@ -33,7 +33,7 @@ CrowdSec / proxybuild install remains **catalog-only** (not installable) until #
 **None (skip `designer`).** Visual contract:
 
 - Artboards **Security · Overview** and **Security · Add-ons** in `docs/dockyrd-security-design.html` (briefing §8: `ServerSecurity`, `ServerSecurityAddons`).
-- New primitives as needed in `web/components/dockyard/ui/` per briefing §8: `StatusRow`, `StepList`, `CodeBlock` (diff), reuse existing cards/rows from design-index patterns.
+- New primitives as needed in `web/components/dockyrd/ui/` per briefing §8: `StatusRow`, `StepList`, `CodeBlock` (diff), reuse existing cards/rows from design-index patterns.
 
 ## Related ADRs
 
@@ -67,7 +67,7 @@ CrowdSec / proxybuild install remains **catalog-only** (not installable) until #
 | `internal/server/api_security_checks.go` | GET + POST run |
 | `internal/server/api_security_addons.go` | catalog, plan, install, uninstall |
 | `internal/jobs/` | New job kind(s) e.g. `security.addon.install` executing addon install with rollback |
-| `web/components/dockyard/security-*` | Overview + Add-ons pages |
+| `web/components/dockyrd/security-*` | Overview + Add-ons pages |
 | `web/app/(shell)/server/security/...` | Page entry |
 | `internal/doctor/doctor.go` | **Optional stretch:** append baseline checks reusing `securitychecks` (briefing §4.10) |
 

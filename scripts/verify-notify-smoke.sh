@@ -13,7 +13,7 @@ cat <<'MANUAL'
 
 == Manual (local serve) ==
 
-1. make build && ./bin/dockyard serve
+1. make build && ./bin/dockyrd serve
 2. Settings → Server → Channels → add Slack webhook → Test → expect ok
 3. Trigger failed deploy (or use test channel) → message within ~10s
 4. Delivery log shows sent/retry states; dead delivery can Retry

@@ -1,7 +1,7 @@
 "use client";
 
 import { forwardRef, useId } from "react";
-import { Select, type SelectOption } from "@/components/dockyard/ui/select";
+import { Select, type SelectOption } from "@/components/dockyrd/ui/select";
 
 const labelClass = "mb-1 block font-mono text-[11px] uppercase tracking-widest";
 

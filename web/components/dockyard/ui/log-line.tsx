@@ -1,4 +1,4 @@
-import { Chip } from "@/components/dockyard/ui/chip";
+import { Chip } from "@/components/dockyrd/ui/chip";
 
 type LogLineProps = {
   timestamp: string;

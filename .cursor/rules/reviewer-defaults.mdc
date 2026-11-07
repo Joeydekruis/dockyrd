@@ -27,7 +27,7 @@ Launch **only** the specialists the change actually needs. Prefer **specialists 
 | **UI only** | `frontend-evaluator` only if design HTML / wireframe exists or L/XL; light `code-reviewer` **only if** non-trivial logic | api/mcp/db; skip frontend-eval for S-M with no design artefacts |
 | **API / routes** (no new auth) | `api-reviewer` | security unless trust boundary changed; skip heavy code-reviewer if api-reviewer covers it |
 | **MCP** | `mcp-reviewer` + `security-reviewer` | - |
-| **DB / migrations / RLS** | `database-reviewer` + `security-reviewer` | RLS only if introduced; Dockyard control plane uses SQLite/goose |
+| **DB / migrations / RLS** | `database-reviewer` + `security-reviewer` | RLS only if introduced; dockyrd control plane uses SQLite/goose |
 | **Auth / secrets / trust** | `security-reviewer` (+ light `code-reviewer` if large) | api unless new public contract |
 | **Perf / budgets** | `performance-evaluator` | - |
 

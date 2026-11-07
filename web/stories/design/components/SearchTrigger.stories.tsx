@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { SearchTrigger } from "@/components/dockyard/ui/search-trigger";
+import { SearchTrigger } from "@/components/dockyrd/ui/search-trigger";
 
 const meta = {
   title: "Design/Components/Search trigger",

@@ -1135,7 +1135,7 @@ export function getServerMetrics(range: MetricRange = "24h") {
   return apiFetch<ServerMetricsResponse>(`/api/v1/server/metrics?${q}`);
 }
 
-export type DockyardEvent = {
+export type dockyrdEvent = {
   id: string;
   level: string;
   category: string;
@@ -1159,7 +1159,7 @@ export function listEvents(opts?: {
   if (opts?.category) q.set("category", opts.category);
   if (opts?.needsAttention) q.set("needs_attention", "1");
   const suffix = q.size ? `?${q}` : "";
-  return apiFetch<{ events: DockyardEvent[] }>(`/api/v1/events${suffix}`);
+  return apiFetch<{ events: dockyrdEvent[] }>(`/api/v1/events${suffix}`);
 }
 
 export function ackEvent(id: string) {
@@ -1313,7 +1313,7 @@ export function getUpdatesStatus(options?: { refresh?: boolean }) {
   return apiFetch<UpdatesStatus>(`/api/v1/updates${query}`);
 }
 
-export function applyDockyardUpdate() {
+export function applydockyrdUpdate() {
   return apiFetch<{
     ok: boolean;
     installed_tag?: string;

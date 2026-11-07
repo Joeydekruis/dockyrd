@@ -8,17 +8,17 @@ TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
 PORT=$((18000 + RANDOM % 8000))
-export DOCKYARD_DATA_DIR="$TMP/data"
-export DOCKYARD_CONFIG_DIR="$TMP/etc"
-export DOCKYARD_LISTEN=":${PORT}"
+export dockyrd_DATA_DIR="$TMP/data"
+export dockyrd_CONFIG_DIR="$TMP/etc"
+export dockyrd_LISTEN=":${PORT}"
 BASE="http://127.0.0.1:${PORT}"
 
 echo "== e2e smoke =="
 make build
 
-"$ROOT/bin/dockyard" init >/dev/null
+"$ROOT/bin/dockyrd" init >/dev/null
 
-"$ROOT/bin/dockyard" serve &
+"$ROOT/bin/dockyrd" serve &
 PID=$!
 cleanup() {
   kill "$PID" 2>/dev/null || true

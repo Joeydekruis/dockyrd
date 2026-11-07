@@ -3,37 +3,37 @@
 import { Layers, Plus } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { AddProjectResourceModal } from "@/components/dockyard/add-project-resource-modal";
-import { CreateApplicationWizard } from "@/components/dockyard/create-application-wizard";
-import { CreateBucketModal } from "@/components/dockyard/create-bucket-modal";
-import { CreateComposeModal } from "@/components/dockyard/create-compose-modal";
-import { CreateDatabaseModal } from "@/components/dockyard/create-database-modal";
-import { CreateStaticSiteWizard } from "@/components/dockyard/create-static-site-wizard";
-import { DashboardShell } from "@/components/dockyard/dashboard-shell";
-import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
-import { ProjectHardwareUsageSection } from "@/components/dockyard/project-hardware-usage-section";
-import { ProjectLinksMap } from "@/components/dockyard/project-links-map";
-import { ProjectLinksSettings } from "@/components/dockyard/project-links-settings";
+import { AddProjectResourceModal } from "@/components/dockyrd/add-project-resource-modal";
+import { CreateApplicationWizard } from "@/components/dockyrd/create-application-wizard";
+import { CreateBucketModal } from "@/components/dockyrd/create-bucket-modal";
+import { CreateComposeModal } from "@/components/dockyrd/create-compose-modal";
+import { CreateDatabaseModal } from "@/components/dockyrd/create-database-modal";
+import { CreateStaticSiteWizard } from "@/components/dockyrd/create-static-site-wizard";
+import { DashboardShell } from "@/components/dockyrd/dashboard-shell";
+import { DockyrdPageLoading } from "@/components/dockyrd/dockyrd-page-loading";
+import { ProjectHardwareUsageSection } from "@/components/dockyrd/project-hardware-usage-section";
+import { ProjectLinksMap } from "@/components/dockyrd/project-links-map";
+import { ProjectLinksSettings } from "@/components/dockyrd/project-links-settings";
 import {
   type ProjectResourceRow,
   ProjectResourceTable,
-} from "@/components/dockyard/project-resource-table";
+} from "@/components/dockyrd/project-resource-table";
 import {
   type ResourceProvisionContext,
   ResourceProvisioningModal,
-} from "@/components/dockyard/resource-provisioning-modal";
+} from "@/components/dockyrd/resource-provisioning-modal";
 import {
   StaticSiteCreateProgressModal,
   type StaticSiteCreateResult,
-} from "@/components/dockyard/static-site-create-progress-modal";
-import { Button } from "@/components/dockyard/ui/button";
-import { PageHeader } from "@/components/dockyard/ui/page-header";
+} from "@/components/dockyrd/static-site-create-progress-modal";
+import { Button } from "@/components/dockyrd/ui/button";
+import { PageHeader } from "@/components/dockyrd/ui/page-header";
 import {
   SplitButton,
   type SplitButtonMenuItem,
-} from "@/components/dockyard/ui/split-button";
-import { Tabs } from "@/components/dockyard/ui/tabs";
-import type { TimeRange } from "@/components/dockyard/ui/time-range-toggle";
+} from "@/components/dockyrd/ui/split-button";
+import { Tabs } from "@/components/dockyrd/ui/tabs";
+import type { TimeRange } from "@/components/dockyrd/ui/time-range-toggle";
 import { formatBytes } from "@/lib/analytics-stats";
 import {
   type Deployment,

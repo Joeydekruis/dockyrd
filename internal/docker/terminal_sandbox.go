@@ -59,7 +59,7 @@ func (c *Client) RunTerminalSandbox(ctx context.Context, in RunTerminalSandboxIn
 		LabelManaged:              managedTrue,
 		LabelKind:                 KindSystem,
 		LabelProject:              in.ProjectID,
-		"dev.dockyard.terminal":   "sandbox",
+		"dev.dockyrd.terminal":   "sandbox",
 	}
 
 	startCmd := []string{

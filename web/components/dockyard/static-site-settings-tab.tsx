@@ -8,21 +8,21 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { ServiceBuildLocationPanel } from "@/components/dockyard/service-build-location-panel";
-import { Alert } from "@/components/dockyard/ui/alert";
-import { Button } from "@/components/dockyard/ui/button";
-import { DangerZone } from "@/components/dockyard/ui/danger-zone";
-import { Field } from "@/components/dockyard/ui/field";
-import { Modal } from "@/components/dockyard/ui/modal";
-import { SelectField } from "@/components/dockyard/ui/select-field";
+import { ServiceBuildLocationPanel } from "@/components/dockyrd/service-build-location-panel";
+import { Alert } from "@/components/dockyrd/ui/alert";
+import { Button } from "@/components/dockyrd/ui/button";
+import { DangerZone } from "@/components/dockyrd/ui/danger-zone";
+import { Field } from "@/components/dockyrd/ui/field";
+import { Modal } from "@/components/dockyrd/ui/modal";
+import { SelectField } from "@/components/dockyrd/ui/select-field";
 import {
   SettingsBranchPill,
   SettingsCopyPill,
   SettingsDetailBlock,
   SettingsEnabledStatus,
   SettingsGroupHeading,
-} from "@/components/dockyard/ui/settings-detail-block";
-import { Switch } from "@/components/dockyard/ui/switch";
+} from "@/components/dockyrd/ui/settings-detail-block";
+import { Switch } from "@/components/dockyrd/ui/switch";
 import { patchService, type Service } from "@/lib/api";
 import {
   formatBuildPart,
@@ -381,7 +381,7 @@ export function StaticSiteSettingsTab({
         />
         <DangerZone
           title="Delete static site"
-          description="Removes the site, its domains, and deployment history from Dockyard. This cannot be undone."
+          description="Removes the site, its domains, and deployment history from dockyrd. This cannot be undone."
           action={
             <Button
               type="button"
@@ -476,7 +476,7 @@ export function StaticSiteSettingsTab({
       <Modal
         open={modal === "build"}
         title="Update build settings"
-        description="How Dockyard builds and publishes this site on each deployment."
+        description="How dockyrd builds and publishes this site on each deployment."
         onClose={closeModal}
         size="lg"
         footer={

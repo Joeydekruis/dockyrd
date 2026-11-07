@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { StatCard } from "@/components/dockyard/ui/stat-card";
+import { StatCard } from "@/components/dockyrd/ui/stat-card";
 
-/** **Source:** `web/components/dockyard/ui/stat-card.tsx` */
+/** **Source:** `web/components/dockyrd/ui/stat-card.tsx` */
 const meta = {
   title: "Design/Components/Stat card",
   component: StatCard,

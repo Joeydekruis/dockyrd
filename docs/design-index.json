@@ -2,7 +2,7 @@
     "$schema_note": "Navigation index for the Dockyrd UI design export. Line numbers are 1-based and refer to the files as published (project/<file>). Every page is a self-contained .dc.html with inline styles; use `search_anchors` strings if line numbers drift.",
     "project": {
      "name": "Dockyrd",
-     "spelling": "Always 'Dockyrd' (not Dockyard).",
+     "spelling": "Always 'Dockyrd' (not dockyrd).",
      "description": "Open-source, self-hosted deployment platform; lean, reliable, safe alternative to Coolify. Positioning: the Sevalla experience on your own hardware, without Coolify complexity.",
      "language_of_ui": "English",
      "design_language": "Calendly-inspired, light mode only"
@@ -2346,6 +2346,6 @@
      "Settings sub-pages other than Profile & security (General, Team, Git providers, Backup storage, Updates, Notifications, API tokens) are not designed yet.",
      "Application detail and Database detail pages are not designed yet.",
      "Object storage bucket detail not designed.",
-     "navy logo variant (f36a9077-dockyard-logo-navy.svg) provided but unused."
+     "navy logo variant (f36a9077-dockyrd-logo-navy.svg) provided but unused."
     ]
    }

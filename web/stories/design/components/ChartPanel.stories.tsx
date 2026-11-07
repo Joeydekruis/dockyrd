@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { ChartPanel } from "@/components/dockyard/ui/chart-panel";
+import { ChartPanel } from "@/components/dockyrd/ui/chart-panel";
 
 const meta = {
   title: "Design/Components/Chart panel",

@@ -83,7 +83,7 @@ func (d apiDeps) handleGitHubWorkflow(w http.ResponseWriter, r *http.Request) {
 		Branch:      cfg.Source.BranchOrDefault(),
 		Context:     cfg.BuildContextDir("."),
 		Image:       build.ExpectedGHCRImage(repo),
-		DockyardURL: base,
+		DockyrdURL: base,
 		ServiceID:   serviceID,
 	})
 	if err != nil {
@@ -91,11 +91,11 @@ func (d apiDeps) handleGitHubWorkflow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]any{
-		"workflow": ".github/workflows/dockyard.yml",
+		"workflow": ".github/workflows/dockyrd.yml",
 		"yaml":     yaml,
 		"secrets": []map[string]string{
-			{"name": "DOCKYARD_URL", "value": base},
-			{"name": "DOCKYARD_DEPLOY_TOKEN", "description": "Create via POST /api/v1/services/{id}/deploy-token"},
+			{"name": "dockyrd_URL", "value": base},
+			{"name": "dockyrd_DEPLOY_TOKEN", "description": "Create via POST /api/v1/services/{id}/deploy-token"},
 		},
 	})
 }

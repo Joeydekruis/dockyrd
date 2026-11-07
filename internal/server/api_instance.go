@@ -170,7 +170,7 @@ func (d apiDeps) handleSMTPTest(w http.ResponseWriter, r *http.Request) {
 		writeJSONError(w, http.StatusBadRequest, "smtp not configured")
 		return
 	}
-	subject := "Dockyard SMTP test"
+	subject := "dockyrd SMTP test"
 	text := "If you received this message, SMTP is configured correctly."
 	if err := mail.VerifyConnection(cfg); err != nil {
 		d.recordEmailLog(ctx, emailKindSMTPTest, smtpFromAddress(cfg), body.To, subject, emailStatusFailed, err.Error(), cfg)

@@ -18,7 +18,7 @@ export function IconButton({
       type={type}
       aria-label={label}
       title={label}
-      className={`dockyard-icon-btn ${className}`.trim()}
+      className={`dockyrd-icon-btn ${className}`.trim()}
       {...props}
     >
       <Icon strokeWidth={1.8} className="size-5" aria-hidden />

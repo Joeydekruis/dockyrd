@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { Button } from "@/components/dockyard/ui/button";
-import { PageHeader } from "@/components/dockyard/ui/page-header";
+import { Button } from "@/components/dockyrd/ui/button";
+import { PageHeader } from "@/components/dockyrd/ui/page-header";
 
 const meta = {
   title: "Design/Components/Page header",

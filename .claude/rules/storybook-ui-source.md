@@ -14,8 +14,8 @@ Storybook is a **render catalog** of the same React components the panel ships. 
 
 | Layer | Path | Storybook |
 |-------|------|-----------|
-| **Primitives** (buttons, badges, rows, modals, search palette, auth fields, empty state, …) | `web/components/dockyard/ui/*` | Import **only** from `@/components/dockyard/ui/…` or `@/components/dockyard/ui` barrel |
-| **Composites** (sidebar, header, command palette, dashboard shell, auth layout) | `web/components/dockyard/*` | May import composites; composites **must compose** `ui/*` — no duplicated button/input markup |
+| **Primitives** (buttons, badges, rows, modals, search palette, auth fields, empty state, …) | `web/components/dockyrd/ui/*` | Import **only** from `@/components/dockyrd/ui/…` or `@/components/dockyrd/ui` barrel |
+| **Composites** (sidebar, header, command palette, dashboard shell, auth layout) | `web/components/dockyrd/*` | May import composites; composites **must compose** `ui/*` — no duplicated button/input markup |
 | **Stories** | `web/stories/dockyrd/*`, `web/stories/design/**` | Board overviews under `Design/1–4`; **per-component Playground + Controls** under **`Design/Components/*`** |
 
 Run: `pnpm --dir web storybook` (port 6006). See `docs/project/setup.md`.
@@ -24,7 +24,7 @@ Run: `pnpm --dir web storybook` (port 6006). See `docs/project/setup.md`.
 
 1. **Do not** duplicate design-system markup in stories (no copy-paste `<button className="btn-primary">` in a story file).
 2. **Do not** style product pages with one-off primary/outline buttons when `ui/button` exists — use the shared component (or extend `ui/` first, then use it in the page **and** story).
-3. **New design primitive** → add under `web/components/dockyard/ui/<name>.tsx`, export from `ui/index.ts`, add/update story under `web/stories/dockyrd/`, then wire pages/composites to import it.
+3. **New design primitive** → add under `web/components/dockyrd/ui/<name>.tsx`, export from `ui/index.ts`, add/update story under `web/stories/dockyrd/`, then wire pages/composites to import it.
 4. **Story change** that alters visuals → edit the **shared component**, not a fork in the story.
 5. **CSS tokens** stay in `web/styles/globals.css`; class hooks like `.btn-primary` are implementation details of `ui/*` — pages should not invent parallel class strings for the same control.
 
@@ -39,4 +39,4 @@ Run: `pnpm --dir web storybook` (port 6006). See `docs/project/setup.md`.
 - After UI work touching primitives: `pnpm --dir web typecheck` and spot-check in Storybook.
 - If a page and story diverge, **merge into `ui/`** — do not “fix the story” with local JSX.
 
-Cross-ref: [dockyard-design-contract](../dockyard-design-contract.mdc), [web/design-quality](../web/design-quality.mdc).
+Cross-ref: [dockyrd-design-contract](../dockyrd-design-contract.mdc), [web/design-quality](../web/design-quality.mdc).

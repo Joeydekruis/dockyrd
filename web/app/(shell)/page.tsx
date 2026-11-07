@@ -1,4 +1,4 @@
-import { HomeDashboard } from "@/components/dockyard/home-dashboard";
+import { HomeDashboard } from "@/components/dockyrd/home-dashboard";
 
 export default function HomePage() {
   return <HomeDashboard />;

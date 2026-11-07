@@ -51,7 +51,7 @@ Per [design-when](design-when.mdc) - **not** every UI Feature:
 
 1. `design-direction.md` - palette, type, layout idea, references (prose lives here) - when designer ran
 2. `assets/<slug>-wireframe.html` - **HTML** visual UI only (optional view-switch toolbar OK; no comments/legends/explanations)
-3. **Dashboard UI** — `docs/design-index.json` + [dockyard-design-contract](dockyard-design-contract.mdc); §17 gaps may use issue wireframes
+3. **Dashboard UI** — `docs/design-index.json` + [dockyrd-design-contract](dockyrd-design-contract.mdc); §17 gaps may use issue wireframes
 4. **Do not** generate mockup images / PNGs as the design contract
 5. **Do not** pause for human design approval - parent continues to generator
 6. When artefacts exist, AC and frontend-evaluator reference those paths; when skipped, implement from spec + patterns

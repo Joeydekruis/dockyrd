@@ -65,19 +65,19 @@ func (m *MemoryLockoutTimer) WasCancelled(actionID string) bool {
 	return m.cancelled[actionID]
 }
 
-// SystemdLockoutTimer schedules dockyard host revert via systemd-run.
+// SystemdLockoutTimer schedules dockyrd host revert via systemd-run.
 //
-// Requires dockyard on PATH as installed by packaging; timer runs as root (same as panel today).
-// Uses systemd-run --on-active=<duration> --unit=dockyard-host-revert-<id> dockyard host revert <id>.
+// Requires dockyrd on PATH as installed by packaging; timer runs as root (same as panel today).
+// Uses systemd-run --on-active=<duration> --unit=dockyrd-host-revert-<id> dockyrd host revert <id>.
 type SystemdLockoutTimer struct {
-	DockyardBin string
+	dockyrdBin string
 	Run         func(ctx context.Context, name string, args ...string) error
 }
 
 func NewSystemdLockoutTimer() *SystemdLockoutTimer {
-	bin := "dockyard"
+	bin := "dockyrd"
 	return &SystemdLockoutTimer{
-		DockyardBin: bin,
+		dockyrdBin: bin,
 		Run:         execSystemdRun,
 	}
 }
@@ -98,18 +98,18 @@ func (s *SystemdLockoutTimer) Schedule(ctx context.Context, actionID string, not
 		delay = time.Second
 	}
 	secs := int64(delay.Round(time.Second) / time.Second)
-	unit := fmt.Sprintf("dockyard-host-revert-%s", actionID)
+	unit := fmt.Sprintf("dockyrd-host-revert-%s", actionID)
 	args := []string{
 		"--on-active=" + fmt.Sprintf("%d", secs),
 		"--unit=" + unit,
 		"--collect",
-		s.DockyardBin, "host", "revert", actionID,
+		s.dockyrdBin, "host", "revert", actionID,
 	}
 	return s.Run(ctx, "systemd-run", args...)
 }
 
 func (s *SystemdLockoutTimer) Cancel(ctx context.Context, actionID string) error {
-	unit := fmt.Sprintf("dockyard-host-revert-%s", actionID)
+	unit := fmt.Sprintf("dockyrd-host-revert-%s", actionID)
 	_ = s.Run(ctx, "systemctl", "stop", unit)
 	_ = s.Run(ctx, "systemctl", "reset-failed", unit)
 	return nil

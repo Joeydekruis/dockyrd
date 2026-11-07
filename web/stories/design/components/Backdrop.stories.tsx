@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { Backdrop } from "@/components/dockyard/ui/backdrop";
+import { Backdrop } from "@/components/dockyrd/ui/backdrop";
 
 const meta = {
   title: "Design/Components/Backdrop",

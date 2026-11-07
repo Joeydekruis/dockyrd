@@ -91,16 +91,16 @@ func (rt *Runtime) runComposeDeployment(ctx context.Context, deploymentID string
 		appendLog(msg)
 		return rt.fail(ctx, deploymentID, fmt.Errorf("%s", msg))
 	}
-	dockyardFile, err := compose.WriteDockyardJSON(releaseDir, doc)
+	dockyrdFile, err := compose.WritedockyrdJSON(releaseDir, doc)
 	if err != nil {
 		return rt.fail(ctx, deploymentID, err)
 	}
 
-	if err := runner.Pull(deployCtx, cfg.ProjectName, releaseDir, dockyardFile, envLines, appendLog); err != nil {
+	if err := runner.Pull(deployCtx, cfg.ProjectName, releaseDir, dockyrdFile, envLines, appendLog); err != nil {
 		appendLog(err.Error())
 		return rt.fail(ctx, deploymentID, err)
 	}
-	if err := runner.Up(deployCtx, cfg.ProjectName, releaseDir, dockyardFile, envLines, cfg.WaitTimeoutSec, appendLog); err != nil {
+	if err := runner.Up(deployCtx, cfg.ProjectName, releaseDir, dockyrdFile, envLines, cfg.WaitTimeoutSec, appendLog); err != nil {
 		appendLog(err.Error())
 		return rt.fail(ctx, deploymentID, err)
 	}

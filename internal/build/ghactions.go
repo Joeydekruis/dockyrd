@@ -10,11 +10,11 @@ type GitHubWorkflowInput struct {
 	Branch      string
 	Context     string
 	Image       string
-	DockyardURL string
+	DockyrdURL string
 	ServiceID   string
 }
 
-// RenderGitHubWorkflow returns dockyard.yml contents for copy into the repo.
+// RenderGitHubWorkflow returns dockyrd.yml contents for copy into the repo.
 func RenderGitHubWorkflow(in GitHubWorkflowInput) (string, error) {
 	if strings.TrimSpace(in.Branch) == "" {
 		in.Branch = "main"
@@ -22,9 +22,9 @@ func RenderGitHubWorkflow(in GitHubWorkflowInput) (string, error) {
 	if strings.TrimSpace(in.Context) == "" {
 		in.Context = "."
 	}
-	base := strings.TrimRight(strings.TrimSpace(in.DockyardURL), "/")
+	base := strings.TrimRight(strings.TrimSpace(in.DockyrdURL), "/")
 	image := strings.TrimSpace(in.Image)
-	return fmt.Sprintf(`name: Dockyard Deploy
+	return fmt.Sprintf(`name: dockyrd Deploy
 
 on:
   push:
@@ -54,10 +54,10 @@ jobs:
           context: %s
           push: true
           tags: %s:${{ github.sha }}
-      - name: Deploy to Dockyard
+      - name: Deploy to dockyrd
         run: |
           curl -sfS -X POST "%s/api/v1/hooks/deploy/%s" \
-            -H "Authorization: Bearer ${{ secrets.DOCKYARD_DEPLOY_TOKEN }}" \
+            -H "Authorization: Bearer ${{ secrets.dockyrd_DEPLOY_TOKEN }}" \
             -H "Content-Type: application/json" \
             -d "{\"image\":\"%s:${{ github.sha }}\",\"commit_sha\":\"${{ github.sha }}\"}"
 `, in.Branch, in.Context, image, base, in.ServiceID, image), nil

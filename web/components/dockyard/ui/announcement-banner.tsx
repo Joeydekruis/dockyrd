@@ -2,7 +2,7 @@
 
 import { ArrowRight, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Chip } from "@/components/dockyard/ui/chip";
+import { Chip } from "@/components/dockyrd/ui/chip";
 import { PUBLIC_SITE_ORIGIN } from "@/lib/public-links";
 
 const STORAGE_KEY = "dy_announcement_dismissed";
@@ -65,7 +65,7 @@ export function AnnouncementBanner({ onDismiss }: AnnouncementBannerProps) {
         <button
           type="button"
           onClick={dismiss}
-          className="dockyard-icon-btn ml-1"
+          className="dockyrd-icon-btn ml-1"
           aria-label="Dismiss announcement"
         >
           <X strokeWidth={1.8} className="size-4" aria-hidden />

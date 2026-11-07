@@ -1,7 +1,7 @@
 "use client";
 
-import { CreateApplicationWizard } from "@/components/dockyard/create-application-wizard";
-import type { ResourceProvisionContext } from "@/components/dockyard/resource-provisioning-modal";
+import { CreateApplicationWizard } from "@/components/dockyrd/create-application-wizard";
+import type { ResourceProvisionContext } from "@/components/dockyrd/resource-provisioning-modal";
 
 type CreateApplicationModalProps = {
   open: boolean;

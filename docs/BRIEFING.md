@@ -1,23 +1,23 @@
-# Dockyard: technische briefing v0.1 (MVP)
+# dockyrd: technische briefing v0.1 (MVP)
 
 > Self-hosted, open source deploy-platform op één server. Eén Go-binary, één installatieregel, Next.js control plane.
 > Status: bouwbriefing voor de eerste publieke repo · Datum: 2 november 2026 · Eigenaar: Joey de Kruis
-> Bron design: Claude Design-canvas "Dockyard Dashboard" (19 schermen)
+> Bron design: Claude Design-canvas "dockyrd Dashboard" (19 schermen)
 
 ---
 
 ## 0. Samenvatting in tien regels
 
-1. **Eén Go-binary** (`dockyard`) draait als systemd-service op de host: API, scheduler, builds, reconciler, metrics en de **ingebedde Next.js UI** (static export via `go:embed`).
-2. **Docker Engine** is de runtime. Alles wat Dockyard maakt, krijgt Docker-labels; die labels zijn de "actual state", SQLite is de "desired state".
-3. **Caddy** draait als aparte container (`dy-proxy`) en wordt geconfigureerd via zijn admin-API op een unix-socket. Automatisch HTTPS, zero-downtime switches, JSON access logs voor analytics. **Een herstart of update van Dockyard raakt nooit lopend verkeer.**
-4. **SQLite** (CGO-vrij, WAL) als enige database van het control plane. Geen Postgres/Redis voor Dockyard zelf.
+1. **Eén Go-binary** (`dockyrd`) draait als systemd-service op de host: API, scheduler, builds, reconciler, metrics en de **ingebedde Next.js UI** (static export via `go:embed`).
+2. **Docker Engine** is de runtime. Alles wat dockyrd maakt, krijgt Docker-labels; die labels zijn de "actual state", SQLite is de "desired state".
+3. **Caddy** draait als aparte container (`dy-proxy`) en wordt geconfigureerd via zijn admin-API op een unix-socket. Automatisch HTTPS, zero-downtime switches, JSON access logs voor analytics. **Een herstart of update van dockyrd raakt nooit lopend verkeer.**
+4. **SQLite** (CGO-vrij, WAL) als enige database van het control plane. Geen Postgres/Redis voor dockyrd zelf.
 5. **Builds**: Railpack (auto-detect, o.a. Next.js) via BuildKit, of Dockerfile, of een kant-en-klaar image.
 6. **Static sites** hebben geen container nodig: build-output gaat naar disk, Caddy serveert het, rollback is een atomische symlink-switch.
 7. **Databases**: Postgres en Redis-compatible (Valkey) uit officiële images, met gegenereerde credentials en verwijsbare variabelen (`${{db.DATABASE_URL}}`).
 8. **Object storage**: Garage (single-node) als ingebouwde S3-server. MinIO valt af (community-editie is gearchiveerd, zie §12).
 9. **Gebruikersbeheer** vanaf dag één: owner/admin/member/viewer, sessies, argon2id, TOTP-2FA, invites, optioneel GitHub-login, audit log.
-10. **Installatie**: `curl -fsSL https://get.dockyard.dev | sudo sh` → Docker check/installatie, binary met handtekeningcontrole, systemd, eenmalige setup-token. Updates via ondertekende GitHub releases met automatische rollback.
+10. **Installatie**: `curl -fsSL https://get.dockyrd.dev | sudo sh` → Docker check/installatie, binary met handtekeningcontrole, systemd, eenmalige setup-token. Updates via ondertekende GitHub releases met automatische rollback.
 
 Licentie: **Apache-2.0** (zie §16).
 
@@ -27,7 +27,7 @@ Licentie: **Apache-2.0** (zie §16).
 
 ### 1.1 Einddoel MVP
 
-Een developer installeert Dockyard op een verse VPS (Ubuntu 24.04 / Debian 12+) en kan binnen 10 minuten:
+Een developer installeert dockyrd op een verse VPS (Ubuntu 24.04 / Debian 12+) en kan binnen 10 minuten:
 
 - een **Next.js-app** uit een GitHub-repo live zetten op een eigen domein met HTTPS,
 - er een **Postgres-database** naast zetten die de app via een interne verbinding gebruikt,
@@ -53,7 +53,7 @@ Een developer installeert Dockyard op een verse VPS (Ubuntu 24.04 / Debian 12+) 
 
 | Eis | Meetbare invulling |
 |---|---|
-| Lightweight | `dockyard` idle < 60 MB RSS, < 1 % CPU op 1 vCPU. Caddy ~30 MB. Totale platform-overhead < 150 MB RAM excl. builds |
+| Lightweight | `dockyrd` idle < 60 MB RSS, < 1 % CPU op 1 vCPU. Caddy ~30 MB. Totale platform-overhead < 150 MB RAM excl. builds |
 | Stabiel | Control plane kan crashen/updaten zonder dat één workload of request faalt. Alle operaties idempotent. Reconciler herstelt drift binnen 60 s |
 | Betrouwbaar | Geen deploy laat een half-kapotte situatie achter: nieuwe container pas live na healthcheck, anders blijft de oude draaien |
 | Simpel te installeren | Eén commando, < 3 min op een verse VPS, geen vragen in de terminal |
@@ -64,7 +64,7 @@ Een developer installeert Dockyard op een verse VPS (Ubuntu 24.04 / Debian 12+) 
 
 ## 2. Lessen uit Coolify en Dokploy
 
-| | Coolify v4 | Dokploy | **Dockyard-keuze** |
+| | Coolify v4 | Dokploy | **dockyrd-keuze** |
 |---|---|---|---|
 | Stack control plane | PHP/Laravel + Livewire, Postgres, Redis, soketi (meerdere containers) | Next.js-app (UI en backend in één), Postgres, Redis, Traefik | **Eén Go-binary + SQLite**. Geen extra infrastructuur voor het platform zelf |
 | Proxy | Traefik (default) of Caddy | Traefik | **Caddy** via admin-API (JSON), los proces |
@@ -76,8 +76,8 @@ Een developer installeert Dockyard op een verse VPS (Ubuntu 24.04 / Debian 12+) 
 
 **Wat we bewust anders doen:**
 
-- **Footprint.** Coolify en Dokploy draaien zelf al 3–5 containers met Postgres en Redis. Dockyard: één proces + Caddy.
-- **Geen SSH naar de eigen host.** Coolify beheert ook de lokale server via SSH; dat is een bron van fragiliteit (key-beheer, connection-errors). Dockyard praat met de lokale Docker-socket. Multi-server komt later via een eigen agent, niet via SSH-shellcommando's.
+- **Footprint.** Coolify en Dokploy draaien zelf al 3–5 containers met Postgres en Redis. dockyrd: één proces + Caddy.
+- **Geen SSH naar de eigen host.** Coolify beheert ook de lokale server via SSH; dat is een bron van fragiliteit (key-beheer, connection-errors). dockyrd praat met de lokale Docker-socket. Multi-server komt later via een eigen agent, niet via SSH-shellcommando's.
 - **Gescheiden data plane.** Het panel kan herstarten zonder dat de proxy of workloads iets merken (ook letterlijk een event in het design: "The panel restarted. No services were interrupted").
 - **Setup-token.** Een verse installatie mag niet door de eerste de beste bezoeker van `http://IP:8000` geclaimd worden.
 - **Kleine, consistente UI** in plaats van een feature-wand.
@@ -94,11 +94,11 @@ Een developer installeert Dockyard op een verse VPS (Ubuntu 24.04 / Debian 12+) 
                     ┌──────────▼──────────┐
                     │  dy-proxy (Caddy)    │  container, restart=always
                     │  - TLS / ACME        │  netwerk: dy-edge (+ host poorten 80/443)
-                    │  - routes apps/sites │  volumes: caddy-data, /var/lib/dockyard/sites:ro
+                    │  - routes apps/sites │  volumes: caddy-data, /var/lib/dockyrd/sites:ro
                     │  - JSON access log   │  admin-API: unix socket
                     └───┬─────────┬────────┘
                         │         │ file_server
-          reverse_proxy │         └──────────► /var/lib/dockyard/sites/<site>/current
+          reverse_proxy │         └──────────► /var/lib/dockyrd/sites/<site>/current
                         │
      ┌──────────────────▼─────────────────────────────────────────┐
      │  Docker Engine                                              │
@@ -110,37 +110,37 @@ Een developer installeert Dockyard op een verse VPS (Ubuntu 24.04 / Debian 12+) 
      └──────────────────▲─────────────────────────────────────────┘
                         │ /var/run/docker.sock
      ┌──────────────────┴──────────────────────────────┐
-     │  dockyard (systemd, Go)                          │
+     │  dockyrd (systemd, Go)                          │
      │  ├─ HTTP: /api/v1 (JSON), /api/v1/stream (SSE),  │
      │  │        /hooks/github, UI (embedded export)    │
      │  ├─ jobs: deploy, build, prune, cert-check …     │
      │  ├─ reconciler (30 s)                            │
      │  ├─ collectors: host, containers, caddy logs     │
      │  ├─ updater (GitHub releases)                    │
-     │  └─ SQLite /var/lib/dockyard/dockyard.db         │
+     │  └─ SQLite /var/lib/dockyrd/dockyrd.db         │
      └──────────────────────────────────────────────────┘
 ```
 
-Het dashboard zelf wordt ook via Caddy geserveerd zodra er een domein is ingesteld (`dockyard.example.com` → `reverse_proxy host.docker.internal:8000` / host-gateway). Vóór de setup is het bereikbaar op `http://<ip>:8000`; na het instellen van een domein kan poort 8000 dicht (optie in Settings).
+Het dashboard zelf wordt ook via Caddy geserveerd zodra er een domein is ingesteld (`dockyrd.example.com` → `reverse_proxy host.docker.internal:8000` / host-gateway). Vóór de setup is het bereikbaar op `http://<ip>:8000`; na het instellen van een domein kan poort 8000 dicht (optie in Settings).
 
-### 3.2 Waarom Dockyard op de host draait en niet in een container
+### 3.2 Waarom dockyrd op de host draait en niet in een container
 
 - Eén binary + systemd = minste bewegende delen, journald-logging, simpele self-update.
-- Directe toegang tot `/proc` voor host-metrics en tot `/var/lib/dockyard/sites` zonder bind-mount-gedoe.
-- Herstart van Dockyard ≠ herstart van Docker-objecten. Caddy, databases en apps hebben `restart: unless-stopped`.
+- Directe toegang tot `/proc` voor host-metrics en tot `/var/lib/dockyrd/sites` zonder bind-mount-gedoe.
+- Herstart van dockyrd ≠ herstart van Docker-objecten. Caddy, databases en apps hebben `restart: unless-stopped`.
 
 ### 3.3 Desired state vs. actual state
 
 - **Desired** = SQLite (wat de gebruiker heeft ingesteld + welke deployment "live" moet zijn).
-- **Actual** = Docker, uitgelezen via labels. Elk object dat Dockyard maakt draagt minimaal:
+- **Actual** = Docker, uitgelezen via labels. Elk object dat dockyrd maakt draagt minimaal:
 
 ```
-dev.dockyard.managed=true
-dev.dockyard.server=<server_id>
-dev.dockyard.project=<project_id>
-dev.dockyard.service=<service_id>
-dev.dockyard.kind=app|database|redis|bucket|system
-dev.dockyard.deployment=<deployment_id>   (apps)
+dev.dockyrd.managed=true
+dev.dockyrd.server=<server_id>
+dev.dockyrd.project=<project_id>
+dev.dockyrd.service=<service_id>
+dev.dockyrd.kind=app|database|redis|bucket|system
+dev.dockyrd.deployment=<deployment_id>   (apps)
 ```
 
 - De **reconciler** (elke 30 s + bij opstarten + na elke job) vergelijkt beide en:
@@ -160,27 +160,27 @@ Regel: **de reconciler doet nooit iets destructiefs met volumes.** Volumes worde
 | App-container | `dy-<service_slug>-<deploy_short>` met netwerk-alias `<service_slug>` binnen het projectnetwerk |
 | Database-container | `dy-<service_slug>` (vaste naam, geen blue/green) |
 | Volume | `dy-<service_short>-data` |
-| Image | `dockyard/<service_short>:<deploy_short>` |
+| Image | `dockyrd/<service_short>:<deploy_short>` |
 | Systeemcontainers | `dy-proxy`, `dy-buildkit`, `dy-garage` |
 
 Interne hostnamen voor gebruikers zijn **leesbaar**: een app in project "Client X" bereikt de database op `db:5432` (de service-slug), precies zoals het design toont (`postgres · internal:5432`).
 
 ### 3.5 Proxy: Caddy via admin-API
 
-- Dockyard rendert de **volledige** Caddy JSON-config uit SQLite en doet `POST /load` op de admin-socket (`/var/lib/dockyard/caddy/admin.sock`, gemount in de container). Caddy valideert atomisch; bij een ongeldige config blijft de oude actief en logt Dockyard een event.
-- Geen Caddyfile, geen partial PATCHes: altijd volledige config → idempotent en makkelijk te debuggen (`dockyard proxy dump`).
+- dockyrd rendert de **volledige** Caddy JSON-config uit SQLite en doet `POST /load` op de admin-socket (`/var/lib/dockyrd/caddy/admin.sock`, gemount in de container). Caddy valideert atomisch; bij een ongeldige config blijft de oude actief en logt dockyrd een event.
+- Geen Caddyfile, geen partial PATCHes: altijd volledige config → idempotent en makkelijk te debuggen (`dockyrd proxy dump`).
 - Certificaten in volume `dy-proxy-data`; ACME HTTP-01 standaard, e-mail uit de instance-settings.
 - Routes per domein:
   - **app**: `reverse_proxy <container-naam>:<poort>` op `dy-edge`, met `health_uri` optioneel en `lb_try_duration 5s` zodat een switch geen 502 geeft.
   - **static site**: `file_server` met `root /srv/sites/<site_id>/current`, optioneel SPA-fallback (`try_files {path} /index.html`), cache-headers voor gehashte assets, `encode zstd gzip`.
   - **redirects**: `www` ↔ apex, http → https (Caddy default).
-- Access logs: JSON naar `/var/lib/dockyard/caddy/access.log` met rotatie (roll_size 50 MB, roll_keep 3). Dockyard tailt dit bestand voor analytics (§11.3).
+- Access logs: JSON naar `/var/lib/dockyrd/caddy/access.log` met rotatie (roll_size 50 MB, roll_keep 3). dockyrd tailt dit bestand voor analytics (§11.3).
 - **Platformdomein**: als geen wildcard-domein is ingesteld, krijgt elke service `<slug>-<rand4>.<ip-met-streepjes>.sslip.io` → direct werkend HTTPS zonder DNS-werk. Met een wildcard-domein (bijv. `*.apps.example.com`) wordt het `<slug>-<rand4>.apps.example.com`.
 
 ### 3.6 Zero-downtime app-deploy (blue/green)
 
 ```
-1. build image dockyard/<svc>:<deploy>
+1. build image dockyrd/<svc>:<deploy>
 2. start nieuwe container  dy-<svc>-<deploy>  (netwerken: dy-p-<proj> [+ dy-edge])
 3. healthcheck: TCP-connect op poort, daarna optioneel HTTP GET healthPath → 2xx/3xx
    timeout instelbaar (default 60 s), interval 2 s
@@ -216,7 +216,7 @@ Rollback = "redeploy" van een eerdere deployment: het image bestaat nog (we bewa
 | Host-metrics | `/proc` en `/sys` direct lezen (kleine eigen package) of `gopsutil/v4` | Weinig code, geen CGO |
 | Wachtwoorden | `golang.org/x/crypto/argon2` (argon2id) | Moderne standaard |
 | TOTP | `github.com/pquerna/otp` | Bewezen, klein |
-| Secrets at rest | AES-256-GCM met master-key in `/etc/dockyard/secret.key` (0600) | Env-vars, DB-wachtwoorden, S3-keys, GitHub App-key versleuteld in SQLite |
+| Secrets at rest | AES-256-GCM met master-key in `/etc/dockyrd/secret.key` (0600) | Env-vars, DB-wachtwoorden, S3-keys, GitHub App-key versleuteld in SQLite |
 | Logging | `log/slog` (JSON) → journald | Standaard, structured |
 | CLI | `cobra` of eigen minimal `flag`-subcommands | Klein houden |
 | Self-update | Eigen updater: GitHub Releases API + `sha256` + **cosign/sigstore**-verificatie | Zie §13 |
@@ -250,7 +250,7 @@ Rollback = "redeploy" van een eerdere deployment: het image bestaat nog (we bewa
 
 Als dit patroon in de praktijk wringt, is de fallback Vite + TanStack Router met exact dezelfde componenten; de componentcode hoeft daarvoor niet te veranderen. Neem dit besluit uiterlijk aan het eind van milestone M1.
 
-### 4.3 Systeemcomponenten (containers, versies gepind per Dockyard-release)
+### 4.3 Systeemcomponenten (containers, versies gepind per dockyrd-release)
 
 | Container | Image | Rol |
 |---|---|---|
@@ -267,9 +267,9 @@ Gebruikersservices: officiële images `postgres:<major>`, `valkey/valkey:<major>
 Eén repo, één Go-module, platte structuur. Alles wat niet publiek API is, zit in `internal/`.
 
 ```
-dockyard/
+dockyrd/
 ├── cmd/
-│   └── dockyard/
+│   └── dockyrd/
 │       └── main.go              # CLI-entrypoint: serve, init, admin, update, doctor, version
 ├── internal/
 │   ├── api/                     # Huma-handlers per resource, middleware (auth, csrf, ratelimit)
@@ -297,18 +297,18 @@ dockyard/
 │   ├── app/                     # routes (zie §10)
 │   ├── components/
 │   │   ├── ui/                  # shadcn (Base UI) componenten — eigen code
-│   │   └── dockyard/            # AppShell, Sidebar, StatusBadge, StatCard, ResourceRow, LogViewer, EChart …
+│   │   └── dockyrd/            # AppShell, Sidebar, StatusBadge, StatCard, ResourceRow, LogViewer, EChart …
 │   ├── lib/                     # api client (gegenereerd), sse, format, route-param helper
 │   ├── styles/                  # globals.css met tokens
 │   ├── embed.go                 # package web: //go:embed all:out
 │   ├── next.config.ts
 │   └── package.json
 ├── scripts/
-│   ├── install.sh               # get.dockyard.dev
+│   ├── install.sh               # get.dockyrd.dev
 │   ├── uninstall.sh
 │   └── dev-vm.sh                # Multipass/Lima VM voor lokaal testen
 ├── packaging/
-│   └── dockyard.service         # systemd unit
+│   └── dockyrd.service         # systemd unit
 ├── docs/                        # Markdown-docs (later een docs-site)
 │   ├── architecture.md
 │   ├── install.md
@@ -339,7 +339,7 @@ dockyard/
 ### 6.1 Eén commando
 
 ```bash
-curl -fsSL https://get.dockyard.dev | sudo sh
+curl -fsSL https://get.dockyrd.dev | sudo sh
 ```
 
 `install.sh` (POSIX sh, idempotent, opnieuw draaien = repareren/upgraden):
@@ -348,45 +348,45 @@ curl -fsSL https://get.dockyard.dev | sudo sh
 2. **Docker**: als niet aanwezig → officiële apt-repo van Docker installeren (`docker-ce`, `containerd.io`, `docker-buildx-plugin`). Als wel aanwezig: versie ≥ 27 vereisen.
 3. **Docker daemon-tuning** (merge, niet overschrijven, van `/etc/docker/daemon.json`): `log-driver: json-file`, `log-opts: {max-size: 10m, max-file: 3}`, `live-restore: true` (containers blijven draaien tijdens dockerd-restart). Alleen herstarten als er iets wijzigt en er nog geen workloads draaien; anders melden.
 4. **Swap**: bij < 2 GB RAM en geen swap → 2 GB swapfile + `vm.swappiness=10`.
-5. **Binary**: download `dockyard_<ver>_linux_<arch>.tar.gz` + `checksums.txt` + signature van GitHub Releases. Verifieer sha256; verifieer cosign-signature als `cosign` beschikbaar is (anders checksum + HTTPS, en de binary verifieert zichzelf bij de eerste update). Installeer naar `/usr/local/bin/dockyard`.
-6. **Paden**: `/etc/dockyard/` (0700), `/var/lib/dockyard/` (data), `/var/log/dockyard/` niet nodig (journald).
-7. **`dockyard init`**: maakt master-key, SQLite + migraties, netwerk `dy-edge`, start `dy-proxy` en `dy-buildkit`, genereert een **eenmalige setup-token**.
-8. **systemd**: `packaging/dockyard.service` installeren, `enable --now`.
-9. **Firewall**: als `ufw` actief is → 22, 80, 443, 8000 openzetten en melden. Waarschuwing in docs: Docker-gepubliceerde poorten omzeilen ufw; daarom publiceert Dockyard standaard **geen** databasepoorten.
+5. **Binary**: download `dockyrd_<ver>_linux_<arch>.tar.gz` + `checksums.txt` + signature van GitHub Releases. Verifieer sha256; verifieer cosign-signature als `cosign` beschikbaar is (anders checksum + HTTPS, en de binary verifieert zichzelf bij de eerste update). Installeer naar `/usr/local/bin/dockyrd`.
+6. **Paden**: `/etc/dockyrd/` (0700), `/var/lib/dockyrd/` (data), `/var/log/dockyrd/` niet nodig (journald).
+7. **`dockyrd init`**: maakt master-key, SQLite + migraties, netwerk `dy-edge`, start `dy-proxy` en `dy-buildkit`, genereert een **eenmalige setup-token**.
+8. **systemd**: `packaging/dockyrd.service` installeren, `enable --now`.
+9. **Firewall**: als `ufw` actief is → 22, 80, 443, 8000 openzetten en melden. Waarschuwing in docs: Docker-gepubliceerde poorten omzeilen ufw; daarom publiceert dockyrd standaard **geen** databasepoorten.
 10. **Output**:
 
 ```
-✓ Dockyard v0.1.0 is running.
+✓ dockyrd v0.1.0 is running.
 
   Open:   http://203.0.113.10:8000/setup?token=8f3k-29xq-a71m
   Token is valid for 60 minutes and can be used once.
-  Lost it?  sudo dockyard setup-token
+  Lost it?  sudo dockyrd setup-token
 ```
 
-Flags: `--version v0.1.2`, `--channel stable|beta`, `--no-docker-install`, `--dashboard-domain dockyard.example.com`, `--force`.
+Flags: `--version v0.1.2`, `--channel stable|beta`, `--no-docker-install`, `--dashboard-domain dockyrd.example.com`, `--force`.
 
 ### 6.2 systemd-unit
 
 ```ini
 [Unit]
-Description=Dockyard
+Description=dockyrd
 After=network-online.target docker.service
 Requires=docker.service
 Wants=network-online.target
 
 [Service]
 Type=notify
-ExecStart=/usr/local/bin/dockyard serve
+ExecStart=/usr/local/bin/dockyrd serve
 Restart=always
 RestartSec=2
-EnvironmentFile=-/etc/dockyard/dockyard.env
+EnvironmentFile=-/etc/dockyrd/dockyrd.env
 LimitNOFILE=65536
 # Hardening (draait als root i.v.m. docker.sock — docker-groep is toch root-equivalent)
 NoNewPrivileges=true
 ProtectSystem=full
 ProtectHome=true
 PrivateTmp=true
-ReadWritePaths=/var/lib/dockyard /etc/dockyard /usr/local/bin
+ReadWritePaths=/var/lib/dockyrd /etc/dockyrd /usr/local/bin
 
 [Install]
 WantedBy=multi-user.target
@@ -407,20 +407,20 @@ Setup-wizard in de UI (scherm nog te ontwerpen, §17):
 
 | Commando | Doel |
 |---|---|
-| `dockyard serve` | Start de server (systemd) |
-| `dockyard init` | Eerste setup (idempotent) |
-| `dockyard setup-token` | Nieuwe eenmalige token (alleen zolang er geen owner is) |
-| `dockyard admin reset-password <email>` | Nood-reset vanaf de server |
-| `dockyard admin disable-2fa <email>` | Nood-uitschakelen 2FA |
-| `dockyard update [--version]` | Handmatige update |
-| `dockyard doctor` | Checkt Docker, poorten, DNS van domeinen, disk, proxy-config, klok (ACME), versies; geeft concrete fixes |
-| `dockyard proxy dump` | Huidige Caddy-config tonen |
-| `dockyard backup` | Snapshot van control-plane DB (zie §6.5) |
-| `dockyard version` | Versie, commit, builddatum |
+| `dockyrd serve` | Start de server (systemd) |
+| `dockyrd init` | Eerste setup (idempotent) |
+| `dockyrd setup-token` | Nieuwe eenmalige token (alleen zolang er geen owner is) |
+| `dockyrd admin reset-password <email>` | Nood-reset vanaf de server |
+| `dockyrd admin disable-2fa <email>` | Nood-uitschakelen 2FA |
+| `dockyrd update [--version]` | Handmatige update |
+| `dockyrd doctor` | Checkt Docker, poorten, DNS van domeinen, disk, proxy-config, klok (ACME), versies; geeft concrete fixes |
+| `dockyrd proxy dump` | Huidige Caddy-config tonen |
+| `dockyrd backup` | Snapshot van control-plane DB (zie §6.5) |
+| `dockyrd version` | Versie, commit, builddatum |
 
 ### 6.5 Control-plane self-backup (wél in MVP)
 
-Klein en essentieel: dagelijks `VACUUM INTO /var/lib/dockyard/backups/dockyard-YYYYMMDD.db`, 7 bewaren, plus vóór elke update en elke migratie. Dit staat los van de (latere) database-backups van gebruikers.
+Klein en essentieel: dagelijks `VACUUM INTO /var/lib/dockyrd/backups/dockyrd-YYYYMMDD.db`, 7 bewaren, plus vóór elke update en elke migratie. Dit staat los van de (latere) database-backups van gebruikers.
 
 ### 6.6 Uninstall
 
@@ -581,7 +581,7 @@ S3_ENDPOINT=${{uploads.S3_ENDPOINT}}
 | bucket | `S3_ENDPOINT`, `S3_REGION`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_PUBLIC_URL` |
 | app | `PRIVATE_HOST` (`<slug>:<port>`), `PUBLIC_URL` (primair domein) |
 
-Regels: alleen binnen hetzelfde project resolvebaar; resolutie bij elke deploy; cycli → validatiefout. UI: bij "Create database" vanuit een project biedt Dockyard aan om `DATABASE_URL` meteen aan geselecteerde apps toe te voegen. Bij het aanmaken verbindt Dockyard de app ook met het netwerk van Garage als er een bucket-link is.
+Regels: alleen binnen hetzelfde project resolvebaar; resolutie bij elke deploy; cycli → validatiefout. UI: bij "Create database" vanuit een project biedt dockyrd aan om `DATABASE_URL` meteen aan geselecteerde apps toe te voegen. Bij het aanmaken verbindt dockyrd de app ook met het netwerk van Garage als er een bucket-link is.
 
 **Next.js-specifiek**: variabelen met prefix `NEXT_PUBLIC_` krijgen automatisch `at_build=1`; UI toont een hint dat wijzigen een rebuild vraagt (niet alleen een restart).
 
@@ -610,7 +610,7 @@ RBAC als één Go-functie `can(user, action, target)`; elke Huma-operation decla
 - **Sessies**: random 32-byte token in cookie `dy_session` (`HttpOnly`, `Secure` zodra HTTPS, `SameSite=Lax`, 30 dagen sliding, 12 uur zonder "remember"). In DB alleen de sha256. Design-scherm "Active sessions" toont device, locatie (GeoIP optioneel/uit; anders alleen IP), laatst actief, "Sign out".
 - **2FA**: TOTP (RFC 6238) + 10 recovery codes. Na wachtwoord → tussenstap; sessie heeft `mfa_passed`. Owner kan 2FA verplicht stellen voor iedereen.
 - **GitHub-login** ("Continue with GitHub" in design): via de OAuth-credentials van de GitHub App. Alleen zichtbaar als geconfigureerd. Koppelen aan bestaand account via verified e-mail óf expliciet vanuit Settings. Geen automatische account-aanmaak zonder invite.
-- **Wachtwoord vergeten**: werkt alleen als SMTP is ingesteld (settings). Zonder SMTP toont het scherm: "Ask an admin, or run `sudo dockyard admin reset-password` on the server".
+- **Wachtwoord vergeten**: werkt alleen als SMTP is ingesteld (settings). Zonder SMTP toont het scherm: "Ask an admin, or run `sudo dockyrd admin reset-password` on the server".
 - **Invites**: link met token (48 uur geldig); e-mail als SMTP beschikbaar, anders kopieerbare link.
 - **Brute force**: rate limit per IP + per account (bijv. 10/min, exponentiële backoff), constant-time vergelijkingen, generieke foutmelding ("Incorrect email or password", zoals in design).
 
@@ -678,7 +678,7 @@ Light mode only. Tokens rechtstreeks overgenomen uit het canvas.
 }
 ```
 
-shadcn-variabelen (`--background`, `--primary`, `--border`, `--ring`, …) mappen op deze tokens, zodat shadcn-componenten automatisch in de Dockyard-stijl renderen.
+shadcn-variabelen (`--background`, `--primary`, `--border`, `--ring`, …) mappen op deze tokens, zodat shadcn-componenten automatisch in de dockyrd-stijl renderen.
 
 ### 9.2 Regels uit het design (als component-API vastleggen)
 
@@ -701,7 +701,7 @@ shadcn-variabelen (`--background`, `--primary`, `--border`, `--ring`, …) mappe
 | Header | geen "Add service"-knop; geen Production/Staging-switch op de projectpagina |
 | Toegankelijkheid | echte `<button>`/`<a>`, `aria-current="page"`, `aria-label` op icon-only knoppen, focus-ring met `brand` |
 
-### 9.3 Componentenbibliotheek (`web/components/dockyard`)
+### 9.3 Componentenbibliotheek (`web/components/dockyrd`)
 
 `AppShell`, `Sidebar`, `TopBar`, `Breadcrumbs`, `CommandPalette`, `AnnouncementBanner`, `PageHeader` (eyebrow + H1 + subtitle + action), `StatCard`, `StatGrid`, `ResourceList` + `ResourceRow`, `StatusBadge`, `CommitChip`, `EmptyState`, `Tabs` (detail-tabs), `KeyValueList`, `LogViewer` (virtueel gescrold, filter, pause/resume, wrap, UTC-toggle), `EnvEditor` (reveal secrets, paste .env), `DomainCard` (DNS-instructies + "Check again"), `DangerZone`, `EChart`, `TimeRangeToggle` (1h/24h/7d/30d), `ServerHealthCard`, `CreateServiceDialog`.
 
@@ -824,13 +824,13 @@ Conventies: ULID-ID's, `snake_case` JSON, foutformaat RFC 9457 (`application/pro
 **Bronnen**
 1. **GitHub (GitHub App)**: repo + branch + root directory (monorepo). Auto-deploy op push naar de branch.
 2. **Publieke Git-URL**: zonder auth.
-3. **Private Git zonder GitHub App**: deploy key (Dockyard genereert ed25519, toont public key).
+3. **Private Git zonder GitHub App**: deploy key (dockyrd genereert ed25519, toont public key).
 4. **Docker image**: `ghcr.io/org/app:tag`, optioneel registry-credentials. "Redeploy" pullt opnieuw.
 
 **Build-pipeline** (job `build`, concurrency standaard 1, instelbaar):
 
 ```
-clone (shallow, depth=1; LFS optioneel)  → /var/lib/dockyard/builds/<deploy>/src
+clone (shallow, depth=1; LFS optioneel)  → /var/lib/dockyrd/builds/<deploy>/src
 detect builder:
   Dockerfile aanwezig + builder=dockerfile  → docker buildx build -f <Dockerfile>
   anders railpack:
@@ -839,13 +839,13 @@ detect builder:
         --build-arg BUILDKIT_SYNTAX=ghcr.io/railwayapp/railpack-frontend:<gepinde versie> \
         --build-arg cache-key=<service_id> \
         --secret id=K,env=K … \
-        -f plan.json -t dockyard/<svc>:<deploy> --load src
+        -f plan.json -t dockyrd/<svc>:<deploy> --load src
 stream stdout/stderr → logbestand + SSE (met secret-scrubber)
 cleanup src-map (altijd, ook bij falen)
 ```
 
 - `railpack prepare` exit code 75 → retry; 1 → definitief falen; fouten uitlezen uit `info.json`.
-- **Next.js**: Railpack detecteert Next en zet build/start correct. Docs-tip: `output: 'standalone'` in `next.config` voor kleinere images. Dockyard detecteert ontbrekende `standalone` en toont een niet-blokkerende hint.
+- **Next.js**: Railpack detecteert Next en zet build/start correct. Docs-tip: `output: 'standalone'` in `next.config` voor kleinere images. dockyrd detecteert ontbrekende `standalone` en toont een niet-blokkerende hint.
 - Build-timeouts (default 20 min), disk-guard (weiger build bij < 10 % vrije disk, met event + link naar Docker cleanup).
 - Image-retentie: laatste 5 per service; oudere images opgeruimd door de `prune`-job.
 
@@ -856,7 +856,7 @@ cleanup src-map (altijd, ook bij falen)
 - Bronnen: GitHub, Git-URL.
 - Build in een **wegwerp-container** (`node:<lts>-alpine` of op basis van `.nvmrc`/`engines`), met install/build-commando's uit settings of auto-detect (lockfile → pnpm/npm/yarn/bun; `package.json` `build`-script).
 - Output-dir auto-detect: `dist`, `out`, `build`, `public`, `_site`. Leeg/ontbrekend → duidelijke fout.
-- **Release**: kopieer output naar `/var/lib/dockyard/sites/<site>/releases/<deploy>/` → atomische `rename` van symlink `current` → Caddy serveert direct, geen reload nodig. Rollback = symlink terugzetten (milliseconden).
+- **Release**: kopieer output naar `/var/lib/dockyrd/sites/<site>/releases/<deploy>/` → atomische `rename` van symlink `current` → Caddy serveert direct, geen reload nodig. Rollback = symlink terugzetten (milliseconden).
 - Retentie: laatste 5 releases.
 - Env vars zijn alleen build-time (design: "Injected at build time").
 - Tab **Access** (v0.2): basic auth / wachtwoord op de site via Caddy.
@@ -866,9 +866,9 @@ cleanup src-map (altijd, ook bij falen)
 
 | Bron | Opslag | Weergave |
 |---|---|---|
-| Build-logs | Bestand per deployment (`/var/lib/dockyard/logs/deploy/<id>.log`), 30 dagen | Deploy-detail, live via SSE |
+| Build-logs | Bestand per deployment (`/var/lib/dockyrd/logs/deploy/<id>.log`), 30 dagen | Deploy-detail, live via SSE |
 | Runtime-logs (apps, DB's) | Docker json-file (rotatie 3×10 MB) | `ContainerLogs` met `follow` → SSE |
-| Access-logs (apps met domein, static sites) | Caddy JSON-log; Dockyard tailt het bestand (inotify + positie-checkpoint) | Logs-tab "Access"; geaggregeerd voor Analytics |
+| Access-logs (apps met domein, static sites) | Caddy JSON-log; dockyrd tailt het bestand (inotify + positie-checkpoint) | Logs-tab "Access"; geaggregeerd voor Analytics |
 
 **Analytics-aggregatie**: per minuut per service: requests, 2xx/3xx/4xx/5xx, bytes, latency-percentielen (t-digest of vaste histogram-buckets per minuut). Rollups: 1 min (48 uur bewaren), 5 min (7 dagen), 1 uur (90 dagen). Grafieken uit het design (requests/min, response time Avg/P90/P95/P99, status codes, bandwidth) komen hier direct uit. Geen cookies, geen IP-opslag, geen bezoekersprofielen.
 
@@ -876,7 +876,7 @@ cleanup src-map (altijd, ook bij falen)
 
 - **Host-collector** (elke 10 s, opgeslagen per minuut): CPU %, load, geheugen, disk per mountpoint, netwerk rx/tx.
 - **Container-collector** (elke 15 s): Docker stats one-shot per container (CPU, mem/limit, net, restarts).
-- **Events** (design "Important events"): deploy started/succeeded/failed, container restarted (OOM via `docker events` `oom`/`die`), certificate renewed/failing, Dockyard updated, backup done (v0.2), disk > 85 %, build cache > X GB. Categorieën: deploys, issues, system.
+- **Events** (design "Important events"): deploy started/succeeded/failed, container restarted (OOM via `docker events` `oom`/`die`), certificate renewed/failing, dockyrd updated, backup done (v0.2), disk > 85 %, build cache > X GB. Categorieën: deploys, issues, system.
 - **Needs attention**: open events met level warning/error die niet ge-ackt zijn (bijv. "worker keeps hitting its memory limit" → knop "Open service").
 - **Docker cleanup**: overzicht van build cache, dangling images, gestopte niet-beheerde containers, oude releases → "Review and clean up". Raakt nooit draaiende services of volumes.
 
@@ -890,7 +890,7 @@ cleanup src-map (altijd, ook bij falen)
 
 ### 11.6 Object storage (Garage)
 
-- Lege staat (design): "No buckets yet" + providerkeuze. **Install Garage** → Dockyard start `dy-garage` (single node, `replication_factor = 1`, metadata en data op `/var/lib/dockyard/garage`), genereert `rpc_secret` en admin-token, wijst layout toe.
+- Lege staat (design): "No buckets yet" + providerkeuze. **Install Garage** → dockyrd start `dy-garage` (single node, `replication_factor = 1`, metadata en data op `/var/lib/dockyrd/garage`), genereert `rpc_secret` en admin-token, wijst layout toe.
 - Buckets en access keys via de **Garage admin-API** (v2) vanuit `internal/storage`.
 - Intern endpoint `http://dy-garage:3900` (Garage wordt aan projectnetwerken gekoppeld zodra een project een bucket heeft); optioneel publiek via `s3.<instance-domein>` (Caddy-route) voor presigned uploads vanuit de browser.
 - Publieke read (statische assets) per bucket via Garage website-mode + Caddy-route.
@@ -917,18 +917,18 @@ Voorstel: alleen Garage in de MVP; de tweede kaart wordt **SeaweedFS** (Apache-2
 ### 13.2 Self-update flow
 
 ```
-check (1×/24h + handmatig): GET api.github.com/repos/<org>/dockyard/releases/latest
+check (1×/24h + handmatig): GET api.github.com/repos/<org>/dockyrd/releases/latest
   → nieuwere versie? event "Update available" + chip in sidebar (design: "Up to date")
 apply (handmatig in UI of auto als ingesteld, met onderhoudsvenster):
   1. download tarball + checksums + .sig/.cert
   2. verifieer sha256 én cosign-signature (identiteit = release-workflow van deze repo)
   3. VACUUM INTO pre-update backup
-  4. schrijf nieuwe binary naar /usr/local/bin/dockyard.new, fsync, rename (atomisch)
-     bewaar vorige als dockyard.prev
-  5. systemctl restart dockyard   (workloads + Caddy draaien door)
+  4. schrijf nieuwe binary naar /usr/local/bin/dockyrd.new, fsync, rename (atomisch)
+     bewaar vorige als dockyrd.prev
+  5. systemctl restart dockyrd   (workloads + Caddy draaien door)
   6. nieuwe versie: migraties → health → sd_notify READY
-  7. updater-watchdog (systemd OnFailure-unit dockyard-rollback.service):
-     als READY niet binnen 60 s → dockyard.prev terugzetten + pre-update DB terugzetten + event
+  7. updater-watchdog (systemd OnFailure-unit dockyrd-rollback.service):
+     als READY niet binnen 60 s → dockyrd.prev terugzetten + pre-update DB terugzetten + event
   8. systeemcontainers alleen vervangen als hun gepinde digest wijzigt. Caddy: graceful stop
      + start duurt ~1 s; dit staat in de release notes ("proxy restart, ~1 s"). Zonder
      digest-wijziging blijft de proxy ongemoeid.
@@ -942,12 +942,12 @@ Database-migraties zijn **forward-only en backwards-compatible voor één minor-
 
 ### 14.1 Lokaal ontwikkelen
 
-- Dockyard heeft echte Linux + Docker nodig. Aanbevolen: `scripts/dev-vm.sh` (Multipass/Lima VM met Ubuntu 24.04) of een goedkope dev-VPS. Docker Desktop/OrbStack werkt voor het meeste, behalve host-paden en `/proc`-metrics.
+- dockyrd heeft echte Linux + Docker nodig. Aanbevolen: `scripts/dev-vm.sh` (Multipass/Lima VM met Ubuntu 24.04) of een goedkope dev-VPS. Docker Desktop/OrbStack werkt voor het meeste, behalve host-paden en `/proc`-metrics.
 - `make dev`:
-  - Go-server met `DOCKYARD_DEV_UI=http://localhost:3000` → niet-API-requests worden ge-reverse-proxied naar de Next.js dev-server. Eén origin, cookies werken, HMR werkt.
+  - Go-server met `dockyrd_DEV_UI=http://localhost:3000` → niet-API-requests worden ge-reverse-proxied naar de Next.js dev-server. Eén origin, cookies werken, HMR werkt.
   - `pnpm dev` in `web/`.
 - `make generate`: sqlc → Go; Huma → `openapi.json` → `openapi-typescript` → `web/lib/api/schema.d.ts`. CI faalt als gegenereerde bestanden niet up-to-date zijn.
-- Seed-commando `dockyard dev seed` vult een DB met de demo-data uit het design (Client X, Webshop, …) voor UI-werk zonder echte containers.
+- Seed-commando `dockyrd dev seed` vult een DB met de demo-data uit het design (Client X, Webshop, …) voor UI-werk zonder echte containers.
 
 ### 14.2 Tests
 
@@ -957,7 +957,7 @@ Database-migraties zijn **forward-only en backwards-compatible voor één minor-
 | Integratie | echte Docker: netwerk/volume/containers aanmaken, blue/green, reconciler-drift, Caddy laden | `go test -tags=integration` op GitHub Actions (Docker beschikbaar) |
 | E2E | `install.sh` op de CI-runner → setup → deploy voorbeeld-Next.js-app + Postgres + static site → HTTP-checks → update naar snapshot-build → workloads bleven up | shell + Playwright |
 | UI | componenten en kritieke flows (login + 2FA, create app, env editor) | Playwright |
-| Chaos-light | `kill -9 dockyard` tijdens build/deploy → na herstart consistente staat, geen downtime van live service | integratietest |
+| Chaos-light | `kill -9 dockyrd` tijdens build/deploy → na herstart consistente staat, geen downtime van live service | integratietest |
 
 Voorbeeldrepo's in `e2e/fixtures/` (Next.js app-router met Prisma/Drizzle → Postgres, Vite static site, Dockerfile-app).
 
@@ -965,7 +965,7 @@ Voorbeeldrepo's in `e2e/fixtures/` (Next.js app-router met Prisma/Drizzle → Po
 
 - `ci.yml` (PR): `go vet`, `staticcheck`, `golangci-lint`, unit tests, `pnpm lint/typecheck/build`, generated-files-check, **Radix-check**, licentie-check van dependencies (geen GPL/AGPL in de binary).
 - `e2e.yml` (main + nightly): integratie + install-e2e.
-- `release.yml` (tags): GoReleaser + cosign + publiceren van `install.sh` naar `get.dockyard.dev` (GitHub Pages of Cloudflare Pages).
+- `release.yml` (tags): GoReleaser + cosign + publiceren van `install.sh` naar `get.dockyrd.dev` (GitHub Pages of Cloudflare Pages).
 
 ### 14.4 Radix-guard
 
@@ -979,7 +979,7 @@ fi
 ### 14.5 Bijdragen (open source)
 
 - `CONTRIBUTING.md`: dev-setup, commit-conventie (Conventional Commits), "één PR = één onderwerp", ADR voor architectuurwijzigingen.
-- Issue-templates: bug (met `dockyard doctor`-output), feature request.
+- Issue-templates: bug (met `dockyrd doctor`-output), feature request.
 - Labels: `good first issue`, `help wanted`, `area/api`, `area/ui`, `area/proxy`, …
 - DCO sign-off (lichter dan een CLA) via GitHub-app of check.
 
@@ -996,7 +996,7 @@ fi
 | **M4 · Observability + team** | host/container-metrics + rollups, events + needs attention, Analytics-pagina (ECharts), static-site analytics uit Caddy-logs, Docker cleanup, team/invites/rollen, 2FA, sessions-overzicht, audit log, search | Alle 19 design-schermen functioneel |
 | **M5 · Release v0.1.0** | self-update + rollback, `doctor`, docs (install, eerste app, Next.js-guide, troubleshooting), e2e groen, security-review | Publieke release + announcement |
 | **v0.2** | database-backups (pg_dump → S3/Garage, schema + restore), notificaties, static-site Access (basic auth), web-terminal, preview deploys, per-project rechten, API-tokens | |
-| **v0.3** | Multi-server via `dockyard agent` (mTLS-tunnel, geen SSH-shellcommando's), Compose-templates, MySQL/MariaDB | |
+| **v0.3** | Multi-server via `dockyrd agent` (mTLS-tunnel, geen SSH-shellcommando's), Compose-templates, MySQL/MariaDB | |
 
 **Backups (v0.2, alvast ontworpen)**: job `backup` per database-schema (cron-expressie), `pg_dump -Fc` gestreamd naar S3-compatible target (Garage lokaal of extern), retentie (dagelijks 7, wekelijks 4), restore naar dezelfde of nieuwe database, verificatie door periodiek een restore naar een tijdelijke container. Design-widget "Backups · Scheduled to S3 · Next run 03:00 · Restore" past hier precies op.
 
@@ -1008,9 +1008,9 @@ fi
 
 - Simpel en breed geaccepteerd; ook gebruikt door Coolify en Dokploy, dus vertrouwd in deze niche.
 - Expliciete patentlicentie (beter dan MIT voor infra-software waar bedrijven op bouwen).
-- Laat bedrijven Dockyard vrij gebruiken en aanpassen, wat adoptie helpt.
+- Laat bedrijven dockyrd vrij gebruiken en aanpassen, wat adoptie helpt.
 
-Afweging: als het risico dat een partij Dockyard als concurrerende gehoste dienst aanbiedt zwaarder weegt dan adoptie, is AGPL-3.0 het alternatief. Voor een project dat vooral adoptie en contributors zoekt is Apache-2.0 de beste fit. Let erop dat ingebedde dependencies licentie-compatibel zijn (Caddy en BuildKit: Apache-2.0; Garage: AGPL-3.0, maar draait als **losse container** en wordt niet meegelinkt, dus geen probleem voor de licentie van Dockyard; vermeld het wel in `NOTICE`/docs).
+Afweging: als het risico dat een partij dockyrd als concurrerende gehoste dienst aanbiedt zwaarder weegt dan adoptie, is AGPL-3.0 het alternatief. Voor een project dat vooral adoptie en contributors zoekt is Apache-2.0 de beste fit. Let erop dat ingebedde dependencies licentie-compatibel zijn (Caddy en BuildKit: Apache-2.0; Garage: AGPL-3.0, maar draait als **losse container** en wordt niet meegelinkt, dus geen probleem voor de licentie van dockyrd; vermeld het wel in `NOTICE`/docs).
 
 ---
 
@@ -1034,8 +1034,8 @@ Afweging: als het risico dat een partij Dockyard als concurrerende gehoste diens
 
 ## 18. Open beslissingen voor Joey
 
-1. **Domein voor installer en docs**: `get.dockyard.dev`/`dockyard.dev` beschikbaar? (bepaalt URL's in `install.sh` en de banner "Learn more").
-2. **GitHub-organisatie** voor de repo (bijv. `github.com/dockyard-dev/dockyard`).
+1. **Domein voor installer en docs**: `get.dockyrd.dev`/`dockyrd.dev` beschikbaar? (bepaalt URL's in `install.sh` en de banner "Learn more").
+2. **GitHub-organisatie** voor de repo (bijv. `github.com/dockyrd-dev/dockyrd`).
 3. **Redis vs. Valkey**: voorstel is Valkey-image met UI-label "Redis" en hint "Redis-compatible (Valkey)". Akkoord?
 4. **Dashboard-poort**: `8000` (zoals Coolify) of `3000`? Voorstel 8000.
 5. **Auto-updates standaard aan of uit**? Voorstel: check aan, toepassen handmatig (met optie "auto-apply patch releases").
@@ -1046,17 +1046,17 @@ Afweging: als het risico dat een partij Dockyard als concurrerende gehoste diens
 
 ## 19. Definition of done voor v0.1.0
 
-- [ ] `curl -fsSL https://get.dockyard.dev | sudo sh` op verse Ubuntu 24.04 én Debian 12, amd64 én arm64, < 3 min.
+- [ ] `curl -fsSL https://get.dockyrd.dev | sudo sh` op verse Ubuntu 24.04 én Debian 12, amd64 én arm64, < 3 min.
 - [ ] Setup-token vereist; zonder token geen owner-claim.
 - [ ] Next.js-repo (app router) + Postgres + Garage-bucket live op eigen domein met HTTPS via push-to-deploy.
 - [ ] Static site (Vite) live, rollback < 1 s.
 - [ ] Redeploy zonder één mislukte request (getest met load tijdens deploy).
-- [ ] `kill -9` van Dockyard tijdens build → live services onaangetast, deployment na herstart netjes `failed (interrupted)`.
+- [ ] `kill -9` van dockyrd tijdens build → live services onaangetast, deployment na herstart netjes `failed (interrupted)`.
 - [ ] Self-update naar nieuwe versie + automatische rollback bij kapotte release, beide getest.
 - [ ] Users: invite, rollen, 2FA, sessies intrekken, wachtwoord-reset via CLI.
-- [ ] Idle-footprint gemeten: Dockyard < 60 MB RSS, totaal platform < 150 MB.
+- [ ] Idle-footprint gemeten: dockyrd < 60 MB RSS, totaal platform < 150 MB.
 - [ ] Geen `@radix-ui/*` in de dependency tree; geen externe requests vanuit de UI.
-- [ ] Docs: installatie, eerste app, Next.js-gids, domeinen/DNS, troubleshooting (`dockyard doctor`).
+- [ ] Docs: installatie, eerste app, Next.js-gids, domeinen/DNS, troubleshooting (`dockyrd doctor`).
 - [ ] LICENSE, NOTICE, CONTRIBUTING, SECURITY, CODE_OF_CONDUCT aanwezig.
 
 ---
@@ -1072,7 +1072,7 @@ Afweging: als het risico dat een partij Dockyard als concurrerende gehoste diens
 - Status MinIO CE 2026 en alternatieven: https://glukhov.org/data-infrastructure/object-storage/minio-dead/
 - Garage: https://garagehq.deuxfleurs.fr
 
-## Bijlage B — Voorbeeld Caddy-config (gerenderd door Dockyard)
+## Bijlage B — Voorbeeld Caddy-config (gerenderd door dockyrd)
 
 ```json
 {

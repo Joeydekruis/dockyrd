@@ -7,7 +7,7 @@ size: XL
 
 ## Goal
 
-Run multi-container stacks as a first-class `compose` service kind with Dockyard-managed deploy and edge proxy.
+Run multi-container stacks as a first-class `compose` service kind with dockyrd-managed deploy and edge proxy.
 
 ## Acceptance criteria
 

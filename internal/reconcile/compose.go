@@ -45,7 +45,7 @@ func SyncComposeServices(ctx context.Context, cfg config.Config, q *sqlc.Queries
 			continue
 		}
 		releaseDir := filepath.Join(compose.StackDataDir(cfg.DataDir, row.ID), "releases", row.LiveDeploymentID.String)
-		composeFile := filepath.Join(releaseDir, "compose.dockyard.json")
+		composeFile := filepath.Join(releaseDir, "compose.dockyrd.json")
 		if _, err := os.Stat(composeFile); err != nil {
 			continue
 		}

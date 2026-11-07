@@ -1,5 +1,5 @@
-import { Button } from "@/components/dockyard/ui/button";
-import { Chip } from "@/components/dockyard/ui/chip";
+import { Button } from "@/components/dockyrd/ui/button";
+import { Chip } from "@/components/dockyrd/ui/chip";
 
 type TemplateCardProps = {
   name: string;

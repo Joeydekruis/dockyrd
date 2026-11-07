@@ -368,7 +368,7 @@ func loadAllowPrivateTargets(ctx context.Context, q *sqlc.Queries) bool {
 func instanceName(ctx context.Context, q *sqlc.Queries) string {
 	row, err := q.GetSetting(ctx, "notifications")
 	if err != nil {
-		return "Dockyard"
+		return "dockyrd"
 	}
 	var settings struct {
 		InstanceName string `json:"instance_name"`
@@ -378,7 +378,7 @@ func instanceName(ctx context.Context, q *sqlc.Queries) string {
 	if settings.InstanceName != "" {
 		return settings.InstanceName
 	}
-	return "Dockyard"
+	return "dockyrd"
 }
 
 // SendTest delivers synchronously through a sender (API test button).

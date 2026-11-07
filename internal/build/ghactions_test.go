@@ -10,7 +10,7 @@ func TestRenderGitHubWorkflow(t *testing.T) {
 		Branch:      "main",
 		Context:     ".",
 		Image:       "ghcr.io/acme/app",
-		DockyardURL: "https://dock.example.com",
+		DockyrdURL: "https://dock.example.com",
 		ServiceID:   "01TEST",
 	})
 	if err != nil {
@@ -19,7 +19,7 @@ func TestRenderGitHubWorkflow(t *testing.T) {
 	if !strings.Contains(out, "hooks/deploy/01TEST") {
 		t.Fatalf("missing hook path: %s", out)
 	}
-	if !strings.Contains(out, "DOCKYARD_DEPLOY_TOKEN") {
+	if !strings.Contains(out, "dockyrd_DEPLOY_TOKEN") {
 		t.Fatal("missing secret name")
 	}
 }

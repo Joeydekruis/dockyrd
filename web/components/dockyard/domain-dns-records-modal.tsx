@@ -1,10 +1,10 @@
 "use client";
 
 import { Check, Circle } from "lucide-react";
-import { Alert } from "@/components/dockyard/ui/alert";
-import { Button } from "@/components/dockyard/ui/button";
-import { DnsRecordBlock } from "@/components/dockyard/ui/dns-record-block";
-import { Modal } from "@/components/dockyard/ui/modal";
+import { Alert } from "@/components/dockyrd/ui/alert";
+import { Button } from "@/components/dockyrd/ui/button";
+import { DnsRecordBlock } from "@/components/dockyrd/ui/dns-record-block";
+import { Modal } from "@/components/dockyrd/ui/modal";
 import type { ServiceDomain } from "@/lib/api";
 import { checkServiceDomain } from "@/lib/api";
 import { aRecordForHostname, domainStatusDisplay } from "@/lib/domain-dns";
@@ -56,7 +56,7 @@ export function DomainDnsRecordsModal({
   const d = domain;
   const ip =
     publicIPv4.trim() ||
-    "Set DOCKYARD_PUBLIC_IPV4 on the server (Instance → General)";
+    "Set dockyrd_PUBLIC_IPV4 on the server (Instance → General)";
   const { name, nameAlt } = aRecordForHostname(d.hostname);
   const statusView = domainStatusDisplay(d);
   const verified = !d.is_platform && !statusView.needsVerification;
@@ -127,8 +127,8 @@ export function DomainDnsRecordsModal({
               copyable
             />
             <p className="text-[13px]" style={{ color: "var(--muted-text)" }}>
-              Once HTTP traffic reaches this server on ports 80 and 443,
-              Dockyard requests a Let&apos;s Encrypt certificate automatically.
+              Once HTTP traffic reaches this server on ports 80 and 443, dockyrd
+              requests a Let&apos;s Encrypt certificate automatically.
             </p>
           </div>
         </li>

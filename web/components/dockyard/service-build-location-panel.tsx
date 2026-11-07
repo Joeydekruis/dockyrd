@@ -2,12 +2,12 @@
 
 import { Hammer } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { Button } from "@/components/dockyard/ui/button";
-import { SelectField } from "@/components/dockyard/ui/select-field";
+import { Button } from "@/components/dockyrd/ui/button";
+import { SelectField } from "@/components/dockyrd/ui/select-field";
 import {
   SettingsDetailBlock,
   SettingsGroupHeading,
-} from "@/components/dockyard/ui/settings-detail-block";
+} from "@/components/dockyrd/ui/settings-detail-block";
 import {
   listBuilders,
   patchServiceBuildLocation,

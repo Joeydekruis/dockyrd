@@ -1,5 +1,5 @@
 ---
-description: Testing - Go, web, integration, e2e, TDD (Dockyard)
+description: Testing - Go, web, integration, e2e, TDD (dockyrd)
 alwaysApply: true
 ---
 
@@ -25,7 +25,7 @@ Aim for **~80%** on new/changed **logic** (Go packages, `web/lib`, hooks) once c
 | **Integration** | Docker API, reconcile, Caddy load, deploy state machine | `go test -tags=integration` (Docker required) |
 | **Web unit/component** | React hooks, form validation, API client helpers | Vitest/Playwright component tests when added under `web/` |
 | **E2E** | Install script, setup, deploy fixture app, critical UI flows | `e2e/` Playwright + shell (briefing §14.2) |
-| **UI contract** | New/changed dashboard screens | Structure vs `design-index.json` + Playwright flows — [dockyard-design-contract](dockyard-design-contract.mdc) |
+| **UI contract** | New/changed dashboard screens | Structure vs `design-index.json` + Playwright flows — [dockyrd-design-contract](dockyrd-design-contract.mdc) |
 
 ---
 
@@ -37,7 +37,7 @@ When changing **`internal/db/migrations/`** or sqlc queries:
 - Apply migrations on a clean DB in tests or `make test` — forward-only in production.
 - Invoke **`database-reviewer`** on non-trivial schema changes (constraints, secrets columns, auth tables).
 
-User **Postgres/Redis** services are provisioned by Dockyard in Docker — not migrated via app Drizzle. E2E fixtures may use Prisma/Drizzle in **sample apps only** under `e2e/fixtures/`.
+User **Postgres/Redis** services are provisioned by dockyrd in Docker — not migrated via app Drizzle. E2E fixtures may use Prisma/Drizzle in **sample apps only** under `e2e/fixtures/`.
 
 ---
 

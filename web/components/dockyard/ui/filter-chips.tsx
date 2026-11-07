@@ -1,4 +1,4 @@
-import { Chip } from "@/components/dockyard/ui/chip";
+import { Chip } from "@/components/dockyrd/ui/chip";
 
 type FilterChipsProps = {
   options: { value: string; label: string }[];

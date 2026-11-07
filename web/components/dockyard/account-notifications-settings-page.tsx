@@ -4,11 +4,11 @@ import { useCallback, useEffect, useState } from "react";
 import {
   SettingsErrorBanner,
   SettingsSection,
-} from "@/components/dockyard/account-settings-shared";
-import { DashboardShell } from "@/components/dockyard/dashboard-shell";
-import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
-import { SettingsPageBody } from "@/components/dockyard/settings-page-body";
-import { Button } from "@/components/dockyard/ui/button";
+} from "@/components/dockyrd/account-settings-shared";
+import { DashboardShell } from "@/components/dockyrd/dashboard-shell";
+import { DockyrdPageLoading } from "@/components/dockyrd/dockyrd-page-loading";
+import { SettingsPageBody } from "@/components/dockyrd/settings-page-body";
+import { Button } from "@/components/dockyrd/ui/button";
 import {
   getNotificationPrefs,
   type NotificationPrefs,
@@ -95,7 +95,7 @@ export function AccountNotificationsSettingsPage() {
         ) : null}
         <SettingsSection
           title="Email notifications"
-          description="Choose what Dockyard sends to your account email when SMTP is configured on the server."
+          description="Choose what dockyrd sends to your account email when SMTP is configured on the server."
         >
           {loading || !prefs ? (
             <DockyrdPageLoading className="py-2" cubeSize={28} />

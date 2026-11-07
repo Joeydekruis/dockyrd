@@ -4,7 +4,7 @@ import (
 	"github.com/docker/docker/api/types/container"
 )
 
-// Cgroup placement for Dockyard-managed containers (build resilience Layer 1).
+// Cgroup placement for dockyrd-managed containers (build resilience Layer 1).
 const (
 	cgroupParentSystem = "dy-system.slice"
 	cgroupParentApps   = "dy-apps.slice"

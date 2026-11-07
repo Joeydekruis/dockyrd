@@ -2,20 +2,20 @@
 
 import { Globe, Plus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CreateStaticSiteWizard } from "@/components/dockyard/create-static-site-wizard";
-import { DashboardShell } from "@/components/dockyard/dashboard-shell";
-import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
+import { CreateStaticSiteWizard } from "@/components/dockyrd/create-static-site-wizard";
+import { DashboardShell } from "@/components/dockyrd/dashboard-shell";
+import { DockyrdPageLoading } from "@/components/dockyrd/dockyrd-page-loading";
 import {
   StaticSiteCreateProgressModal,
   type StaticSiteCreateResult,
-} from "@/components/dockyard/static-site-create-progress-modal";
-import { Button } from "@/components/dockyard/ui/button";
-import { PageHeader } from "@/components/dockyard/ui/page-header";
-import { ResourceListAddLink } from "@/components/dockyard/ui/resource-list-add-link";
-import { ResourceListSection } from "@/components/dockyard/ui/resource-list-section";
-import { ResourceRow } from "@/components/dockyard/ui/resource-row";
-import { StatCard } from "@/components/dockyard/ui/stat-card";
-import type { StatusVariant } from "@/components/dockyard/ui/status-badge";
+} from "@/components/dockyrd/static-site-create-progress-modal";
+import { Button } from "@/components/dockyrd/ui/button";
+import { PageHeader } from "@/components/dockyrd/ui/page-header";
+import { ResourceListAddLink } from "@/components/dockyrd/ui/resource-list-add-link";
+import { ResourceListSection } from "@/components/dockyrd/ui/resource-list-section";
+import { ResourceRow } from "@/components/dockyrd/ui/resource-row";
+import { StatCard } from "@/components/dockyrd/ui/stat-card";
+import type { StatusVariant } from "@/components/dockyrd/ui/status-badge";
 import {
   type Deployment,
   listDeployments,

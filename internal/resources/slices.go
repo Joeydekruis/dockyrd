@@ -1,6 +1,6 @@
 package resources
 
-// Systemd slice names for Dockyard cgroup isolation (Layer 1).
+// Systemd slice names for dockyrd cgroup isolation (Layer 1).
 const (
 	SliceRoot   = "dy.slice"
 	SliceSystem = "dy-system.slice"

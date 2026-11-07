@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { IntegrationsSettingsPage } from "@/components/dockyard/integrations-settings-page";
+import { IntegrationsSettingsPage } from "@/components/dockyrd/integrations-settings-page";
 
 export default function ServerIntegrationsSettingsPage() {
   return (

@@ -1,4 +1,4 @@
-import { SecurityAddonsPage } from "@/components/dockyard/security-addons-page";
+import { SecurityAddonsPage } from "@/components/dockyrd/security-addons-page";
 
 export default function ServerSecurityAddonsPage() {
   return <SecurityAddonsPage />;

@@ -232,7 +232,7 @@ func checkProxyDefaults(deps Deps, ts int64) Result {
 		ID: "proxy.defaults", Title: "Proxy baseline defaults", Severity: "medium",
 		Fix: FixLink, FixHref: "/settings/server/updates", LastRunAt: ts,
 	}
-	raw, err := proxy.Render(proxy.RenderInput{ACMEEmail: "checks@dockyard.local"})
+	raw, err := proxy.Render(proxy.RenderInput{ACMEEmail: "checks@dockyrd.local"})
 	if err != nil {
 		r.Status, r.Detail = StatusFail, err.Error()
 		return r

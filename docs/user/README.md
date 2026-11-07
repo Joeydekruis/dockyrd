@@ -1,6 +1,6 @@
 # User documentation
 
-End-user guides for installing and running **Dockyard** (CLI/binary) and the **Dockyrd** dashboard.
+End-user guides for installing and running **dockyrd** (CLI/binary) and the **Dockyrd** dashboard.
 
 ## Public site
 
@@ -17,7 +17,7 @@ When you change onboarding, install, CLI, or user-facing behavior, update **both
 curl -fsSL https://raw.githubusercontent.com/Joeydekruis/dockyrd/development/scripts/install.sh | sudo sh
 ```
 
-Until `https://get.dockyard.dev` is live, this GitHub raw URL is the official one-liner (also shown on dockyrd.io).
+Until `https://get.dockyrd.dev` is live, this GitHub raw URL is the official one-liner (also shown on dockyrd.io).
 
 ## Index
 

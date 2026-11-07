@@ -12,7 +12,7 @@ import {
 import {
   type SnackbarTone,
   SnackbarViewport,
-} from "@/components/dockyard/ui/snackbar";
+} from "@/components/dockyrd/ui/snackbar";
 import { writeClipboardText } from "@/lib/clipboard";
 
 type SnackbarState = {

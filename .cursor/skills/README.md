@@ -1,4 +1,4 @@
-# Four Final skills library (Dockyard)
+# Four Final skills library (dockyrd)
 
 On-demand playbooks. Rules stay short; agents invoke skills for depth.
 
@@ -6,7 +6,7 @@ On-demand playbooks. Rules stay short; agents invoke skills for depth.
 
 | Skill | Use when |
 |-|--|
-| [dockyard-dev](dockyard-dev/SKILL.md) | Go API, SQLite, embedded web, Makefile, Radix check |
+| [dockyrd-dev](dockyrd-dev/SKILL.md) | Go API, SQLite, embedded web, Makefile, Radix check |
 | [subagent-driven-development](subagent-driven-development/SKILL.md) | Parent orchestrating discuss → plan → design → generate → review |
 | [test-driven-development](test-driven-development/SKILL.md) | Generator implementing behavior |
 | [verification-before-completion](verification-before-completion/SKILL.md) | Before merge-ready / handoff claim |

@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/dockyard/ui/button";
+import { Button } from "@/components/dockyrd/ui/button";
 import {
   TERMINAL_THEMES,
   type TerminalTheme,
@@ -44,7 +44,7 @@ function ThemeCard({
           <span style={{ color: p.prompt, fontWeight: 600 }}>
             root@host:~#{" "}
           </span>
-          <span style={{ color: p.cmd }}>dockyard status</span>
+          <span style={{ color: p.cmd }}>dockyrd status</span>
         </span>
         <span className="block truncate" style={{ color: p.text }}>
           Server healthy

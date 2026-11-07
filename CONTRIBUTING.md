@@ -1,6 +1,6 @@
-# Contributing to Dockyard
+# Contributing to dockyrd
 
-Thanks for helping build Dockyard. Read [`docs/BRIEFING.md`](docs/BRIEFING.md) for architecture and [`AGENTS.md`](AGENTS.md) for agent/human workflow.
+Thanks for helping build dockyrd. Read [`docs/BRIEFING.md`](docs/BRIEFING.md) for architecture and [`AGENTS.md`](AGENTS.md) for agent/human workflow.
 
 ## Branching
 

@@ -27,10 +27,10 @@ const panelPosition: Record<TooltipPlacement, string> = {
 };
 
 const arrowClass: Record<TooltipPlacement, string> = {
-  top: "dockyard-tooltip-arrow dockyard-tooltip-arrow-bottom",
-  bottom: "dockyard-tooltip-arrow dockyard-tooltip-arrow-top",
-  left: "dockyard-tooltip-arrow dockyard-tooltip-arrow-right",
-  right: "dockyard-tooltip-arrow dockyard-tooltip-arrow-left",
+  top: "dockyrd-tooltip-arrow dockyrd-tooltip-arrow-bottom",
+  bottom: "dockyrd-tooltip-arrow dockyrd-tooltip-arrow-top",
+  left: "dockyrd-tooltip-arrow dockyrd-tooltip-arrow-right",
+  right: "dockyrd-tooltip-arrow dockyrd-tooltip-arrow-left",
 };
 
 function mergeHandler(
@@ -88,7 +88,7 @@ export function Tooltip({
         <span
           id={tipId}
           role="tooltip"
-          className={`dockyard-tooltip absolute z-50 ${panelPosition[placement]}`}
+          className={`dockyrd-tooltip absolute z-50 ${panelPosition[placement]}`}
         >
           {content}
           <span className={arrowClass[placement]} aria-hidden />
@@ -101,7 +101,7 @@ export function Tooltip({
 /** Inline icon chip for tooltip content (e.g. external link). */
 export function TooltipInlineIcon({ children }: { children: ReactNode }) {
   return (
-    <span className="dockyard-tooltip-inline-icon" aria-hidden>
+    <span className="dockyrd-tooltip-inline-icon" aria-hidden>
       {children}
     </span>
   );

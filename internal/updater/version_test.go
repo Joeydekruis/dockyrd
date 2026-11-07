@@ -15,8 +15,8 @@ func TestCompareVersions(t *testing.T) {
 }
 
 func TestParseChecksumLine(t *testing.T) {
-	body := "abc123  dockyard_0.0.14_linux_amd64.tar.gz\n"
-	got := parseChecksumLine(body, "dockyard_0.0.14_linux_amd64.tar.gz")
+	body := "abc123  dockyrd_0.0.14_linux_amd64.tar.gz\n"
+	got := parseChecksumLine(body, "dockyrd_0.0.14_linux_amd64.tar.gz")
 	if got != "abc123" {
 		t.Fatalf("got %q", got)
 	}

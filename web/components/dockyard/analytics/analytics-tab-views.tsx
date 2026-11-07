@@ -6,23 +6,23 @@ import {
   dualAreaOption,
   horizontalStackOption,
   sparklineOption,
-} from "@/components/dockyard/analytics/chart-options";
+} from "@/components/dockyrd/analytics/chart-options";
 import {
   AnalyticsChartCard,
   type AnalyticsTabId,
   ViewDetailsLink,
-} from "@/components/dockyard/analytics/use-analytics-data";
-import { BuildCapacityCard } from "@/components/dockyard/build-capacity-card";
-import { Button } from "@/components/dockyard/ui/button";
-import { Chip } from "@/components/dockyard/ui/chip";
-import { EChart } from "@/components/dockyard/ui/echart";
-import { FilterChips } from "@/components/dockyard/ui/filter-chips";
-import { ProgressBar } from "@/components/dockyard/ui/progress-bar";
+} from "@/components/dockyrd/analytics/use-analytics-data";
+import { BuildCapacityCard } from "@/components/dockyrd/build-capacity-card";
+import { Button } from "@/components/dockyrd/ui/button";
+import { Chip } from "@/components/dockyrd/ui/chip";
+import { EChart } from "@/components/dockyrd/ui/echart";
+import { FilterChips } from "@/components/dockyrd/ui/filter-chips";
+import { ProgressBar } from "@/components/dockyrd/ui/progress-bar";
 import {
   ServerContainersTable,
   type ServerContainersTableRow,
-} from "@/components/dockyard/ui/server-containers-table";
-import { StatCard } from "@/components/dockyard/ui/stat-card";
+} from "@/components/dockyrd/ui/server-containers-table";
+import { StatCard } from "@/components/dockyrd/ui/stat-card";
 import { analyticsChartColors as c } from "@/lib/analytics-chart-theme";
 import {
   average,
@@ -41,7 +41,7 @@ import {
 import type {
   CleanupSummary,
   ContainerMetricSnapshot,
-  DockyardEvent,
+  dockyrdEvent,
   HostMetricPoint,
   ServerContainer,
   ServerInfo,
@@ -534,7 +534,7 @@ export function DiskTab({
       <AnalyticsChartCard
         title="Disk usage"
         subtitle={
-          total > 0 ? `${formatBytes(total)} volume` : "Dockyard data directory"
+          total > 0 ? `${formatBytes(total)} volume` : "dockyrd data directory"
         }
       >
         <EChart option={chartOpt} height={280} ariaLabel="Disk usage chart" />
@@ -678,8 +678,8 @@ export function EventsAndOpsSection({
   onCleanup,
   containerRows,
 }: {
-  events: DockyardEvent[];
-  allEvents: DockyardEvent[];
+  events: dockyrdEvent[];
+  allEvents: dockyrdEvent[];
   eventFilter: string;
   setEventFilter: (v: string) => void;
   onAck: (id: string) => void;
@@ -873,7 +873,7 @@ export function containerTableRows(
       id: c.id,
       name: c.name,
       projectLabel:
-        c.project_label ?? (c.kind === "system" ? "Dockyard" : (c.kind ?? "—")),
+        c.project_label ?? (c.kind === "system" ? "dockyrd" : (c.kind ?? "—")),
       cpu: c.cpu_percent != null ? `${(c.cpu_percent * 100).toFixed(1)}%` : "—",
       memory: c.memory_bytes != null ? formatBytes(c.memory_bytes) : "—",
       uptime: c.created_at ? formatUptime(uptimeSec) : "—",

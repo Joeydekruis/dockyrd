@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Box, Home, Settings } from "lucide-react";
-import { NavMenuItem } from "@/components/dockyard/ui/nav-menu-item";
+import { NavMenuItem } from "@/components/dockyrd/ui/nav-menu-item";
 
 const iconArgType = {
   control: "select" as const,

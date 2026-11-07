@@ -66,11 +66,11 @@ func resolveBannerDisplay(listen string, detect func() (string, bool)) (bannerDi
 
 func writeSetupBanner(w io.Writer, token string, expiresAt time.Time, listen string, detect func() (string, bool)) {
 	if token == "" {
-		fmt.Fprintln(w, "Dockyard is initialized (setup token unchanged).")
-		fmt.Fprintln(w, "  Lost it?  dockyard setup-token")
+		fmt.Fprintln(w, "dockyrd is initialized (setup token unchanged).")
+		fmt.Fprintln(w, "  Lost it?  dockyrd setup-token")
 		return
 	}
-	fmt.Fprintln(w, "✓ Dockyard initialized.")
+	fmt.Fprintln(w, "✓ dockyrd initialized.")
 	port := listenPort(listen)
 	mode, host := resolveBannerDisplay(listen, detect)
 	fmt.Fprintln(w)
@@ -86,7 +86,7 @@ func writeSetupBanner(w io.Writer, token string, expiresAt time.Time, listen str
 		fmt.Fprintln(w, "  Use this machine's public IP (not 127.0.0.1 from your laptop).")
 	}
 	fmt.Fprintf(w, "  Token valid until %s UTC (single use).\n", expiresAt.Format(time.RFC3339))
-	fmt.Fprintln(w, "  Lost it?  dockyard setup-token")
+	fmt.Fprintln(w, "  Lost it?  dockyrd setup-token")
 }
 
 // PrintInitBanner writes the post-install message to stdout.

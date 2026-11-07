@@ -1,10 +1,10 @@
 "use client";
 
-import { NotificationsBell } from "@/components/dockyard/notifications-bell";
-import { Breadcrumbs } from "@/components/dockyard/ui/breadcrumbs";
-import { Button } from "@/components/dockyard/ui/button";
-import { SearchTrigger } from "@/components/dockyard/ui/search-trigger";
-import { UserMenu } from "@/components/dockyard/user-menu";
+import { NotificationsBell } from "@/components/dockyrd/notifications-bell";
+import { Breadcrumbs } from "@/components/dockyrd/ui/breadcrumbs";
+import { Button } from "@/components/dockyrd/ui/button";
+import { SearchTrigger } from "@/components/dockyrd/ui/search-trigger";
+import { UserMenu } from "@/components/dockyrd/user-menu";
 import type { MeResponse } from "@/lib/api";
 import { PUBLIC_DOCS_INTRO_URL } from "@/lib/public-links";
 

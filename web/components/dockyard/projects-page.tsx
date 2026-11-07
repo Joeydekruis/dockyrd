@@ -3,12 +3,12 @@
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CreateProjectModal } from "@/components/dockyard/create-project-modal";
-import { DashboardShell } from "@/components/dockyard/dashboard-shell";
-import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
-import { ProjectsWelcomeHero } from "@/components/dockyard/projects-welcome-hero";
-import { Button } from "@/components/dockyard/ui/button";
-import { ProjectCard } from "@/components/dockyard/ui/project-card";
+import { CreateProjectModal } from "@/components/dockyrd/create-project-modal";
+import { DashboardShell } from "@/components/dockyrd/dashboard-shell";
+import { DockyrdPageLoading } from "@/components/dockyrd/dockyrd-page-loading";
+import { ProjectsWelcomeHero } from "@/components/dockyrd/projects-welcome-hero";
+import { Button } from "@/components/dockyrd/ui/button";
+import { ProjectCard } from "@/components/dockyrd/ui/project-card";
 import { listProjects, listServices, type Project } from "@/lib/api";
 import {
   buildProjectOverview,

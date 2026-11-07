@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
-import { SelectField } from "@/components/dockyard/ui/select-field";
+import { SelectField } from "@/components/dockyrd/ui/select-field";
 
 const branchOptions = [
   { value: "main", label: "main" },

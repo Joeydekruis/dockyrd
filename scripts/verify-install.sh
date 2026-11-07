@@ -9,21 +9,21 @@ trap 'rm -rf "$TMP"' EXIT
 
 make build
 
-export DOCKYARD_INSTALL_BIN="$ROOT/bin/dockyard"
-export DOCKYARD_INSTALL_DY_BIN="$ROOT/bin/dy"
-export DOCKYARD_CONFIG_DIR="$TMP/etc"
-export DOCKYARD_DATA_DIR="$TMP/data"
-export DOCKYARD_BIN_DEST="$TMP/bin/dockyard"
-export DOCKYARD_DY_BIN_DEST="$TMP/bin/dy"
-export DOCKYARD_SKIP_ROOT=1
-export DOCKYARD_SKIP_SYSTEMD=1
+export dockyrd_INSTALL_BIN="$ROOT/bin/dockyrd"
+export dockyrd_INSTALL_DY_BIN="$ROOT/bin/dy"
+export dockyrd_CONFIG_DIR="$TMP/etc"
+export dockyrd_DATA_DIR="$TMP/data"
+export dockyrd_BIN_DEST="$TMP/bin/dockyrd"
+export dockyrd_DY_BIN_DEST="$TMP/bin/dy"
+export dockyrd_SKIP_ROOT=1
+export dockyrd_SKIP_SYSTEMD=1
 
 mkdir -p "$TMP/bin"
 sh "$ROOT/scripts/install.sh"
 
-test -x "$DOCKYARD_BIN_DEST"
-test -x "$DOCKYARD_DY_BIN_DEST"
-test -f "$DOCKYARD_CONFIG_DIR/secret.key"
-test -f "$DOCKYARD_DATA_DIR/control.db"
+test -x "$dockyrd_BIN_DEST"
+test -x "$dockyrd_DY_BIN_DEST"
+test -f "$dockyrd_CONFIG_DIR/secret.key"
+test -f "$dockyrd_DATA_DIR/control.db"
 
 echo "verify-install OK"

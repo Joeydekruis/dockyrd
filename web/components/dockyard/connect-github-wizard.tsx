@@ -2,7 +2,7 @@
 
 import { Check, ExternalLink, GitBranch, X } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { Button } from "@/components/dockyard/ui/button";
+import { Button } from "@/components/dockyrd/ui/button";
 import {
   type GitHubStatus,
   getGitHubStatus,

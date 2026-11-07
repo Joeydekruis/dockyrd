@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Button } from "@/components/dockyard/ui/button";
+import { Button } from "@/components/dockyrd/ui/button";
 import { fetchServiceLogs } from "@/lib/api";
 import {
   RESOURCE_DETAIL_CARD,

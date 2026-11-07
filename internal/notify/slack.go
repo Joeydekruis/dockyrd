@@ -115,7 +115,7 @@ func userAgent(version string) string {
 	if version == "" {
 		version = "dev"
 	}
-	return fmt.Sprintf("Dockyard/%s (+https://dockyrd.io)", version)
+	return fmt.Sprintf("dockyrd/%s (+https://dockyrd.io)", version)
 }
 
 func secretString(secret ChannelSecret, key string) (string, bool) {

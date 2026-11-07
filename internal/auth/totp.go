@@ -10,7 +10,7 @@ import (
 	"github.com/pquerna/otp/totp"
 )
 
-const totpIssuer = "Dockyard"
+const totpIssuer = "dockyrd"
 
 // NewTOTPSecret generates a base32 secret and otpauth URL for enrollment.
 func NewTOTPSecret(accountEmail string) (secret string, otpauthURL string, err error) {

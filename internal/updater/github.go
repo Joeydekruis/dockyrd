@@ -60,7 +60,7 @@ func FetchLatest(ctx context.Context, repo, currentVersion string) (Release, boo
 		return Release{}, false, err
 	}
 	tag := normalizeTag(payload.TagName)
-	wantPrefix := fmt.Sprintf("dockyard_%s_%s_%s", strings.TrimPrefix(tag, "v"), runtime.GOOS, runtime.GOARCH)
+	wantPrefix := fmt.Sprintf("dockyrd_%s_%s_%s", strings.TrimPrefix(tag, "v"), runtime.GOOS, runtime.GOARCH)
 	var rel Release
 	rel.Tag = tag
 	rel.Notes = strings.TrimSpace(payload.Body)

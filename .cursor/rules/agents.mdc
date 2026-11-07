@@ -28,4 +28,4 @@ Reviewer selection: `.cursor/rules/reviewer-defaults.mdc` + issue rubric (Featur
 
 All Feature reviewers write to `docs/project/feedback/<issue>/<type>-i<iter>.md`.
 
-Skills: `.cursor/skills/README.md` — start with **dockyard-dev** for implementation.
+Skills: `.cursor/skills/README.md` — start with **dockyrd-dev** for implementation.

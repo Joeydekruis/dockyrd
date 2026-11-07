@@ -14,7 +14,7 @@ import (
 
 const defaultHost = "unix:///var/run/docker.sock"
 
-// Client wraps the moby API with Dockyard conventions.
+// Client wraps the moby API with dockyrd conventions.
 type Client struct {
 	moby *moby.Client
 }
@@ -72,7 +72,7 @@ func (c *Client) EnsureProjectNetwork(ctx context.Context, projectSlug string) e
 	return c.EnsureNetwork(ctx, ProjectNetworkName(projectSlug))
 }
 
-// ListManaged returns summaries of containers labeled dev.dockyard.managed=true.
+// ListManaged returns summaries of containers labeled dev.dockyrd.managed=true.
 func (c *Client) ListManaged(ctx context.Context) ([]ManagedContainer, error) {
 	list, err := c.moby.ContainerList(ctx, container.ListOptions{
 		All:     true,
@@ -98,7 +98,7 @@ func (c *Client) ListManaged(ctx context.Context) ([]ManagedContainer, error) {
 	return out, nil
 }
 
-// ManagedContainer is a Dockyard-labeled container summary.
+// ManagedContainer is a dockyrd-labeled container summary.
 type ManagedContainer struct {
 	ID       string
 	Name     string

@@ -57,7 +57,7 @@ func checkServicePolicy(name string, svc map[string]any, opts PolicyOptions) []I
 		issues = append(issues, Issue{Rule: "build", Message: fmt.Sprintf("service %q: build is not supported in v1 (use image:)", name)})
 	}
 	if cn, ok := svc["container_name"].(string); ok && strings.TrimSpace(cn) != "" {
-		issues = append(issues, Issue{Rule: "container_name", Message: fmt.Sprintf("service %q: container_name is managed by Dockyard", name)})
+		issues = append(issues, Issue{Rule: "container_name", Message: fmt.Sprintf("service %q: container_name is managed by dockyrd", name)})
 	}
 	issues = append(issues, checkMounts(name, svc, opts)...)
 	issues = append(issues, checkCaps(name, svc)...)
@@ -83,7 +83,7 @@ func checkPorts(name string, svc map[string]any, opts PolicyOptions) []Issue {
 	return []Issue{{
 		Rule:    "ports",
 		Warning: true,
-		Message: fmt.Sprintf("service %q: host ports will be stripped (use a Dockyard domain)", name),
+		Message: fmt.Sprintf("service %q: host ports will be stripped (use a dockyrd domain)", name),
 	}}
 }
 

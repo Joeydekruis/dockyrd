@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { UserMenu } from "@/components/dockyard/user-menu";
+import { UserMenu } from "@/components/dockyrd/user-menu";
 
 const demoUser = {
   id: "1",

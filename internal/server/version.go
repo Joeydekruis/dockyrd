@@ -2,7 +2,7 @@ package server
 
 import "time"
 
-// buildVersion is set from cmd/dockyard via SetBuildVersion.
+// buildVersion is set from cmd/dockyrd via SetBuildVersion.
 var buildVersion = "dev"
 
 var processStartedAt = time.Now().Unix()

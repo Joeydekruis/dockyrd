@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Switch } from "@/components/dockyard/ui/switch";
+import { Switch } from "@/components/dockyrd/ui/switch";
 import { type Project, patchProject } from "@/lib/api";
 
 type ProjectLinksSettingsProps = {

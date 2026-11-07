@@ -4,16 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Troubleshooting · Dockyrd</title>
-<meta name="description" content="Start with dockyard doctor. It checks the usual suspects and prints a concrete fix for each problem it finds.">
+<meta name="description" content="Start with dockyrd doctor. It checks the usual suspects and prints a concrete fix for each problem it finds.">
 <link rel="canonical" href="https://dockyrd.io/docs/troubleshooting.html">
 <meta property="og:type" content="article">
 <meta property="og:site_name" content="Dockyrd">
 <meta property="og:title" content="Troubleshooting · Dockyrd">
-<meta property="og:description" content="Start with dockyard doctor. It checks the usual suspects and prints a concrete fix for each problem it finds.">
+<meta property="og:description" content="Start with dockyrd doctor. It checks the usual suspects and prints a concrete fix for each problem it finds.">
 <meta property="og:url" content="https://dockyrd.io/docs/troubleshooting.html">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Troubleshooting · Dockyrd">
-<meta name="twitter:description" content="Start with dockyard doctor. It checks the usual suspects and prints a concrete fix for each problem it finds.">
+<meta name="twitter:description" content="Start with dockyrd doctor. It checks the usual suspects and prints a concrete fix for each problem it finds.">
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="../assets/site.css?v=0.6.3">
 </head>
@@ -85,8 +85,8 @@
     <div class="crumbs"><span class="eyebrow">Operations</span></div>
     <article class="doc">
 <h1>Troubleshooting</h1>
-<p class="lead">Start with <code>dockyard doctor</code>. It checks the usual suspects and prints a concrete fix for each problem it finds.</p>
-<pre data-lang="bash">sudo dockyard doctor</pre>
+<p class="lead">Start with <code>dockyrd doctor</code>. It checks the usual suspects and prints a concrete fix for each problem it finds.</p>
+<pre data-lang="bash">sudo dockyrd doctor</pre>
 <h2 id="troubleshooting-cert">Certificate is not issued</h2>
 <ul>
 <li>Check that the domain's <code>A</code> record points at this server. The Domains tab shows the expected value.</li>
@@ -98,8 +98,8 @@
 <h2 id="troubleshooting-disk">Builds refuse to start</h2>
 <p>Dockyrd refuses builds when less than 10% disk is free. Open <b>Analytics → Docker cleanup</b> to remove build cache, dangling images and old releases. Cleanup never touches running services or volumes.</p>
 <h2 id="troubleshooting-locked">Locked out</h2>
-<pre data-lang="bash">sudo dockyard admin reset-password you@example.com
-sudo dockyard admin disable-2fa you@example.com</pre>
+<pre data-lang="bash">sudo dockyrd admin reset-password you@example.com
+sudo dockyrd admin disable-2fa you@example.com</pre>
 </article>
     <nav class="pager" aria-label="Previous and next page"><a class="prev" href="cli.html"><span class="eyebrow">Previous</span><span>CLI reference</span></a><a class="next" href="architecture.html"><span class="eyebrow">Next</span><span>Architecture</span></a></nav>
     <div class="edit"><a href="https://github.com/Joeydekruis/dockyrd/edit/development/docs/user/troubleshooting.md" target="_blank" rel="noopener noreferrer">Edit this page on GitHub</a><span>Apache-2.0 licensed</span></div>

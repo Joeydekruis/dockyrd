@@ -65,12 +65,12 @@ function readSource() {
     "curl -fsSL https://get.dockyrd.dev/uninstall | sudo sh",
     UNINSTALL_CMD,
   );
-  html = html.replaceAll("/usr/local/bin/dockyrd", "/usr/local/bin/dockyard");
-  html = html.replaceAll("sudo dockyrd ", "sudo dockyard ");
-  html = html.replaceAll("<code>dockyrd ", "<code>dockyard ");
-  html = html.replaceAll(">dockyrd ", ">dockyard ");
-  html = html.replaceAll("/etc/dockyrd/", "/etc/dockyard/");
-  html = html.replaceAll("/var/lib/dockyrd/", "/var/lib/dockyard/");
+  html = html.replaceAll("/usr/local/bin/dockyrd", "/usr/local/bin/dockyrd");
+  html = html.replaceAll("sudo dockyrd ", "sudo dockyrd ");
+  html = html.replaceAll("<code>dockyrd ", "<code>dockyrd ");
+  html = html.replaceAll(">dockyrd ", ">dockyrd ");
+  html = html.replaceAll("/etc/dockyrd/", "/etc/dockyrd/");
+  html = html.replaceAll("/var/lib/dockyrd/", "/var/lib/dockyrd/");
   html = html.replaceAll("var REPO = 'dockyrd/dockyrd'", `var REPO = '${REPO}'`);
   html = html.replaceAll("v0.1 · preview", `v${VERSION}`);
   html = html.replaceAll(

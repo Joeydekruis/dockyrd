@@ -271,7 +271,7 @@ func (d apiDeps) handleGitHubWebhook(w http.ResponseWriter, r *http.Request) {
 }
 
 func publicBaseURL(r *http.Request) string {
-	if v := strings.TrimRight(os.Getenv("DOCKYARD_PUBLIC_URL"), "/"); v != "" {
+	if v := strings.TrimRight(os.Getenv("dockyrd_PUBLIC_URL"), "/"); v != "" {
 		return v
 	}
 	scheme := "http"

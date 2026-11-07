@@ -7,7 +7,7 @@ export function SearchTrigger({ onClick }: SearchTriggerProps) {
     <button
       type="button"
       onClick={onClick}
-      className="dockyard-search-trigger"
+      className="dockyrd-search-trigger"
       aria-label="Search pages, resources and actions"
     >
       <span>Search…</span>

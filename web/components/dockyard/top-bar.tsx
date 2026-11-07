@@ -1,6 +1,6 @@
 "use client";
 
-import { AnnouncementBanner } from "@/components/dockyard/ui/announcement-banner";
+import { AnnouncementBanner } from "@/components/dockyrd/ui/announcement-banner";
 
 export const BANNER_HEIGHT_PX = 44;
 

@@ -26,6 +26,12 @@ export type TerminalTheme = {
     cursor: string;
     selectionBackground?: string;
   };
+  /** Toolbar, tabs, and chrome controls (not dashboard --text). */
+  chrome: {
+    fg: string;
+    muted: string;
+    border: string;
+  };
 };
 
 export const TERMINAL_THEMES: TerminalTheme[] = [
@@ -51,6 +57,7 @@ export const TERMINAL_THEMES: TerminalTheme[] = [
       cursor: "#8EBEFF",
       selectionBackground: "#25497E",
     },
+    chrome: { fg: "#E3F0FF", muted: "#8AA9D3", border: "#25497E" },
   },
   {
     id: "dockyrd-light",
@@ -74,6 +81,7 @@ export const TERMINAL_THEMES: TerminalTheme[] = [
       cursor: "#0B57C9",
       selectionBackground: "#B7D3F7",
     },
+    chrome: { fg: "#0B1F3A", muted: "#5A6577", border: "#B7D3F7" },
   },
   {
     id: "hacker-green",
@@ -97,6 +105,7 @@ export const TERMINAL_THEMES: TerminalTheme[] = [
       cursor: "#3DEB6F",
       selectionBackground: "#1B4A24",
     },
+    chrome: { fg: "#8DFFAA", muted: "#4FB46A", border: "#1B4A24" },
   },
   {
     id: "normal-light",
@@ -120,6 +129,7 @@ export const TERMINAL_THEMES: TerminalTheme[] = [
       cursor: "#24292F",
       selectionBackground: "#CFCFCF",
     },
+    chrome: { fg: "#1A1A1A", muted: "#555555", border: "#CFCFCF" },
   },
 ];
 

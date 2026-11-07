@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-const defaultAppName = "Dockyard"
+const defaultAppName = "dockyrd"
 
 // ManifestParams configures the GitHub App manifest redirect flow.
 type ManifestParams struct {
@@ -32,7 +32,7 @@ type ManifestLaunch struct {
 func BuildManifestLaunch(p ManifestParams, state string) (ManifestLaunch, error) {
 	base := strings.TrimRight(strings.TrimSpace(p.PublicBaseURL), "/")
 	if base == "" {
-		base = strings.TrimRight(os.Getenv("DOCKYARD_PUBLIC_URL"), "/")
+		base = strings.TrimRight(os.Getenv("dockyrd_PUBLIC_URL"), "/")
 	}
 	if base == "" {
 		return ManifestLaunch{}, fmt.Errorf("public base URL required for GitHub manifest")

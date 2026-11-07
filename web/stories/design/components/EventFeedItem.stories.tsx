@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { EventFeedItem } from "@/components/dockyard/ui/event-feed-item";
+import { EventFeedItem } from "@/components/dockyrd/ui/event-feed-item";
 
-/** **Source:** `web/components/dockyard/ui/event-feed-item.tsx` */
+/** **Source:** `web/components/dockyrd/ui/event-feed-item.tsx` */
 const meta = {
   title: "Design/Components/Event feed item",
   component: EventFeedItem,

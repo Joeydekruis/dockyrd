@@ -10,7 +10,7 @@ export async function waitForPanelHealth(timeoutMs = 120_000): Promise<void> {
         return;
       }
     } catch {
-      // Expected while dockyard serve is down.
+      // Expected while dockyrd serve is down.
     }
     await new Promise((resolve) => setTimeout(resolve, 1500));
   }

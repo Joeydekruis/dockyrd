@@ -43,7 +43,7 @@
     ),
     linear-gradient(120deg, #2f4a8a, #4767bc 55%, #7088da);
   --card-radius: 20px;
-  --dockyard-announcement-height: 44px;
+  --dockyrd-announcement-height: 44px;
 }
 
 .field-input {
@@ -417,7 +417,7 @@ button.btn-text:disabled {
   outline-offset: 2px;
 }
 
-.dockyard-nav-link {
+.dockyrd-nav-link {
   display: flex;
   min-height: 44px;
   align-items: center;
@@ -433,22 +433,22 @@ button.btn-text:disabled {
     color 0.15s ease;
 }
 
-.dockyard-nav-link:hover {
+.dockyrd-nav-link:hover {
   background: var(--nav-hover);
   color: var(--ink-navy);
 }
 
-.dockyard-nav-link[aria-current="page"] {
+.dockyrd-nav-link[aria-current="page"] {
   background: var(--brand-soft);
   color: var(--ink-navy);
 }
 
-.dockyard-nav-link:focus-visible {
+.dockyrd-nav-link:focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
 }
 
-.dockyard-icon-btn {
+.dockyrd-icon-btn {
   display: inline-flex;
   min-height: 44px;
   min-width: 44px;
@@ -462,16 +462,16 @@ button.btn-text:disabled {
   transition: background 0.15s ease;
 }
 
-.dockyard-icon-btn:hover {
+.dockyrd-icon-btn:hover {
   background: rgba(11, 31, 58, 0.08);
 }
 
-.dockyard-icon-btn:focus-visible {
+.dockyrd-icon-btn:focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
 }
 
-.dockyard-search-trigger {
+.dockyrd-search-trigger {
   display: flex;
   min-height: 44px;
   width: min(280px, 40vw);
@@ -490,12 +490,12 @@ button.btn-text:disabled {
     border-color 0.15s ease;
 }
 
-.dockyard-search-trigger:hover {
+.dockyrd-search-trigger:hover {
   border-color: var(--secondary-button-border);
   background: var(--surface);
 }
 
-.dockyard-search-trigger:focus-visible {
+.dockyrd-search-trigger:focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
 }
@@ -763,7 +763,7 @@ button.btn-text:disabled {
   transition: width 0.05s linear;
 }
 
-.dockyard-tooltip {
+.dockyrd-tooltip {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -778,7 +778,7 @@ button.btn-text:disabled {
   box-shadow: 0 6px 20px rgba(11, 31, 58, 0.28);
 }
 
-.dockyard-tooltip-inline-icon {
+.dockyrd-tooltip-inline-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -787,35 +787,35 @@ button.btn-text:disabled {
   background: rgba(255, 255, 255, 0.14);
 }
 
-.dockyard-tooltip-arrow {
+.dockyrd-tooltip-arrow {
   position: absolute;
   width: 0;
   height: 0;
   border: 6px solid transparent;
 }
 
-.dockyard-tooltip-arrow-bottom {
+.dockyrd-tooltip-arrow-bottom {
   bottom: -11px;
   left: 50%;
   translate: -50% 0;
   border-top-color: var(--ink-navy);
 }
 
-.dockyard-tooltip-arrow-top {
+.dockyrd-tooltip-arrow-top {
   top: -11px;
   left: 50%;
   translate: -50% 0;
   border-bottom-color: var(--ink-navy);
 }
 
-.dockyard-tooltip-arrow-right {
+.dockyrd-tooltip-arrow-right {
   right: -11px;
   top: 50%;
   translate: 0 -50%;
   border-left-color: var(--ink-navy);
 }
 
-.dockyard-tooltip-arrow-left {
+.dockyrd-tooltip-arrow-left {
   left: -11px;
   top: 50%;
   translate: 0 -50%;
@@ -849,7 +849,7 @@ button.btn-text:disabled {
   background: var(--primary-button-hover);
 }
 
-.dockyard-menu-panel {
+.dockyrd-menu-panel {
   position: absolute;
   top: calc(100% + 6px);
   left: 0;
@@ -865,7 +865,7 @@ button.btn-text:disabled {
   box-shadow: 0 12px 32px rgba(11, 31, 58, 0.16);
 }
 
-.dockyard-menu-item {
+.dockyrd-menu-item {
   display: flex;
   width: 100%;
   min-height: 40px;
@@ -883,18 +883,18 @@ button.btn-text:disabled {
   cursor: pointer;
 }
 
-.dockyard-menu-item:hover,
-.dockyard-menu-item:focus-visible {
+.dockyrd-menu-item:hover,
+.dockyrd-menu-item:focus-visible {
   background: #f1f0ed;
   outline: none;
 }
 
-.dockyard-menu-item-danger {
+.dockyrd-menu-item-danger {
   color: var(--danger);
 }
 
-.dockyard-menu-item-danger:hover,
-.dockyard-menu-item-danger:focus-visible {
+.dockyrd-menu-item-danger:hover,
+.dockyrd-menu-item-danger:focus-visible {
   background: #f1f0ed;
 }
 
@@ -1034,18 +1034,18 @@ button.btn-text:disabled {
   word-break: break-word;
 }
 
-.dockyard-switch-track {
+.dockyrd-switch-track {
   transition: background-color 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.dockyard-switch-thumb {
+.dockyrd-switch-thumb {
   transition: transform 0.22s cubic-bezier(0.34, 1.25, 0.64, 1);
   will-change: transform;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dockyard-switch-track,
-  .dockyard-switch-thumb {
+  .dockyrd-switch-track,
+  .dockyrd-switch-thumb {
     transition: none;
   }
 
