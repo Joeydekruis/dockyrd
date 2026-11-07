@@ -5,9 +5,9 @@ import { Terminal as XTerm } from "@xterm/xterm";
 import "@xterm/xterm/css/xterm.css";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
-import { EmptyState } from "@/components/dockyard/ui/empty-state";
 import { Button } from "@/components/dockyard/ui/button";
 import { Chip } from "@/components/dockyard/ui/chip";
+import { EmptyState } from "@/components/dockyard/ui/empty-state";
 import { PageHeader } from "@/components/dockyard/ui/page-header";
 import { Select } from "@/components/dockyard/ui/select";
 import {
@@ -177,7 +177,9 @@ export function TerminalPage() {
       });
     } catch (err) {
       setConnState("error");
-      setStatusNote(err instanceof Error ? err.message : "Could not start session.");
+      setStatusNote(
+        err instanceof Error ? err.message : "Could not start session.",
+      );
     }
   }, [selected, mode, useRoot, teardown, mountTerm, sendResize]);
 
@@ -249,7 +251,11 @@ export function TerminalPage() {
             </Button>
           ) : null}
           {mode !== "shell" ? (
-            <Button type="button" variant="outline" onClick={() => setMode("shell")}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setMode("shell")}
+            >
               Shell
             </Button>
           ) : null}
@@ -264,14 +270,22 @@ export function TerminalPage() {
             </label>
           ) : null}
           <div className="ml-auto flex flex-wrap gap-2">
-            <span className="font-mono text-[11px] uppercase tracking-wide" style={{ color: "var(--muted-text)" }}>
+            <span
+              className="font-mono text-[11px] uppercase tracking-wide"
+              style={{ color: "var(--muted-text)" }}
+            >
               {connState === "connected" ? (
                 <span style={{ color: "var(--status-ok-fg)" }}>Connected</span>
               ) : (
                 connState
               )}
             </span>
-            <Button type="button" variant="outline" onClick={clear} disabled={!termRef.current}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={clear}
+              disabled={!termRef.current}
+            >
               Clear
             </Button>
             <Button
@@ -291,11 +305,11 @@ export function TerminalPage() {
           </p>
         ) : null}
 
-        <div
+        <section
           ref={hostRef}
+          aria-label="Terminal output"
           className="min-h-[420px] overflow-hidden rounded-[12px] border p-2"
           style={{ borderColor: "var(--border)", background: "#fff" }}
-          aria-label="Terminal output"
         />
       </div>
     </DashboardShell>
