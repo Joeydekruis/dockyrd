@@ -162,7 +162,9 @@ Newer releases auto-prefer the legacy database when `/var/lib/dockyrd/control.db
 
 ## `ERR_QUIC_PROTOCOL_ERROR` in the browser
 
-Chrome often shows this on **HTTPS** (HTTP/3) when the edge proxy and panel disagree after a restart, while the panel may still be fine on the direct port.
+Chrome often shows this on **HTTPS** when the browser tries **HTTP/3 (QUIC over UDP port 443)** but the path is blocked — common on **Hetzner Cloud Firewalls** that only allow **TCP** 80/443 and not **UDP** 443. dockyrd 0.7.7+ configures Caddy for HTTP/1.1 and HTTP/2 only; older builds need UDP 443 open or a proxy reload after updating.
+
+Chrome can also show this when the edge proxy and panel disagree after a restart, while the panel may still be fine on the direct port.
 
 1. Try **`http://<server-ip>:8000`** (not `https://`) and sign in there.
 2. On the server, confirm the API:

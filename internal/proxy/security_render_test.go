@@ -35,6 +35,8 @@ func TestRenderStrictSecuritySnapshot(t *testing.T) {
 		"default-src 'self'",
 		"Permissions-Policy",
 		"reverse_proxy",
+		`"h1"`,
+		`"h2"`,
 	} {
 		if !strings.Contains(s, frag) {
 			t.Fatalf("missing %q in render", frag)

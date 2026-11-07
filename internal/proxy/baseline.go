@@ -80,6 +80,8 @@ func mergeServerConfig(base map[string]any, trusted TrustedProxyConfig) map[stri
 	for k, v := range serverTimeouts() {
 		base[k] = v
 	}
+	// HTTP/3 needs UDP 443; many cloud firewalls (Hetzner) only open TCP — Chrome then shows ERR_QUIC_PROTOCOL_ERROR.
+	base["protocols"] = []string{"h1", "h2"}
 	applyTrustedProxies(base, trusted)
 	return base
 }

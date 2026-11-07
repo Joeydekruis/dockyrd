@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.7.7] - 2026-11-07
+
+_Finished: 2026-11-07_
+
+### Fixed
+
+- **Caddy edge** — disable HTTP/3 (`h3`) on `:443`; TLS over TCP only (avoids `ERR_QUIC_PROTOCOL_ERROR` when cloud firewalls block UDP 443, e.g. Hetzner)
+
 ## [0.7.6] - 2026-11-07
 
 _Finished: 2026-11-07_
