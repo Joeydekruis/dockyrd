@@ -11,11 +11,14 @@ From briefing §15. Update when a milestone closes.
 | **M4 · Observability + team** | Metrics, events, Analytics, team/2FA/audit/search, SMTP | All 19 design screens functional | **Done** (2026-11-03) |
 | **M5 · v0.1.0 release** | Self-update, doctor, docs, e2e green | Public release | **Released** — **`v0.0.22`** on `main`; §19 polish ongoing |
 | **M6 · Resource links** | Directed links, ref enforcement, per-link networks, project map | #58–#61 shipped @ **v0.0.49** | **Done** (2026-11-05) |
+| **M6.1 · Panel terminal** | Container web terminal (admin), psql/valkey shortcuts | #72 @ **v0.6.0** | **Done** (2026-11-07) |
 
 **Gate:** `./scripts/verify-m5-smoke.sh`, `./scripts/verify-install.sh`, `make e2e` (Docker host).
+
+**Latest release:** [**v0.6.0**](https://github.com/Joeydekruis/dockyrd/releases/tag/v0.6.0) — web terminal (#72) on top of the v0.2 train on `main`.
 
 **Briefing §19 (post-release backlog):** see [`post-m5-backlog.md`](post-m5-backlog.md) — Ubuntu curl CI matrix, fixture deploy automation, chaos/load in CI.
 
 ## Post-MVP (briefing)
 
-v0.2 backups/notifications/previews; v0.3 multi-server agent.
+v0.3 multi-server agent; backup hardening (#67); UI shell parity (#45).

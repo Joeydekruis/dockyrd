@@ -43,7 +43,7 @@ Een developer installeert Dockyard op een verse VPS (Ubuntu 24.04 / Debian 12+) 
 | Geplande database-backups naar S3 + restore | Design toont ze al; datamodel en jobs-runner zijn erop voorbereid (§15) |
 | Multi-server (remote servers via agent) | Schema bevat `server_id` vanaf dag één, maar MVP = lokale server |
 | Preview deployments per PR | Vereist GitHub App-events die we al ontvangen; UI later |
-| Web-terminal (`docker exec`) | WebSocket + security review |
+| ~~Web-terminal (`docker exec`)~~ | **Shipped v0.6.0** — container shell only (#72); host shell still out of scope |
 | Notificaties (e-mail, Slack, Discord, webhooks) | Events-tabel bestaat al; alleen kanalen toevoegen |
 | Docker Compose-stacks / one-click templates | Kernmodel eerst stabiel |
 | MySQL/MariaDB/MongoDB | Zelfde database-driver-interface, extra implementaties |
