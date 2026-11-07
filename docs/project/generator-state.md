@@ -4,10 +4,10 @@
 
 ## In progress
 
-_None — #72 handoff posted, maintainer verify pending._
+_None._
 
 ## Last ship
 
-**#72** — Web terminal (container exec) @ **v0.0.57**.
+**#72** — Web terminal @ **v0.6.0** (`main` + GitHub Release `v0.6.0`).
 
 Prior: **#71** apps domain defaults @ **v0.0.55–0.0.56**; **v0.2 features** (#68–#70) @ **v0.0.54**.
