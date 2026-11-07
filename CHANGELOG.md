@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.7.8] - 2026-11-07
+
+_Finished: 2026-11-07_
+
+### Fixed
+
+- **Static site / app builds** — register `dy-buildkit` via `buildx create --buildkitd-config` (not a bogus remote endpoint); symlink `docker-buildx` into dockyrd `DOCKER_CONFIG` (Docker Desktop); fail deploy when BuildKit bootstrap fails
+
 ## [0.7.7] - 2026-11-07
 
 _Finished: 2026-11-07_
