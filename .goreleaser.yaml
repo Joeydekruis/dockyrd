@@ -22,6 +22,20 @@ builds:
     ldflags:
       - -s -w
       - -X main.version={{.Version}}
+  # Legacy name inside tarballs so pre-0.7.1 self-update can upgrade across the rebrand.
+  - id: dockyard
+    main: ./cmd/dockyard
+    binary: dockyard
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X main.version={{.Version}}
   - id: dy
     main: ./cmd/dy
     binary: dy
@@ -42,6 +56,16 @@ archives:
       - dockyrd
       - dy
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - LICENSE
+      - NOTICE
+      - README.md
+  - id: legacy
+    format: tar.gz
+    builds:
+      - dockyard
+      - dy
+    name_template: "dockyard_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     files:
       - LICENSE
       - NOTICE

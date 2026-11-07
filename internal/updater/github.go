@@ -60,21 +60,33 @@ func FetchLatest(ctx context.Context, repo, currentVersion string) (Release, boo
 		return Release{}, false, err
 	}
 	tag := normalizeTag(payload.TagName)
-	wantPrefix := fmt.Sprintf("dockyrd_%s_%s_%s", strings.TrimPrefix(tag, "v"), runtime.GOOS, runtime.GOARCH)
+	prefixes := releaseAssetPrefixes(tag, runtime.GOOS, runtime.GOARCH)
 	var rel Release
 	rel.Tag = tag
 	rel.Notes = strings.TrimSpace(payload.Body)
 	for _, a := range payload.Assets {
-		if strings.HasPrefix(a.Name, wantPrefix) && strings.HasSuffix(a.Name, ".tar.gz") {
-			rel.AssetName = a.Name
-			rel.AssetURL = a.BrowserDownloadURL
-		}
 		if a.Name == "checksums.txt" {
 			rel.ChecksumURL = a.BrowserDownloadURL
 		}
 	}
+	for _, prefix := range prefixes {
+		for _, a := range payload.Assets {
+			if strings.HasPrefix(a.Name, prefix) && strings.HasSuffix(a.Name, ".tar.gz") {
+				rel.AssetName = a.Name
+				rel.AssetURL = a.BrowserDownloadURL
+				break
+			}
+		}
+		if rel.AssetURL != "" {
+			break
+		}
+	}
 	if rel.AssetURL == "" {
-		return Release{}, false, fmt.Errorf("no release asset matching %s", wantPrefix)
+		return Release{}, false, fmt.Errorf(
+			"no release asset matching %s (also tried legacy %s)",
+			prefixes[0],
+			prefixes[1],
+		)
 	}
 	newer := CompareVersions(currentVersion, tag) < 0
 	return rel, newer, nil

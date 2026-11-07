@@ -50,7 +50,9 @@ func Load() Config {
 	if v := os.Getenv(envPublicIPv4); v != "" {
 		cfg.PublicIPv4 = v
 	}
+	applyLegacyEnvAliases(&cfg)
 	if runtime.GOOS == "linux" {
+		cfg = resolveLegacyInstallPaths(cfg)
 		return cfg
 	}
 	base := devBaseDir()
@@ -179,6 +181,9 @@ func (c Config) BuildTimeout() time.Duration {
 // PublicURL is the external HTTPS origin for links in email (optional env override).
 func (c Config) PublicURL() string {
 	v := strings.TrimSpace(os.Getenv(envPublicURL))
+	if v == "" {
+		v = strings.TrimSpace(os.Getenv(legacyEnvPublicURL))
+	}
 	for len(v) > 0 && v[len(v)-1] == '/' {
 		v = v[:len(v)-1]
 	}

@@ -101,7 +101,8 @@ func BuildRailpack(ctx context.Context, in RailpackInput) error {
 	buildArgs = append(buildArgs, contextDir)
 
 	buildCmd := exec.CommandContext(ctx, in.DockerBinary, buildArgs...)
-	buildCmd.Env = append(os.Environ(), envPairs(in.BuildArgs)...)
+	buildCmd.Env = append(os.Environ(), DockerCLIEnv()...)
+	buildCmd.Env = append(buildCmd.Env, envPairs(in.BuildArgs)...)
 	buildCmd.Stdout = buildWriter
 	buildCmd.Stderr = buildWriter
 	if err := buildCmd.Run(); err != nil {

@@ -1,0 +1,27 @@
+[Unit]
+Description=dockyrd
+After=network-online.target docker.service
+Requires=docker.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+Slice=dy-system.slice
+OOMScoreAdjust=-900
+Environment=GOMEMLIMIT=96MiB
+Environment=DOCKER_CONFIG=/var/lib/dockyrd/docker-cli
+Environment=BUILDX_CONFIG=/var/lib/dockyrd/buildx
+ExecStart=/usr/local/bin/dockyrd serve
+Restart=always
+RestartSec=2
+EnvironmentFile=-/etc/dockyrd/dockyrd.env
+EnvironmentFile=-/etc/dockyard/dockyard.env
+LimitNOFILE=65536
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/dockyrd /var/lib/dockyard /etc/dockyrd /etc/dockyard /usr/local/bin
+
+[Install]
+WantedBy=multi-user.target

@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.7.3] - 2026-11-07
+
+_Finished: 2026-11-07_
+
+### Fixed
+
+- **Installer (`curl | sh`)** — fetch `packaging/dockyrd.service` with fallback to `packaging/dockyard.service`; download slice units from GitHub when not run from a git checkout; ship `packaging/dockyrd.service` on `development` so fresh VPS installs enable `dockyrd.service` without manual unit copy
+- **Legacy installs** — auto-prefer `/var/lib/dockyard` when `/var/lib/dockyrd` is empty but legacy DB has users; `dockyard_*` release tarball names alongside `dockyrd_*` for install/update; systemd `DOCKER_CONFIG` / `BUILDX_CONFIG` under data dir
+
+### Changed
+
+- **GoReleaser** — publish legacy `dockyard_{version}_linux_{arch}` archives for in-place upgrades from pre-rename binaries
+
 ## [0.7.2] - 2026-11-07
 
 _Finished: 2026-11-07_

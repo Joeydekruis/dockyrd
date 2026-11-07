@@ -51,6 +51,7 @@ func exportWithBuildkit(ctx context.Context, dockerBin string, in BuildInput, wo
 		workDir,
 	)
 	cmd := exec.CommandContext(ctx, dockerBin, args...)
+	cmd.Env = append(os.Environ(), build.DockerCLIEnv()...)
 	cmd.Stdout = logFile
 	cmd.Stderr = logFile
 	if err := cmd.Run(); err != nil {

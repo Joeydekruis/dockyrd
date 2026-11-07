@@ -69,6 +69,7 @@ func BuildDockerfile(ctx context.Context, in DockerfileInput) error {
 	args = append(args, contextDir)
 
 	cmd := exec.CommandContext(ctx, in.DockerBinary, args...)
+	cmd.Env = append(os.Environ(), DockerCLIEnv()...)
 	cmd.Stdout = writer
 	cmd.Stderr = writer
 	if err := cmd.Run(); err != nil {

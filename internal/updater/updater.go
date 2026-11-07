@@ -120,6 +120,9 @@ func Apply(ctx context.Context, cfg config.Config, current string, opts Options)
 	if err := installBinary(binPath, dest); err != nil {
 		return ApplyResult{}, err
 	}
+	if err := linkPanelBinaryAliases(dest); err != nil {
+		return ApplyResult{}, err
+	}
 	dyDest := os.Getenv("dockyrd_DY_BIN")
 	if dyDest == "" {
 		dyDest = "/usr/local/bin/dy"
@@ -235,7 +238,7 @@ func extractReleaseBinaries(archivePath, destDir string) (dockyrdPath string, dy
 		}
 		base := filepath.Base(hdr.Name)
 		switch base {
-		case "dockyrd":
+		case "dockyrd", "dockyard":
 			out := filepath.Join(destDir, "dockyrd")
 			if err := writeTarEntry(tr, out); err != nil {
 				return "", "", err
@@ -248,7 +251,7 @@ func extractReleaseBinaries(archivePath, destDir string) (dockyrdPath string, dy
 			}
 			dyPath = out
 		default:
-			if strings.HasPrefix(base, "dockyrd") && dockyrdPath == "" {
+			if dockyrdPath == "" && (strings.HasPrefix(base, "dockyrd") || strings.HasPrefix(base, "dockyard")) {
 				out := filepath.Join(destDir, "dockyrd")
 				if err := writeTarEntry(tr, out); err != nil {
 					return "", "", err

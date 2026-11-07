@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/Joeydekruis/dockyrd/internal/build"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/errdefs"
@@ -78,6 +79,7 @@ func ensureBuildxBuilder(ctx context.Context) error {
 		name = BuildkitContainerName
 	}
 	check := exec.CommandContext(ctx, "docker", "buildx", "inspect", name)
+	check.Env = append(os.Environ(), build.DockerCLIEnv()...)
 	if check.Run() == nil {
 		return nil
 	}
@@ -86,5 +88,6 @@ func ensureBuildxBuilder(ctx context.Context) error {
 		"--driver", "docker-container",
 		BuildkitContainerName,
 	)
+	create.Env = append(os.Environ(), build.DockerCLIEnv()...)
 	return create.Run()
 }

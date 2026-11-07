@@ -12,6 +12,9 @@ import (
 func ScheduleServiceRestart() {
 	unit := os.Getenv("dockyrd_SYSTEMD_UNIT")
 	if unit == "" {
+		unit = os.Getenv("DOCKYARD_SYSTEMD_UNIT")
+	}
+	if unit == "" {
 		unit = "dockyrd.service"
 	}
 	go func() {

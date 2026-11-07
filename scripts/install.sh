@@ -263,7 +263,10 @@ download_release_binary() {
 	tmp=$(mktemp -d) || return 1
 	trap 'rm -rf "$tmp"' EXIT
 	if ! curl -sfL "${base}/${asset}" -o "${tmp}/${asset}"; then
-		return 1
+		asset="dockyard_${ver}_${os_name}_${arch}.tar.gz"
+		if ! curl -sfL "${base}/${asset}" -o "${tmp}/${asset}"; then
+			return 1
+		fi
 	fi
 	if curl -sfL "${base}/checksums.txt" -o "${tmp}/checksums.txt"; then
 		want=$(grep " ${asset}$" "${tmp}/checksums.txt" | awk '{print $1}')
@@ -273,14 +276,32 @@ download_release_binary() {
 			return 1
 		fi
 	fi
-	tar -xzf "${tmp}/${asset}" -C "$tmp" dockyrd || return 1
-	install -m 755 "${tmp}/dockyrd" "$BIN_DEST"
+	if tar -xzf "${tmp}/${asset}" -C "$tmp" dockyrd 2>/dev/null; then
+		install -m 755 "${tmp}/dockyrd" "$BIN_DEST"
+	elif tar -xzf "${tmp}/${asset}" -C "$tmp" dockyard 2>/dev/null; then
+		install -m 755 "${tmp}/dockyard" "$BIN_DEST"
+	else
+		return 1
+	fi
 	if tar -xzf "${tmp}/${asset}" -C "$tmp" dy 2>/dev/null; then
 		install_dy_cli "${tmp}/dy"
 	else
 		install_dy_cli ""
 	fi
 	return 0
+}
+
+packaging_github_raw() {
+	repo="${dockyrd_GITHUB_REPO:-Joeydekruis/dockyrd}"
+	ref="${dockyrd_INSTALL_REF:-development}"
+	printf 'https://raw.githubusercontent.com/%s/%s/packaging' "$repo" "$ref"
+}
+
+fetch_packaging_unit() {
+	name="$1"
+	dest="$2"
+	base=$(packaging_github_raw) || return 1
+	curl -sfL "${base}/${name}" -o "$dest"
 }
 
 resolve_unit_src() {
@@ -294,14 +315,22 @@ resolve_unit_src() {
 		printf '%s' "$local_path"
 		return 0
 	fi
-	repo="${dockyrd_GITHUB_REPO:-Joeydekruis/dockyrd}"
-	ref="${dockyrd_INSTALL_REF:-development}"
-	tmp=$(mktemp) || return 1
-	if ! curl -sfL "https://raw.githubusercontent.com/${repo}/${ref}/packaging/dockyrd.service" -o "$tmp"; then
-		rm -f "$tmp"
-		return 1
+	local_path="$script_dir/../packaging/dockyard.service"
+	if [ -f "$local_path" ]; then
+		printf '%s' "$local_path"
+		return 0
 	fi
-	printf '%s' "$tmp"
+	tmp=$(mktemp) || return 1
+	if fetch_packaging_unit dockyrd.service "$tmp"; then
+		printf '%s' "$tmp"
+		return 0
+	fi
+	if fetch_packaging_unit dockyard.service "$tmp"; then
+		printf '%s' "$tmp"
+		return 0
+	fi
+	rm -f "$tmp"
+	return 1
 }
 
 install_systemd() {
@@ -330,7 +359,13 @@ install_build_resilience() {
 		src="$script_dir/../packaging/$unit"
 		if [ -f "$src" ]; then
 			install -m 644 "$src" "/etc/systemd/system/$unit"
+			continue
 		fi
+		tmp=$(mktemp) || continue
+		if fetch_packaging_unit "$unit" "$tmp"; then
+			install -m 644 "$tmp" "/etc/systemd/system/$unit"
+		fi
+		rm -f "$tmp"
 	done
 	if [ -f /sys/fs/cgroup/cgroup.controllers ]; then
 		log "✓ cgroup v2 detected"
