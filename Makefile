@@ -7,7 +7,7 @@ site:
 	node scripts/build-public-site.mjs
 
 build: web-build
-	go build -ldflags "$(LDFLAGS)" -o bin/dockyard ./cmd/dockyard
+	go build -ldflags "$(LDFLAGS)" -o bin/dockyrd ./cmd/dockyard
 	go build -ldflags "$(LDFLAGS)" -o bin/dy ./cmd/dy
 
 web-build:
