@@ -14,7 +14,9 @@ func (rt *Runtime) resolveBuildx(ctx context.Context, buildLocation string) (bui
 	loc := strings.TrimSpace(strings.ToLower(buildLocation))
 	if loc == "" || loc == "local" {
 		if rt.Docker != nil {
-			_ = rt.Docker.EnsureBuildkit(ctx, rt.Cfg.DataDir)
+			if err := rt.Docker.EnsureBuildkit(ctx, rt.Cfg.DataDir); err != nil {
+				return "", "", false, fmt.Errorf("ensure buildkit: %w", err)
+			}
 		}
 		return build.LocalBuildxBuilder(), "local", false, nil
 	}
@@ -26,7 +28,9 @@ func (rt *Runtime) resolveBuildx(ctx context.Context, buildLocation string) (bui
 			return name, label, true, nil
 		}
 		if rt.Docker != nil {
-			_ = rt.Docker.EnsureBuildkit(ctx, rt.Cfg.DataDir)
+			if err := rt.Docker.EnsureBuildkit(ctx, rt.Cfg.DataDir); err != nil {
+				return "", "", false, fmt.Errorf("ensure buildkit: %w", err)
+			}
 		}
 		return build.LocalBuildxBuilder(), "local", false, nil
 	}

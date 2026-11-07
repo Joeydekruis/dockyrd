@@ -3,6 +3,7 @@ package docker
 import (
 	"context"
 	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -70,24 +71,28 @@ func (c *Client) EnsureBuildkit(ctx context.Context, dataDir string) error {
 			}
 		}
 	}
-	return ensureBuildxBuilder(ctx)
+	return ensureBuildxBuilder(ctx, cfgPath)
 }
 
-func ensureBuildxBuilder(ctx context.Context) error {
+func ensureBuildxBuilder(ctx context.Context, buildkitdConfig string) error {
 	name := strings.TrimSpace(os.Getenv("dockyrd_BUILDX_BUILDER"))
 	if name == "" {
 		name = BuildkitContainerName
 	}
+	cliEnv := append(os.Environ(), build.DockerCLIEnv()...)
 	check := exec.CommandContext(ctx, "docker", "buildx", "inspect", name)
-	check.Env = append(os.Environ(), build.DockerCLIEnv()...)
+	check.Env = cliEnv
 	if check.Run() == nil {
 		return nil
 	}
 	create := exec.CommandContext(ctx, "docker", "buildx", "create",
 		"--name", name,
 		"--driver", "docker-container",
-		BuildkitContainerName,
+		"--buildkitd-config", buildkitdConfig,
 	)
-	create.Env = append(os.Environ(), build.DockerCLIEnv()...)
-	return create.Run()
+	create.Env = cliEnv
+	if out, err := create.CombinedOutput(); err != nil {
+		return fmt.Errorf("buildx create %q: %w: %s", name, err, strings.TrimSpace(string(out)))
+	}
+	return nil
 }
