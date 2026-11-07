@@ -120,6 +120,7 @@ func (d apiDeps) handlePatchInstanceSettings(w http.ResponseWriter, r *http.Requ
 		}
 		panel.TerminalAllowHost = want
 	}
+	instance.EnsureACMEDefaults(ctx, d.q, d.cfg, &panel)
 	if err := instance.SavePanel(ctx, d.q, panel); err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "database error")
 		return

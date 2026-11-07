@@ -16,6 +16,7 @@ const (
 	legacyEnvListen     = "DOCKYARD_LISTEN"
 	legacyEnvPublicIPv4 = "DOCKYARD_PUBLIC_IPV4"
 	legacyEnvPublicURL  = "DOCKYARD_PUBLIC_URL"
+	legacyEnvAcmeEmail  = "DOCKYARD_ACME_EMAIL"
 )
 
 func applyLegacyEnvAliases(cfg *Config) {

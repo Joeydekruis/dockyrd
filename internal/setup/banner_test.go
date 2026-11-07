@@ -2,6 +2,7 @@ package setup
 
 import (
 	"bytes"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -52,6 +53,20 @@ func TestSetupBannerManualWhenNoIP(t *testing.T) {
 	if !strings.Contains(out, "http://<this-server-ip>:8000/setup?token=tok-123") {
 		t.Fatalf("expected manual template:\n%s", out)
 	}
+}
+
+func TestSetupBannerHTTPSDomainFromEnv(t *testing.T) {
+	t.Setenv("dockyrd_PUBLIC_URL", "https://panel.example.com")
+	var buf bytes.Buffer
+	exp := time.Date(2026, 11, 3, 23, 0, 0, 0, time.UTC)
+	writeSetupBanner(&buf, "abc-token", exp, ":8000", func() (string, bool) {
+		return "203.0.113.10", true
+	})
+	out := buf.String()
+	if !strings.Contains(out, "https://panel.example.com/setup?token=abc-token") {
+		t.Fatalf("expected HTTPS setup URL:\n%s", out)
+	}
+	_ = os.Unsetenv("dockyrd_PUBLIC_URL")
 }
 
 func TestSetupBannerLoopbackBind(t *testing.T) {

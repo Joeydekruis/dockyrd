@@ -123,11 +123,11 @@ func SyncFromDB(ctx context.Context, q *sqlc.Queries, cfg config.Config, dock *d
 	if err != nil {
 		return err
 	}
-	acmeEmail := strings.TrimSpace(panel.AcmeEmail)
+	acmeEmail := instance.EffectiveAcmeEmail(cfg, panel)
 	if acmeEmail == "" {
 		acmeEmail = "ops@localhost"
 	}
-	panelHost := instance.PanelHostname(panel.PublicURL)
+	panelHost := instance.PanelHostname(instance.EffectivePublicURL(cfg, panel))
 	panelUpstream := ""
 	if panelHost != "" {
 		panelUpstream = "127.0.0.1:" + cfg.ListenPort()

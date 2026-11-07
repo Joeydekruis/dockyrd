@@ -14,6 +14,9 @@ UNIT_SRC="${dockyrd_UNIT_SRC:-}"
 SKIP_SYSTEMD="${dockyrd_SKIP_SYSTEMD:-0}"
 SKIP_ROOT="${dockyrd_SKIP_ROOT:-0}"
 dockyrd_SKIP_DOCKER_INSTALL="${dockyrd_SKIP_DOCKER_INSTALL:-0}"
+INSTALL_DASHBOARD_DOMAIN=""
+INSTALL_ACME_EMAIL=""
+ENV_FILE="${dockyrd_ENV_FILE:-}"
 
 log() {
 	printf '%s\n' "$*"
@@ -48,12 +51,131 @@ preflight() {
 	fi
 }
 
+normalize_public_url() {
+	domain="$1"
+	case "$domain" in
+	"") return 1 ;;
+	http://* | https://*) printf '%s' "$domain" ;;
+	*) printf 'https://%s' "$domain" ;;
+	esac
+}
+
 parse_args() {
-	for arg in "$@"; do
-		case "$arg" in
-		--no-docker-install) dockyrd_SKIP_DOCKER_INSTALL=1 ;;
+	while [ $# -gt 0 ]; do
+		case "$1" in
+		--no-docker-install)
+			dockyrd_SKIP_DOCKER_INSTALL=1
+			shift
+			;;
+		--version)
+			shift
+			dockyrd_VERSION="${1:-}"
+			[ -n "$dockyrd_VERSION" ] || {
+				log "--version requires a value" >&2
+				exit 1
+			}
+			shift
+			;;
+		--dashboard-domain)
+			shift
+			INSTALL_DASHBOARD_DOMAIN="${1:-}"
+			[ -n "$INSTALL_DASHBOARD_DOMAIN" ] || {
+				log "--dashboard-domain requires a hostname" >&2
+				exit 1
+			}
+			shift
+			;;
+		--acme-email)
+			shift
+			INSTALL_ACME_EMAIL="${1:-}"
+			[ -n "$INSTALL_ACME_EMAIL" ] || {
+				log "--acme-email requires an email address" >&2
+				exit 1
+			}
+			shift
+			;;
+		--force) shift ;;
+		-*)
+			log "Unknown option: $1" >&2
+			exit 1
+			;;
+		*) break ;;
 		esac
 	done
+}
+
+resolve_env_file() {
+	if [ -n "$ENV_FILE" ]; then
+		printf '%s' "$ENV_FILE"
+		return 0
+	fi
+	if [ -n "$CONFIG_DIR" ]; then
+		printf '%s/dockyrd.env' "$CONFIG_DIR"
+		return 0
+	fi
+	printf '%s' "/etc/dockyrd/dockyrd.env"
+}
+
+load_install_env() {
+	env_path=$(resolve_env_file)
+	if [ -f "$env_path" ]; then
+		set -a
+		# shellcheck disable=SC1090
+		. "$env_path"
+		set +a
+	fi
+}
+
+set_env_kv() {
+	file="$1"
+	key="$2"
+	value="$3"
+	tmp="${file}.tmp.$$"
+	mkdir -p "$(dirname "$file")"
+	touch "$file"
+	chmod 600 "$file"
+	awk -v k="$key" -v v="$value" '
+		BEGIN { done = 0 }
+		$0 ~ "^" k "=" { print k "=" v; done = 1; next }
+		{ print }
+		END { if (!done) print k "=" v }
+	' "$file" >"$tmp"
+	mv "$tmp" "$file"
+}
+
+write_install_env() {
+	if [ "$SKIP_ROOT" = "1" ]; then
+		return 0
+	fi
+	if [ -z "$INSTALL_DASHBOARD_DOMAIN" ] && [ -z "$INSTALL_ACME_EMAIL" ]; then
+		return 0
+	fi
+	env_path=$(resolve_env_file)
+	public_url=""
+	if [ -n "$INSTALL_DASHBOARD_DOMAIN" ]; then
+		public_url=$(normalize_public_url "$INSTALL_DASHBOARD_DOMAIN") || exit 1
+		set_env_kv "$env_path" "dockyrd_PUBLIC_URL" "$public_url"
+	fi
+	if [ -n "$INSTALL_ACME_EMAIL" ]; then
+		set_env_kv "$env_path" "dockyrd_ACME_EMAIL" "$INSTALL_ACME_EMAIL"
+	fi
+	log "✓ Wrote installer edge settings to $env_path"
+}
+
+maybe_open_firewall() {
+	if [ "$SKIP_ROOT" = "1" ]; then
+		return 0
+	fi
+	if ! command -v ufw >/dev/null 2>&1; then
+		return 0
+	fi
+	if ! ufw status 2>/dev/null | grep -q "Status: active"; then
+		return 0
+	fi
+	for rule in 22/tcp 80/tcp 443/tcp 8000/tcp; do
+		ufw allow "$rule" >/dev/null 2>&1 || true
+	done
+	log "✓ Opened UFW ports 22, 80, 443, 8000 (UFW is active)"
 }
 
 docker_daemon_ready() {
@@ -406,6 +528,7 @@ EOF
 }
 
 run_init() {
+	load_install_env
 	dockyrd_CONFIG_DIR="$CONFIG_DIR" dockyrd_DATA_DIR="$DATA_DIR" \
 		"$BIN_DEST" init
 }
@@ -417,9 +540,12 @@ main() {
 	preflight
 	ensure_docker
 	ensure_paths
+	write_install_env
+	load_install_env
 	install_binary
 	run_init
 	install_systemd
+	maybe_open_firewall
 	if [ "$SKIP_SYSTEMD" != "1" ] && command -v systemctl >/dev/null 2>&1; then
 		systemctl restart dockyrd.service || systemctl start dockyrd.service
 		verify_service_healthy

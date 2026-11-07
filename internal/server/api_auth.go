@@ -18,6 +18,7 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
 	"github.com/Joeydekruis/dockyrd/internal/docker"
 	"github.com/Joeydekruis/dockyrd/internal/events"
+	"github.com/Joeydekruis/dockyrd/internal/instance"
 	"github.com/Joeydekruis/dockyrd/internal/notify"
 	"github.com/Joeydekruis/dockyrd/internal/setup"
 )
@@ -42,10 +43,13 @@ type loginRequest struct {
 }
 
 type setupRequest struct {
-	Token    string `json:"token"`
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Token          string  `json:"token"`
+	Name           string  `json:"name"`
+	Email          string  `json:"email"`
+	Password       string  `json:"password"`
+	PublicURL      *string `json:"public_url"`
+	AcmeEmail      *string `json:"acme_email"`
+	WildcardDomain *string `json:"wildcard_domain"`
 }
 
 type userResponse struct {
@@ -271,6 +275,26 @@ func (d apiDeps) handleSetup(w http.ResponseWriter, r *http.Request) {
 	if err := d.startSession(w, r, userID, true); err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "session error")
 		return
+	}
+	if body.PublicURL != nil || body.AcmeEmail != nil || body.WildcardDomain != nil {
+		panel, perr := instance.LoadPanel(ctx, d.q)
+		if perr != nil {
+			writeJSONError(w, http.StatusInternalServerError, "database error")
+			return
+		}
+		prev := panel
+		acme := body.AcmeEmail
+		if acme == nil && body.PublicURL != nil && strings.TrimSpace(*body.PublicURL) != "" {
+			email := body.Email
+			acme = &email
+		}
+		applyInstancePanelPatch(&panel, prev, body.WildcardDomain, body.PublicURL, acme, nil)
+		instance.EnsureACMEDefaults(ctx, d.q, d.cfg, &panel)
+		if err := instance.SavePanel(ctx, d.q, panel); err != nil {
+			writeJSONError(w, http.StatusInternalServerError, "database error")
+			return
+		}
+		d.syncEdgeProxy(ctx)
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"ok": true})
 }

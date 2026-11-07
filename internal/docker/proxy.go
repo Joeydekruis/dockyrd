@@ -132,8 +132,22 @@ func proxyBootstrapJSON() ([]byte, error) {
 			"http": map[string]any{
 				"servers": map[string]any{
 					"bootstrap": map[string]any{
-						"listen": []string{":8080"},
+						"listen": []string{":80", ":443"},
 						"routes": []any{},
+					},
+				},
+			},
+			"tls": map[string]any{
+				"automation": map[string]any{
+					"policies": []any{
+						map[string]any{
+							"issuers": []any{
+								map[string]any{
+									"module": "acme",
+									"email":  "ops@localhost",
+								},
+							},
+						},
 					},
 				},
 			},

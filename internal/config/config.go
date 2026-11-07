@@ -21,6 +21,7 @@ const (
 	envListen        = "dockyrd_LISTEN"
 	envPublicIPv4    = "dockyrd_PUBLIC_IPV4"
 	envPublicURL     = "dockyrd_PUBLIC_URL"
+	envAcmeEmail     = "dockyrd_ACME_EMAIL"
 )
 
 // Config holds process-level paths and network binding.
@@ -186,6 +187,15 @@ func (c Config) PublicURL() string {
 	}
 	for len(v) > 0 && v[len(v)-1] == '/' {
 		v = v[:len(v)-1]
+	}
+	return v
+}
+
+// AcmeEmail is the Let's Encrypt contact when instance settings have no ACME email yet.
+func (c Config) AcmeEmail() string {
+	v := strings.TrimSpace(os.Getenv(envAcmeEmail))
+	if v == "" {
+		v = strings.TrimSpace(os.Getenv(legacyEnvAcmeEmail))
 	}
 	return v
 }

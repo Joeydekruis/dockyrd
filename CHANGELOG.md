@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.7.6] - 2026-11-07
+
+_Finished: 2026-11-07_
+
+### Fixed
+
+- **Custom dashboard domain HTTPS on fresh VPS** — `install.sh` supports `--dashboard-domain` and `--acme-email` (writes `dockyrd.env`); `dy-proxy` uses `dockyrd_PUBLIC_URL` / `dockyrd_ACME_EMAIL` until instance settings exist; Caddy bootstrap binds `:80`/`:443` immediately; UFW opens 22/80/443/8000 when active
+- **Setup / Server settings** — ACME email defaults from owner account when saving a dashboard URL; setup API can set `public_url` in one step; setup wizard sends ACME email with custom domain
+
 ## [0.7.5] - 2026-11-07
 
 _Finished: 2026-11-07_

@@ -59,6 +59,7 @@ export function SetupClient() {
       if (dashboardUrl.trim() || appsDomain.trim()) {
         await patchInstanceSettings({
           public_url: dashboardUrl.trim() || undefined,
+          acme_email: dashboardUrl.trim() ? email.trim() : undefined,
           wildcard_domain: appsDomain.trim() || undefined,
         });
         if (appsDomain.trim()) {

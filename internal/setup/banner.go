@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Joeydekruis/dockyrd/internal/instance"
 	"github.com/Joeydekruis/dockyrd/internal/netutil"
 )
 
@@ -73,13 +74,20 @@ func writeSetupBanner(w io.Writer, token string, expiresAt time.Time, listen str
 	fmt.Fprintln(w, "✓ dockyrd initialized.")
 	port := listenPort(listen)
 	mode, host := resolveBannerDisplay(listen, detect)
+	panelHost := instance.PanelHostname(installerPublicURL())
 	fmt.Fprintln(w)
+	if panelHost != "" {
+		fmt.Fprintf(w, "  Setup URL:  https://%s/setup?token=%s\n", panelHost, token)
+		fmt.Fprintln(w, "  (DNS must already point at this server; ACME needs ports 80 and 443 open.)")
+	}
 	switch mode {
 	case bannerLoopback:
 		fmt.Fprintf(w, "  Setup token:  %s\n", token)
 		fmt.Fprintf(w, "  Open:  http://127.0.0.1:%s/setup?token=%s\n", port, token)
 	case bannerDirectURL:
-		fmt.Fprintf(w, "  Setup URL:  http://%s:%s/setup?token=%s\n", host, port, token)
+		if panelHost == "" {
+			fmt.Fprintf(w, "  Setup URL:  http://%s:%s/setup?token=%s\n", host, port, token)
+		}
 	case bannerManual:
 		fmt.Fprintf(w, "  Setup token:  %s\n", token)
 		fmt.Fprintf(w, "  Open in your browser:  http://<this-server-ip>:%s/setup?token=%s\n", port, token)
@@ -87,6 +95,15 @@ func writeSetupBanner(w io.Writer, token string, expiresAt time.Time, listen str
 	}
 	fmt.Fprintf(w, "  Token valid until %s UTC (single use).\n", expiresAt.Format(time.RFC3339))
 	fmt.Fprintln(w, "  Lost it?  dockyrd setup-token")
+}
+
+func installerPublicURL() string {
+	for _, key := range []string{"dockyrd_PUBLIC_URL", "DOCKYARD_PUBLIC_URL"} {
+		if v := strings.TrimSpace(os.Getenv(key)); v != "" {
+			return v
+		}
+	}
+	return ""
 }
 
 // PrintInitBanner writes the post-install message to stdout.

@@ -214,6 +214,49 @@ func trimSlash(s string) string {
 	return s
 }
 
+// EffectivePublicURL prefers instance settings, then installer env (dockyrd_PUBLIC_URL).
+func EffectivePublicURL(cfg config.Config, panel Panel) string {
+	if u := strings.TrimSpace(panel.PublicURL); u != "" {
+		return trimSlash(u)
+	}
+	return trimSlash(cfg.PublicURL())
+}
+
+// EffectiveAcmeEmail prefers instance settings, then installer env (dockyrd_ACME_EMAIL).
+func EffectiveAcmeEmail(cfg config.Config, panel Panel) string {
+	if e := strings.TrimSpace(panel.AcmeEmail); e != "" {
+		return e
+	}
+	return strings.TrimSpace(cfg.AcmeEmail())
+}
+
+// EnsureACMEDefaults sets AcmeEmail when PublicURL is configured but ACME email is still empty.
+func EnsureACMEDefaults(ctx context.Context, q *sqlc.Queries, cfg config.Config, panel *Panel) {
+	if panel == nil || strings.TrimSpace(panel.PublicURL) == "" {
+		return
+	}
+	if strings.TrimSpace(panel.AcmeEmail) != "" {
+		return
+	}
+	if e := strings.TrimSpace(cfg.AcmeEmail()); e != "" {
+		panel.AcmeEmail = e
+		return
+	}
+	users, err := q.ListUsers(ctx)
+	if err != nil {
+		return
+	}
+	for _, u := range users {
+		if u.Role != "owner" {
+			continue
+		}
+		if e := strings.TrimSpace(u.Email); e != "" {
+			panel.AcmeEmail = e
+			return
+		}
+	}
+}
+
 // PanelHostname returns the host part of Public URL for HTTPS routing (no port).
 func PanelHostname(publicURL string) string {
 	u := strings.TrimSpace(publicURL)
