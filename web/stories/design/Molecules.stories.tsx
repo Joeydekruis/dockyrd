@@ -21,7 +21,7 @@ import {
   StatCard,
   Tabs,
   TimeRangeToggle,
-} from "@/components/dockyrd/ui";
+} from "@/components/dockyard/ui";
 import { CatalogCanvas, CatalogGrid, CatalogRow } from "./catalog-layout";
 
 const meta = {

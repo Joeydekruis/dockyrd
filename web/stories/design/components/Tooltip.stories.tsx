@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ArrowUpRight, Copy } from "lucide-react";
-import { Button } from "@/components/dockyrd/ui/button";
-import { IconButton } from "@/components/dockyrd/ui/icon-button";
+import { Button } from "@/components/dockyard/ui/button";
+import { IconButton } from "@/components/dockyard/ui/icon-button";
 import {
   Tooltip,
   TooltipInlineIcon,
   type TooltipPlacement,
-} from "@/components/dockyrd/ui/tooltip";
+} from "@/components/dockyard/ui/tooltip";
 
 const meta = {
   title: "Design/Components/Tooltip",

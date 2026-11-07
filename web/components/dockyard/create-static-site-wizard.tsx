@@ -3,17 +3,17 @@
 import { GitBranch, Trash2 } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { StaticSiteCreateResult } from "@/components/dockyrd/static-site-create-progress-modal";
-import { Button } from "@/components/dockyrd/ui/button";
-import { Field } from "@/components/dockyrd/ui/field";
-import { IconButton } from "@/components/dockyrd/ui/icon-button";
-import { SearchSelectField } from "@/components/dockyrd/ui/search-select-field";
-import { SelectField } from "@/components/dockyrd/ui/select-field";
-import { Switch } from "@/components/dockyrd/ui/switch";
+import type { StaticSiteCreateResult } from "@/components/dockyard/static-site-create-progress-modal";
+import { Button } from "@/components/dockyard/ui/button";
+import { Field } from "@/components/dockyard/ui/field";
+import { IconButton } from "@/components/dockyard/ui/icon-button";
+import { SearchSelectField } from "@/components/dockyard/ui/search-select-field";
+import { SelectField } from "@/components/dockyard/ui/select-field";
+import { Switch } from "@/components/dockyard/ui/switch";
 import {
   WizardModalShell,
   type WizardStepDef,
-} from "@/components/dockyrd/ui/wizard-modal-shell";
+} from "@/components/dockyard/ui/wizard-modal-shell";
 import {
   createDeployment,
   createService,

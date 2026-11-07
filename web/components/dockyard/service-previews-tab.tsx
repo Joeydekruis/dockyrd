@@ -2,9 +2,9 @@
 
 import { ExternalLink, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { Button } from "@/components/dockyrd/ui/button";
-import { EmptyState } from "@/components/dockyrd/ui/empty-state";
-import { StatusBadge } from "@/components/dockyrd/ui/status-badge";
+import { Button } from "@/components/dockyard/ui/button";
+import { EmptyState } from "@/components/dockyard/ui/empty-state";
+import { StatusBadge } from "@/components/dockyard/ui/status-badge";
 import {
   deleteServicePreview,
   listServicePreviews,

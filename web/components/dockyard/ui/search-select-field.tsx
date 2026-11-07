@@ -4,7 +4,7 @@ import { forwardRef, useId } from "react";
 import {
   SearchSelect,
   type SearchSelectOption,
-} from "@/components/dockyrd/ui/search-select";
+} from "@/components/dockyard/ui/search-select";
 
 const labelClass = "mb-1 block font-mono text-[11px] uppercase tracking-widest";
 

@@ -1,8 +1,8 @@
-import { CommitChip } from "@/components/dockyrd/ui/commit-chip";
+import { CommitChip } from "@/components/dockyard/ui/commit-chip";
 import {
   StatusBadge,
   type StatusVariant,
-} from "@/components/dockyrd/ui/status-badge";
+} from "@/components/dockyard/ui/status-badge";
 
 type DeploymentRowProps = {
   name: string;

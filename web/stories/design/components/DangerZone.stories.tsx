@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { Button } from "@/components/dockyrd/ui/button";
-import { DangerZone } from "@/components/dockyrd/ui/danger-zone";
+import { Button } from "@/components/dockyard/ui/button";
+import { DangerZone } from "@/components/dockyard/ui/danger-zone";
 
 const meta = {
   title: "Design/Components/Danger zone",

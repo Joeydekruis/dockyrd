@@ -1,10 +1,10 @@
 "use client";
 
 import { type FormEvent, useState } from "react";
-import { AuthLayout } from "@/components/dockyrd/auth-layout";
-import { AuthServerResetHint } from "@/components/dockyrd/auth-server-reset-hint";
-import { AuthField } from "@/components/dockyrd/ui/auth-field";
-import { Button } from "@/components/dockyrd/ui/button";
+import { AuthLayout } from "@/components/dockyard/auth-layout";
+import { AuthServerResetHint } from "@/components/dockyard/auth-server-reset-hint";
+import { AuthField } from "@/components/dockyard/ui/auth-field";
+import { Button } from "@/components/dockyard/ui/button";
 import { requestPasswordReset } from "@/lib/api";
 
 export function ForgotPasswordClient() {

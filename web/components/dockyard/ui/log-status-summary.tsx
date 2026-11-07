@@ -1,4 +1,4 @@
-import { Chip } from "@/components/dockyrd/ui/chip";
+import { Chip } from "@/components/dockyard/ui/chip";
 
 type LogStatusSummaryProps = {
   counts: { "2xx"?: number; "3xx"?: number; "4xx"?: number; "5xx"?: number };

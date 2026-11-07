@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { Chip } from "@/components/dockyrd/ui/chip";
+import { Chip } from "@/components/dockyard/ui/chip";
 
 /** **Source:** `web/components/dockyrd/ui/chip.tsx` */
 const meta = {

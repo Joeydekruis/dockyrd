@@ -2,23 +2,23 @@
 
 import { ExternalLink } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { AddEnvVariableModal } from "@/components/dockyrd/add-env-variable-modal";
-import { DashboardShell } from "@/components/dockyrd/dashboard-shell";
-import { DockyrdPageLoading } from "@/components/dockyrd/dockyrd-page-loading";
-import { ServiceDomainsTab } from "@/components/dockyrd/service-domains-tab";
-import { ServiceSecurityTab } from "@/components/dockyrd/service-security-tab";
+import { AddEnvVariableModal } from "@/components/dockyard/add-env-variable-modal";
+import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
+import { ServiceDomainsTab } from "@/components/dockyard/service-domains-tab";
+import { ServiceSecurityTab } from "@/components/dockyard/service-security-tab";
 import {
   ServiceAccessLogsPanel,
   ServiceTrafficAnalyticsPanel,
-} from "@/components/dockyrd/service-traffic-panel";
-import { StaticSiteSettingsTab } from "@/components/dockyrd/static-site-settings-tab";
-import { Button } from "@/components/dockyrd/ui/button";
-import { EmptyState } from "@/components/dockyrd/ui/empty-state";
-import { EnvVarRow } from "@/components/dockyrd/ui/env-var-row";
-import { KeyValueRow } from "@/components/dockyrd/ui/key-value-row";
-import { StaticSiteDeploymentTable } from "@/components/dockyrd/ui/static-site-deployment-table";
-import { StatusBadge } from "@/components/dockyrd/ui/status-badge";
-import { Tabs } from "@/components/dockyrd/ui/tabs";
+} from "@/components/dockyard/service-traffic-panel";
+import { StaticSiteSettingsTab } from "@/components/dockyard/static-site-settings-tab";
+import { Button } from "@/components/dockyard/ui/button";
+import { EmptyState } from "@/components/dockyard/ui/empty-state";
+import { EnvVarRow } from "@/components/dockyard/ui/env-var-row";
+import { KeyValueRow } from "@/components/dockyard/ui/key-value-row";
+import { StaticSiteDeploymentTable } from "@/components/dockyard/ui/static-site-deployment-table";
+import { StatusBadge } from "@/components/dockyard/ui/status-badge";
+import { Tabs } from "@/components/dockyard/ui/tabs";
 import {
   createDeployment,
   type Deployment,

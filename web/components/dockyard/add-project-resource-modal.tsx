@@ -1,9 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Button } from "@/components/dockyrd/ui/button";
-import { Modal } from "@/components/dockyrd/ui/modal";
-import { SearchSelectField } from "@/components/dockyrd/ui/search-select-field";
+import { Button } from "@/components/dockyard/ui/button";
+import { Modal } from "@/components/dockyard/ui/modal";
+import { SearchSelectField } from "@/components/dockyard/ui/search-select-field";
 import { moveServiceToProject, type Project } from "@/lib/api";
 import {
   loadMovableResources,

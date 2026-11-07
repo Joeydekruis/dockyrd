@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { DashboardShell } from "@/components/dockyrd/dashboard-shell";
-import { Button } from "@/components/dockyrd/ui/button";
-import { Field } from "@/components/dockyrd/ui/field";
+import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { Button } from "@/components/dockyard/ui/button";
+import { Field } from "@/components/dockyard/ui/field";
 import {
   SettingsDetailBlock,
   SettingsEnabledStatus,
-} from "@/components/dockyrd/ui/settings-detail-block";
+} from "@/components/dockyard/ui/settings-detail-block";
 import {
   configureGarageBackupTarget,
   getServerBackupTarget,

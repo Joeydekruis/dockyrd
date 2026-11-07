@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { Breadcrumbs } from "@/components/dockyrd/ui/breadcrumbs";
+import { Breadcrumbs } from "@/components/dockyard/ui/breadcrumbs";
 
 const meta = {
   title: "Design/Components/Breadcrumbs",

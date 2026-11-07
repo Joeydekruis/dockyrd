@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
-import { RadioGroup } from "@/components/dockyrd/ui/radio-group";
+import { RadioGroup } from "@/components/dockyard/ui/radio-group";
 
 const options = [
   { value: "docker", label: "Dockerfile", description: "Build from repo root" },

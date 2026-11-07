@@ -3,7 +3,7 @@ import { useState } from "react";
 import {
   type TimeRange,
   TimeRangeToggle,
-} from "@/components/dockyrd/ui/time-range-toggle";
+} from "@/components/dockyard/ui/time-range-toggle";
 
 const meta = {
   title: "Design/Components/Time range toggle",

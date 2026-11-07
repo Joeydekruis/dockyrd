@@ -1,6 +1,6 @@
 "use client";
 
-import { Backdrop, ProgressBar } from "@/components/dockyrd/ui";
+import { Backdrop, ProgressBar } from "@/components/dockyard/ui";
 
 export type UpdateApplyPhase = "applying" | "restarting" | "complete" | "error";
 

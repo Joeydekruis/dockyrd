@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { LogStatusSummary } from "@/components/dockyrd/ui/log-status-summary";
+import { LogStatusSummary } from "@/components/dockyard/ui/log-status-summary";
 
 const meta = {
   title: "Design/Components/Log status summary",

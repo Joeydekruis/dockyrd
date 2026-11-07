@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { Divider } from "@/components/dockyrd/ui/divider";
+import { Divider } from "@/components/dockyard/ui/divider";
 
 /** **Source:** `web/components/dockyrd/ui/divider.tsx` */
 const meta = {

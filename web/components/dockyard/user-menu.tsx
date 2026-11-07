@@ -11,7 +11,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
-import { Avatar } from "@/components/dockyrd/ui/avatar";
+import { Avatar } from "@/components/dockyard/ui/avatar";
 import { logout, type MeResponse } from "@/lib/api";
 import { PUBLIC_DOCS_INTRO_URL } from "@/lib/public-links";
 

@@ -1,7 +1,7 @@
 import { CircleCheck, CircleX, LoaderCircle } from "lucide-react";
 import Link from "next/link";
-import { SettingsBranchPill } from "@/components/dockyrd/ui/settings-detail-block";
-import { StatusBadge } from "@/components/dockyrd/ui/status-badge";
+import { SettingsBranchPill } from "@/components/dockyard/ui/settings-detail-block";
+import { StatusBadge } from "@/components/dockyard/ui/status-badge";
 import type { Deployment } from "@/lib/api";
 import { formatTimeAgo } from "@/lib/resource-dashboard";
 import {

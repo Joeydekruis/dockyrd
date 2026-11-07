@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useEffect, useRef, useState } from "react";
-import { AuthLayout } from "@/components/dockyrd/auth-layout";
-import { AuthField } from "@/components/dockyrd/ui/auth-field";
-import { Button } from "@/components/dockyrd/ui/button";
+import { AuthLayout } from "@/components/dockyard/auth-layout";
+import { AuthField } from "@/components/dockyard/ui/auth-field";
+import { Button } from "@/components/dockyard/ui/button";
 import { getSetupStatus, login, probeAuthState, submitMfa } from "@/lib/api";
 
 export function SignInClient() {

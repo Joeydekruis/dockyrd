@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { AnnouncementBanner } from "@/components/dockyrd/ui/announcement-banner";
+import { AnnouncementBanner } from "@/components/dockyard/ui/announcement-banner";
 
 const meta = {
   title: "Design/Components/Announcement banner",

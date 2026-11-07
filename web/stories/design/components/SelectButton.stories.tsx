@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
-import { SelectButton } from "@/components/dockyrd/ui/select-button";
+import { SelectButton } from "@/components/dockyard/ui/select-button";
 
 const options = [
   { value: "prod", label: "Production" },

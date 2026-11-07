@@ -1,6 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import { Box, Database, Globe, HardDrive } from "lucide-react";
-import type { SearchSelectOption } from "@/components/dockyrd/ui/search-select";
+import type { SearchSelectOption } from "@/components/dockyard/ui/search-select";
 import {
   type ApplicationRow,
   type DatabaseRow,

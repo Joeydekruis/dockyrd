@@ -2,11 +2,11 @@
 
 import { Plus } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { DashboardShell } from "@/components/dockyrd/dashboard-shell";
-import { DockyrdPageLoading } from "@/components/dockyrd/dockyrd-page-loading";
-import { InviteTeamMemberModal } from "@/components/dockyrd/invite-team-member-modal";
-import { SettingsPageBody } from "@/components/dockyrd/settings-page-body";
-import { Button } from "@/components/dockyrd/ui/button";
+import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
+import { InviteTeamMemberModal } from "@/components/dockyard/invite-team-member-modal";
+import { SettingsPageBody } from "@/components/dockyard/settings-page-body";
+import { Button } from "@/components/dockyard/ui/button";
 import {
   type AuditEntry,
   listAuditLog,

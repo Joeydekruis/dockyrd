@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import {
   StatusBadge,
   type StatusVariant,
-} from "@/components/dockyrd/ui/status-badge";
+} from "@/components/dockyard/ui/status-badge";
 
 const variants: StatusVariant[] = ["ok", "warn", "err", "idle", "info"];
 

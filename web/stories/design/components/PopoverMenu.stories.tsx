@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { PopoverMenu } from "@/components/dockyrd/ui/popover-menu";
+import { PopoverMenu } from "@/components/dockyard/ui/popover-menu";
 
 const items = [
   { id: "edit", label: "Edit" },

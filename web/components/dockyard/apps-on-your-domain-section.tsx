@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { Button } from "@/components/dockyrd/ui/button";
-import { StatusBadge } from "@/components/dockyrd/ui/status-badge";
+import { Button } from "@/components/dockyard/ui/button";
+import { StatusBadge } from "@/components/dockyard/ui/status-badge";
 import {
   getInstanceSettings,
   type InstanceSettings,

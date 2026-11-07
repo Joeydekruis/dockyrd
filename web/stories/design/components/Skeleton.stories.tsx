@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { Skeleton } from "@/components/dockyrd/ui/skeleton";
+import { Skeleton } from "@/components/dockyard/ui/skeleton";
 
 /** **Source:** `web/components/dockyrd/ui/skeleton.tsx` */
 const meta = {

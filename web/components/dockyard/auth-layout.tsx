@@ -1,8 +1,8 @@
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { DockyrdLogo } from "@/components/dockyrd/dockyrd-logo";
-import { DockyrdMark } from "@/components/dockyrd/dockyrd-mark";
+import { DockyrdLogo } from "@/components/dockyard/dockyrd-logo";
+import { DockyrdMark } from "@/components/dockyard/dockyrd-mark";
 
 type AuthLayoutProps = {
   children: ReactNode;

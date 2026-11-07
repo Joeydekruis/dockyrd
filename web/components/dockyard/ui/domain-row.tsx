@@ -1,7 +1,7 @@
 import {
   StatusBadge,
   type StatusVariant,
-} from "@/components/dockyrd/ui/status-badge";
+} from "@/components/dockyard/ui/status-badge";
 
 type DomainRowProps = {
   hostname: string;

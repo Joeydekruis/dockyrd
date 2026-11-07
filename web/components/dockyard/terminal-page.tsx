@@ -6,12 +6,12 @@ import "@xterm/xterm/css/xterm.css";
 import { Settings } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
-import { DashboardShell } from "@/components/dockyrd/dashboard-shell";
-import { TerminalSettingsDialog } from "@/components/dockyrd/terminal-settings-dialog";
-import { Button } from "@/components/dockyrd/ui/button";
-import { Chip } from "@/components/dockyrd/ui/chip";
-import { EmptyState } from "@/components/dockyrd/ui/empty-state";
-import { PageHeader } from "@/components/dockyrd/ui/page-header";
+import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { TerminalSettingsDialog } from "@/components/dockyard/terminal-settings-dialog";
+import { Button } from "@/components/dockyard/ui/button";
+import { Chip } from "@/components/dockyard/ui/chip";
+import { EmptyState } from "@/components/dockyard/ui/empty-state";
+import { PageHeader } from "@/components/dockyard/ui/page-header";
 import {
   createTerminalSession,
   getMe,

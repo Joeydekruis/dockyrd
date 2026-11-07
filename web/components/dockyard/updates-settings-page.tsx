@@ -1,13 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { DashboardShell } from "@/components/dockyrd/dashboard-shell";
-import { SettingsPageBody } from "@/components/dockyrd/settings-page-body";
-import { Button } from "@/components/dockyrd/ui/button";
+import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { SettingsPageBody } from "@/components/dockyard/settings-page-body";
+import { Button } from "@/components/dockyard/ui/button";
 import {
   UpdateApplyingOverlay,
   type UpdateApplyPhase,
-} from "@/components/dockyrd/update-applying-overlay";
+} from "@/components/dockyard/update-applying-overlay";
 import {
   applydockyrdUpdate,
   getUpdatesStatus,

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ArrowRight } from "lucide-react";
-import { InlineLink } from "@/components/dockyrd/ui/inline-link";
+import { InlineLink } from "@/components/dockyard/ui/inline-link";
 
 const iconArgType = {
   control: "select" as const,

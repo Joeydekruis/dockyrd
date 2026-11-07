@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/dockyrd/ui/button";
+import { Button } from "@/components/dockyard/ui/button";
 import { getInstanceSettings, getMe } from "@/lib/api";
 
 const DISMISS_KEY = "dockyrd_apps_domain_nudge_dismissed";

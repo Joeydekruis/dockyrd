@@ -11,11 +11,11 @@ import {
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useState } from "react";
-import { AddConnectionModal } from "@/components/dockyrd/add-connection-modal";
-import { RemoveConnectionModal } from "@/components/dockyrd/remove-connection-modal";
-import { Button } from "@/components/dockyrd/ui/button";
-import { EmptyState } from "@/components/dockyrd/ui/empty-state";
-import { StatusBadge } from "@/components/dockyrd/ui/status-badge";
+import { AddConnectionModal } from "@/components/dockyard/add-connection-modal";
+import { RemoveConnectionModal } from "@/components/dockyard/remove-connection-modal";
+import { Button } from "@/components/dockyard/ui/button";
+import { EmptyState } from "@/components/dockyard/ui/empty-state";
+import { StatusBadge } from "@/components/dockyard/ui/status-badge";
 import {
   deleteServiceLink,
   listServiceLinks,

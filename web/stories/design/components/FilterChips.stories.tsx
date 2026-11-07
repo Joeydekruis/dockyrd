@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
-import { FilterChips } from "@/components/dockyrd/ui/filter-chips";
+import { FilterChips } from "@/components/dockyard/ui/filter-chips";
 
 const options = [
   { value: "all", label: "All" },

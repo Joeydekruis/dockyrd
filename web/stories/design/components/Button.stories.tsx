@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ArrowRight, Plus, X } from "lucide-react";
-import { Button, type ButtonVariant } from "@/components/dockyrd/ui/button";
+import { Button, type ButtonVariant } from "@/components/dockyard/ui/button";
 
 const iconArgType = {
   control: "select" as const,

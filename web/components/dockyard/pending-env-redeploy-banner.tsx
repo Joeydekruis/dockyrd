@@ -1,7 +1,7 @@
 "use client";
 
-import { Alert } from "@/components/dockyrd/ui/alert";
-import { Button } from "@/components/dockyrd/ui/button";
+import { Alert } from "@/components/dockyard/ui/alert";
+import { Button } from "@/components/dockyard/ui/button";
 
 type PendingEnvRedeployBannerProps = {
   onDeploy?: () => void;

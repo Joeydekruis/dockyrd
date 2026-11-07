@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { AddCard } from "@/components/dockyrd/ui/add-card";
+import { AddCard } from "@/components/dockyard/ui/add-card";
 
 /** **Source:** `web/components/dockyrd/ui/add-card.tsx` */
 const meta = {

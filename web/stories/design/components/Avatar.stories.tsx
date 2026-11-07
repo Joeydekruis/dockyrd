@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { Avatar } from "@/components/dockyrd/ui/avatar";
+import { Avatar } from "@/components/dockyard/ui/avatar";
 
 /** **Source:** `web/components/dockyrd/ui/avatar.tsx` */
 const meta = {

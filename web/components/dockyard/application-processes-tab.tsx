@@ -1,11 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Button } from "@/components/dockyrd/ui/button";
+import { Button } from "@/components/dockyard/ui/button";
 import {
   StatusBadge,
   type StatusVariant,
-} from "@/components/dockyrd/ui/status-badge";
+} from "@/components/dockyard/ui/status-badge";
 import { getServerContainers, type Service } from "@/lib/api";
 import { resourceStatusDisplay } from "@/lib/resource-dashboard";
 import {

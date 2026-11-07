@@ -1,4 +1,4 @@
-import { ApplicationDetailPage } from "@/components/dockyrd/application-detail-page";
+import { ApplicationDetailPage } from "@/components/dockyard/application-detail-page";
 
 export function generateStaticParams() {
   return [{ slug: "_" }];

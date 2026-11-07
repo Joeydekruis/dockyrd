@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { DockyrdCubeIcon } from "@/components/dockyrd/dockyrd-cube-icon";
+import { DockyrdCubeIcon } from "@/components/dockyard/dockyrd-cube-icon";
 
 const LOADER_CUBE_SLOTS = ["a", "b", "c", "d", "e"] as const;
 

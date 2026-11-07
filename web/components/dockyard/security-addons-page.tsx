@@ -1,12 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { DashboardShell } from "@/components/dockyrd/dashboard-shell";
-import { SecurityNav } from "@/components/dockyrd/security-nav";
-import { Button } from "@/components/dockyrd/ui/button";
-import { CodeBlock } from "@/components/dockyrd/ui/code-block";
-import { PageHeader } from "@/components/dockyrd/ui/page-header";
-import { StatusBadge } from "@/components/dockyrd/ui/status-badge";
+import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { SecurityNav } from "@/components/dockyard/security-nav";
+import { Button } from "@/components/dockyard/ui/button";
+import { CodeBlock } from "@/components/dockyard/ui/code-block";
+import { PageHeader } from "@/components/dockyard/ui/page-header";
+import { StatusBadge } from "@/components/dockyard/ui/status-badge";
 import {
   installSecurityAddon,
   listSecurityAddons,

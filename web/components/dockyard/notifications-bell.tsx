@@ -9,7 +9,7 @@ import {
   NotificationFilterPills,
   NotificationRow,
   NotificationsPanelHeader,
-} from "@/components/dockyrd/notifications-ui";
+} from "@/components/dockyard/notifications-ui";
 import {
   getInboxSummary,
   type InboxNotification,

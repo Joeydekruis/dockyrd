@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { TimeRange } from "@/components/dockyrd/ui/time-range-toggle";
+import type { TimeRange } from "@/components/dockyard/ui/time-range-toggle";
 import {
   ackEvent,
   type CleanupSummary,

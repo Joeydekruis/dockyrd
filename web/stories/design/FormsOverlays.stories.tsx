@@ -25,7 +25,7 @@ import {
   TextareaField,
   Tooltip,
   UploadDropzone,
-} from "@/components/dockyrd/ui";
+} from "@/components/dockyard/ui";
 import { CatalogCanvas, CatalogRow } from "./catalog-layout";
 
 const meta = {

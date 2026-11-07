@@ -6,23 +6,23 @@ import {
   dualAreaOption,
   horizontalStackOption,
   sparklineOption,
-} from "@/components/dockyrd/analytics/chart-options";
+} from "@/components/dockyard/analytics/chart-options";
 import {
   AnalyticsChartCard,
   type AnalyticsTabId,
   ViewDetailsLink,
-} from "@/components/dockyrd/analytics/use-analytics-data";
-import { BuildCapacityCard } from "@/components/dockyrd/build-capacity-card";
-import { Button } from "@/components/dockyrd/ui/button";
-import { Chip } from "@/components/dockyrd/ui/chip";
-import { EChart } from "@/components/dockyrd/ui/echart";
-import { FilterChips } from "@/components/dockyrd/ui/filter-chips";
-import { ProgressBar } from "@/components/dockyrd/ui/progress-bar";
+} from "@/components/dockyard/analytics/use-analytics-data";
+import { BuildCapacityCard } from "@/components/dockyard/build-capacity-card";
+import { Button } from "@/components/dockyard/ui/button";
+import { Chip } from "@/components/dockyard/ui/chip";
+import { EChart } from "@/components/dockyard/ui/echart";
+import { FilterChips } from "@/components/dockyard/ui/filter-chips";
+import { ProgressBar } from "@/components/dockyard/ui/progress-bar";
 import {
   ServerContainersTable,
   type ServerContainersTableRow,
-} from "@/components/dockyrd/ui/server-containers-table";
-import { StatCard } from "@/components/dockyrd/ui/stat-card";
+} from "@/components/dockyard/ui/server-containers-table";
+import { StatCard } from "@/components/dockyard/ui/stat-card";
 import { analyticsChartColors as c } from "@/lib/analytics-chart-theme";
 import {
   average,

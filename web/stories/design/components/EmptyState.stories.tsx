@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { EmptyState } from "@/components/dockyrd/ui/empty-state";
+import { EmptyState } from "@/components/dockyard/ui/empty-state";
 
 /** **Source:** `web/components/dockyrd/ui/empty-state.tsx` */
 const meta = {

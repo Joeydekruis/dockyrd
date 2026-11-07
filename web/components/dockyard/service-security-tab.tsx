@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
-import { Button } from "@/components/dockyrd/ui/button";
-import { EmptyState } from "@/components/dockyrd/ui/empty-state";
-import { RadioGroup } from "@/components/dockyrd/ui/radio-group";
-import { Switch } from "@/components/dockyrd/ui/switch";
+import { Button } from "@/components/dockyard/ui/button";
+import { EmptyState } from "@/components/dockyard/ui/empty-state";
+import { RadioGroup } from "@/components/dockyard/ui/radio-group";
+import { Switch } from "@/components/dockyard/ui/switch";
 import {
   clearServiceBasicAuth,
   getServiceSecurity,

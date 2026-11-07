@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { Spinner } from "@/components/dockyrd/ui/spinner";
+import { Spinner } from "@/components/dockyard/ui/spinner";
 
 const sizes = ["sm", "md"] as const;
 

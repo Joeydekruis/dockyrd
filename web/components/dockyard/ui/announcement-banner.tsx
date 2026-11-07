@@ -2,7 +2,7 @@
 
 import { ArrowRight, X } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Chip } from "@/components/dockyrd/ui/chip";
+import { Chip } from "@/components/dockyard/ui/chip";
 import { PUBLIC_SITE_ORIGIN } from "@/lib/public-links";
 
 const STORAGE_KEY = "dy_announcement_dismissed";

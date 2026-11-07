@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { Snackbar, SnackbarViewport } from "@/components/dockyrd/ui/snackbar";
+import { Snackbar, SnackbarViewport } from "@/components/dockyard/ui/snackbar";
 
 const meta = {
   title: "Design/Components/Snackbar",

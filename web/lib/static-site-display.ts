@@ -1,4 +1,4 @@
-import type { StatusVariant } from "@/components/dockyrd/ui/status-badge";
+import type { StatusVariant } from "@/components/dockyard/ui/status-badge";
 import type { Deployment, Service, ServiceDomain } from "@/lib/api";
 
 export type StaticSiteConfig = {

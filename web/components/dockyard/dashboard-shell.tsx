@@ -2,16 +2,16 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AppHeader } from "@/components/dockyrd/app-header";
+import { AppHeader } from "@/components/dockyard/app-header";
 import {
   CommandPalette,
   useCommandPalette,
-} from "@/components/dockyrd/command-palette";
-import { DockyrdPageLoading } from "@/components/dockyrd/dockyrd-page-loading";
-import { Sidebar } from "@/components/dockyrd/sidebar";
-import { BANNER_HEIGHT_PX, TopBar } from "@/components/dockyrd/top-bar";
-import { isAnnouncementDismissed } from "@/components/dockyrd/ui/announcement-banner";
-import { UpdateAvailableNotifier } from "@/components/dockyrd/update-available-modal";
+} from "@/components/dockyard/command-palette";
+import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
+import { Sidebar } from "@/components/dockyard/sidebar";
+import { BANNER_HEIGHT_PX, TopBar } from "@/components/dockyard/top-bar";
+import { isAnnouncementDismissed } from "@/components/dockyard/ui/announcement-banner";
+import { UpdateAvailableNotifier } from "@/components/dockyard/update-available-modal";
 import { getMe, type MeResponse } from "@/lib/api";
 import { isAccountSettingsPath, isSettingsPath } from "@/lib/nav";
 import { SnackbarProvider } from "@/lib/snackbar-context";

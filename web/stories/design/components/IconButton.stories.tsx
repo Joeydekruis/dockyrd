@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Settings, X } from "lucide-react";
-import { IconButton } from "@/components/dockyrd/ui/icon-button";
+import { IconButton } from "@/components/dockyard/ui/icon-button";
 
 /** **Source:** `web/components/dockyrd/ui/icon-button.tsx` (`.dockyrd-icon-btn`) */
 const meta = {

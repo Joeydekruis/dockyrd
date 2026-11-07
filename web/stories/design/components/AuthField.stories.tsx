@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { AuthField } from "@/components/dockyrd/ui/auth-field";
+import { AuthField } from "@/components/dockyard/ui/auth-field";
 
 const meta = {
   title: "Design/Components/Auth field",

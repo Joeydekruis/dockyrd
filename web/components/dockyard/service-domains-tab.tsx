@@ -2,16 +2,16 @@
 
 import { Plus } from "lucide-react";
 import { type CSSProperties, useEffect, useState } from "react";
-import { AddCustomDomainModal } from "@/components/dockyrd/add-custom-domain-modal";
-import { AppsDomainNudge } from "@/components/dockyrd/apps-domain-nudge";
-import { DomainDnsRecordsModal } from "@/components/dockyrd/domain-dns-records-modal";
-import { Button } from "@/components/dockyrd/ui/button";
-import { ConfirmDialog } from "@/components/dockyrd/ui/confirm-dialog";
+import { AddCustomDomainModal } from "@/components/dockyard/add-custom-domain-modal";
+import { AppsDomainNudge } from "@/components/dockyard/apps-domain-nudge";
+import { DomainDnsRecordsModal } from "@/components/dockyard/domain-dns-records-modal";
+import { Button } from "@/components/dockyard/ui/button";
+import { ConfirmDialog } from "@/components/dockyard/ui/confirm-dialog";
 import {
   PopoverMenu,
   type PopoverMenuItem,
-} from "@/components/dockyrd/ui/popover-menu";
-import { StatusBadge } from "@/components/dockyrd/ui/status-badge";
+} from "@/components/dockyard/ui/popover-menu";
+import { StatusBadge } from "@/components/dockyard/ui/status-badge";
 import {
   createServiceDomain,
   deleteServiceDomain,

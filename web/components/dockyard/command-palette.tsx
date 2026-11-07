@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { SearchPalette } from "@/components/dockyrd/ui/search-palette";
+import { SearchPalette } from "@/components/dockyard/ui/search-palette";
 import { globalSearch, type SearchResult } from "@/lib/api";
 import { palettePages } from "@/lib/nav";
 

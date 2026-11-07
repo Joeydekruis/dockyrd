@@ -1,6 +1,6 @@
 import { CheckCircle2, CloudUpload, Loader2, XCircle } from "lucide-react";
 import type { ReactNode } from "react";
-import { Button } from "@/components/dockyrd/ui/button";
+import { Button } from "@/components/dockyard/ui/button";
 
 export type UploadDropzoneState = "idle" | "uploading" | "done" | "error";
 

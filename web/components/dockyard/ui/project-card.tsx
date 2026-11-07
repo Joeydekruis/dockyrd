@@ -1,9 +1,9 @@
 import Link from "next/link";
-import { Chip } from "@/components/dockyrd/ui/chip";
+import { Chip } from "@/components/dockyard/ui/chip";
 import {
   StatusBadge,
   type StatusVariant,
-} from "@/components/dockyrd/ui/status-badge";
+} from "@/components/dockyard/ui/status-badge";
 
 type ProjectCardProps = {
   name: string;

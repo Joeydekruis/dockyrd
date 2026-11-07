@@ -3,8 +3,8 @@
 import type { LucideIcon } from "lucide-react";
 import { Box, Database, Globe, HardDrive, Layers } from "lucide-react";
 import Link from "next/link";
-import { CommitChip } from "@/components/dockyrd/ui/commit-chip";
-import { StatusBadge } from "@/components/dockyrd/ui/status-badge";
+import { CommitChip } from "@/components/dockyard/ui/commit-chip";
+import { StatusBadge } from "@/components/dockyard/ui/status-badge";
 import type { Deployment, Service } from "@/lib/api";
 import {
   resourceKindMeta,

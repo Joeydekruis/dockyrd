@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Button } from "@/components/dockyrd/ui/button";
-import { Modal } from "@/components/dockyrd/ui/modal";
-import { Switch } from "@/components/dockyrd/ui/switch";
+import { Button } from "@/components/dockyard/ui/button";
+import { Modal } from "@/components/dockyard/ui/modal";
+import { Switch } from "@/components/dockyard/ui/switch";
 
 type RemoveConnectionModalProps = {
   open: boolean;

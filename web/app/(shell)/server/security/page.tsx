@@ -1,4 +1,4 @@
-import { SecurityOverviewPage } from "@/components/dockyrd/security-overview-page";
+import { SecurityOverviewPage } from "@/components/dockyard/security-overview-page";
 
 export default function ServerSecurityPage() {
   return <SecurityOverviewPage />;

@@ -3,30 +3,30 @@
 import { Monitor } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ApplicationConnectionsFlow } from "@/components/dockyrd/application-connections-flow";
-import { ApplicationEnvironmentTab } from "@/components/dockyrd/application-environment-tab";
-import { ApplicationProcessesTab } from "@/components/dockyrd/application-processes-tab";
-import { ApplicationSettingsTab } from "@/components/dockyrd/application-settings-tab";
-import { DashboardShell } from "@/components/dockyrd/dashboard-shell";
-import { DeploymentResourceStrip } from "@/components/dockyrd/deployment-resource-strip";
-import { DockyrdPageLoading } from "@/components/dockyrd/dockyrd-page-loading";
-import { PendingEnvRedeployBanner } from "@/components/dockyrd/pending-env-redeploy-banner";
-import { ServiceDomainsTab } from "@/components/dockyrd/service-domains-tab";
-import { ServicePreviewsTab } from "@/components/dockyrd/service-previews-tab";
-import { ServiceSecurityTab } from "@/components/dockyrd/service-security-tab";
+import { ApplicationConnectionsFlow } from "@/components/dockyard/application-connections-flow";
+import { ApplicationEnvironmentTab } from "@/components/dockyard/application-environment-tab";
+import { ApplicationProcessesTab } from "@/components/dockyard/application-processes-tab";
+import { ApplicationSettingsTab } from "@/components/dockyard/application-settings-tab";
+import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { DeploymentResourceStrip } from "@/components/dockyard/deployment-resource-strip";
+import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
+import { PendingEnvRedeployBanner } from "@/components/dockyard/pending-env-redeploy-banner";
+import { ServiceDomainsTab } from "@/components/dockyard/service-domains-tab";
+import { ServicePreviewsTab } from "@/components/dockyard/service-previews-tab";
+import { ServiceSecurityTab } from "@/components/dockyard/service-security-tab";
 import {
   ServiceAccessLogsPanel,
   ServiceTrafficAnalyticsPanel,
-} from "@/components/dockyrd/service-traffic-panel";
-import { ApplicationDeploymentTable } from "@/components/dockyrd/ui/application-deployment-table";
-import { Button } from "@/components/dockyrd/ui/button";
-import { EmptyState } from "@/components/dockyrd/ui/empty-state";
+} from "@/components/dockyard/service-traffic-panel";
+import { ApplicationDeploymentTable } from "@/components/dockyard/ui/application-deployment-table";
+import { Button } from "@/components/dockyard/ui/button";
+import { EmptyState } from "@/components/dockyard/ui/empty-state";
 import {
   SettingsBranchPill,
   SettingsCopyPill,
-} from "@/components/dockyrd/ui/settings-detail-block";
-import { StatusBadge } from "@/components/dockyrd/ui/status-badge";
-import { Tabs } from "@/components/dockyrd/ui/tabs";
+} from "@/components/dockyard/ui/settings-detail-block";
+import { StatusBadge } from "@/components/dockyard/ui/status-badge";
+import { Tabs } from "@/components/dockyard/ui/tabs";
 import {
   createDeployment,
   type Deployment,

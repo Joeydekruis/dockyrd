@@ -2,10 +2,10 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { PathnameContext } from "next/dist/shared/lib/hooks-client-context.shared-runtime.js";
 import type { ReactNode } from "react";
 import { useState } from "react";
-import { AppHeader } from "@/components/dockyrd/app-header";
-import { AuthLayout } from "@/components/dockyrd/auth-layout";
-import { Sidebar } from "@/components/dockyrd/sidebar";
-import { TopBar } from "@/components/dockyrd/top-bar";
+import { AppHeader } from "@/components/dockyard/app-header";
+import { AuthLayout } from "@/components/dockyard/auth-layout";
+import { Sidebar } from "@/components/dockyard/sidebar";
+import { TopBar } from "@/components/dockyard/top-bar";
 import {
   Button,
   ChartPanel,
@@ -19,7 +19,7 @@ import {
   ServerHealthCard,
   SessionRow,
   TemplateCard,
-} from "@/components/dockyrd/ui";
+} from "@/components/dockyard/ui";
 import { CatalogCanvas, CatalogGrid, CatalogRow } from "./catalog-layout";
 
 const meta = {

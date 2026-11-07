@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
-import { SearchSelectField } from "@/components/dockyrd/ui/search-select-field";
+import { SearchSelectField } from "@/components/dockyard/ui/search-select-field";
 
 const repoOptions = [
   { value: "acme/marketing", label: "acme/marketing" },

@@ -3,7 +3,7 @@ import { useState } from "react";
 import {
   SearchPalette,
   type SearchResultRow,
-} from "@/components/dockyrd/ui/search-palette";
+} from "@/components/dockyard/ui/search-palette";
 
 const demoResults: SearchResultRow[] = [
   { kind: "page", label: "Dashboard", href: "/" },

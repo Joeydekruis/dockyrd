@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { LogLine } from "@/components/dockyrd/ui/log-line";
+import { LogLine } from "@/components/dockyard/ui/log-line";
 
 /** **Source:** `web/components/dockyrd/ui/log-line.tsx` */
 const meta = {

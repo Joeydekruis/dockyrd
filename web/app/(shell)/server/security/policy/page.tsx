@@ -1,4 +1,4 @@
-import { SecurityPolicyPage } from "@/components/dockyrd/security-policy-page";
+import { SecurityPolicyPage } from "@/components/dockyard/security-policy-page";
 
 export default function ServerSecurityPolicyRoute() {
   return <SecurityPolicyPage />;

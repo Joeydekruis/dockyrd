@@ -2,21 +2,21 @@
 
 import { HardDrive, Plus } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CreateBucketModal } from "@/components/dockyrd/create-bucket-modal";
-import { DashboardShell } from "@/components/dockyrd/dashboard-shell";
-import { DockyrdPageLoading } from "@/components/dockyrd/dockyrd-page-loading";
+import { CreateBucketModal } from "@/components/dockyard/create-bucket-modal";
+import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import {
   type ResourceProvisionContext,
   ResourceProvisioningModal,
-} from "@/components/dockyrd/resource-provisioning-modal";
-import { Button } from "@/components/dockyrd/ui/button";
-import { HeroPromoCard } from "@/components/dockyrd/ui/hero-promo-card";
-import { PageHeader } from "@/components/dockyrd/ui/page-header";
-import { ResourceListAddLink } from "@/components/dockyrd/ui/resource-list-add-link";
-import { ResourceListSection } from "@/components/dockyrd/ui/resource-list-section";
-import { ResourceRow } from "@/components/dockyrd/ui/resource-row";
-import { StatCard } from "@/components/dockyrd/ui/stat-card";
-import { TemplateCard } from "@/components/dockyrd/ui/template-card";
+} from "@/components/dockyard/resource-provisioning-modal";
+import { Button } from "@/components/dockyard/ui/button";
+import { HeroPromoCard } from "@/components/dockyard/ui/hero-promo-card";
+import { PageHeader } from "@/components/dockyard/ui/page-header";
+import { ResourceListAddLink } from "@/components/dockyard/ui/resource-list-add-link";
+import { ResourceListSection } from "@/components/dockyard/ui/resource-list-section";
+import { ResourceRow } from "@/components/dockyard/ui/resource-row";
+import { StatCard } from "@/components/dockyard/ui/stat-card";
+import { TemplateCard } from "@/components/dockyard/ui/template-card";
 import {
   getStorageStatus,
   installGarage,

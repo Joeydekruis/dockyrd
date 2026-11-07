@@ -1,8 +1,8 @@
 "use client";
 
 import { Copy } from "lucide-react";
-import { CodeInline } from "@/components/dockyrd/ui/code-inline";
-import { IconButton } from "@/components/dockyrd/ui/icon-button";
+import { CodeInline } from "@/components/dockyard/ui/code-inline";
+import { IconButton } from "@/components/dockyard/ui/icon-button";
 import { useCopyToClipboard } from "@/lib/snackbar-context";
 
 type DnsRecordBlockProps = {

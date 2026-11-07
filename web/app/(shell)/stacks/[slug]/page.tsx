@@ -1,4 +1,4 @@
-import { ComposeDetailPage } from "@/components/dockyrd/compose-detail-page";
+import { ComposeDetailPage } from "@/components/dockyard/compose-detail-page";
 
 export function generateStaticParams() {
   return [{ slug: "_" }];

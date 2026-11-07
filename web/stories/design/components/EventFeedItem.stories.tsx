@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { EventFeedItem } from "@/components/dockyrd/ui/event-feed-item";
+import { EventFeedItem } from "@/components/dockyard/ui/event-feed-item";
 
 /** **Source:** `web/components/dockyrd/ui/event-feed-item.tsx` */
 const meta = {

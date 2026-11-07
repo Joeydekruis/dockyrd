@@ -1,4 +1,4 @@
-import type { StatusVariant } from "@/components/dockyrd/ui/status-badge";
+import type { StatusVariant } from "@/components/dockyard/ui/status-badge";
 import type { Project, Service } from "@/lib/api";
 import { formatTimeAgo } from "@/lib/resource-dashboard";
 

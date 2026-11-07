@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "@/components/dockyrd/ui/button";
+import { Button } from "@/components/dockyard/ui/button";
 import {
   patchServicePreviewConfig,
   type Service,

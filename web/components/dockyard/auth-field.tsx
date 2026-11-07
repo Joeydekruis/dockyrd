@@ -1,1 +1,1 @@
-export { AuthField } from "@/components/dockyrd/ui/auth-field";
+export { AuthField } from "@/components/dockyard/ui/auth-field";

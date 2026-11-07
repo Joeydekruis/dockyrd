@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
-import { Button } from "@/components/dockyrd/ui/button";
-import { Modal } from "@/components/dockyrd/ui/modal";
+import { Button } from "@/components/dockyard/ui/button";
+import { Modal } from "@/components/dockyard/ui/modal";
 
 const meta = {
   title: "Design/Components/Modal",

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { CodeInline } from "@/components/dockyrd/ui/code-inline";
+import { CodeInline } from "@/components/dockyard/ui/code-inline";
 
 /** **Source:** `web/components/dockyrd/ui/code-inline.tsx` */
 const meta = {

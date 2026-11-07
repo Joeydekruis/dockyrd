@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { TokenSwatch } from "@/components/dockyrd/ui/token-swatch";
+import { TokenSwatch } from "@/components/dockyard/ui/token-swatch";
 
 /** **Source:** `web/components/dockyrd/ui/token-swatch.tsx` */
 const meta = {

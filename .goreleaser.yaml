@@ -10,7 +10,7 @@ before:
 
 builds:
   - id: dockyrd
-    main: ./cmd/dockyrd
+    main: ./cmd/dockyard
     binary: dockyrd
     env:
       - CGO_ENABLED=0

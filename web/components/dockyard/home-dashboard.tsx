@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { DashboardShell } from "@/components/dockyrd/dashboard-shell";
+import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import { listApplications, listDatabases, listProjects } from "@/lib/api";
 
 export function HomeDashboard() {

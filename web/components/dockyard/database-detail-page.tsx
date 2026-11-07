@@ -2,18 +2,18 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { DashboardShell } from "@/components/dockyrd/dashboard-shell";
-import { DatabaseConnectionCards } from "@/components/dockyrd/database-connection-cards";
-import { DatabaseDetailSettings } from "@/components/dockyrd/database-detail-settings";
-import { DatabaseQueryPanel } from "@/components/dockyrd/database-query-panel";
-import { DockyrdPageLoading } from "@/components/dockyrd/dockyrd-page-loading";
-import { ServiceConnectedApplicationsPanel } from "@/components/dockyrd/service-connected-applications-panel";
-import { ServiceLogsPanel } from "@/components/dockyrd/service-logs-panel";
-import { Button } from "@/components/dockyrd/ui/button";
-import { Chip } from "@/components/dockyrd/ui/chip";
-import { KeyValueRow } from "@/components/dockyrd/ui/key-value-row";
-import { StatusBadge } from "@/components/dockyrd/ui/status-badge";
-import { Tabs } from "@/components/dockyrd/ui/tabs";
+import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { DatabaseConnectionCards } from "@/components/dockyard/database-connection-cards";
+import { DatabaseDetailSettings } from "@/components/dockyard/database-detail-settings";
+import { DatabaseQueryPanel } from "@/components/dockyard/database-query-panel";
+import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
+import { ServiceConnectedApplicationsPanel } from "@/components/dockyard/service-connected-applications-panel";
+import { ServiceLogsPanel } from "@/components/dockyard/service-logs-panel";
+import { Button } from "@/components/dockyard/ui/button";
+import { Chip } from "@/components/dockyard/ui/chip";
+import { KeyValueRow } from "@/components/dockyard/ui/key-value-row";
+import { StatusBadge } from "@/components/dockyard/ui/status-badge";
+import { Tabs } from "@/components/dockyard/ui/tabs";
 import {
   type DatabaseRow,
   listDatabases,

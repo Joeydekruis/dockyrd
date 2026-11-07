@@ -2,9 +2,9 @@
 
 import { Copy, Eye, EyeOff } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { DockyrdPageLoading } from "@/components/dockyrd/dockyrd-page-loading";
-import { IconButton } from "@/components/dockyrd/ui/icon-button";
-import { KeyValueRow } from "@/components/dockyrd/ui/key-value-row";
+import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
+import { IconButton } from "@/components/dockyard/ui/icon-button";
+import { KeyValueRow } from "@/components/dockyard/ui/key-value-row";
 import { getServiceConnection } from "@/lib/api";
 import {
   RESOURCE_DETAIL_CARD,

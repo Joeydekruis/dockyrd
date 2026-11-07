@@ -2,7 +2,7 @@
 
 import { MoreHorizontal } from "lucide-react";
 import { type ReactNode, useEffect, useRef, useState } from "react";
-import { IconButton } from "@/components/dockyrd/ui/icon-button";
+import { IconButton } from "@/components/dockyard/ui/icon-button";
 
 export type PopoverMenuItem = {
   id: string;

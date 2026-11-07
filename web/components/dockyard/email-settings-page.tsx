@@ -2,13 +2,13 @@
 
 import { ChevronDown } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { DashboardShell } from "@/components/dockyrd/dashboard-shell";
-import { DockyrdPageLoading } from "@/components/dockyrd/dockyrd-page-loading";
-import { SettingsPageBody } from "@/components/dockyrd/settings-page-body";
-import { Button } from "@/components/dockyrd/ui/button";
-import { Modal } from "@/components/dockyrd/ui/modal";
-import { SnackbarViewport } from "@/components/dockyrd/ui/snackbar";
-import { StatusBadge } from "@/components/dockyrd/ui/status-badge";
+import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
+import { SettingsPageBody } from "@/components/dockyard/settings-page-body";
+import { Button } from "@/components/dockyard/ui/button";
+import { Modal } from "@/components/dockyard/ui/modal";
+import { SnackbarViewport } from "@/components/dockyard/ui/snackbar";
+import { StatusBadge } from "@/components/dockyard/ui/status-badge";
 import {
   type EmailLogEntry,
   getInstanceSettings,

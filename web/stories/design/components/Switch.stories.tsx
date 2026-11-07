@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
-import { Switch } from "@/components/dockyrd/ui/switch";
+import { Switch } from "@/components/dockyard/ui/switch";
 
 const meta = {
   title: "Design/Components/Switch",

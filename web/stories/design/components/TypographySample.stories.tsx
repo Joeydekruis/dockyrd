@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import {
   type TypographyRole,
   TypographySample,
-} from "@/components/dockyrd/ui/typography-sample";
+} from "@/components/dockyard/ui/typography-sample";
 
 const roles: TypographyRole[] = ["h1", "h2", "body", "muted", "mono"];
 

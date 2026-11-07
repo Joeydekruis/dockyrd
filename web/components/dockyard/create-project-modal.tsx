@@ -1,10 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Button } from "@/components/dockyrd/ui/button";
-import { Field } from "@/components/dockyrd/ui/field";
-import { Modal } from "@/components/dockyrd/ui/modal";
-import { TextareaField } from "@/components/dockyrd/ui/textarea-field";
+import { Button } from "@/components/dockyard/ui/button";
+import { Field } from "@/components/dockyard/ui/field";
+import { Modal } from "@/components/dockyard/ui/modal";
+import { TextareaField } from "@/components/dockyard/ui/textarea-field";
 import { createProject, type Project } from "@/lib/api";
 
 type CreateProjectModalProps = {

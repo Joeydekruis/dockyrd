@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { SessionRow } from "@/components/dockyrd/ui/session-row";
+import { SessionRow } from "@/components/dockyard/ui/session-row";
 
 /** **Source:** `web/components/dockyrd/ui/session-row.tsx` */
 const meta = {

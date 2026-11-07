@@ -11,11 +11,11 @@ import {
   useState,
 } from "react";
 import { createPortal } from "react-dom";
-import type { SelectOption } from "@/components/dockyrd/ui/select";
+import type { SelectOption } from "@/components/dockyard/ui/select";
 import {
   isSelectMenuOutsideClick,
   useSelectMenuPosition,
-} from "@/components/dockyrd/ui/use-select-menu-position";
+} from "@/components/dockyard/ui/use-select-menu-position";
 
 export type SearchSelectOption = SelectOption;
 

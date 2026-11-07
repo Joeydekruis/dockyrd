@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { CommitChip } from "@/components/dockyrd/ui/commit-chip";
+import { CommitChip } from "@/components/dockyard/ui/commit-chip";
 
 /** **Source:** `web/components/dockyrd/ui/commit-chip.tsx` */
 const meta = {

@@ -13,6 +13,7 @@ _Finished: 2026-11-07_
 ### Fixed
 
 - **Terminal / dark themes** — Copy plain, Clear, tabs, and status bar use per-theme `chrome` colors (no dashboard `--text` on dark toolbar); settings control uses Lucide icon at 22px
+- **Web build** — restore `@/components/dockyard/*` import paths; Makefile/GoReleaser build `cmd/dockyard` again
 
 ## [0.7.0] - 2026-11-07
 

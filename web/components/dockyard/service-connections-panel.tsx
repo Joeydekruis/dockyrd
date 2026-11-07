@@ -1,10 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { AddConnectionModal } from "@/components/dockyrd/add-connection-modal";
-import { Button } from "@/components/dockyrd/ui/button";
-import { EmptyState } from "@/components/dockyrd/ui/empty-state";
-import { ResourceRow } from "@/components/dockyrd/ui/resource-row";
+import { AddConnectionModal } from "@/components/dockyard/add-connection-modal";
+import { Button } from "@/components/dockyard/ui/button";
+import { EmptyState } from "@/components/dockyard/ui/empty-state";
+import { ResourceRow } from "@/components/dockyard/ui/resource-row";
 import {
   deleteServiceLink,
   listServiceLinks,

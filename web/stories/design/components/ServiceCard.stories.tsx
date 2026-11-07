@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Box, Globe } from "lucide-react";
-import { ServiceCard } from "@/components/dockyrd/ui/service-card";
+import { ServiceCard } from "@/components/dockyard/ui/service-card";
 
 const iconArgType = {
   control: "select" as const,

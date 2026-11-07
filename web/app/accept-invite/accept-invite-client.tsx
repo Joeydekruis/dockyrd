@@ -3,8 +3,8 @@
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { type FormEvent, useEffect, useState } from "react";
-import { AuthLayout } from "@/components/dockyrd/auth-layout";
-import { Button } from "@/components/dockyrd/ui/button";
+import { AuthLayout } from "@/components/dockyard/auth-layout";
+import { Button } from "@/components/dockyard/ui/button";
 import { acceptInvite, previewInvite } from "@/lib/api";
 
 export function AcceptInviteClient() {

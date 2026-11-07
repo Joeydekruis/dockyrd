@@ -1,10 +1,10 @@
 import type { LucideIcon } from "lucide-react";
 import { Box } from "lucide-react";
-import { IconTile } from "@/components/dockyrd/ui/icon-tile";
+import { IconTile } from "@/components/dockyard/ui/icon-tile";
 import {
   StatusBadge,
   type StatusVariant,
-} from "@/components/dockyrd/ui/status-badge";
+} from "@/components/dockyard/ui/status-badge";
 
 type ServiceCardProps = {
   name: string;

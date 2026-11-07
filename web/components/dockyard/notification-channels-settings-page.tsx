@@ -2,14 +2,14 @@
 
 import { MoreHorizontal, Plus } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { DashboardShell } from "@/components/dockyrd/dashboard-shell";
-import { DockyrdPageLoading } from "@/components/dockyrd/dockyrd-page-loading";
-import { NotificationChannelModal } from "@/components/dockyrd/notification-channel-modal";
-import { NotificationDeliveryLogModal } from "@/components/dockyrd/notification-delivery-log-modal";
-import { SettingsPageBody } from "@/components/dockyrd/settings-page-body";
-import { Button } from "@/components/dockyrd/ui/button";
-import { PopoverMenu } from "@/components/dockyrd/ui/popover-menu";
-import { ResourceRow } from "@/components/dockyrd/ui/resource-row";
+import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
+import { NotificationChannelModal } from "@/components/dockyard/notification-channel-modal";
+import { NotificationDeliveryLogModal } from "@/components/dockyard/notification-delivery-log-modal";
+import { SettingsPageBody } from "@/components/dockyard/settings-page-body";
+import { Button } from "@/components/dockyard/ui/button";
+import { PopoverMenu } from "@/components/dockyard/ui/popover-menu";
+import { ResourceRow } from "@/components/dockyard/ui/resource-row";
 import {
   deleteNotificationChannel,
   getNotificationSettings,

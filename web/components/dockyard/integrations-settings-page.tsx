@@ -3,13 +3,13 @@
 import { ExternalLink, GitBranch } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { ConnectGitHubWizard } from "@/components/dockyrd/connect-github-wizard";
-import { DashboardShell } from "@/components/dockyrd/dashboard-shell";
-import { DockyrdPageLoading } from "@/components/dockyrd/dockyrd-page-loading";
-import { SettingsPageBody } from "@/components/dockyrd/settings-page-body";
-import { Button } from "@/components/dockyrd/ui/button";
-import { ConfirmDialog } from "@/components/dockyrd/ui/confirm-dialog";
-import { StatusBadge } from "@/components/dockyrd/ui/status-badge";
+import { ConnectGitHubWizard } from "@/components/dockyard/connect-github-wizard";
+import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
+import { SettingsPageBody } from "@/components/dockyard/settings-page-body";
+import { Button } from "@/components/dockyard/ui/button";
+import { ConfirmDialog } from "@/components/dockyard/ui/confirm-dialog";
+import { StatusBadge } from "@/components/dockyard/ui/status-badge";
 import {
   disconnectGitHub,
   type GitHubStatus,
