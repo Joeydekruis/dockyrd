@@ -10,6 +10,7 @@ github: https://github.com/Joeydekruis/dockyrd/issues/73
 - [x] Four themes + settings modal; persisted in localStorage
 - [x] Copy selection as plain text (button + Ctrl/Cmd+Shift+C)
 - [x] Termius-style tabs, menu groups, ROOT warning banner
-- [ ] Test sandbox shell — deferred
+- [x] Test sandbox shell — Alpine ephemeral container, project/open vs strict link networks, removed on session end
+- [x] Terminal theme per user in SQLite — `GET|PATCH /api/v1/terminal/preferences` (+ localStorage cache)
 
 Briefing: `docs/project/briefings/terminal-web.md`

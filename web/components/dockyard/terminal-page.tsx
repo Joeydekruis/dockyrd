@@ -15,8 +15,12 @@ import {
   createTerminalSession,
   getMe,
   getTerminalMeta,
+  getTerminalPreferences,
+  listProjects,
   listTerminalTargets,
+  patchTerminalPreferences,
   type MeResponse,
+  type Project,
   type TerminalMeta,
   type TerminalTarget,
 } from "@/lib/api";
@@ -37,6 +41,7 @@ type TerminalTab = {
   label: string;
   badge?: "ROOT" | "SANDBOX";
   target?: TerminalTarget;
+  projectId?: string;
   mode: "shell" | "psql" | "valkey-cli";
   useRoot: boolean;
   connState: ConnState;
@@ -59,6 +64,7 @@ export function TerminalPage() {
   const [user, setUser] = useState<MeResponse | null>(null);
   const [forbidden, setForbidden] = useState(false);
   const [targets, setTargets] = useState<TerminalTarget[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [meta, setMeta] = useState<TerminalMeta | null>(null);
   const [tabs, setTabs] = useState<TerminalTab[]>([]);
   const [activeId, setActiveId] = useState("");
@@ -94,13 +100,23 @@ export function TerminalPage() {
           return;
         }
         setUser(me);
-        return Promise.all([listTerminalTargets(), getTerminalMeta()]);
+        return Promise.all([
+          listTerminalTargets(),
+          getTerminalMeta(),
+          listProjects(),
+          getTerminalPreferences().catch(() => ({ theme_id: loadTerminalThemeId() })),
+        ]);
       })
       .then((res) => {
         if (cancelled || !res) return;
-        const [targetRes, metaRes] = res;
+        const [targetRes, metaRes, projectRes, prefs] = res;
         setTargets(targetRes.targets);
         setMeta(metaRes);
+        setProjects(projectRes.projects);
+        if (prefs.theme_id) {
+          setThemeId(prefs.theme_id as TerminalThemeId);
+          saveTerminalThemeId(prefs.theme_id as TerminalThemeId);
+        }
         if (targetRes.targets[0]) {
           const t = targetRes.targets[0];
           const id = newTabId();
@@ -220,10 +236,6 @@ export function TerminalPage() {
 
   const connectTab = useCallback(
     async (tab: TerminalTab, mfaCode?: string) => {
-      if (tab.kind === "test") {
-        setStatusNote("Test shell is not available yet.");
-        return;
-      }
       activeTabRef.current = tab.id;
       mountTerm();
       patchTab(tab.id, { connState: "connecting" });
@@ -231,6 +243,7 @@ export function TerminalPage() {
       try {
         const session = await createTerminalSession({
           session_kind: tab.kind,
+          project_id: tab.projectId,
           service_id: tab.target?.service_id,
           compose_service: tab.target?.compose_service,
           mode: tab.mode,
@@ -353,6 +366,25 @@ export function TerminalPage() {
     openHostTab();
   };
 
+  const openTestTab = (project: Project) => {
+    setMenuOpen(false);
+    const id = newTabId();
+    const tab: TerminalTab = {
+      id,
+      kind: "test",
+      label: `Test · ${project.name}`,
+      badge: "SANDBOX",
+      projectId: project.id,
+      mode: "shell",
+      useRoot: false,
+      connState: "idle",
+    };
+    setTabs((prev) => [...prev, tab]);
+    teardown();
+    setActiveId(id);
+    void connectTab(tab);
+  };
+
   const openHostTab = (mfaCode?: string) => {
     setHostMfaOpen(false);
     const id = newTabId();
@@ -374,6 +406,7 @@ export function TerminalPage() {
   const pickTheme = (id: TerminalThemeId) => {
     setThemeId(id);
     saveTerminalThemeId(id);
+    void patchTerminalPreferences({ theme_id: id }).catch(() => undefined);
   };
 
   const clear = () => {
@@ -387,11 +420,11 @@ export function TerminalPage() {
           lead: "Root on the host.",
           text: "You have full server access. Prefer container or test shells when possible.",
         }
-      : activeTab.badge === "SANDBOX"
+      : activeTab.kind === "test"
         ? {
             tone: "var(--status-ok-fg)",
             lead: "Sandbox.",
-            text: "This throwaway container is removed when you close the tab.",
+            text: "Throwaway container on the project network. It is removed when this session ends.",
           }
         : null
     : null;
@@ -533,17 +566,37 @@ export function TerminalPage() {
                     <span className="px-2.5 pt-2 font-mono text-[11px] uppercase tracking-wide text-[var(--muted-foreground)]">
                       Test
                     </span>
-                    <button
-                      type="button"
-                      role="menuitem"
-                      disabled
-                      className="rounded-lg px-2.5 py-2 text-left text-sm opacity-60"
-                    >
-                      Test shell
-                      <span className="block text-xs text-[var(--muted-foreground)]">
-                        No host access · coming soon
-                      </span>
-                    </button>
+                    {meta?.session_kinds.test.available ? (
+                      projects.length ? (
+                        projects.map((p) => (
+                          <button
+                            key={p.id}
+                            type="button"
+                            role="menuitem"
+                            onClick={() => openTestTab(p)}
+                            className="rounded-lg px-2.5 py-2 text-left text-sm hover:bg-[var(--surface-2)]"
+                          >
+                            Test shell · {p.name}
+                            <span className="block text-xs text-[var(--muted-foreground)]">
+                              No host access · project network
+                            </span>
+                          </button>
+                        ))
+                      ) : (
+                        <p className="px-2.5 py-2 text-sm text-[var(--muted-foreground)]">
+                          No projects yet.
+                        </p>
+                      )
+                    ) : (
+                      <button
+                        type="button"
+                        role="menuitem"
+                        disabled
+                        className="rounded-lg px-2.5 py-2 text-left text-sm opacity-60"
+                      >
+                        Test shell unavailable
+                      </button>
+                    )}
                     <span className="px-2.5 pt-2 font-mono text-[11px] uppercase tracking-wide text-[var(--muted-foreground)]">
                       Containers
                     </span>
@@ -653,7 +706,11 @@ export function TerminalPage() {
             {activeTab?.connState === "connected"
               ? "Connected"
               : (activeTab?.connState ?? "idle")}
-            {activeTab?.kind === "host" ? " · root · bash" : " · container"}
+            {activeTab?.kind === "host"
+              ? " · root · bash"
+              : activeTab?.kind === "test"
+                ? " · sandbox · sh"
+                : " · container"}
           </span>
           <span>
             {shellTheme.name} · UTF-8 · Ctrl+Shift+C copies plain text

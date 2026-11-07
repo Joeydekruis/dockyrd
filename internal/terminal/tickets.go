@@ -25,6 +25,10 @@ const (
 type SessionSpec struct {
 	SessionKind    string // container | host | test
 	UserID         string
+	ProjectID      string
+	ProjectSlug    string
+	LinksMode      string
+	LinkIDs        []string
 	ServiceID      string
 	ContainerID    string
 	ComposeService string

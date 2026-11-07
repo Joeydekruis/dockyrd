@@ -1651,8 +1651,20 @@ export function getTerminalMeta() {
   return apiFetch<TerminalMeta>("/api/v1/terminal/meta");
 }
 
+export function getTerminalPreferences() {
+  return apiFetch<{ theme_id: string }>("/api/v1/terminal/preferences");
+}
+
+export function patchTerminalPreferences(body: { theme_id: string }) {
+  return apiFetch<{ theme_id: string }>("/api/v1/terminal/preferences", {
+    method: "PATCH",
+    json: body,
+  });
+}
+
 export function createTerminalSession(input: {
   session_kind?: "container" | "host" | "test";
+  project_id?: string;
   service_id?: string;
   compose_service?: string;
   mode?: string;

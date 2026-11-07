@@ -6,6 +6,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.6.3] - 2026-11-07
+
+_Finished: 2026-11-07_
+
+### Added
+
+- **#73 / Terminal v2 (continued)** — **Test shell**: throwaway Alpine sandbox per project (`links_mode` open → project network; `strict` → per-link `dy-l-*` networks); removed when the WebSocket session ends; **SANDBOX** tab in UI — https://github.com/Joeydekruis/dockyrd/issues/73
+- **Terminal preferences** — `GET|PATCH /api/v1/terminal/preferences` persists `theme_id` per user (localStorage remains client cache)
+
 ## [0.6.2] - 2026-11-07
 
 _Finished: 2026-11-07_

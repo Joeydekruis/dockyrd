@@ -61,6 +61,7 @@ type createTerminalSessionRequest struct {
 	Mode           string `json:"mode"`
 	ExecUser       string `json:"exec_user"`
 	MfaCode        string `json:"mfa_code"`
+	ProjectID      string `json:"project_id"`
 }
 
 type createTerminalSessionResponse struct {
@@ -77,6 +78,8 @@ type wsResizeMessage struct {
 func registerTerminalRoutes(mux *http.ServeMux, deps apiDeps) {
 	mux.HandleFunc("GET /api/v1/terminal/targets", deps.handleTerminalTargets)
 	mux.HandleFunc("GET /api/v1/terminal/meta", deps.handleTerminalMeta)
+	mux.HandleFunc("GET /api/v1/terminal/preferences", deps.handleGetTerminalPreferences)
+	mux.HandleFunc("PATCH /api/v1/terminal/preferences", deps.handlePatchTerminalPreferences)
 	mux.HandleFunc("POST /api/v1/terminal/sessions", deps.handleCreateTerminalSession)
 	mux.HandleFunc("GET /api/v1/terminal/ws", deps.handleTerminalWebSocket)
 }
@@ -120,7 +123,7 @@ func (d apiDeps) handleTerminalMeta(w http.ResponseWriter, r *http.Request) {
 				"allowed_by_instance":     hostAllowed,
 				"requires_mfa_if_enabled": totpEnabled(user.TotpEnabledAt),
 			},
-			"test": map[string]any{"available": false},
+			"test": map[string]any{"available": d.docker != nil},
 		},
 	})
 }
@@ -223,9 +226,13 @@ func (d apiDeps) handleCreateTerminalSession(w http.ResponseWriter, r *http.Requ
 	}
 	targetKind := "service"
 	targetID := body.ServiceID
-	if spec.SessionKind == terminal.SessionKindHost {
+	switch spec.SessionKind {
+	case terminal.SessionKindHost:
 		targetKind = "host"
 		targetID = "server"
+	case terminal.SessionKindTest:
+		targetKind = "project"
+		targetID = body.ProjectID
 	}
 	_ = d.audit.Record(ctx, audit.Entry{
 		UserID:     user.ID,
@@ -251,7 +258,7 @@ func (d apiDeps) resolveTerminalSession(ctx context.Context, user sqlc.GetUserBy
 	case terminal.SessionKindHost:
 		return d.resolveHostTerminalSession(ctx, user, body)
 	case terminal.SessionKindTest:
-		return terminal.SessionSpec{}, nil, fmt.Errorf("%w: test shell is not available yet", errTerminalUnavailable)
+		return d.resolveTestTerminalSession(ctx, user, body)
 	case terminal.SessionKindContainer:
 	default:
 		return terminal.SessionSpec{}, nil, fmt.Errorf("unknown session_kind %q", body.SessionKind)
@@ -312,6 +319,43 @@ func (d apiDeps) resolveHostTerminalSession(ctx context.Context, user sqlc.GetUs
 		SessionKind: terminal.SessionKindHost,
 		UserID:      user.ID,
 		Mode:        "shell",
+	}, meta, nil
+}
+
+func (d apiDeps) resolveTestTerminalSession(ctx context.Context, user sqlc.GetUserByIDRow, body createTerminalSessionRequest) (terminal.SessionSpec, map[string]any, error) {
+	projectID := strings.TrimSpace(body.ProjectID)
+	if projectID == "" {
+		return terminal.SessionSpec{}, nil, fmt.Errorf("project_id required for test shell")
+	}
+	row, err := d.q.GetProjectByID(ctx, projectID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return terminal.SessionSpec{}, nil, fmt.Errorf("project not found")
+		}
+		return terminal.SessionSpec{}, nil, fmt.Errorf("database error")
+	}
+	links, err := d.q.ListLinksForProject(ctx, projectID)
+	if err != nil {
+		return terminal.SessionSpec{}, nil, fmt.Errorf("database error")
+	}
+	linkIDs := make([]string, 0, len(links))
+	for _, l := range links {
+		linkIDs = append(linkIDs, l.ID)
+	}
+	meta := map[string]any{
+		"session_kind": terminal.SessionKindTest,
+		"project_id":   projectID,
+		"links_mode":   row.LinksMode,
+	}
+	return terminal.SessionSpec{
+		SessionKind: terminal.SessionKindTest,
+		UserID:      user.ID,
+		ProjectID:   projectID,
+		ProjectSlug: row.Slug,
+		LinksMode:   row.LinksMode,
+		LinkIDs:     linkIDs,
+		Mode:        "shell",
+		Cmd:         []string{"/bin/sh"},
 	}, meta, nil
 }
 
@@ -410,9 +454,13 @@ func (d apiDeps) handleTerminalWebSocket(w http.ResponseWriter, r *http.Request)
 
 	targetKind := "service"
 	targetID := spec.ServiceID
-	if spec.SessionKind == terminal.SessionKindHost {
+	switch spec.SessionKind {
+	case terminal.SessionKindHost:
 		targetKind = "host"
 		targetID = "server"
+	case terminal.SessionKindTest:
+		targetKind = "project"
+		targetID = spec.ProjectID
 	}
 	_ = d.audit.Record(ctx, audit.Entry{
 		UserID:     spec.UserID,
@@ -454,8 +502,35 @@ func (d apiDeps) handleTerminalWebSocket(w http.ResponseWriter, r *http.Request)
 			_ = conn.WriteMessage(websocket.TextMessage, []byte("\r\nDocker is unavailable.\r\n"))
 			return
 		}
+		containerID := spec.ContainerID
+		if spec.SessionKind == terminal.SessionKindTest {
+			sandboxID, serr := d.docker.RunTerminalSandbox(sessionCtx, docker.RunTerminalSandboxInput{
+				ProjectID:   spec.ProjectID,
+				ProjectSlug: spec.ProjectSlug,
+				LinksMode:   spec.LinksMode,
+				LinkIDs:     spec.LinkIDs,
+			})
+			if serr != nil {
+				_ = conn.WriteMessage(websocket.TextMessage, []byte("\r\nCould not start test shell: "+serr.Error()+"\r\n"))
+				_ = conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.ClosePolicyViolation, "sandbox failed"))
+				return
+			}
+			defer func() {
+				_ = d.docker.StopAndRemove(context.Background(), sandboxID, 10)
+			}()
+			containerID = sandboxID
+			_ = d.audit.Record(ctx, audit.Entry{
+				UserID:     spec.UserID,
+				Action:     "terminal.sandbox.start",
+				TargetKind: "project",
+				TargetID:   spec.ProjectID,
+				Meta: map[string]any{
+					"links_mode": spec.LinksMode,
+				},
+			})
+		}
 		var err error
-		dockerExec, err = d.docker.StartInteractiveExec(ctx, spec.ContainerID, spec.Cmd, spec.ExecUser, spec.Env)
+		dockerExec, err = d.docker.StartInteractiveExec(ctx, containerID, spec.Cmd, spec.ExecUser, spec.Env)
 		if err != nil {
 			_ = conn.WriteMessage(websocket.TextMessage, []byte("\r\nCould not open a shell in this container. The image may not include /bin/sh (distroless images are unsupported).\r\n"))
 			_ = conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.ClosePolicyViolation, "exec failed"))
