@@ -76,17 +76,12 @@ func serverTimeouts() map[string]any {
 	}
 }
 
-func mergeServerConfig(base map[string]any, trusted TrustedProxyConfig) map[string]any {
+func mergeTLSServer(base map[string]any, trusted TrustedProxyConfig) map[string]any {
 	for k, v := range serverTimeouts() {
 		base[k] = v
 	}
 	// HTTP/3 needs UDP 443; many cloud firewalls (Hetzner) only open TCP — Chrome then shows ERR_QUIC_PROTOCOL_ERROR.
 	base["protocols"] = []string{"h1", "h2"}
-	// Caddy's default HTTP→HTTPS redirect runs before certs exist and breaks ACME HTTP-01
-	// (LE follows 308 to HTTPS; handshake fails with "tls: internal error").
-	base["automatic_https"] = map[string]any{
-		"disable_redirects": true,
-	}
 	applyTrustedProxies(base, trusted)
 	return base
 }

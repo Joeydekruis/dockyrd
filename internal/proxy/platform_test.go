@@ -111,7 +111,7 @@ func TestRenderBaselineHandlers(t *testing.T) {
 		t.Fatal(err)
 	}
 	s := string(raw)
-	for _, frag := range []string{`"handler": "encode"`, `Strict-Transport-Security`, `nosniff`, `read_header_timeout`, `disable_redirects`, `"dy_http"`, `"dy_https"`} {
+	for _, frag := range []string{`"handler": "encode"`, `Strict-Transport-Security`, `nosniff`, `read_header_timeout`, `"dy_http"`, `"dy_https"`} {
 		if !strings.Contains(s, frag) {
 			t.Fatalf("missing %q in render output", frag)
 		}

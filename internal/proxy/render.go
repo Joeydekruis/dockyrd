@@ -121,7 +121,7 @@ func Render(in RenderInput) ([]byte, error) {
 						"logs":   map[string]any{"default_logger_name": "dy"},
 						"routes": []any{},
 					}),
-					"dy_https": mergeServerConfig(map[string]any{
+					"dy_https": mergeTLSServer(map[string]any{
 						"listen": []string{":443"},
 						"logs":   map[string]any{"default_logger_name": "dy"},
 						"routes": routes,

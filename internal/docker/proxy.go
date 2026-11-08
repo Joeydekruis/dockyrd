@@ -131,10 +131,13 @@ func proxyBootstrapJSON() ([]byte, error) {
 		"apps": map[string]any{
 			"http": map[string]any{
 				"servers": map[string]any{
+					// Port 80 only until panel SyncFromDB runs — :443 must not serve plain HTTP.
 					"bootstrap": map[string]any{
-						"listen":    []string{":80", ":443"},
-						"protocols": []string{"h1", "h2"},
-						"routes":    []any{},
+						"listen": []string{":80"},
+						"automatic_https": map[string]any{
+							"disable_redirects": true,
+						},
+						"routes": []any{},
 					},
 				},
 			},

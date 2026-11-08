@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.7.13] - 2026-11-08
+
+_Finished: 2026-11-08_
+
+### Fixed
+
+- **HTTPS / dashboard SSL** — stop auto-repair from restarting `dy-proxy` on missing certs (restart wiped Caddy back to bootstrap plain HTTP on `:443`); bootstrap listens on `:80` only until routes sync; reload edge via admin API by default (`?restart=true` for hard restart)
+
 ## [0.7.12] - 2026-11-08
 
 _Finished: 2026-11-08_

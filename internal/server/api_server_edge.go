@@ -19,13 +19,14 @@ func (d apiDeps) handleServerEdgeReload(w http.ResponseWriter, r *http.Request) 
 	d.repairStaleLoopbackPlatformDomains(ctx)
 	hosts := watch.EdgeProbeHostnames(ctx, d.cfg, d.q)
 	needs := proxy.EdgeNeedsRepair(hosts)
-	if err := proxy.ReloadEdge(ctx, d.cfg, d.q, cli, true, nil); err != nil {
+	restart := r.URL.Query().Get("restart") == "1" || r.URL.Query().Get("restart") == "true"
+	if err := proxy.ReloadEdge(ctx, d.cfg, d.q, cli, restart, nil); err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "edge reload failed")
 		return
 	}
 	after := proxy.EdgeNeedsRepair(watch.EdgeProbeHostnames(ctx, d.cfg, d.q))
 	writeJSON(w, http.StatusOK, map[string]any{
-		"restarted": true,
+		"restarted": restart,
 		"was_unhealthy": needs,
 		"healthy_after": !after,
 	})

@@ -70,8 +70,27 @@ func TryAutoRepair(ctx context.Context, cfg config.Config, q *sqlc.Queries, dock
 		edgeRepairGate.last = time.Now()
 		edgeRepairGate.Unlock()
 	}
+	restart := edgeNeedsContainerRestart(hosts)
 	if log != nil {
-		log.Info("edge repair: restarting dy-proxy and syncing routes")
+		if restart {
+			log.Info("edge repair: restart dy-proxy and sync routes")
+		} else {
+			log.Info("edge repair: sync caddy routes (no container restart)")
+		}
 	}
-	return ReloadEdge(ctx, cfg, q, dock, true, log)
+	return ReloadEdge(ctx, cfg, q, dock, restart, log)
+}
+
+// edgeNeedsContainerRestart is true when HTTP-01 is blocked (config unlikely fixable via load alone).
+func edgeNeedsContainerRestart(hosts []string) bool {
+	for _, h := range hosts {
+		h = strings.TrimSpace(h)
+		if h == "" {
+			continue
+		}
+		if ACMEChallengeBlocked(h) {
+			return true
+		}
+	}
+	return false
 }
