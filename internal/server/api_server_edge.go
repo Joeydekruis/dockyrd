@@ -20,7 +20,13 @@ func (d apiDeps) handleServerEdgeReload(w http.ResponseWriter, r *http.Request) 
 	hosts := watch.EdgeProbeHostnames(ctx, d.cfg, d.q)
 	needs := proxy.EdgeNeedsRepair(hosts)
 	restart := r.URL.Query().Get("restart") == "1" || r.URL.Query().Get("restart") == "true"
-	if err := proxy.ReloadEdge(ctx, d.cfg, d.q, cli, restart, nil); err != nil {
+	var err error
+	if restart {
+		err = proxy.ReloadEdge(ctx, d.cfg, d.q, cli, true, nil)
+	} else {
+		err = proxy.SyncEdgeFromDB(ctx, d.cfg, d.q, cli, nil)
+	}
+	if err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "edge reload failed")
 		return
 	}

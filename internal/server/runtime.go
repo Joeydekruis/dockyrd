@@ -78,8 +78,8 @@ func startBackground(ctx context.Context, cfg config.Config, db *sql.DB, q *sqlc
 			log.Warn("ensure dy-proxy", "err", err)
 		} else {
 			RepairStaleLoopbackPlatformDomains(ctx, cfg, q)
-			if err := proxy.SyncFromDB(ctx, q, cfg, dockerCli); err != nil && log != nil {
-				log.Warn("proxy sync", "err", err)
+			if err := proxy.SyncEdgeFromDB(ctx, cfg, q, dockerCli, log); err != nil && log != nil {
+				log.Error("proxy sync", "err", err)
 			}
 			go func() {
 				time.Sleep(12 * time.Second)

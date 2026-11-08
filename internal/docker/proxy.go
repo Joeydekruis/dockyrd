@@ -20,7 +20,8 @@ const (
 	ProxyContainerName  = "dy-proxy"
 	ProxyImage          = "caddy:2-alpine"
 	proxySpecLabel      = "dev.dockyrd.proxy_spec"
-	proxySpecHostV1     = "host-v1"
+	proxySpecHostV1     = "host-v1" // legacy bootstrap (:80+:443 HTTP)
+	proxySpecHostV2     = "host-v2" // :80 bootstrap + admin load for :443 TLS
 	caddyDirInContainer = "/var/lib/dockyrd/caddy"
 )
 
@@ -58,7 +59,7 @@ func (c *Client) EnsureProxy(ctx context.Context, cfg config.Config) error {
 	inspect, err := c.moby.ContainerInspect(ctx, ProxyContainerName)
 	if err == nil {
 		spec := inspect.Config.Labels[proxySpecLabel]
-		if spec != proxySpecHostV1 {
+		if spec != proxySpecHostV2 {
 			if err := c.removeProxyContainer(ctx); err != nil {
 				return err
 			}
@@ -92,7 +93,7 @@ func (c *Client) EnsureProxy(ctx context.Context, cfg config.Config) error {
 			Labels: map[string]string{
 				LabelManaged:   managedTrue,
 				LabelKind:      KindSystem,
-				proxySpecLabel: proxySpecHostV1,
+				proxySpecLabel: proxySpecHostV2,
 			},
 		}, hostCfg, nil, nil, ProxyContainerName)
 		// cgroup applied on create only; existing dy-proxy keeps prior placement until recreated
@@ -184,7 +185,7 @@ func (c *Client) ProxyRunning(ctx context.Context) (bool, string) {
 	if err != nil {
 		return false, "not created"
 	}
-	if inspect.Config.Labels[proxySpecLabel] != proxySpecHostV1 {
+	if inspect.Config.Labels[proxySpecLabel] != proxySpecHostV2 {
 		return false, "outdated spec (restart dockyrd to recreate)"
 	}
 	if !inspect.State.Running {
@@ -213,4 +214,12 @@ func (c *Client) RestartProxy(ctx context.Context, cfg config.Config) error {
 		return fmt.Errorf("restart dy-proxy: %w", err)
 	}
 	return waitForFile(ctx, cfg.CaddyAdminSocket(), 45*time.Second)
+}
+
+// RecreateProxy removes dy-proxy and creates it again (bootstrap + fresh process).
+func (c *Client) RecreateProxy(ctx context.Context, cfg config.Config) error {
+	if err := c.removeProxyContainer(ctx); err != nil && !errdefs.IsNotFound(err) {
+		return err
+	}
+	return c.EnsureProxy(ctx, cfg)
 }

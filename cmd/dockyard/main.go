@@ -57,6 +57,11 @@ func main() {
 		if rep.HasFailures() {
 			os.Exit(1)
 		}
+	case "repair-edge":
+		if err := server.RepairEdgeCLI(cfg); err != nil {
+			fmt.Fprintf(os.Stderr, "repair-edge: %v\n", err)
+			os.Exit(1)
+		}
 	case "admin":
 		if err := runAdmin(cfg, os.Args[2:]); err != nil {
 			fmt.Fprintf(os.Stderr, "admin: %v\n", err)
@@ -125,7 +130,7 @@ func runHost(cfg config.Config, args []string) error {
 }
 
 func printUsage() {
-	fmt.Fprintf(os.Stderr, "Usage: dockyrd <serve|version|init|setup-token|doctor|update|admin|host>\n")
+	fmt.Fprintf(os.Stderr, "Usage: dockyrd <serve|version|init|setup-token|doctor|repair-edge|update|admin|host>\n")
 	fmt.Fprintf(os.Stderr, "       dockyrd update [--check] [--rollback]\n")
 	fmt.Fprintf(os.Stderr, "       dockyrd admin reset-password <email> [password]\n")
 	fmt.Fprintf(os.Stderr, "       dockyrd admin disable-2fa <email>\n")

@@ -6,6 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.7.14] - 2026-11-08
+
+_Finished: 2026-11-08_
+
+### Added
+
+- **`dockyrd repair-edge`** — recreate `dy-proxy` when :443 serves plain HTTP and load routes from SQLite (one command on the host)
+
+### Fixed
+
+- **HTTPS** — bump `dy-proxy` spec to `host-v2` so upgrades recreate stale Caddy containers; startup and repair detect plain HTTP on :443 and reload TLS routes with retries
+
 ## [0.7.13] - 2026-11-08
 
 _Finished: 2026-11-08_

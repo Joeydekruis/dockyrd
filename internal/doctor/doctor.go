@@ -204,7 +204,7 @@ func checkProxyContainer(ctx context.Context) []Check {
 			Name:    "dy-proxy container",
 			Status:  StatusWarn,
 			Detail:  detail,
-			FixHint: "Dockyrd restarts dy-proxy automatically when HTTPS fails; update to the latest release or use Settings → Server → General → Repair edge",
+			FixHint: "Run `sudo dockyrd repair-edge` on the host (or Settings → Server → General → Repair edge); ensure dockyrd is on the latest release",
 		}}
 	}
 	return []Check{{Name: "dy-proxy container", Status: StatusOK, Detail: detail}}

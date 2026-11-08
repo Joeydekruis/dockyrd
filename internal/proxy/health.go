@@ -1,8 +1,10 @@
 package proxy
 
 import (
+	"bytes"
 	"crypto/tls"
 	"crypto/x509"
+	"io"
 	"net"
 	"net/http"
 	"strings"
@@ -61,6 +63,25 @@ func TLSHealthy(hostname string) bool {
 		return false
 	}
 	return certMatchesHostname(hostname, state.PeerCertificates[0])
+}
+
+// PlainHTTPOn443 reports whether something on :443 responds like cleartext HTTP (broken edge bootstrap).
+func PlainHTTPOn443() bool {
+	conn, err := net.DialTimeout("tcp", net.JoinHostPort("127.0.0.1", "443"), 3*time.Second)
+	if err != nil {
+		return false
+	}
+	defer conn.Close()
+	_ = conn.SetDeadline(time.Now().Add(3 * time.Second))
+	if _, err := conn.Write([]byte("GET / HTTP/1.0\r\nHost: probe.local\r\n\r\n")); err != nil {
+		return false
+	}
+	buf := make([]byte, 8)
+	n, err := io.ReadAtLeast(conn, buf, 5)
+	if err != nil || n < 5 {
+		return false
+	}
+	return bytes.HasPrefix(buf[:n], []byte("HTTP/"))
 }
 
 func certMatchesHostname(hostname string, leaf *x509.Certificate) bool {
