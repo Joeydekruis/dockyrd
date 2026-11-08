@@ -157,6 +157,19 @@ export function TerminalPage() {
             },
           ]);
           setActiveId(id);
+        } else if (metaRes.session_kinds.host.available) {
+          setTabs([
+            {
+              id,
+              kind: "host",
+              label: "Server",
+              badge: "ROOT",
+              mode: "shell",
+              useRoot: false,
+              connState: "idle",
+            },
+          ]);
+          setActiveId(id);
         } else if (
           metaRes.session_kinds.test.available &&
           projectRes.projects[0]
@@ -303,6 +316,15 @@ export function TerminalPage() {
       if (tab.connState === "connecting") {
         return;
       }
+      if (
+        tab.kind === "host" &&
+        !mfaCode &&
+        meta?.session_kinds.host.requires_mfa_if_enabled
+      ) {
+        setHostMfaCode("");
+        setHostMfaOpen(true);
+        return;
+      }
       const sess = ensureTabSession(tab.id);
       if (!sess) return;
       patchTab(tab.id, { connState: "connecting" });
@@ -362,7 +384,7 @@ export function TerminalPage() {
         );
       }
     },
-    [activeId, ensureTabSession, patchTab, sendResizeFor],
+    [activeId, ensureTabSession, meta, patchTab, sendResizeFor],
   );
 
   useEffect(() => {
@@ -463,6 +485,22 @@ export function TerminalPage() {
     setTabs((prev) => [...prev, tab]);
     setActiveId(id);
     void connectTab(tab);
+  };
+
+  const completeHostSessionAfterMfa = (mfaCode: string) => {
+    const code = mfaCode.trim();
+    setHostMfaOpen(false);
+    const pendingHost = tabs.find(
+      (t) =>
+        t.kind === "host" &&
+        (t.connState === "idle" || t.connState === "error"),
+    );
+    if (pendingHost) {
+      setActiveId(pendingHost.id);
+      void connectTab(pendingHost, code);
+      return;
+    }
+    openHostTab(code);
   };
 
   const openHostTab = (mfaCode?: string) => {
@@ -636,15 +674,25 @@ export function TerminalPage() {
                     role="menu"
                     aria-label="New session"
                     className="absolute left-0 top-[52px] z-50 flex w-[min(340px,calc(100vw-3rem))] flex-col gap-0.5 rounded-[14px] border p-1.5 shadow-lg"
-                    style={{
-                      background: shellTheme.bar,
-                      borderColor: shellTheme.border,
-                    }}
+                    style={
+                      {
+                        background: shellTheme.bar,
+                        borderColor: shellTheme.border,
+                        color: shellTheme.chrome.fg,
+                        ["--terminal-menu-hover" as string]: shellTheme.surface,
+                      } as React.CSSProperties
+                    }
                   >
-                    <span className="px-2.5 pb-1 pt-2 font-mono text-[11px] uppercase tracking-wide text-[var(--muted-foreground)]">
+                    <span
+                      className="px-2.5 pb-1 pt-2 font-mono text-[11px] uppercase tracking-wide"
+                      style={{ color: shellTheme.chrome.muted }}
+                    >
                       Open a shell in
                     </span>
-                    <span className="px-2.5 pt-2 font-mono text-[11px] uppercase tracking-wide text-[var(--muted-foreground)]">
+                    <span
+                      className="px-2.5 pt-2 font-mono text-[11px] uppercase tracking-wide"
+                      style={{ color: shellTheme.chrome.muted }}
+                    >
                       Test
                     </span>
                     {meta?.session_kinds.test.available ? (
@@ -655,16 +703,22 @@ export function TerminalPage() {
                             type="button"
                             role="menuitem"
                             onClick={() => openTestTab(p)}
-                            className="rounded-lg px-2.5 py-2 text-left text-sm hover:bg-[var(--surface-2)]"
+                            className="rounded-lg px-2.5 py-2 text-left text-sm hover:bg-[var(--terminal-menu-hover)]"
                           >
                             Test shell · {p.name}
-                            <span className="block text-xs text-[var(--muted-foreground)]">
+                            <span
+                              className="block text-xs"
+                              style={{ color: shellTheme.chrome.muted }}
+                            >
                               No host access · project network
                             </span>
                           </button>
                         ))
                       ) : (
-                        <p className="px-2.5 py-2 text-sm text-[var(--muted-foreground)]">
+                        <p
+                          className="px-2.5 py-2 text-sm"
+                          style={{ color: shellTheme.chrome.muted }}
+                        >
                           No projects yet.
                         </p>
                       )
@@ -678,7 +732,10 @@ export function TerminalPage() {
                         Test shell unavailable
                       </button>
                     )}
-                    <span className="px-2.5 pt-2 font-mono text-[11px] uppercase tracking-wide text-[var(--muted-foreground)]">
+                    <span
+                      className="px-2.5 pt-2 font-mono text-[11px] uppercase tracking-wide"
+                      style={{ color: shellTheme.chrome.muted }}
+                    >
                       Containers
                     </span>
                     {targets.map((t) => (
@@ -687,12 +744,15 @@ export function TerminalPage() {
                         type="button"
                         role="menuitem"
                         onClick={() => addContainerTab(t)}
-                        className="rounded-lg px-2.5 py-2 text-left text-sm hover:bg-[var(--surface-2)]"
+                        className="rounded-lg px-2.5 py-2 text-left text-sm hover:bg-[var(--terminal-menu-hover)]"
                       >
                         {targetLabel(t)}
                       </button>
                     ))}
-                    <span className="px-2.5 pt-2 font-mono text-[11px] uppercase tracking-wide text-[var(--muted-foreground)]">
+                    <span
+                      className="px-2.5 pt-2 font-mono text-[11px] uppercase tracking-wide"
+                      style={{ color: shellTheme.chrome.muted }}
+                    >
                       Advanced
                     </span>
                     <button
@@ -703,7 +763,10 @@ export function TerminalPage() {
                       className="rounded-lg px-2.5 py-2 text-left text-sm disabled:opacity-50"
                     >
                       Server shell
-                      <span className="block text-xs text-[var(--muted-foreground)]">
+                      <span
+                        className="block text-xs"
+                        style={{ color: shellTheme.chrome.muted }}
+                      >
                         {hostAvailable
                           ? "Root on the host · owner only"
                           : hostEnabled
@@ -712,14 +775,18 @@ export function TerminalPage() {
                       </span>
                     </button>
                     {!hostEnabled ? (
-                      <p className="px-2.5 pb-2 text-xs text-[var(--muted-foreground)]">
+                      <p
+                        className="px-2.5 pb-2 text-xs"
+                        style={{ color: shellTheme.chrome.muted }}
+                      >
                         <Link
                           href="/settings/server/general"
                           className="underline"
+                          style={{ color: shellTheme.chrome.fg }}
                         >
                           Instance settings
                         </Link>{" "}
-                        → allow host terminal (owner, 2FA to enable).
+                        → allow host terminal (owner only).
                       </p>
                     ) : null}
                   </div>
@@ -849,7 +916,7 @@ export function TerminalPage() {
             className="relative w-full max-w-sm rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-6"
             onSubmit={(e) => {
               e.preventDefault();
-              openHostTab(hostMfaCode.trim());
+              completeHostSessionAfterMfa(hostMfaCode);
             }}
           >
             <h2 className="mb-2 text-lg font-semibold">Confirm 2FA</h2>

@@ -56,10 +56,10 @@ func (c *Client) RunTerminalSandbox(ctx context.Context, in RunTerminalSandboxIn
 	applyAppsCgroup(hostConfig)
 
 	labels := map[string]string{
-		LabelManaged:              managedTrue,
-		LabelKind:                 KindSystem,
-		LabelProject:              in.ProjectID,
-		"dev.dockyrd.terminal":   "sandbox",
+		LabelManaged:           managedTrue,
+		LabelKind:              KindSystem,
+		LabelProject:           in.ProjectID,
+		"dev.dockyrd.terminal": "sandbox",
 	}
 
 	startCmd := []string{
@@ -92,17 +92,25 @@ func (c *Client) RunTerminalSandbox(ctx context.Context, in RunTerminalSandboxIn
 		}
 	} else {
 		if len(in.LinkIDs) == 0 {
-			_ = c.moby.ContainerRemove(ctx, resp.ID, container.RemoveOptions{Force: true})
-			return "", fmt.Errorf("no service links in this project; add a link or use links_mode open")
-		}
-		for _, linkID := range in.LinkIDs {
-			linkID = strings.TrimSpace(linkID)
-			if linkID == "" {
-				continue
-			}
-			if err := c.ConnectLinkEndpoint(ctx, linkID, resp.ID, nil); err != nil {
+			if err := c.EnsureProjectNetwork(ctx, in.ProjectSlug); err != nil {
 				_ = c.moby.ContainerRemove(ctx, resp.ID, container.RemoveOptions{Force: true})
 				return "", err
+			}
+			projectNet := ProjectNetworkName(in.ProjectSlug)
+			if err := c.moby.NetworkConnect(ctx, projectNet, resp.ID, nil); err != nil {
+				_ = c.moby.ContainerRemove(ctx, resp.ID, container.RemoveOptions{Force: true})
+				return "", err
+			}
+		} else {
+			for _, linkID := range in.LinkIDs {
+				linkID = strings.TrimSpace(linkID)
+				if linkID == "" {
+					continue
+				}
+				if err := c.ConnectLinkEndpoint(ctx, linkID, resp.ID, nil); err != nil {
+					_ = c.moby.ContainerRemove(ctx, resp.ID, container.RemoveOptions{Force: true})
+					return "", err
+				}
 			}
 		}
 	}

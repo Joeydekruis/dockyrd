@@ -187,7 +187,7 @@ dockyrd configures Caddy via a unix admin socket. Panel restarts do not stop use
 
 ### TLS works on HTTP but browsers show SSL error on HTTPS
 
-If `curl -I http://your-domain/` returns **308** from Caddy but `curl -I https://your-domain/` fails TLS, Let's Encrypt **HTTP-01** is usually stuck: Caddy was redirecting `/.well-known/acme-challenge/*` to HTTPS before a certificate existed. **0.7.11+** uses separate `:80` / `:443` listeners so challenges stay on HTTP; restart `dockyrd` after update. Also set a **real ACME email** under **Settings → Instance**, save, then wait ~1–2 minutes.
+If `curl -I http://your-domain/` returns **308** from Caddy but `curl -I https://your-domain/` fails TLS, Let's Encrypt **HTTP-01** is usually stuck: Caddy was redirecting `/.well-known/acme-challenge/*` to HTTPS before a certificate existed. **0.7.11+** uses separate `:80` / `:443` listeners so challenges stay on HTTP. **0.7.12+** restarts `dy-proxy` and reloads routes automatically when HTTPS is broken (on panel start, every few minutes, and when cert watch sees a missing cert). You can also use **Settings → Server → General → Repair edge (Caddy)**. Set a **real ACME email**, save URL settings, then wait ~1–2 minutes for issuance.
 
 Quick check from your laptop:
 

@@ -95,14 +95,6 @@ func (d apiDeps) handlePatchInstanceSettings(w http.ResponseWriter, r *http.Requ
 		}
 		want := *body.TerminalAllowHost
 		if want && !prev.TerminalAllowHost {
-			code := ""
-			if body.TerminalHostMfaCode != nil {
-				code = strings.TrimSpace(*body.TerminalHostMfaCode)
-			}
-			if err := d.verifyUserTOTPCode(ctx, user, code); err != nil {
-				writeJSONError(w, http.StatusUnauthorized, err.Error())
-				return
-			}
 			_ = d.audit.Record(ctx, audit.Entry{
 				UserID:     user.ID,
 				Action:     "terminal.host_enabled",

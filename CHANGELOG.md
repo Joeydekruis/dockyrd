@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.7.12] - 2026-11-08
+
+_Finished: 2026-11-08_
+
+### Added
+
+- **Edge auto-repair** — probe TLS and ACME HTTP paths locally; restart `dy-proxy` and reload routes on panel start, every 3 minutes when unhealthy, and when cert watch sees missing certs (no SSH)
+- **`POST /api/v1/server/edge/reload`** — admin API + **Settings → Server → General → Repair edge (Caddy)** for manual edge restart
+
+### Changed
+
+- **Doctor** — HTTPS/proxy fix hints point at in-panel edge repair instead of journalctl runbooks
+
 ## [0.7.11] - 2026-11-08
 
 _Finished: 2026-11-08_

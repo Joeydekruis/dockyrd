@@ -1446,6 +1446,18 @@ export function postServerCleanup(targets: string[]) {
   );
 }
 
+export type EdgeReloadResult = {
+  restarted: boolean;
+  was_unhealthy: boolean;
+  healthy_after: boolean;
+};
+
+export function postServerEdgeReload() {
+  return apiFetch<EdgeReloadResult>("/api/v1/server/edge/reload", {
+    method: "POST",
+  });
+}
+
 export function requestPasswordReset(email: string) {
   return apiFetch<{
     ok: boolean;

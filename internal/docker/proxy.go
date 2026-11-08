@@ -189,3 +189,25 @@ func (c *Client) ProxyRunning(ctx context.Context) (bool, string) {
 	}
 	return true, "running"
 }
+
+// RestartProxy restarts dy-proxy when it is already running (recreates via EnsureProxy when missing).
+func (c *Client) RestartProxy(ctx context.Context, cfg config.Config) error {
+	if c == nil || c.moby == nil {
+		return errors.New("docker client required")
+	}
+	inspect, err := c.moby.ContainerInspect(ctx, ProxyContainerName)
+	if err != nil {
+		if errdefs.IsNotFound(err) {
+			return c.EnsureProxy(ctx, cfg)
+		}
+		return err
+	}
+	if !inspect.State.Running {
+		return c.EnsureProxy(ctx, cfg)
+	}
+	timeout := 15
+	if err := c.moby.ContainerRestart(ctx, ProxyContainerName, container.StopOptions{Timeout: &timeout}); err != nil {
+		return fmt.Errorf("restart dy-proxy: %w", err)
+	}
+	return waitForFile(ctx, cfg.CaddyAdminSocket(), 45*time.Second)
+}

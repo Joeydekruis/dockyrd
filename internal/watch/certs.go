@@ -13,7 +13,9 @@ import (
 
 	"github.com/Joeydekruis/dockyrd/internal/config"
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
+	"github.com/Joeydekruis/dockyrd/internal/docker"
 	"github.com/Joeydekruis/dockyrd/internal/notify"
+	"github.com/Joeydekruis/dockyrd/internal/proxy"
 )
 
 type certEval struct {
@@ -52,11 +54,11 @@ func evalCertLifetime(now time.Time, notBefore, notAfter time.Time, warnPct floa
 }
 
 // RunCerts checks TLS certificates served on :443 and updates domain rows.
-func RunCerts(ctx context.Context, cfg config.Config, q *sqlc.Queries, n *notify.Notifier, log *slog.Logger, interval time.Duration) {
+func RunCerts(ctx context.Context, cfg config.Config, q *sqlc.Queries, n *notify.Notifier, log *slog.Logger, interval time.Duration, dock *docker.Client) {
 	if interval <= 0 {
 		interval = 6 * time.Hour
 	}
-	tickCerts(ctx, cfg, q, n, log)
+	tickCerts(ctx, cfg, q, n, log, dock)
 	t := time.NewTicker(interval)
 	defer t.Stop()
 	for {
@@ -64,12 +66,12 @@ func RunCerts(ctx context.Context, cfg config.Config, q *sqlc.Queries, n *notify
 		case <-ctx.Done():
 			return
 		case <-t.C:
-			tickCerts(ctx, cfg, q, n, log)
+			tickCerts(ctx, cfg, q, n, log, dock)
 		}
 	}
 }
 
-func tickCerts(ctx context.Context, cfg config.Config, q *sqlc.Queries, n *notify.Notifier, log *slog.Logger) {
+func tickCerts(ctx context.Context, cfg config.Config, q *sqlc.Queries, n *notify.Notifier, log *slog.Logger, dock *docker.Client) {
 	if q == nil {
 		return
 	}
@@ -86,13 +88,11 @@ func tickCerts(ctx context.Context, cfg config.Config, q *sqlc.Queries, n *notif
 		if row.DnsStatus.Valid {
 			dns = row.DnsStatus.String
 		}
-		checkDomainCert(ctx, q, n, settings.CertWarnPct, row.ID, row.Hostname, dns)
+		checkDomainCert(ctx, cfg, q, n, dock, log, settings.CertWarnPct, row.ID, row.Hostname, dns)
 	}
-	_ = cfg
-	_ = log
 }
 
-func checkDomainCert(ctx context.Context, q *sqlc.Queries, n *notify.Notifier, certWarnPct int, domainID, hostname, dnsStatus string) {
+func checkDomainCert(ctx context.Context, cfg config.Config, q *sqlc.Queries, n *notify.Notifier, dock *docker.Client, log *slog.Logger, certWarnPct int, domainID, hostname, dnsStatus string) {
 	hostname = strings.TrimSpace(hostname)
 	if hostname == "" {
 		return
@@ -108,6 +108,7 @@ func checkDomainCert(ctx context.Context, q *sqlc.Queries, n *notify.Notifier, c
 			CertExpiresAt: sql.NullInt64{},
 			ID:            domainID,
 		})
+		_ = proxy.TryAutoRepair(ctx, cfg, q, dock, []string{hostname}, false, log)
 		return
 	}
 	defer conn.Close()

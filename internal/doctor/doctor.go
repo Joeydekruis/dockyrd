@@ -204,7 +204,7 @@ func checkProxyContainer(ctx context.Context) []Check {
 			Name:    "dy-proxy container",
 			Status:  StatusWarn,
 			Detail:  detail,
-			FixHint: "Restart `dockyrd.service`; check `journalctl -u dockyrd` for ensure dy-proxy errors",
+			FixHint: "Dockyrd restarts dy-proxy automatically when HTTPS fails; update to the latest release or use Settings → Server → General → Repair edge",
 		}}
 	}
 	return []Check{{Name: "dy-proxy container", Status: StatusOK, Detail: detail}}
@@ -219,7 +219,7 @@ func checkHTTPSPorts(ctx context.Context) []Check {
 				Name:    "HTTPS edge (443/80)",
 				Status:  StatusWarn,
 				Detail:  fmt.Sprintf("nothing listening on %s", addr),
-				FixHint: "Set Public URL + ACME email in Instance settings and save; open firewall 80/443; restart dockyrd",
+				FixHint: "Set dashboard URL + ACME email under Settings → Server → General and save (syncs the edge); ensure firewall allows TCP 80/443",
 			}}
 		}
 		_ = conn.Close()

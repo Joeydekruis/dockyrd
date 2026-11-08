@@ -81,6 +81,10 @@ func startBackground(ctx context.Context, cfg config.Config, db *sql.DB, q *sqlc
 			if err := proxy.SyncFromDB(ctx, q, cfg, dockerCli); err != nil && log != nil {
 				log.Warn("proxy sync", "err", err)
 			}
+			go func() {
+				time.Sleep(12 * time.Second)
+				watch.TickEdgeRepair(ctx, cfg, q, dockerCli, log, false)
+			}()
 		}
 	}
 
@@ -90,7 +94,10 @@ func startBackground(ctx context.Context, cfg config.Config, db *sql.DB, q *sqlc
 		go dispatcher.Run(ctx, 2*time.Second)
 	}
 	go watch.RunDNS(ctx, cfg, q, log, 2*time.Minute)
-	go watch.RunCerts(ctx, cfg, q, notifier, log, 6*time.Hour)
+	go watch.RunCerts(ctx, cfg, q, notifier, log, 6*time.Hour, dockerCli)
+	if dockerCli != nil {
+		go watch.RunEdgeRepair(ctx, cfg, q, dockerCli, log, 3*time.Minute)
+	}
 	if notifier != nil {
 		go watch.RunDisk(ctx, cfg, q, notifier, log, 60*time.Second, dockerCli)
 		go watch.RunBackupsOverdue(ctx, q, notifier, log, 10*time.Minute)
