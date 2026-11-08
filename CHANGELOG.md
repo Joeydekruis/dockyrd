@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.7.11] - 2026-11-08
+
+_Finished: 2026-11-08_
+
+### Fixed
+
+- **ACME / HTTPS** — split Caddy into `dy_http` (`:80` only, challenges) and `dy_https` (`:443`, app/static routes); drop combined `:80`/`:443` server that kept redirecting `/.well-known/acme-challenge/*` to HTTPS
+
 ## [0.7.10] - 2026-11-07
 
 _Finished: 2026-11-07_

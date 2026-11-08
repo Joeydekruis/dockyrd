@@ -48,8 +48,7 @@ func Render(in RenderInput) ([]byte, error) {
 		in.ACMEEmail = "ops@localhost"
 	}
 
-	routes := make([]any, 0, len(in.AppRoutes)+len(in.StaticRoutes)+2)
-	routes = append(routes, httpToHTTPSRedirectRoute())
+	routes := make([]any, 0, len(in.AppRoutes)+len(in.StaticRoutes)+1)
 
 	if in.PanelHost != "" && in.PanelUpstream != "" {
 		routes = append(routes, map[string]any{
@@ -116,8 +115,14 @@ func Render(in RenderInput) ([]byte, error) {
 		"apps": map[string]any{
 			"http": map[string]any{
 				"servers": map[string]any{
-					"dy": mergeServerConfig(map[string]any{
-						"listen": []string{":443", ":80"},
+					// :80 only — ACME HTTP-01; must not share :443 or Caddy redirects challenges to HTTPS.
+					"dy_http": mergePlainHTTPServer(map[string]any{
+						"listen": []string{":80"},
+						"logs":   map[string]any{"default_logger_name": "dy"},
+						"routes": []any{},
+					}),
+					"dy_https": mergeServerConfig(map[string]any{
+						"listen": []string{":443"},
 						"logs":   map[string]any{"default_logger_name": "dy"},
 						"routes": routes,
 					}, in.Trusted),

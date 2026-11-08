@@ -91,26 +91,13 @@ func mergeServerConfig(base map[string]any, trusted TrustedProxyConfig) map[stri
 	return base
 }
 
-// httpToHTTPSRedirectRoute redirects cleartext HTTP after certs exist, but not ACME challenges.
-func httpToHTTPSRedirectRoute() map[string]any {
-	return map[string]any{
-		"match": []any{
-			map[string]any{
-				"protocol": []string{"http"},
-				"not": []any{
-					map[string]any{
-						"path": []string{"/.well-known/acme-challenge/*"},
-					},
-				},
-			},
-		},
-		"handle": []any{
-			map[string]any{
-				"handler":  "redir",
-				"location": "https://{http.request.host}{http.request.uri}",
-				"permanent": true,
-			},
-		},
-		"terminal": true,
+// mergePlainHTTPServer configures port-80 ACME only (no TLS routes, no HTTP→HTTPS redirect).
+func mergePlainHTTPServer(base map[string]any) map[string]any {
+	for k, v := range serverTimeouts() {
+		base[k] = v
 	}
+	base["automatic_https"] = map[string]any{
+		"disable_redirects": true,
+	}
+	return base
 }
