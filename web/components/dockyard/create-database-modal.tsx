@@ -7,6 +7,7 @@ import { Field } from "@/components/dockyard/ui/field";
 import { Modal } from "@/components/dockyard/ui/modal";
 import { SelectField } from "@/components/dockyard/ui/select-field";
 import { createService, listProjects, type Project } from "@/lib/api";
+import { serviceDetailHref } from "@/lib/service-routes";
 
 type CreateDatabaseModalProps = {
   open: boolean;
@@ -60,6 +61,7 @@ export function CreateDatabaseModal({
           kind === "postgres"
             ? "Postgres container starting on this server."
             : "Redis container starting on this server.",
+        detailHref: serviceDetailHref(service.kind, service.slug),
       });
       onClose();
     } catch (err) {

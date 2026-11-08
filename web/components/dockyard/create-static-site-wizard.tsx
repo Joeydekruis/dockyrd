@@ -28,6 +28,7 @@ import {
   putServiceVariables,
 } from "@/lib/api";
 import { previewDefaultPlatformHostname } from "@/lib/domain-dns";
+import { serviceDetailHref } from "@/lib/service-routes";
 
 const STEPS: WizardStepDef[] = [
   { id: "source", label: "Source" },
@@ -312,6 +313,8 @@ export function CreateStaticSiteWizard({
         serviceId: service.id,
         deploymentId: deployment.id,
         siteName: draft.siteName.trim(),
+        slug: service.slug,
+        detailHref: serviceDetailHref(service.kind, service.slug),
         repo: draft.repo.trim(),
         branch: draft.branch.trim(),
         installCmd: draft.installCmd.trim() || "npm install",

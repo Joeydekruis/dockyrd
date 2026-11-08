@@ -10,9 +10,6 @@ import (
 	"strings"
 )
 
-// DefaultRailpackFrontend is the BuildKit syntax image for railpack plans.
-const DefaultRailpackFrontend = "ghcr.io/railwayapp/railpack-frontend:v0.2.2"
-
 // RailpackInput configures railpack prepare + buildx load.
 type RailpackInput struct {
 	ContextDir   string

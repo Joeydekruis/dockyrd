@@ -14,7 +14,6 @@ import { useCallback, useEffect, useState } from "react";
 import { AddConnectionModal } from "@/components/dockyard/add-connection-modal";
 import { RemoveConnectionModal } from "@/components/dockyard/remove-connection-modal";
 import { Button } from "@/components/dockyard/ui/button";
-import { EmptyState } from "@/components/dockyard/ui/empty-state";
 import { StatusBadge } from "@/components/dockyard/ui/status-badge";
 import {
   deleteServiceLink,
@@ -356,15 +355,6 @@ export function ApplicationConnectionsFlow({
           </div>
         </div>
       </div>
-
-      {!loading && links.length === 0 ? (
-        <div className="mt-4">
-          <EmptyState
-            title="No connections yet"
-            description="Link resources so environment references resolve and traffic can reach private services."
-          />
-        </div>
-      ) : null}
 
       <AddConnectionModal
         open={addOpen}

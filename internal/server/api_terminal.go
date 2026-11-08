@@ -16,7 +16,6 @@ import (
 	"github.com/oklog/ulid/v2"
 
 	"github.com/Joeydekruis/dockyrd/internal/audit"
-	"github.com/Joeydekruis/dockyrd/internal/auth"
 	"github.com/Joeydekruis/dockyrd/internal/config"
 	"github.com/Joeydekruis/dockyrd/internal/instance"
 	"github.com/Joeydekruis/dockyrd/internal/crypto"
@@ -84,24 +83,6 @@ func registerTerminalRoutes(mux *http.ServeMux, deps apiDeps) {
 	mux.HandleFunc("GET /api/v1/terminal/ws", deps.handleTerminalWebSocket)
 }
 
-func (d apiDeps) verifyUserTOTPCode(ctx context.Context, user sqlc.GetUserByIDRow, code string) error {
-	if !totpEnabled(user.TotpEnabledAt) {
-		return nil
-	}
-	code = strings.TrimSpace(code)
-	if code == "" {
-		return errors.New("2fa code required")
-	}
-	secret, err := d.decryptUserTOTPSecret(ctx, user.ID)
-	if err != nil {
-		return errors.New("2fa not configured")
-	}
-	if !auth.ValidateTOTP(secret, code) {
-		return errors.New("invalid 2fa code")
-	}
-	return nil
-}
-
 func (d apiDeps) handleTerminalMeta(w http.ResponseWriter, r *http.Request) {
 	user, ok := d.requireAdmin(w, r)
 	if !ok {
@@ -114,14 +95,13 @@ func (d apiDeps) handleTerminalMeta(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	hostAllowed := panel.TerminalAllowHost
-	canHost := user.Role == "owner" && hostAllowed
+	canHost := hostAllowed && (user.Role == "owner" || user.Role == "admin")
 	writeJSON(w, http.StatusOK, map[string]any{
 		"session_kinds": map[string]any{
 			"container": map[string]any{"available": true},
 			"host": map[string]any{
-				"available":               canHost,
-				"allowed_by_instance":     hostAllowed,
-				"requires_mfa_if_enabled": totpEnabled(user.TotpEnabledAt),
+				"available":           canHost,
+				"allowed_by_instance": hostAllowed,
 			},
 			"test": map[string]any{"available": d.docker != nil},
 		},
@@ -323,8 +303,9 @@ func (d apiDeps) resolveTerminalSession(ctx context.Context, user sqlc.GetUserBy
 }
 
 func (d apiDeps) resolveHostTerminalSession(ctx context.Context, user sqlc.GetUserByIDRow, body createTerminalSessionRequest) (terminal.SessionSpec, map[string]any, error) {
-	if user.Role != "owner" {
-		return terminal.SessionSpec{}, nil, fmt.Errorf("%w: only the owner may open a host shell", errTerminalForbidden)
+	_ = body
+	if user.Role != "owner" && user.Role != "admin" {
+		return terminal.SessionSpec{}, nil, fmt.Errorf("%w: only owners and admins may open a host shell", errTerminalForbidden)
 	}
 	panel, err := instance.LoadPanel(ctx, d.q)
 	if err != nil {
@@ -332,9 +313,6 @@ func (d apiDeps) resolveHostTerminalSession(ctx context.Context, user sqlc.GetUs
 	}
 	if !panel.TerminalAllowHost {
 		return terminal.SessionSpec{}, nil, fmt.Errorf("%w: host terminal is disabled in instance settings", errTerminalForbidden)
-	}
-	if err := d.verifyUserTOTPCode(ctx, user, body.MfaCode); err != nil {
-		return terminal.SessionSpec{}, nil, fmt.Errorf("%w: %s", errTerminalUnauthorized, err.Error())
 	}
 	meta := map[string]any{"session_kind": terminal.SessionKindHost}
 	return terminal.SessionSpec{

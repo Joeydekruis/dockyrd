@@ -5,6 +5,7 @@ on:
     branches: [development, main]
     paths:
       - "scripts/install.sh"
+      - "scripts/ensure-railpack.sh"
       - "scripts/verify-install.sh"
       - ".github/workflows/install-matrix.yml"
   workflow_dispatch:

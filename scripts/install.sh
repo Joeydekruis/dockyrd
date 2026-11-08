@@ -205,6 +205,20 @@ wait_for_docker() {
 	done
 }
 
+ensure_railpack() {
+	script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+	if [ -f "$script_dir/ensure-railpack.sh" ]; then
+		sh "$script_dir/ensure-railpack.sh"
+		return
+	fi
+	if command -v railpack >/dev/null 2>&1; then
+		log "✓ Railpack CLI already installed"
+		return 0
+	fi
+	log "Missing scripts/ensure-railpack.sh; install Railpack manually." >&2
+	exit 1
+}
+
 install_docker_via_apt() {
 	if ! command -v apt-get >/dev/null 2>&1; then
 		log "Docker is not installed and automatic install needs apt (Debian/Ubuntu)." >&2
@@ -539,6 +553,7 @@ main() {
 	require_root
 	preflight
 	ensure_docker
+	ensure_railpack
 	ensure_paths
 	write_install_env
 	load_install_env

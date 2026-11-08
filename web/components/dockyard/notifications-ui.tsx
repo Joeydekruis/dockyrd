@@ -2,6 +2,7 @@
 
 import { AlertTriangle, Check, Info, Tag, X, XCircle } from "lucide-react";
 import Link from "next/link";
+import { Button } from "@/components/dockyard/ui/button";
 import type { InboxNotification } from "@/lib/api";
 import { formatTimeAgo } from "@/lib/resource-dashboard";
 
@@ -208,20 +209,20 @@ export function NotificationsPanelHeader({
 }) {
   return (
     <div
-      className="flex items-start justify-between gap-3 border-b px-6 py-5"
+      className="flex items-center justify-between gap-3 border-b px-6 py-5"
       style={{ borderColor: "var(--border)" }}
     >
       <h2 className="text-xl font-semibold tracking-tight">{title}</h2>
       <div className="flex items-center gap-3">
         {onMarkAllRead ? (
-          <button
-            type="button"
-            className="btn-link text-sm font-medium"
+          <Button
+            variant="outline"
+            iconLeft={Check}
             disabled={markAllDisabled}
             onClick={onMarkAllRead}
           >
             Mark all as read
-          </button>
+          </Button>
         ) : null}
         {onClose ? (
           <button

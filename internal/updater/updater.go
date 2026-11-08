@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/Joeydekruis/dockyrd/internal/build"
 	"github.com/Joeydekruis/dockyrd/internal/config"
 	"github.com/Joeydekruis/dockyrd/internal/db"
 )
@@ -134,6 +135,9 @@ func Apply(ctx context.Context, cfg config.Config, current string, opts Options)
 		if !opts.Quiet {
 			fmt.Printf("Installed dy to %s\n", dyDest)
 		}
+	}
+	if err := build.EnsureRailpackCLI(ctx); err != nil {
+		return ApplyResult{}, fmt.Errorf("ensure railpack CLI: %w", err)
 	}
 	if !opts.Quiet {
 		fmt.Printf("Installed %s to %s\n", rel.Tag, dest)

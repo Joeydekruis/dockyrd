@@ -1,6 +1,6 @@
 "use client";
 
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Eye, EyeOff } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AddEnvVariableModal } from "@/components/dockyard/add-env-variable-modal";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
@@ -34,6 +34,7 @@ import {
   type ServiceDomain,
   type ServiceVariable,
 } from "@/lib/api";
+import { staticSiteDetailBreadcrumbs } from "@/lib/resource-breadcrumbs";
 import { formatTimeAgo, resourceStatusDisplay } from "@/lib/resource-dashboard";
 import {
   deploymentCommitShaShort,
@@ -224,9 +225,13 @@ export function StaticSiteDetailPage() {
   }
 
   const title = row?.service.name ?? "Static site";
+  const breadcrumbItems = useMemo(
+    () => staticSiteDetailBreadcrumbs(row?.project, title),
+    [row?.project, title],
+  );
 
   return (
-    <DashboardShell title={title} breadcrumb="Static sites">
+    <DashboardShell title={title} breadcrumbItems={breadcrumbItems}>
       {loading ? (
         <DockyrdPageLoading />
       ) : error ? (
@@ -487,6 +492,7 @@ export function StaticSiteDetailPage() {
                   <Button
                     type="button"
                     variant="outline"
+                    iconLeft={revealedSecrets ? EyeOff : Eye}
                     onClick={() => {
                       setRevealedSecrets((v) => !v);
                     }}

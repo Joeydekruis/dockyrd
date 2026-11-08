@@ -1,11 +1,10 @@
 "use client";
 
 import type { LucideIcon } from "lucide-react";
-import { Circle, CircleCheck, Copy, GitBranch } from "lucide-react";
+import { Circle, CircleCheck, GitBranch } from "lucide-react";
 import type { ReactNode } from "react";
 import { Button } from "@/components/dockyard/ui/button";
-import { IconButton } from "@/components/dockyard/ui/icon-button";
-import { useCopyToClipboard } from "@/lib/snackbar-context";
+import { CopyIconButton } from "@/components/dockyard/ui/copy-icon-button";
 
 export type SettingsDetailRow = {
   label: string;
@@ -81,7 +80,6 @@ export function SettingsMetaGrid({ children }: { children: ReactNode }) {
 }
 
 export function SettingsCopyPill({ value }: { value: string }) {
-  const copyToClipboard = useCopyToClipboard();
   return (
     <span
       className="inline-flex max-w-full items-center gap-1 rounded-lg border py-1 pl-2.5 pr-1 font-mono text-[13px]"
@@ -91,13 +89,7 @@ export function SettingsCopyPill({ value }: { value: string }) {
       }}
     >
       <span className="truncate">{value}</span>
-      <IconButton
-        icon={Copy}
-        label="Copy"
-        onClick={() => {
-          void copyToClipboard(value);
-        }}
-      />
+      <CopyIconButton value={value} label="Copy" />
     </span>
   );
 }
@@ -151,7 +143,7 @@ export function SettingsDetailBlock({
 }: SettingsDetailBlockProps) {
   return (
     <div
-      className="border-t py-6 first:border-t-0 first:pt-0"
+      className="-mx-6 border-t px-6 py-6 first:border-t-0 first:pt-6"
       style={{ borderColor: "var(--border)" }}
     >
       <div className="flex flex-wrap items-start justify-between gap-4">

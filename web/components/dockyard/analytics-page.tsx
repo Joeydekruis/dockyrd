@@ -72,7 +72,10 @@ export function AnalyticsPage() {
 
   const lastUpdatedLine =
     data.lastRefreshedAt != null ? (
-      <p className="mt-2 text-[13px]" style={{ color: "var(--muted-text)" }}>
+      <p
+        className="shrink-0 pb-3 text-right text-[13px]"
+        style={{ color: "var(--muted-text)" }}
+      >
         Last refreshed:{" "}
         <time
           dateTime={new Date(data.lastRefreshedAt * 1000).toISOString()}
@@ -83,7 +86,10 @@ export function AnalyticsPage() {
         {data.loading ? " · updating…" : null}
       </p>
     ) : data.loading ? (
-      <p className="mt-2 text-[13px]" style={{ color: "var(--muted-text)" }}>
+      <p
+        className="shrink-0 pb-3 text-right text-[13px]"
+        style={{ color: "var(--muted-text)" }}
+      >
         Loading metrics…
       </p>
     ) : null;
@@ -96,13 +102,19 @@ export function AnalyticsPage() {
         subtitle="Monitor your server, from the key numbers to the detailed charts. Refreshes every minute while you stay on this page."
         action={<TimeRangeToggle value={data.range} onChange={data.setRange} />}
       />
-      {lastUpdatedLine}
-
-      <Tabs
-        tabs={[...analyticsTabs]}
-        activeId={tab}
-        onChange={(id) => setTab(id as AnalyticsTabId)}
-      />
+      <div
+        className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2 border-b"
+        style={{ borderColor: "var(--border)" }}
+      >
+        <div className="min-w-0 [&>div]:border-b-0">
+          <Tabs
+            tabs={[...analyticsTabs]}
+            activeId={tab}
+            onChange={(id) => setTab(id as AnalyticsTabId)}
+          />
+        </div>
+        {lastUpdatedLine}
+      </div>
 
       <div className="mt-8 space-y-10">
         {data.error ? (

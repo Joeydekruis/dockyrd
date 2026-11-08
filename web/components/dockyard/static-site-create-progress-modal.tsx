@@ -1,6 +1,7 @@
 "use client";
 
 import { ArrowLeft, Check, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/dockyard/ui/button";
 import { Chip } from "@/components/dockyard/ui/chip";
@@ -21,6 +22,8 @@ export type StaticSiteCreateResult = {
   serviceId: string;
   deploymentId: string;
   siteName: string;
+  slug: string;
+  detailHref: string;
   repo: string;
   branch: string;
   installCmd: string;
@@ -44,11 +47,14 @@ export function StaticSiteCreateProgressModal({
   onEditSettings,
   onFinished,
 }: StaticSiteCreateProgressModalProps) {
+  const router = useRouter();
   const [deployment, setDeployment] = useState<Deployment | null>(null);
   const [log, setLog] = useState("");
   const finishedRef = useRef(false);
   const onFinishedRef = useRef(onFinished);
   onFinishedRef.current = onFinished;
+  const detailHrefRef = useRef<string | undefined>(undefined);
+  detailHrefRef.current = context?.detailHref;
 
   useEffect(() => {
     if (!open || !context) {
@@ -74,6 +80,12 @@ export function StaticSiteCreateProgressModal({
         if (dep?.status === "live" && !finishedRef.current) {
           finishedRef.current = true;
           onFinishedRef.current();
+          const href = detailHrefRef.current;
+          if (href) {
+            window.setTimeout(() => {
+              if (!cancelled) router.push(href);
+            }, 450);
+          }
         }
       } catch {
         /* keep polling */
@@ -86,7 +98,7 @@ export function StaticSiteCreateProgressModal({
       cancelled = true;
       window.clearInterval(id);
     };
-  }, [open, context]);
+  }, [open, context, router]);
 
   const steps = useMemo(
     () =>
@@ -218,10 +230,10 @@ export function StaticSiteCreateProgressModal({
               Close
             </Button>
             {isLive ? (
-              <Button href="/static-sites">Go to static site</Button>
+              <Button href={context.detailHref}>Open static site</Button>
             ) : (
               <Button type="button" disabled>
-                Go to static site
+                Open static site
               </Button>
             )}
           </div>

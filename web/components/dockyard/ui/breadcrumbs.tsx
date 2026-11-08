@@ -1,5 +1,7 @@
+export type BreadcrumbItem = { label: string; href?: string };
+
 type BreadcrumbsProps = {
-  items: { label: string; href?: string }[];
+  items: BreadcrumbItem[];
 };
 
 export function Breadcrumbs({ items }: BreadcrumbsProps) {

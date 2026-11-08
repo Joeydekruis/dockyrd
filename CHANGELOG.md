@@ -6,6 +6,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.7.16] - 2026-11-08
+
+_Finished: 2026-11-08_
+
+### Added
+
+- **Deployments API** — `triggered_by_name` on list/get deployment responses (Go `/api/v1`)
+- **Railpack** — `scripts/ensure-railpack.sh`, installer hook, and `dockyrd doctor` check when CLI is missing from `PATH`
+- **Dashboard UI** — shared `ServiceDeploymentTable`, deployment author avatar, GitHub repo link, `CopyIconButton`, and resource breadcrumb helpers
+
+### Changed
+
+- **Deployments tables** — applications and static sites use shared deployment table component; author column when trigger user is known
+- **Terminal** — leaner service/instance terminal UI (Go terminal API + `terminal-page.tsx`)
+- **Connection variables** — `KeyValueRow` keeps long revealed URLs in the value column; reveal/copy icons use `size-4`
+- **UI primitives** — popover menu and split-button positioning; primary button spinner variant; provisioning/create flows use shared loading pattern
+
+### Fixed
+
+- **Static site settings** — settings tab layout and save wiring refinements
+
 ## [0.7.15] - 2026-11-08
 
 _Finished: 2026-11-08_

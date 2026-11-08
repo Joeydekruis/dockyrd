@@ -690,6 +690,7 @@ export type Deployment = {
   service_id: string;
   status: string;
   trigger: string;
+  triggered_by_name?: string;
   image_ref?: string;
   release_path?: string;
   commit_sha?: string;
@@ -1699,7 +1700,6 @@ export type TerminalMeta = {
     host: {
       available: boolean;
       allowed_by_instance: boolean;
-      requires_mfa_if_enabled: boolean;
     };
     test: { available: boolean };
   };

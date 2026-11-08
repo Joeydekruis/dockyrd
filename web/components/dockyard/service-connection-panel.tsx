@@ -44,12 +44,15 @@ function ConnectionValue({
   const canCopy = !(secret && !plain);
 
   return (
-    <span className="inline-flex max-w-full flex-wrap items-center gap-1 sm:gap-2">
-      <span className="break-all font-mono text-sm">{display}</span>
+    <span className="inline-flex min-w-0 max-w-full items-start justify-end gap-1.5 sm:gap-2">
+      <span className="min-w-0 break-all text-right font-mono text-sm">
+        {display}
+      </span>
       <span className="inline-flex shrink-0 items-center gap-0.5">
         {secret ? (
           <IconButton
             icon={revealed ? EyeOff : Eye}
+            iconClassName="size-4"
             label={revealed ? `Hide ${name}` : `Reveal ${name}`}
             onClick={() => {
               if (revealed) onHide();
@@ -59,6 +62,7 @@ function ConnectionValue({
         ) : null}
         <IconButton
           icon={Copy}
+          iconClassName="size-4"
           label={`Copy ${name}`}
           disabled={!canCopy}
           onClick={() => {

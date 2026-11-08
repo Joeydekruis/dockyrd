@@ -27,7 +27,7 @@ import {
   patchService,
   type Service,
 } from "@/lib/api";
-import { useCopyToClipboard } from "@/lib/snackbar-context";
+import { useCopyToClipboard, useSnackbar } from "@/lib/snackbar-context";
 
 type BuilderUi = "railpack" | "dockerfile" | "buildpacks" | "nixpacks";
 
@@ -57,7 +57,7 @@ function builderLabel(b: string): string {
 }
 
 function cardClassName() {
-  return "rounded-[20px] border px-6 py-2";
+  return "rounded-[20px] border px-6 pb-2 pt-4";
 }
 
 type ApplicationSettingsTabProps = {
@@ -75,6 +75,7 @@ export function ApplicationSettingsTab({
 }: ApplicationSettingsTabProps) {
   const router = useRouter();
   const copyToClipboard = useCopyToClipboard();
+  const { showSnackbar } = useSnackbar();
   const cfg = parseAppConfig(service.config);
   const [editBuilder, setEditBuilder] = useState(false);
   const [editHealth, setEditHealth] = useState(false);
@@ -99,7 +100,10 @@ export function ApplicationSettingsTab({
     return `${window.location.origin}/api/v1/hooks/deploy/${service.id}`;
   }, [service.id]);
 
-  async function saveConfig(patch: Record<string, unknown>) {
+  async function saveConfig(
+    patch: Record<string, unknown>,
+    successMessage: string,
+  ): Promise<boolean> {
     setBusy(true);
     onError(null);
     try {
@@ -107,15 +111,18 @@ export function ApplicationSettingsTab({
         config: { ...service.config, ...patch },
       });
       await onUpdated();
+      showSnackbar(successMessage, "success");
+      return true;
     } catch (e) {
       onError(e instanceof Error ? e.message : "Save failed");
+      return false;
     } finally {
       setBusy(false);
     }
   }
 
   async function toggleAutoDeploy(next: boolean) {
-    await saveConfig({ autoDeploy: next });
+    await saveConfig({ autoDeploy: next }, "Auto-deploy settings saved.");
   }
 
   const sourceType = String(cfg.source?.type ?? "image").toLowerCase();
@@ -255,7 +262,7 @@ export function ApplicationSettingsTab({
             ]}
           />
           <div
-            className="border-t py-6"
+            className="-mx-6 border-t px-6 py-6"
             style={{ borderColor: "var(--border)" }}
           >
             <Switch
@@ -306,7 +313,7 @@ export function ApplicationSettingsTab({
           ) : null}
           {!gitSourced ? (
             <p
-              className="border-t py-4 text-[13px]"
+              className="-mx-6 border-t px-6 py-4 text-[13px]"
               style={{
                 borderColor: "var(--border)",
                 color: "var(--muted-text)",
@@ -414,11 +421,14 @@ export function ApplicationSettingsTab({
             </Button>
             <Button
               type="button"
-              disabled={busy}
+              loading={busy}
               onClick={() =>
-                void saveConfig({ builder: draftBuilder }).then(() =>
-                  setEditBuilder(false),
-                )
+                void saveConfig(
+                  { builder: draftBuilder },
+                  "Build strategy saved.",
+                ).then((ok) => {
+                  if (ok) setEditBuilder(false);
+                })
               }
             >
               Save
@@ -464,7 +474,7 @@ export function ApplicationSettingsTab({
             </Button>
             <Button
               type="button"
-              disabled={busy}
+              loading={busy}
               onClick={() => {
                 const port = Number.parseInt(draftPort, 10);
                 const mem = Number.parseInt(draftMem, 10);
@@ -476,9 +486,12 @@ export function ApplicationSettingsTab({
                   onError("Memory must be at least 128 MB.");
                   return;
                 }
-                void saveConfig({ port, memLimitMB: mem }).then(() =>
-                  setEditResources(false),
-                );
+                void saveConfig(
+                  { port, memLimitMB: mem },
+                  "Resources saved.",
+                ).then((ok) => {
+                  if (ok) setEditResources(false);
+                });
               }}
             >
               Save
@@ -599,11 +612,14 @@ export function ApplicationSettingsTab({
             </Button>
             <Button
               type="button"
-              disabled={busy}
+              loading={busy}
               onClick={() =>
-                void saveConfig({ healthPath: draftHealth.trim() || "/" }).then(
-                  () => setEditHealth(false),
-                )
+                void saveConfig(
+                  { healthPath: draftHealth.trim() || "/" },
+                  "Health check path saved.",
+                ).then((ok) => {
+                  if (ok) setEditHealth(false);
+                })
               }
             >
               Save

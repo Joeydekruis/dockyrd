@@ -8,6 +8,11 @@ import {
   useRef,
   useState,
 } from "react";
+import { createPortal } from "react-dom";
+import {
+  isSelectMenuOutsideClick,
+  useSelectMenuPosition,
+} from "@/components/dockyard/ui/use-select-menu-position";
 
 /** `secondary` = inverse (white) — use only on gradient/dark backgrounds; prefer `outline` on cards and page chrome. */
 export type SplitButtonVariant = "primary" | "outline" | "secondary";
@@ -58,17 +63,26 @@ export function SplitButton({
 }: SplitButtonProps) {
   const [menuOpen, setMenuOpen] = useState(defaultMenuOpen);
   const rootRef = useRef<HTMLDivElement>(null);
+  const anchorRef = useRef<HTMLDivElement>(null);
   const menuId = useId();
   const btnClass = variantClass[variant];
   const groupClass =
     `split-button split-button-${variant === "secondary" ? "inverse" : variant}`.trim();
   const hasMenu = menuItems != null && menuItems.length > 0;
   const showMenu = hasMenu && (defaultMenuOpen || menuOpen);
+  const usePortal = !defaultMenuOpen;
+  const { menuRef, menuStyle } = useSelectMenuPosition(
+    showMenu && usePortal,
+    anchorRef,
+    { width: menuWidth },
+  );
 
   useEffect(() => {
     if (!menuOpen || defaultMenuOpen) return;
     const onDoc = (e: MouseEvent) => {
-      if (!rootRef.current?.contains(e.target as Node)) setMenuOpen(false);
+      if (isSelectMenuOutsideClick(e.target as Node, rootRef, menuRef)) {
+        setMenuOpen(false);
+      }
     };
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setMenuOpen(false);
@@ -79,7 +93,7 @@ export function SplitButton({
       document.removeEventListener("mousedown", onDoc);
       document.removeEventListener("keydown", onKey);
     };
-  }, [menuOpen, defaultMenuOpen]);
+  }, [menuOpen, defaultMenuOpen, menuRef]);
 
   const onChevronClick = () => {
     if (disabled) return;
@@ -95,7 +109,7 @@ export function SplitButton({
       ref={rootRef}
       className={`relative inline-flex flex-col items-start ${className}`.trim()}
     >
-      <div className={groupClass}>
+      <div ref={anchorRef} className={groupClass}>
         <button
           type={type}
           disabled={disabled}
@@ -131,40 +145,87 @@ export function SplitButton({
         </button>
       </div>
       {showMenu ? (
-        <div
-          id={menuId}
-          role="menu"
-          className="dockyrd-menu-panel"
-          style={{ width: menuWidth }}
-        >
-          {menuItems?.map((item) => {
-            const ItemIcon = item.icon;
-            return (
-              <button
-                key={item.id}
-                type="button"
-                role="menuitem"
-                className="dockyrd-menu-item"
-                style={{
-                  color: item.destructive ? "var(--danger)" : "var(--ink-navy)",
-                }}
-                onClick={() => {
-                  item.onSelect?.();
-                  if (!defaultMenuOpen) setMenuOpen(false);
-                }}
-              >
-                {ItemIcon ? (
-                  <ItemIcon
-                    strokeWidth={1.8}
-                    className="size-4 shrink-0"
-                    aria-hidden
-                  />
-                ) : null}
-                <span className="min-w-0 flex-1 text-left">{item.label}</span>
-              </button>
-            );
-          })}
-        </div>
+        usePortal && typeof document !== "undefined" ? (
+          createPortal(
+            <div
+              ref={menuRef}
+              id={menuId}
+              role="menu"
+              className="dockyrd-menu-panel"
+              style={{ ...menuStyle, width: menuWidth }}
+            >
+              {menuItems?.map((item) => {
+                const ItemIcon = item.icon;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    role="menuitem"
+                    className="dockyrd-menu-item"
+                    style={{
+                      color: item.destructive
+                        ? "var(--danger)"
+                        : "var(--ink-navy)",
+                    }}
+                    onClick={() => {
+                      item.onSelect?.();
+                      setMenuOpen(false);
+                    }}
+                  >
+                    {ItemIcon ? (
+                      <ItemIcon
+                        strokeWidth={1.8}
+                        className="size-4 shrink-0"
+                        aria-hidden
+                      />
+                    ) : null}
+                    <span className="min-w-0 flex-1 text-left">
+                      {item.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>,
+            document.body,
+          )
+        ) : (
+          <div
+            id={menuId}
+            role="menu"
+            className="dockyrd-menu-panel"
+            style={{ width: menuWidth }}
+          >
+            {menuItems?.map((item) => {
+              const ItemIcon = item.icon;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  role="menuitem"
+                  className="dockyrd-menu-item"
+                  style={{
+                    color: item.destructive
+                      ? "var(--danger)"
+                      : "var(--ink-navy)",
+                  }}
+                  onClick={() => {
+                    item.onSelect?.();
+                    if (!defaultMenuOpen) setMenuOpen(false);
+                  }}
+                >
+                  {ItemIcon ? (
+                    <ItemIcon
+                      strokeWidth={1.8}
+                      className="size-4 shrink-0"
+                      aria-hidden
+                    />
+                  ) : null}
+                  <span className="min-w-0 flex-1 text-left">{item.label}</span>
+                </button>
+              );
+            })}
+          </div>
+        )
       ) : null}
     </div>
   );

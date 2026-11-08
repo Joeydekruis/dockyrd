@@ -11,6 +11,7 @@ import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import { Sidebar } from "@/components/dockyard/sidebar";
 import { BANNER_HEIGHT_PX, TopBar } from "@/components/dockyard/top-bar";
 import { isAnnouncementDismissed } from "@/components/dockyard/ui/announcement-banner";
+import type { BreadcrumbItem } from "@/components/dockyard/ui/breadcrumbs";
 import { UpdateAvailableNotifier } from "@/components/dockyard/update-available-modal";
 import { getMe, type MeResponse } from "@/lib/api";
 import { isAccountSettingsPath, isSettingsPath } from "@/lib/nav";
@@ -20,12 +21,14 @@ import { UserLocaleProvider } from "@/lib/user-locale-context";
 type DashboardShellProps = {
   title: string;
   breadcrumb?: string;
+  breadcrumbItems?: BreadcrumbItem[];
   children: React.ReactNode;
 };
 
 export function DashboardShell({
   title,
   breadcrumb,
+  breadcrumbItems,
   children,
 }: DashboardShellProps) {
   const router = useRouter();
@@ -120,6 +123,7 @@ export function DashboardShell({
               <AppHeader
                 title={title}
                 breadcrumb={breadcrumb}
+                breadcrumbItems={breadcrumbItems}
                 user={user}
                 onOpenSearch={() => palette.setOpen(true)}
               />

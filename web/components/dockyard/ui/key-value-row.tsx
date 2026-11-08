@@ -8,16 +8,16 @@ type KeyValueRowProps = {
 export function KeyValueRow({ label, value }: KeyValueRowProps) {
   return (
     <div
-      className="flex flex-wrap items-baseline justify-between gap-2 border-t py-3 first:border-t-0"
+      className="flex items-start gap-3 border-t py-3 first:border-t-0"
       style={{ borderColor: "var(--border)" }}
     >
       <dt
-        className="font-mono text-[11px] uppercase tracking-widest"
+        className="shrink-0 pt-0.5 font-mono text-[11px] uppercase tracking-widest"
         style={{ color: "var(--muted-text)" }}
       >
         {label}
       </dt>
-      <dd className="text-sm font-medium text-right">{value}</dd>
+      <dd className="min-w-0 flex-1 text-right text-sm font-medium">{value}</dd>
     </div>
   );
 }

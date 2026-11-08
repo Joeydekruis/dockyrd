@@ -28,6 +28,7 @@ import {
   putServiceVariables,
 } from "@/lib/api";
 import { previewDefaultPlatformHostname } from "@/lib/domain-dns";
+import { serviceDetailHref } from "@/lib/service-routes";
 
 const STEPS: WizardStepDef[] = [
   { id: "source", label: "Source" },
@@ -257,6 +258,7 @@ export function CreateApplicationWizard({
           draft.sourceKind === "image"
             ? "Pulling image and starting the container."
             : "Building from repository and starting the container.",
+        detailHref: serviceDetailHref(service.kind, service.slug),
       });
       onClose();
     } catch (e) {

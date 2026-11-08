@@ -138,7 +138,8 @@ export function AddEnvVariableModal({
           </Button>
           <Button
             type="button"
-            disabled={busy}
+            loading={busy}
+            className="min-w-[8.5rem]"
             onClick={() =>
               void (mode === "single" ? submitSingle() : submitPaste())
             }

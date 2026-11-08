@@ -7,6 +7,7 @@ import { AddEnvVariableModal } from "@/components/dockyard/add-env-variable-moda
 import { PendingEnvRedeployBanner } from "@/components/dockyard/pending-env-redeploy-banner";
 import { Button } from "@/components/dockyard/ui/button";
 import { Chip } from "@/components/dockyard/ui/chip";
+import { CopyIconButton } from "@/components/dockyard/ui/copy-icon-button";
 import { IconButton } from "@/components/dockyard/ui/icon-button";
 import type { Service, ServiceVariable } from "@/lib/api";
 import {
@@ -104,19 +105,10 @@ export function ApplicationEnvironmentTab({
           <Button
             type="button"
             variant="outline"
+            iconLeft={revealedSecrets ? EyeOff : Eye}
             onClick={onToggleRevealSecrets}
           >
-            {revealedSecrets ? (
-              <>
-                <EyeOff className="mr-1.5 size-4" aria-hidden />
-                Hide secrets
-              </>
-            ) : (
-              <>
-                <Eye className="mr-1.5 size-4" aria-hidden />
-                Reveal secrets
-              </>
-            )}
+            {revealedSecrets ? "Hide secrets" : "Reveal secrets"}
           </Button>
           <Button type="button" onClick={() => setAddVarOpen(true)}>
             Add variable
@@ -142,6 +134,7 @@ export function ApplicationEnvironmentTab({
           const revealed = v.is_secret
             ? revealedSecrets || rowReveal[v.key]
             : true;
+          const canCopy = Boolean(v.value) && (!v.is_secret || revealed);
           const display =
             v.is_secret && !revealed ? "••••••••" : (v.value ?? "");
 
@@ -209,6 +202,12 @@ export function ApplicationEnvironmentTab({
                     Connect
                   </Button>
                 ) : null}
+                <CopyIconButton
+                  value={v.value ?? ""}
+                  label={`Copy ${v.key}`}
+                  message={`Copied ${v.key}`}
+                  disabled={!canCopy}
+                />
               </div>
             </li>
           );

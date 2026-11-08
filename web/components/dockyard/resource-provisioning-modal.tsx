@@ -1,6 +1,7 @@
 "use client";
 
 import { Check, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/dockyard/ui/button";
 import { Chip } from "@/components/dockyard/ui/chip";
@@ -13,6 +14,8 @@ export type ResourceProvisionContext = {
   serviceId: string;
   name: string;
   label: string;
+  /** Dashboard detail route once provisioning finishes. */
+  detailHref: string;
 };
 
 type ResourceProvisioningModalProps = {
@@ -34,12 +37,15 @@ export function ResourceProvisioningModal({
   onClose,
   onFinished,
 }: ResourceProvisioningModalProps) {
+  const router = useRouter();
   const [activeStep, setActiveStep] = useState(0);
   const [done, setDone] = useState(false);
   const [failed, setFailed] = useState(false);
   const finishedRef = useRef(false);
   const onFinishedRef = useRef(onFinished);
   onFinishedRef.current = onFinished;
+  const detailHrefRef = useRef<string | undefined>(undefined);
+  detailHrefRef.current = context?.detailHref;
 
   const serviceId = context?.serviceId;
   const provisionKind = context?.kind;
@@ -69,6 +75,12 @@ export function ResourceProvisioningModal({
       setDone(true);
       setActiveStep(steps.length);
       onFinishedRef.current();
+      const href = detailHrefRef.current;
+      if (href) {
+        window.setTimeout(() => {
+          if (!cancelled) router.push(href);
+        }, 450);
+      }
     };
 
     const stepTimer = window.setInterval(() => {
@@ -132,7 +144,7 @@ export function ResourceProvisioningModal({
       if (pollTimer) window.clearInterval(pollTimer);
       if (maxWaitTimer) window.clearTimeout(maxWaitTimer);
     };
-  }, [open, serviceId, provisionKind]);
+  }, [open, serviceId, provisionKind, router]);
 
   if (!open || !context) return null;
 

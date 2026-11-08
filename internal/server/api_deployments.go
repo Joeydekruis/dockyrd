@@ -1,10 +1,12 @@
 package server
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/Joeydekruis/dockyrd/internal/apitoken"
@@ -19,6 +21,7 @@ type deploymentResponse struct {
 	ServiceID  string  `json:"service_id"`
 	Status     string  `json:"status"`
 	Trigger    string  `json:"trigger"`
+	TriggeredByName *string `json:"triggered_by_name,omitempty"`
 	ImageRef    *string `json:"image_ref,omitempty"`
 	ReleasePath *string `json:"release_path,omitempty"`
 	BuildLogPath *string `json:"build_log_path,omitempty"`
@@ -81,6 +84,7 @@ func (d apiDeps) handleListDeployments(w http.ResponseWriter, r *http.Request) {
 	for _, row := range rows {
 		out = append(out, deploymentFromRow(row))
 	}
+	attachDeploymentTriggerNames(r.Context(), d.q, rows, out)
 	writeJSON(w, http.StatusOK, map[string]any{"deployments": out})
 }
 
@@ -145,7 +149,11 @@ func (d apiDeps) handleGetDeployment(w http.ResponseWriter, r *http.Request) {
 	if _, ok := d.requireProjectScope(w, r, apitoken.ScopeRead, projectID); !ok {
 		return
 	}
-	writeJSON(w, http.StatusOK, deploymentFromFullRow(row))
+	resp := deploymentFromFullRow(row)
+	if name := deploymentTriggeredByName(ctx, d.q, row.TriggeredBy); name != nil {
+		resp.TriggeredByName = name
+	}
+	writeJSON(w, http.StatusOK, resp)
 }
 
 func (d apiDeps) handleCancelDeployment(w http.ResponseWriter, r *http.Request) {
@@ -311,6 +319,48 @@ func (d apiDeps) streamBuildLog(w http.ResponseWriter, r *http.Request, path str
 				}
 			}
 			_ = f.Close()
+		}
+	}
+}
+
+func deploymentTriggeredByName(ctx context.Context, q *sqlc.Queries, triggeredBy sql.NullString) *string {
+	if !triggeredBy.Valid {
+		return nil
+	}
+	uid := strings.TrimSpace(triggeredBy.String)
+	if uid == "" {
+		return nil
+	}
+	u, err := q.GetUserByID(ctx, uid)
+	if err != nil || strings.TrimSpace(u.Name) == "" {
+		return nil
+	}
+	name := strings.TrimSpace(u.Name)
+	return &name
+}
+
+func attachDeploymentTriggerNames(ctx context.Context, q *sqlc.Queries, rows []sqlc.ListDeploymentsForServiceRow, out []deploymentResponse) {
+	if len(rows) != len(out) {
+		return
+	}
+	names := make(map[string]string)
+	for i, row := range rows {
+		if !row.TriggeredBy.Valid {
+			continue
+		}
+		uid := strings.TrimSpace(row.TriggeredBy.String)
+		if uid == "" {
+			continue
+		}
+		name, ok := names[uid]
+		if !ok {
+			if n := deploymentTriggeredByName(ctx, q, row.TriggeredBy); n != nil {
+				name = *n
+				names[uid] = name
+			}
+		}
+		if name != "" {
+			out[i].TriggeredByName = &name
 		}
 	}
 }

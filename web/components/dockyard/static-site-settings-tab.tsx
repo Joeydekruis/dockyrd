@@ -7,6 +7,7 @@ import {
   Settings,
   TriangleAlert,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ServiceBuildLocationPanel } from "@/components/dockyard/service-build-location-panel";
 import { Alert } from "@/components/dockyard/ui/alert";
@@ -23,7 +24,8 @@ import {
   SettingsGroupHeading,
 } from "@/components/dockyard/ui/settings-detail-block";
 import { Switch } from "@/components/dockyard/ui/switch";
-import { patchService, type Service } from "@/lib/api";
+import { deletePanelService, patchService, type Service } from "@/lib/api";
+import { useSnackbar } from "@/lib/snackbar-context";
 import {
   formatBuildPart,
   isBuildEnabled,
@@ -42,7 +44,7 @@ type EditModal =
   | "spaFallback";
 
 function cardClassName() {
-  return "rounded-[20px] border px-6 py-2";
+  return "rounded-[20px] border px-6 pb-2 pt-4";
 }
 
 function buildSettingsPatch(
@@ -113,10 +115,16 @@ export function StaticSiteSettingsTab({
   onUpdated,
   onError,
 }: StaticSiteSettingsTabProps) {
+  const router = useRouter();
+  const { showSnackbar } = useSnackbar();
   const buildParts = staticSiteBuildParts(cfg);
   const buildOn = isBuildEnabled(cfg);
   const [modal, setModal] = useState<EditModal>(null);
   const [busy, setBusy] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [confirmSlug, setConfirmSlug] = useState("");
+  const [deleteBusy, setDeleteBusy] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const [displayName, setDisplayName] = useState(service.name);
   const [repo, setRepo] = useState(cfg.source?.repo ?? "");
@@ -157,12 +165,29 @@ export function StaticSiteSettingsTab({
     setModal(null);
   }
 
-  async function savePatch(body: Parameters<typeof patchService>[1]) {
+  async function confirmDelete() {
+    setDeleteBusy(true);
+    setDeleteError(null);
+    try {
+      await deletePanelService(service.id, { confirm_slug: confirmSlug });
+      router.push("/static-sites");
+    } catch (e) {
+      setDeleteError(e instanceof Error ? e.message : "Delete failed");
+    } finally {
+      setDeleteBusy(false);
+    }
+  }
+
+  async function savePatch(
+    body: Parameters<typeof patchService>[1],
+    successMessage: string,
+  ) {
     setBusy(true);
     onError(null);
     try {
       await patchService(service.id, body);
       await onUpdated();
+      showSnackbar(successMessage, "success");
       setModal(null);
     } catch (e) {
       onError(e instanceof Error ? e.message : "Could not save settings");
@@ -386,8 +411,12 @@ export function StaticSiteSettingsTab({
             <Button
               type="button"
               variant="danger"
-              disabled
               className="font-mono text-[11px] uppercase tracking-widest"
+              onClick={() => {
+                setConfirmSlug("");
+                setDeleteError(null);
+                setDeleteOpen(true);
+              }}
             >
               Delete site
             </Button>
@@ -407,8 +436,14 @@ export function StaticSiteSettingsTab({
             </Button>
             <Button
               type="button"
-              disabled={busy || !displayName.trim()}
-              onClick={() => void savePatch({ name: displayName.trim() })}
+              loading={busy}
+              disabled={!displayName.trim()}
+              onClick={() =>
+                void savePatch(
+                  { name: displayName.trim() },
+                  "Display name saved.",
+                )
+              }
             >
               Save
             </Button>
@@ -436,19 +471,23 @@ export function StaticSiteSettingsTab({
             </Button>
             <Button
               type="button"
-              disabled={busy || !repo.trim()}
+              loading={busy}
+              disabled={!repo.trim()}
               onClick={() =>
-                void savePatch({
-                  config: {
-                    ...(service.config ?? {}),
-                    source: {
-                      ...(cfg.source ?? {}),
-                      type: cfg.source?.type ?? "github",
-                      repo: repo.trim(),
-                      branch: branch.trim() || "main",
+                void savePatch(
+                  {
+                    config: {
+                      ...(service.config ?? {}),
+                      source: {
+                        ...(cfg.source ?? {}),
+                        type: cfg.source?.type ?? "github",
+                        repo: repo.trim(),
+                        branch: branch.trim() || "main",
+                      },
                     },
                   },
-                })
+                  "Source settings saved.",
+                )
               }
             >
               Save
@@ -486,20 +525,23 @@ export function StaticSiteSettingsTab({
             </Button>
             <Button
               type="button"
-              disabled={busy}
+              loading={busy}
               onClick={() =>
-                void savePatch({
-                  config: buildSettingsPatch(service.config ?? {}, cfg, {
-                    buildEnabled,
-                    installCmd,
-                    buildScript,
-                    outputDir,
-                    rootDir,
-                    nodeMajor,
-                    indexFile,
-                    errorFile,
-                  }),
-                })
+                void savePatch(
+                  {
+                    config: buildSettingsPatch(service.config ?? {}, cfg, {
+                      buildEnabled,
+                      installCmd,
+                      buildScript,
+                      outputDir,
+                      rootDir,
+                      nodeMajor,
+                      indexFile,
+                      errorFile,
+                    }),
+                  },
+                  "Build settings saved.",
+                )
               }
             >
               Save
@@ -596,14 +638,17 @@ export function StaticSiteSettingsTab({
             </Button>
             <Button
               type="button"
-              disabled={busy}
+              loading={busy}
               onClick={() =>
-                void savePatch({
-                  config: {
-                    ...(service.config ?? {}),
-                    autoDeploy,
+                void savePatch(
+                  {
+                    config: {
+                      ...(service.config ?? {}),
+                      autoDeploy,
+                    },
                   },
-                })
+                  "Auto-deploy settings saved.",
+                )
               }
             >
               Save
@@ -630,14 +675,17 @@ export function StaticSiteSettingsTab({
             </Button>
             <Button
               type="button"
-              disabled={busy}
+              loading={busy}
               onClick={() =>
-                void savePatch({
-                  config: {
-                    ...(service.config ?? {}),
-                    spaFallback,
+                void savePatch(
+                  {
+                    config: {
+                      ...(service.config ?? {}),
+                      spaFallback,
+                    },
                   },
-                })
+                  "SPA fallback settings saved.",
+                )
               }
             >
               Save
@@ -649,6 +697,44 @@ export function StaticSiteSettingsTab({
           label="Single-page app fallback"
           checked={spaFallback}
           onChange={setSpaFallback}
+        />
+      </Modal>
+
+      <Modal
+        open={deleteOpen}
+        title="Delete static site"
+        description={`This permanently deletes "${service.name}" and cannot be undone.`}
+        onClose={() => setDeleteOpen(false)}
+        footer={
+          <>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setDeleteOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="danger"
+              disabled={deleteBusy || confirmSlug !== service.slug}
+              onClick={() => void confirmDelete()}
+            >
+              Delete
+            </Button>
+          </>
+        }
+      >
+        {deleteError ? (
+          <p className="mb-4 text-sm text-red-600" role="alert">
+            {deleteError}
+          </p>
+        ) : null}
+        <Field
+          label={`Confirm slug (${service.slug})`}
+          value={confirmSlug}
+          onChange={(e) => setConfirmSlug(e.target.value)}
+          autoFocus
         />
       </Modal>
     </div>

@@ -76,7 +76,7 @@ export function ServiceBuildLocationPanel({
   }, [choice, onSaved, service]);
 
   return (
-    <div>
+    <div className="mt-8">
       <SettingsGroupHeading icon={Hammer} label="Build location" />
       <section
         className={cardClassName}
@@ -93,7 +93,10 @@ export function ServiceBuildLocationPanel({
             },
           ]}
         />
-        <div className="mt-4 space-y-3 border-t pt-4">
+        <div
+          className="-mx-6 mt-4 space-y-3 border-t px-6 pt-4"
+          style={{ borderColor: "var(--border)" }}
+        >
           <SelectField
             label="Build location"
             value={choice}

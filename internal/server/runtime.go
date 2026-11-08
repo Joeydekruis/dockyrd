@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/Joeydekruis/dockyrd/internal/audit"
+	"github.com/Joeydekruis/dockyrd/internal/build"
 	"github.com/Joeydekruis/dockyrd/internal/config"
 	"github.com/Joeydekruis/dockyrd/internal/hostops"
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
@@ -61,6 +62,10 @@ func startBackground(ctx context.Context, cfg config.Config, db *sql.DB, q *sqlc
 	}
 
 	worker := &jobs.Worker{Cfg: cfg, Q: q, DB: db, Deploy: deployRT, Docker: dockerCli, Log: log, Notify: notifier, Events: eventLog}
+
+	if err := build.EnsureRailpackCLI(ctx); err != nil && log != nil {
+		log.Warn("ensure railpack CLI", "err", err)
+	}
 
 	go metrics.RunHostCollector(ctx, cfg, q, log, 10*time.Second)
 	if dockerCli != nil {

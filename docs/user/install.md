@@ -14,7 +14,7 @@ curl -fsSL https://raw.githubusercontent.com/Joeydekruis/dockyrd/development/scr
 
 When `https://get.dockyrd.dev` is live, the install one-liner on [dockyrd.io](https://dockyrd.io) will point there instead of the raw GitHub script URL.
 
-The installer checks the OS, installs **Docker Engine** on Debian/Ubuntu when missing, installs `/usr/local/bin/dockyrd` (server) and `/usr/local/bin/dy` (API CLI for tokens/CI), registers `dockyrd.service`, and prints a **one-time setup token**.
+The installer checks the OS, installs **Docker Engine** on Debian/Ubuntu when missing, installs the **Railpack** CLI when it is not already on the host (default app builder), installs `/usr/local/bin/dockyrd` (server) and `/usr/local/bin/dy` (API CLI for tokens/CI), registers `dockyrd.service`, and prints a **one-time setup token**.
 
 Skip automatic Docker install: `dockyrd_SKIP_DOCKER_INSTALL=1` or pass `--no-docker-install` when piping the script.
 

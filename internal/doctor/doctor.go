@@ -6,6 +6,7 @@ import (
 	"io"
 	"net"
 	"os"
+	"os/exec"
 	"strings"
 	"time"
 
@@ -55,6 +56,7 @@ func Run(ctx context.Context, cfg config.Config, version string) Report {
 	rep.Checks = append(rep.Checks, checkDatabase(cfg)...)
 	rep.Checks = append(rep.Checks, checkDisk(cfg)...)
 	rep.Checks = append(rep.Checks, checkDocker(ctx)...)
+	rep.Checks = append(rep.Checks, checkRailpackCLI()...)
 	rep.Checks = append(rep.Checks, checkDockerAddressPools()...)
 	rep.Checks = append(rep.Checks, checkProxyContainer(ctx)...)
 	rep.Checks = append(rep.Checks, checkProxySocket(cfg)...)
@@ -168,6 +170,19 @@ func checkDisk(cfg config.Config) []Check {
 		Status: StatusOK,
 		Detail: fmt.Sprintf("≥ %d%% free", minPct),
 	}}
+}
+
+func checkRailpackCLI() []Check {
+	path, err := exec.LookPath("railpack")
+	if err != nil {
+		return []Check{{
+			Name:    "Railpack CLI",
+			Status:  StatusFail,
+			Detail:  "not on PATH",
+			FixHint: "Re-run the installer or `sudo dockyrd update`; or: curl -fsSL https://railpack.com/install.sh | sh -s -- -y",
+		}}
+	}
+	return []Check{{Name: "Railpack CLI", Status: StatusOK, Detail: path}}
 }
 
 func checkDocker(ctx context.Context) []Check {

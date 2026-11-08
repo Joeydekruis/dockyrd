@@ -5,10 +5,9 @@ import { Terminal as XTerm } from "@xterm/xterm";
 import "@xterm/xterm/css/xterm.css";
 import { Settings } from "lucide-react";
 import Link from "next/link";
-import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import { TerminalSettingsDialog } from "@/components/dockyard/terminal-settings-dialog";
-import { Button } from "@/components/dockyard/ui/button";
 import { Chip } from "@/components/dockyard/ui/chip";
 import { EmptyState } from "@/components/dockyard/ui/empty-state";
 import { PageHeader } from "@/components/dockyard/ui/page-header";
@@ -79,9 +78,6 @@ export function TerminalPage() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [themeId, setThemeId] = useState<TerminalThemeId>("dockyrd-dark");
   const [statusNote, setStatusNote] = useState<string | null>(null);
-  const [hostMfaOpen, setHostMfaOpen] = useState(false);
-  const [hostMfaCode, setHostMfaCode] = useState("");
-  const mfaInputId = useId();
 
   const tabHostRefs = useRef(new Map<string, HTMLDivElement>());
   const tabSessions = useRef(new Map<string, TabSession>());
@@ -307,22 +303,27 @@ export function TerminalPage() {
     return () => window.removeEventListener("resize", onResize);
   }, [activeId, sendResizeFor]);
 
+  useEffect(() => {
+    const host = activeId ? tabHostRefs.current.get(activeId) : undefined;
+    const pane = host?.closest(".terminal-xterm-pane");
+    if (!pane || !(pane instanceof HTMLElement)) return;
+    const ro = new ResizeObserver(() => {
+      const sess = activeId ? tabSessions.current.get(activeId) : undefined;
+      if (!sess) return;
+      sess.fit.fit();
+      sendResizeFor(sess);
+    });
+    ro.observe(pane);
+    return () => ro.disconnect();
+  }, [activeId, sendResizeFor]);
+
   const connectTab = useCallback(
-    async (tab: TerminalTab, mfaCode?: string) => {
+    async (tab: TerminalTab) => {
       const existing = tabSessions.current.get(tab.id);
       if (existing?.ws?.readyState === WebSocket.OPEN) {
         return;
       }
       if (tab.connState === "connecting") {
-        return;
-      }
-      if (
-        tab.kind === "host" &&
-        !mfaCode &&
-        meta?.session_kinds.host.requires_mfa_if_enabled
-      ) {
-        setHostMfaCode("");
-        setHostMfaOpen(true);
         return;
       }
       const sess = ensureTabSession(tab.id);
@@ -337,7 +338,6 @@ export function TerminalPage() {
           compose_service: tab.target?.compose_service,
           mode: tab.mode,
           exec_user: tab.useRoot ? "root" : "",
-          mfa_code: mfaCode,
         });
         const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
         const ws = new WebSocket(
@@ -384,7 +384,7 @@ export function TerminalPage() {
         );
       }
     },
-    [activeId, ensureTabSession, meta, patchTab, sendResizeFor],
+    [activeId, ensureTabSession, patchTab, sendResizeFor],
   );
 
   useEffect(() => {
@@ -456,14 +456,9 @@ export function TerminalPage() {
     if (!meta?.session_kinds.host.available) {
       setStatusNote(
         meta?.session_kinds.host.allowed_by_instance
-          ? "Only the server owner can open a host shell."
-          : "Host terminal is disabled. Enable it under Server settings (owner only).",
+          ? "Only server owners and admins can open a host shell."
+          : "Host terminal is disabled. Enable it under Server settings.",
       );
-      return;
-    }
-    if (meta.session_kinds.host.requires_mfa_if_enabled) {
-      setHostMfaCode("");
-      setHostMfaOpen(true);
       return;
     }
     openHostTab();
@@ -487,24 +482,7 @@ export function TerminalPage() {
     void connectTab(tab);
   };
 
-  const completeHostSessionAfterMfa = (mfaCode: string) => {
-    const code = mfaCode.trim();
-    setHostMfaOpen(false);
-    const pendingHost = tabs.find(
-      (t) =>
-        t.kind === "host" &&
-        (t.connState === "idle" || t.connState === "error"),
-    );
-    if (pendingHost) {
-      setActiveId(pendingHost.id);
-      void connectTab(pendingHost, code);
-      return;
-    }
-    openHostTab(code);
-  };
-
-  const openHostTab = (mfaCode?: string) => {
-    setHostMfaOpen(false);
+  const openHostTab = () => {
     const id = newTabId();
     const tab: TerminalTab = {
       id,
@@ -517,7 +495,7 @@ export function TerminalPage() {
     };
     setTabs((prev) => [...prev, tab]);
     setActiveId(id);
-    void connectTab(tab, mfaCode);
+    void connectTab(tab);
   };
 
   const pickTheme = (id: TerminalThemeId) => {
@@ -562,340 +540,343 @@ export function TerminalPage() {
 
   return (
     <DashboardShell title="Terminal" breadcrumb="Server">
-      <PageHeader
-        eyebrow="Server"
-        title="Terminal"
-        subtitle="Shells on your server and in running containers."
-        action={<Chip>SESSION LOGGED</Chip>}
-      />
+      <div className="flex h-[92vh] max-h-[92vh] min-h-0 flex-col [&>header]:mb-4 [&>header]:shrink-0">
+        <PageHeader
+          eyebrow="Server"
+          title="Terminal"
+          subtitle="Shells on your server and in running containers."
+          action={<Chip>SESSION LOGGED</Chip>}
+        />
 
-      <section
-        aria-label="Terminal"
-        className="flex flex-col overflow-hidden rounded-[20px] border"
-        style={{
-          borderColor: shellTheme.border,
-          background: shellTheme.surface,
-        }}
-      >
-        <div
-          className="flex flex-wrap items-center justify-between gap-2 border-b px-2 py-2"
+        <section
+          aria-label="Terminal"
+          className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-[20px] border"
           style={{
-            background: shellTheme.bar,
             borderColor: shellTheme.border,
+            background: shellTheme.surface,
           }}
         >
           <div
-            role="tablist"
-            aria-label="Terminal sessions"
-            className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5"
+            className="flex flex-wrap items-center justify-between gap-2 border-b px-2 py-2"
+            style={{
+              background: shellTheme.bar,
+              borderColor: shellTheme.border,
+            }}
           >
-            {tabs.map((tab) => {
-              const selected = tab.id === activeId;
-              return (
-                <div
-                  key={tab.id}
-                  className="inline-flex max-w-[240px] items-center rounded-[10px] border"
-                  style={{
-                    borderColor: selected ? shellTheme.border : "transparent",
-                    background: selected ? shellTheme.surface : shellTheme.bar,
-                  }}
-                >
-                  <button
-                    type="button"
-                    role="tab"
-                    aria-selected={selected}
-                    onClick={() => selectTab(tab.id)}
-                    className="inline-flex min-h-11 min-w-0 items-center gap-2 px-3 text-sm font-medium"
-                    style={{ color: shellTheme.chrome.fg }}
-                  >
-                    <span
-                      className="h-2 w-2 shrink-0 rounded-full"
-                      style={{
-                        background:
-                          tab.connState === "connected"
-                            ? "var(--status-ok-fg)"
-                            : "var(--muted-foreground)",
-                      }}
-                    />
-                    <span className="truncate">{tab.label}</span>
-                    {tab.badge ? (
-                      <span
-                        className="shrink-0 rounded-md border px-1.5 font-mono text-[10px] uppercase"
-                        style={{
-                          borderColor:
-                            tab.badge === "ROOT"
-                              ? "#C45E00"
-                              : "var(--status-ok-fg)",
-                          color:
-                            tab.badge === "ROOT"
-                              ? "#C45E00"
-                              : "var(--status-ok-fg)",
-                        }}
-                      >
-                        {tab.badge}
-                      </span>
-                    ) : null}
-                  </button>
-                  {tabs.length > 1 ? (
-                    <button
-                      type="button"
-                      aria-label={`Close ${tab.label}`}
-                      onClick={() => closeTab(tab.id)}
-                      className="inline-flex h-11 w-8 items-center justify-center"
-                      style={{ color: shellTheme.chrome.muted }}
-                    >
-                      ×
-                    </button>
-                  ) : null}
-                </div>
-              );
-            })}
-            <div className="relative">
-              <button
-                type="button"
-                aria-label="New session"
-                aria-haspopup="menu"
-                aria-expanded={menuOpen}
-                onClick={() => setMenuOpen((v) => !v)}
-                className="flex h-11 w-11 items-center justify-center rounded-[10px] text-lg"
-                style={{ color: shellTheme.chrome.muted }}
-              >
-                +
-              </button>
-              {menuOpen ? (
-                <>
-                  <button
-                    type="button"
-                    aria-label="Close menu"
-                    className="fixed inset-0 z-40"
-                    onClick={() => setMenuOpen(false)}
-                  />
+            <div
+              role="tablist"
+              aria-label="Terminal sessions"
+              className="flex min-w-0 flex-1 flex-wrap items-center gap-1.5"
+            >
+              {tabs.map((tab) => {
+                const selected = tab.id === activeId;
+                return (
                   <div
-                    role="menu"
-                    aria-label="New session"
-                    className="absolute left-0 top-[52px] z-50 flex w-[min(340px,calc(100vw-3rem))] flex-col gap-0.5 rounded-[14px] border p-1.5 shadow-lg"
-                    style={
-                      {
-                        background: shellTheme.bar,
-                        borderColor: shellTheme.border,
-                        color: shellTheme.chrome.fg,
-                        ["--terminal-menu-hover" as string]: shellTheme.surface,
-                      } as React.CSSProperties
-                    }
+                    key={tab.id}
+                    className="inline-flex max-w-[240px] items-center rounded-[10px] border"
+                    style={{
+                      borderColor: selected ? shellTheme.border : "transparent",
+                      background: selected
+                        ? shellTheme.surface
+                        : shellTheme.bar,
+                    }}
                   >
-                    <span
-                      className="px-2.5 pb-1 pt-2 font-mono text-[11px] uppercase tracking-wide"
-                      style={{ color: shellTheme.chrome.muted }}
-                    >
-                      Open a shell in
-                    </span>
-                    <span
-                      className="px-2.5 pt-2 font-mono text-[11px] uppercase tracking-wide"
-                      style={{ color: shellTheme.chrome.muted }}
-                    >
-                      Test
-                    </span>
-                    {meta?.session_kinds.test.available ? (
-                      projects.length ? (
-                        projects.map((p) => (
-                          <button
-                            key={p.id}
-                            type="button"
-                            role="menuitem"
-                            onClick={() => openTestTab(p)}
-                            className="rounded-lg px-2.5 py-2 text-left text-sm hover:bg-[var(--terminal-menu-hover)]"
-                          >
-                            Test shell · {p.name}
-                            <span
-                              className="block text-xs"
-                              style={{ color: shellTheme.chrome.muted }}
-                            >
-                              No host access · project network
-                            </span>
-                          </button>
-                        ))
-                      ) : (
-                        <p
-                          className="px-2.5 py-2 text-sm"
-                          style={{ color: shellTheme.chrome.muted }}
-                        >
-                          No projects yet.
-                        </p>
-                      )
-                    ) : (
-                      <button
-                        type="button"
-                        role="menuitem"
-                        disabled
-                        className="rounded-lg px-2.5 py-2 text-left text-sm opacity-60"
-                      >
-                        Test shell unavailable
-                      </button>
-                    )}
-                    <span
-                      className="px-2.5 pt-2 font-mono text-[11px] uppercase tracking-wide"
-                      style={{ color: shellTheme.chrome.muted }}
-                    >
-                      Containers
-                    </span>
-                    {targets.map((t) => (
-                      <button
-                        key={targetKey(t)}
-                        type="button"
-                        role="menuitem"
-                        onClick={() => addContainerTab(t)}
-                        className="rounded-lg px-2.5 py-2 text-left text-sm hover:bg-[var(--terminal-menu-hover)]"
-                      >
-                        {targetLabel(t)}
-                      </button>
-                    ))}
-                    <span
-                      className="px-2.5 pt-2 font-mono text-[11px] uppercase tracking-wide"
-                      style={{ color: shellTheme.chrome.muted }}
-                    >
-                      Advanced
-                    </span>
                     <button
                       type="button"
-                      role="menuitem"
-                      disabled={!hostEnabled && user?.role !== "owner"}
-                      onClick={() => requestHostTab()}
-                      className="rounded-lg px-2.5 py-2 text-left text-sm disabled:opacity-50"
+                      role="tab"
+                      aria-selected={selected}
+                      onClick={() => selectTab(tab.id)}
+                      className="inline-flex min-h-11 min-w-0 items-center gap-2 px-3 text-sm font-medium"
+                      style={{ color: shellTheme.chrome.fg }}
                     >
-                      Server shell
                       <span
-                        className="block text-xs"
-                        style={{ color: shellTheme.chrome.muted }}
-                      >
-                        {hostAvailable
-                          ? "Root on the host · owner only"
-                          : hostEnabled
-                            ? "Owner only · enable in settings"
-                            : "Disabled · enable in Server settings"}
-                      </span>
-                    </button>
-                    {!hostEnabled ? (
-                      <p
-                        className="px-2.5 pb-2 text-xs"
-                        style={{ color: shellTheme.chrome.muted }}
-                      >
-                        <Link
-                          href="/settings/server/general"
-                          className="underline"
-                          style={{ color: shellTheme.chrome.fg }}
+                        className="h-2 w-2 shrink-0 rounded-full"
+                        style={{
+                          background:
+                            tab.connState === "connected"
+                              ? "var(--status-ok-fg)"
+                              : "var(--muted-foreground)",
+                        }}
+                      />
+                      <span className="truncate">{tab.label}</span>
+                      {tab.badge ? (
+                        <span
+                          className="shrink-0 rounded-md border px-1.5 font-mono text-[10px] uppercase"
+                          style={{
+                            borderColor:
+                              tab.badge === "ROOT"
+                                ? "#C45E00"
+                                : "var(--status-ok-fg)",
+                            color:
+                              tab.badge === "ROOT"
+                                ? "#C45E00"
+                                : "var(--status-ok-fg)",
+                          }}
                         >
-                          Instance settings
-                        </Link>{" "}
-                        → allow host terminal (owner only).
-                      </p>
+                          {tab.badge}
+                        </span>
+                      ) : null}
+                    </button>
+                    {tabs.length > 1 ? (
+                      <button
+                        type="button"
+                        aria-label={`Close ${tab.label}`}
+                        onClick={() => closeTab(tab.id)}
+                        className="inline-flex h-11 w-8 items-center justify-center"
+                        style={{ color: shellTheme.chrome.muted }}
+                      >
+                        ×
+                      </button>
                     ) : null}
                   </div>
-                </>
-              ) : null}
+                );
+              })}
+              <div className="relative">
+                <button
+                  type="button"
+                  aria-label="New session"
+                  aria-haspopup="menu"
+                  aria-expanded={menuOpen}
+                  onClick={() => setMenuOpen((v) => !v)}
+                  className="flex h-11 w-11 items-center justify-center rounded-[10px] text-lg"
+                  style={{ color: shellTheme.chrome.muted }}
+                >
+                  +
+                </button>
+                {menuOpen ? (
+                  <>
+                    <button
+                      type="button"
+                      aria-label="Close menu"
+                      className="fixed inset-0 z-40"
+                      onClick={() => setMenuOpen(false)}
+                    />
+                    <div
+                      role="menu"
+                      aria-label="New session"
+                      className="absolute left-0 top-[52px] z-50 flex w-[min(340px,calc(100vw-3rem))] flex-col gap-0.5 rounded-[14px] border p-1.5 shadow-lg"
+                      style={
+                        {
+                          background: shellTheme.bar,
+                          borderColor: shellTheme.border,
+                          color: shellTheme.chrome.fg,
+                          ["--terminal-menu-hover" as string]:
+                            shellTheme.surface,
+                        } as React.CSSProperties
+                      }
+                    >
+                      <span
+                        className="px-2.5 pb-1 pt-2 font-mono text-[11px] uppercase tracking-wide"
+                        style={{ color: shellTheme.chrome.muted }}
+                      >
+                        Open a shell in
+                      </span>
+                      <span
+                        className="px-2.5 pt-2 font-mono text-[11px] uppercase tracking-wide"
+                        style={{ color: shellTheme.chrome.muted }}
+                      >
+                        Test
+                      </span>
+                      {meta?.session_kinds.test.available ? (
+                        projects.length ? (
+                          projects.map((p) => (
+                            <button
+                              key={p.id}
+                              type="button"
+                              role="menuitem"
+                              onClick={() => openTestTab(p)}
+                              className="rounded-lg px-2.5 py-2 text-left text-sm hover:bg-[var(--terminal-menu-hover)]"
+                            >
+                              Test shell · {p.name}
+                              <span
+                                className="block text-xs"
+                                style={{ color: shellTheme.chrome.muted }}
+                              >
+                                No host access · project network
+                              </span>
+                            </button>
+                          ))
+                        ) : (
+                          <p
+                            className="px-2.5 py-2 text-sm"
+                            style={{ color: shellTheme.chrome.muted }}
+                          >
+                            No projects yet.
+                          </p>
+                        )
+                      ) : (
+                        <button
+                          type="button"
+                          role="menuitem"
+                          disabled
+                          className="rounded-lg px-2.5 py-2 text-left text-sm opacity-60"
+                        >
+                          Test shell unavailable
+                        </button>
+                      )}
+                      <span
+                        className="px-2.5 pt-2 font-mono text-[11px] uppercase tracking-wide"
+                        style={{ color: shellTheme.chrome.muted }}
+                      >
+                        Containers
+                      </span>
+                      {targets.map((t) => (
+                        <button
+                          key={targetKey(t)}
+                          type="button"
+                          role="menuitem"
+                          onClick={() => addContainerTab(t)}
+                          className="rounded-lg px-2.5 py-2 text-left text-sm hover:bg-[var(--terminal-menu-hover)]"
+                        >
+                          {targetLabel(t)}
+                        </button>
+                      ))}
+                      <span
+                        className="px-2.5 pt-2 font-mono text-[11px] uppercase tracking-wide"
+                        style={{ color: shellTheme.chrome.muted }}
+                      >
+                        Advanced
+                      </span>
+                      <button
+                        type="button"
+                        role="menuitem"
+                        disabled={!hostEnabled && user?.role !== "owner"}
+                        onClick={() => requestHostTab()}
+                        className="rounded-lg px-2.5 py-2 text-left text-sm disabled:opacity-50"
+                      >
+                        Server shell
+                        <span
+                          className="block text-xs"
+                          style={{ color: shellTheme.chrome.muted }}
+                        >
+                          {hostAvailable
+                            ? "Root on the host · owners and admins"
+                            : "Disabled · enable in Server settings"}
+                        </span>
+                      </button>
+                      {!hostEnabled ? (
+                        <p
+                          className="px-2.5 pb-2 text-xs"
+                          style={{ color: shellTheme.chrome.muted }}
+                        >
+                          <Link
+                            href="/settings/server/general"
+                            className="underline"
+                            style={{ color: shellTheme.chrome.fg }}
+                          >
+                            Instance settings
+                          </Link>{" "}
+                          → allow host terminal.
+                        </p>
+                      ) : null}
+                    </div>
+                  </>
+                ) : null}
+              </div>
+            </div>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={() => void copyPlainSelection()}
+                className="inline-flex min-h-11 items-center justify-center rounded-[10px] border px-3.5 font-mono text-[11px] font-medium uppercase tracking-wide hover:brightness-110"
+                style={{
+                  color: shellTheme.chrome.fg,
+                  borderColor: shellTheme.chrome.border,
+                  background: "transparent",
+                }}
+              >
+                Copy plain
+              </button>
+              <button
+                type="button"
+                onClick={clear}
+                className="inline-flex min-h-11 items-center justify-center rounded-[10px] border px-3.5 font-mono text-[11px] font-medium uppercase tracking-wide hover:brightness-110"
+                style={{
+                  color: shellTheme.chrome.fg,
+                  borderColor: shellTheme.chrome.border,
+                  background: "transparent",
+                }}
+              >
+                Clear
+              </button>
+              <button
+                type="button"
+                aria-label="Terminal settings"
+                onClick={() => setSettingsOpen(true)}
+                className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-[10px] hover:brightness-110"
+                style={{ color: shellTheme.chrome.muted }}
+              >
+                <Settings aria-hidden size={22} strokeWidth={1.75} />
+              </button>
             </div>
           </div>
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              onClick={() => void copyPlainSelection()}
-              className="inline-flex min-h-11 items-center justify-center rounded-[10px] border px-3.5 font-mono text-[11px] font-medium uppercase tracking-wide hover:brightness-110"
-              style={{
-                color: shellTheme.chrome.fg,
-                borderColor: shellTheme.chrome.border,
-                background: "transparent",
-              }}
-            >
-              Copy plain
-            </button>
-            <button
-              type="button"
-              onClick={clear}
-              className="inline-flex min-h-11 items-center justify-center rounded-[10px] border px-3.5 font-mono text-[11px] font-medium uppercase tracking-wide hover:brightness-110"
-              style={{
-                color: shellTheme.chrome.fg,
-                borderColor: shellTheme.chrome.border,
-                background: "transparent",
-              }}
-            >
-              Clear
-            </button>
-            <button
-              type="button"
-              aria-label="Terminal settings"
-              onClick={() => setSettingsOpen(true)}
-              className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-[10px] hover:brightness-110"
-              style={{ color: shellTheme.chrome.muted }}
-            >
-              <Settings aria-hidden size={22} strokeWidth={1.75} />
-            </button>
-          </div>
-        </div>
 
-        {warning ? (
+          {warning ? (
+            <div
+              role="note"
+              className="flex items-start gap-2 border-b px-5 py-2.5 text-sm"
+              style={{
+                background: shellTheme.bar,
+                borderColor: shellTheme.border,
+                color: shellTheme.chrome.muted,
+              }}
+            >
+              <strong style={{ color: warning.tone }}>{warning.lead}</strong>
+              <span>{warning.text}</span>
+            </div>
+          ) : null}
+
+          {statusNote ? (
+            <p className="px-5 py-2 text-sm text-[var(--danger)]" role="status">
+              {statusNote}
+            </p>
+          ) : null}
+
           <div
-            role="note"
-            className="flex items-start gap-2 border-b px-5 py-2.5 text-sm"
+            className="terminal-xterm-pane relative min-h-0 flex-1 p-3"
+            style={{ background: shellTheme.xterm.background }}
+          >
+            {tabs.map((tab) => (
+              <div
+                key={tab.id}
+                ref={(el) => {
+                  if (el) tabHostRefs.current.set(tab.id, el);
+                  else tabHostRefs.current.delete(tab.id);
+                }}
+                className="absolute inset-3 overflow-hidden"
+                style={{
+                  visibility: tab.id === activeId ? "visible" : "hidden",
+                  pointerEvents: tab.id === activeId ? "auto" : "none",
+                }}
+                aria-hidden={tab.id !== activeId}
+              />
+            ))}
+          </div>
+
+          <div
+            className="flex flex-wrap items-center justify-between gap-2 border-t px-5 py-2.5 font-mono text-xs"
             style={{
               background: shellTheme.bar,
               borderColor: shellTheme.border,
               color: shellTheme.chrome.muted,
             }}
           >
-            <strong style={{ color: warning.tone }}>{warning.lead}</strong>
-            <span>{warning.text}</span>
+            <span>
+              {activeTab?.connState === "connected"
+                ? "Connected"
+                : (activeTab?.connState ?? "idle")}
+              {activeTab?.kind === "host"
+                ? " · root · bash"
+                : activeTab?.kind === "test"
+                  ? " · sandbox · sh"
+                  : " · container"}
+            </span>
+            <span>
+              {shellTheme.name} · UTF-8 · Ctrl+Shift+C copies plain text
+            </span>
           </div>
-        ) : null}
-
-        {statusNote ? (
-          <p className="px-5 py-2 text-sm text-[var(--danger)]" role="status">
-            {statusNote}
-          </p>
-        ) : null}
-
-        <div
-          className="relative min-h-[420px] p-3"
-          style={{ background: shellTheme.xterm.background }}
-        >
-          {tabs.map((tab) => (
-            <div
-              key={tab.id}
-              ref={(el) => {
-                if (el) tabHostRefs.current.set(tab.id, el);
-                else tabHostRefs.current.delete(tab.id);
-              }}
-              className="absolute inset-3 overflow-hidden"
-              style={{
-                visibility: tab.id === activeId ? "visible" : "hidden",
-                pointerEvents: tab.id === activeId ? "auto" : "none",
-              }}
-              aria-hidden={tab.id !== activeId}
-            />
-          ))}
-        </div>
-
-        <div
-          className="flex flex-wrap items-center justify-between gap-2 border-t px-5 py-2.5 font-mono text-xs"
-          style={{
-            background: shellTheme.bar,
-            borderColor: shellTheme.border,
-            color: shellTheme.chrome.muted,
-          }}
-        >
-          <span>
-            {activeTab?.connState === "connected"
-              ? "Connected"
-              : (activeTab?.connState ?? "idle")}
-            {activeTab?.kind === "host"
-              ? " · root · bash"
-              : activeTab?.kind === "test"
-                ? " · sandbox · sh"
-                : " · container"}
-          </span>
-          <span>
-            {shellTheme.name} · UTF-8 · Ctrl+Shift+C copies plain text
-          </span>
-        </div>
-      </section>
+        </section>
+      </div>
 
       <TerminalSettingsDialog
         open={settingsOpen}
@@ -903,52 +884,6 @@ export function TerminalPage() {
         onPick={pickTheme}
         onClose={() => setSettingsOpen(false)}
       />
-
-      {hostMfaOpen ? (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
-          <button
-            type="button"
-            className="absolute inset-0 bg-[rgba(11,31,58,0.45)]"
-            aria-label="Close"
-            onClick={() => setHostMfaOpen(false)}
-          />
-          <form
-            className="relative w-full max-w-sm rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-6"
-            onSubmit={(e) => {
-              e.preventDefault();
-              completeHostSessionAfterMfa(hostMfaCode);
-            }}
-          >
-            <h2 className="mb-2 text-lg font-semibold">Confirm 2FA</h2>
-            <p className="mb-4 text-sm text-[var(--muted-foreground)]">
-              Enter your authenticator code to open a host shell.
-            </p>
-            <label className="mb-4 block text-sm" htmlFor={mfaInputId}>
-              Code
-              <input
-                id={mfaInputId}
-                className="field-input mt-1 w-full"
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                value={hostMfaCode}
-                onChange={(e) => setHostMfaCode(e.target.value)}
-              />
-            </label>
-            <div className="flex justify-end gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setHostMfaOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" variant="primary">
-                Open server shell
-              </Button>
-            </div>
-          </form>
-        </div>
-      ) : null}
     </DashboardShell>
   );
 }

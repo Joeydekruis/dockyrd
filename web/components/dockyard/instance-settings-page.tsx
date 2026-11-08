@@ -229,11 +229,11 @@ export function InstanceSettingsPage() {
           <section aria-label="Web terminal" className={settingsCardClass}>
             <h2 className="text-lg font-medium">Host terminal</h2>
             <p className="text-sm text-[var(--muted-foreground)]">
-              When enabled, the server owner can open a root shell on the host
+              When enabled, owners and admins can open a root shell on the host
               from the Terminal page.
             </p>
             <Switch
-              label="Allow host terminal (owner only)"
+              label="Allow host terminal (owners and admins)"
               checked={Boolean(instance.terminal_allow_host)}
               disabled={terminalHostBusy}
               onChange={(v) => void setTerminalAllowHost(v)}

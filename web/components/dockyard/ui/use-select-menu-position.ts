@@ -14,9 +14,18 @@ const VIEWPORT_PADDING_PX = 8;
 /** Above wizard/dialog overlay (`z-50`). */
 const MENU_Z_INDEX = 200;
 
+export type MenuPositionOptions = {
+  /** Horizontal alignment relative to the anchor. */
+  align?: "start" | "end";
+  /** Fixed menu width (defaults to anchor width). */
+  width?: number;
+  minWidth?: number;
+};
+
 export function useSelectMenuPosition(
   open: boolean,
   anchorRef: RefObject<HTMLElement | null>,
+  options?: MenuPositionOptions,
 ) {
   const menuRef = useRef<HTMLDivElement>(null);
   const [menuStyle, setMenuStyle] = useState<CSSProperties>({});
@@ -48,12 +57,20 @@ export function useSelectMenuPosition(
         ? Math.max(VIEWPORT_PADDING_PX, rect.top - MENU_GAP_PX - maxHeight)
         : rect.bottom + MENU_GAP_PX;
 
+      const menuWidth = options?.width ?? options?.minWidth ?? rect.width;
+      const align = options?.align ?? "start";
+      let left = align === "end" ? rect.right - menuWidth : rect.left;
+      const maxLeft = window.innerWidth - menuWidth - VIEWPORT_PADDING_PX;
+      left = Math.max(VIEWPORT_PADDING_PX, Math.min(left, maxLeft));
+
       setMenuStyle({
         position: "fixed",
         top,
-        left: rect.left,
-        width: rect.width,
+        left,
+        width: menuWidth,
+        minWidth: options?.minWidth,
         maxHeight,
+        overflowY: maxHeight > 0 ? "auto" : undefined,
         zIndex: MENU_Z_INDEX,
       });
     };
@@ -65,7 +82,7 @@ export function useSelectMenuPosition(
       window.removeEventListener("resize", update);
       window.removeEventListener("scroll", update, true);
     };
-  }, [open, anchorRef]);
+  }, [open, anchorRef, options?.align, options?.width, options?.minWidth]);
 
   return { menuRef, menuStyle };
 }

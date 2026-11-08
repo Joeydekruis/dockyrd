@@ -13,6 +13,7 @@ export { CodeInline } from "./code-inline";
 export { CommitChip } from "./commit-chip";
 export { ConfirmDialog } from "./confirm-dialog";
 export { ContainerTable, type ContainerTableRow } from "./container-table";
+export { CopyIconButton } from "./copy-icon-button";
 export { DangerZone } from "./danger-zone";
 export { DeploymentRow } from "./deployment-row";
 export { Divider } from "./divider";

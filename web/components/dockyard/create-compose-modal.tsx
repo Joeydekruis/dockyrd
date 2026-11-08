@@ -7,6 +7,7 @@ import { Field } from "@/components/dockyard/ui/field";
 import { Modal } from "@/components/dockyard/ui/modal";
 import { SelectField } from "@/components/dockyard/ui/select-field";
 import { createService, listProjects, type Project } from "@/lib/api";
+import { serviceDetailHref } from "@/lib/service-routes";
 
 const DEFAULT_YAML = `services:
   web:
@@ -66,6 +67,7 @@ export function CreateComposeModal({
         serviceId: service.id,
         name: name.trim(),
         label: "Pulling images and starting the Compose stack.",
+        detailHref: serviceDetailHref(service.kind, service.slug),
       });
       onClose();
     } catch (err) {
