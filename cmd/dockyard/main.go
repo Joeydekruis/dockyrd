@@ -77,6 +77,8 @@ func main() {
 			fmt.Fprintf(os.Stderr, "update: %v\n", err)
 			os.Exit(1)
 		}
+	case "help", "-h", "--help":
+		printUsage()
 	default:
 		printUsage()
 		os.Exit(1)

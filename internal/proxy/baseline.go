@@ -37,18 +37,29 @@ func prependBaseline(handles []any) []any {
 
 func staticImmutableCacheHandler() map[string]any {
 	return map[string]any{
-		"handler": "headers",
-		"match": map[string]any{
-			"path": []string{
-				"/_next/static/*",
-				"*.css",
-				"*.js",
-				"*.woff2",
-			},
-		},
-		"response": map[string]any{
-			"set": map[string]any{
-				"Cache-Control": []string{"public, max-age=31536000, immutable"},
+		"handler": "subroute",
+		"routes": []any{
+			map[string]any{
+				"match": []any{
+					map[string]any{
+						"path": []string{
+							"/_next/static/*",
+							"*.css",
+							"*.js",
+							"*.woff2",
+						},
+					},
+				},
+				"handle": []any{
+					map[string]any{
+						"handler": "headers",
+						"response": map[string]any{
+							"set": map[string]any{
+								"Cache-Control": []string{"public, max-age=31536000, immutable"},
+							},
+						},
+					},
+				},
 			},
 		},
 	}
@@ -56,13 +67,24 @@ func staticImmutableCacheHandler() map[string]any {
 
 func staticHTMLNoCacheHandler() map[string]any {
 	return map[string]any{
-		"handler": "headers",
-		"match": map[string]any{
-			"path": []string{"/", "/index.html", "*.html"},
-		},
-		"response": map[string]any{
-			"set": map[string]any{
-				"Cache-Control": []string{"no-cache"},
+		"handler": "subroute",
+		"routes": []any{
+			map[string]any{
+				"match": []any{
+					map[string]any{
+						"path": []string{"/", "/index.html", "*.html"},
+					},
+				},
+				"handle": []any{
+					map[string]any{
+						"handler": "headers",
+						"response": map[string]any{
+							"set": map[string]any{
+								"Cache-Control": []string{"no-cache"},
+							},
+						},
+					},
+				},
 			},
 		},
 	}

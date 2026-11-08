@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.7.15] - 2026-11-08
+
+_Finished: 2026-11-08_
+
+### Fixed
+
+- **Caddy load / HTTPS down** — static site cache `headers` handlers used invalid JSON (`match` on `headers`); wrap path-specific headers in `subroute` so `proxy.SyncFromDB` succeeds (fixes `ERR_CONNECTION_REFUSED` after failed edge reload)
+
 ## [0.7.14] - 2026-11-08
 
 _Finished: 2026-11-08_

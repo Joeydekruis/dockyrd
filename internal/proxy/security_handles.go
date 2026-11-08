@@ -84,23 +84,28 @@ func ipDenyHandler(ranges []string) map[string]any {
 		return nil
 	}
 	return map[string]any{
-		"match": []any{
+		"handler": "subroute",
+		"routes": []any{
 			map[string]any{
-				"not": []any{
+				"match": []any{
 					map[string]any{
-						"client_ip": map[string]any{
-							"ranges": ranges,
+						"not": []any{
+							map[string]any{
+								"client_ip": map[string]any{
+									"ranges": ranges,
+								},
+							},
 						},
 					},
 				},
-			},
-		},
-		"handle": []any{
-			map[string]any{
-				"handler":     "static_response",
-				"status_code":   403,
-				"body":          "Forbidden",
-				"close":         true,
+				"handle": []any{
+					map[string]any{
+						"handler":     "static_response",
+						"status_code": 403,
+						"body":        "Forbidden",
+						"close":       true,
+					},
+				},
 			},
 		},
 	}

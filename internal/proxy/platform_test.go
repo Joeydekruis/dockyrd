@@ -137,4 +137,10 @@ func TestRenderStaticFileServerRoot(t *testing.T) {
 	if !strings.Contains(s, "file_server") {
 		t.Fatal("expected file_server handler")
 	}
+	if strings.Contains(s, `"handler": "headers"`) && strings.Contains(s, `"match"`) {
+		// Caddy headers handler must not embed matchers — use subroute instead.
+		if !strings.Contains(s, `"handler": "subroute"`) {
+			t.Fatalf("invalid headers+match in static route JSON: %s", s)
+		}
+	}
 }
