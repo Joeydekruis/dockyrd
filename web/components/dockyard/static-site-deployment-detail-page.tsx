@@ -181,14 +181,7 @@ export function StaticSiteDeploymentDetailPage() {
             </Link>
           </p>
 
-          <section
-            className="rounded-[20px] border px-6 py-5"
-            style={{
-              borderColor: "var(--border)",
-              background: "var(--surface)",
-            }}
-            aria-label="Deployment summary"
-          >
+          <section className="py-2" aria-label="Deployment summary">
             <div className="flex flex-wrap items-start justify-between gap-4">
               <div className="min-w-0 space-y-3">
                 <div>
@@ -231,8 +224,8 @@ export function StaticSiteDeploymentDetailPage() {
                   {row.deployment.status.trim().toLowerCase() === "live" ? (
                     <StatusBadge label="Production" variant="info" />
                   ) : null}
+                  <SettingsBranchPill branch={branch} />
                 </div>
-                <SettingsBranchPill branch={branch} />
               </div>
               {visitHref ? (
                 <Button
@@ -287,6 +280,12 @@ export function StaticSiteDeploymentDetailPage() {
               <SettingsMetaField
                 label="Started at"
                 value={formatDeploymentStartedAt(startedAt)}
+              />
+              <SettingsMetaField
+                label="Duration"
+                value={
+                  duration !== undefined ? formatDurationSec(duration) : "—"
+                }
               />
             </SettingsMetaGrid>
             {commitMessage && !commitDescription ? (

@@ -230,7 +230,7 @@ func (d apiDeps) handlePutServiceSecurity(w http.ResponseWriter, r *http.Request
 	redeploy := svc.Kind == "app" && securitypolicy.ResourcesChanged(beforeSite, next)
 	if redeploy && svc.LiveDeploymentID.Valid {
 		if err := d.syncAppMemFromSecurity(ctx, serviceID); err == nil {
-			_, _ = jobs.EnqueueServiceDeploy(ctx, d.q, serviceID, "redeploy", user.ID, jobs.GitMeta{})
+			_, _ = jobs.EnqueueServiceDeploy(ctx, d.q, serviceID, "redeploy", user.ID, d.gitMetaForServiceDeploy(ctx, serviceID))
 		}
 	}
 	updated, _, _ := d.ensureServiceSecurity(ctx, serviceID)

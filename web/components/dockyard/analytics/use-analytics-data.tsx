@@ -50,7 +50,7 @@ function metricRangeFromTimeRange(range: TimeRange): MetricRange {
 }
 
 export function useAnalyticsData(): AnalyticsData {
-  const [range, setRange] = useState<TimeRange>("24h");
+  const [range, setRange] = useState<TimeRange>("1h");
   const [metrics, setMetrics] = useState<ServerMetricsResponse | null>(null);
   const [serverInfo, setServerInfo] = useState<ServerInfo | null>(null);
   const [events, setEvents] = useState<dockyrdEvent[]>([]);

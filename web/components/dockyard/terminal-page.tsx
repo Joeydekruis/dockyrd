@@ -540,7 +540,15 @@ export function TerminalPage() {
 
   return (
     <DashboardShell title="Terminal" breadcrumb="Server">
-      <div className="flex h-[92vh] max-h-[92vh] min-h-0 flex-col [&>header]:mb-4 [&>header]:shrink-0">
+      <div
+        className="flex min-h-0 flex-col [&>header]:mb-4 [&>header]:shrink-0"
+        style={{
+          height:
+            "calc(100dvh - var(--dockyrd-announcement-height, 44px) - 5.5rem - 3rem)",
+          maxHeight:
+            "calc(100dvh - var(--dockyrd-announcement-height, 44px) - 5.5rem - 3rem)",
+        }}
+      >
         <PageHeader
           eyebrow="Server"
           title="Terminal"

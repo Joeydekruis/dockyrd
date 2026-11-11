@@ -113,7 +113,8 @@ func (d apiDeps) handleCreateDeployment(w http.ResponseWriter, r *http.Request) 
 		writeJSONError(w, http.StatusInternalServerError, "database error")
 		return
 	}
-	deploymentID, err := jobs.EnqueueServiceDeploy(ctx, d.q, serviceID, "manual", user.ID, jobs.GitMeta{})
+	meta := d.gitMetaForServiceDeploy(ctx, serviceID)
+	deploymentID, err := jobs.EnqueueServiceDeploy(ctx, d.q, serviceID, "manual", user.ID, meta)
 	if err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "create deployment error")
 		return
@@ -205,7 +206,8 @@ func (d apiDeps) handleRedeployDeployment(w http.ResponseWriter, r *http.Request
 		writeJSONError(w, http.StatusInternalServerError, "database error")
 		return
 	}
-	newID, err := jobs.EnqueueServiceDeploy(ctx, d.q, row.ServiceID, "redeploy", user.ID, jobs.GitMeta{})
+	meta := mergeGitMeta(d.gitMetaForServiceDeploy(ctx, row.ServiceID), gitMetaFromDeploymentRow(row))
+	newID, err := jobs.EnqueueServiceDeploy(ctx, d.q, row.ServiceID, "redeploy", user.ID, meta)
 	if err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "enqueue error")
 		return

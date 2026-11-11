@@ -6,6 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.7.17] - 2026-11-11
+
+_Finished: 2026-11-11_
+
+### Added
+
+- **Deployments API** — preserve Git commit author/title/message on manual deploy, redeploy, and security-driven app redeploy (`gitMetaForServiceDeploy` + GitHub compare/commits)
+- **Dashboard UI** — application and database detail breadcrumbs match static sites (`All …` → project → resource)
+
+### Changed
+
+- **Analytics** — default time range **1h**; **Refresh** button on server analytics header
+- **Service analytics** — default range **1h** on per-service traffic panel
+- **Deployment detail** — branch pill beside status; duration in meta grid; leaner summary section (app + static)
+- **Deployment polling** — overview tab polls while builds run; final refresh when build completes; `starting` / `healthchecking` count as in progress
+- **Deployment author label** — falls back to `triggered_by_name` when commit author is absent
+- **Project resource table** — whole row navigates to resource; public URL link does not trigger row navigation
+
+### Fixed
+
+- **Terminal** — viewport height accounts for announcement bar and shell chrome (less overflow/clipping)
+
 ## [0.7.16] - 2026-11-08
 
 _Finished: 2026-11-08_

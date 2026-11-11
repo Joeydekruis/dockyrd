@@ -16,6 +16,7 @@ import {
   useAnalyticsData,
 } from "@/components/dockyard/analytics/use-analytics-data";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
+import { Button } from "@/components/dockyard/ui/button";
 import { Chip } from "@/components/dockyard/ui/chip";
 import { PageHeader } from "@/components/dockyard/ui/page-header";
 import { Tabs } from "@/components/dockyard/ui/tabs";
@@ -100,7 +101,19 @@ export function AnalyticsPage() {
       <PageHeader
         title="Analytics"
         subtitle="Monitor your server, from the key numbers to the detailed charts. Refreshes every minute while you stay on this page."
-        action={<TimeRangeToggle value={data.range} onChange={data.setRange} />}
+        action={
+          <div className="flex flex-wrap items-center gap-2">
+            <TimeRangeToggle value={data.range} onChange={data.setRange} />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => void data.refresh()}
+              loading={data.loading}
+            >
+              Refresh
+            </Button>
+          </div>
+        }
       />
       <div
         className="flex flex-wrap items-end justify-between gap-x-6 gap-y-2 border-b"

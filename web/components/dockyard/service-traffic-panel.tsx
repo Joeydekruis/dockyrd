@@ -113,7 +113,7 @@ type ServiceTrafficAnalyticsPanelProps = {
 export function ServiceTrafficAnalyticsPanel({
   serviceId,
 }: ServiceTrafficAnalyticsPanelProps) {
-  const [range, setRange] = useState<RangeId>("24h");
+  const [range, setRange] = useState<RangeId>("1h");
   const [data, setData] = useState<ServiceAnalytics | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);

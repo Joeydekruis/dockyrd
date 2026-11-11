@@ -46,6 +46,7 @@ import {
 } from "@/lib/api";
 import { hasDeploymentResourceMetrics } from "@/lib/build-resilience";
 import { hasPendingEnvRedeploy } from "@/lib/env-var-ref";
+import { applicationDetailBreadcrumbs } from "@/lib/resource-breadcrumbs";
 import {
   formatTimeAgo,
   projectPathLabel,
@@ -212,8 +213,12 @@ export function ApplicationDetailPage() {
   const latest = row?.deployments[0];
 
   const deploymentsPollActive = useMemo(() => {
-    if (!row || tab !== "deployments") return false;
-    return row.deployments.some((d) => deploymentIsInProgress(d.status));
+    if (!row) return false;
+    const inProgress = row.deployments.some((d) =>
+      deploymentIsInProgress(d.status),
+    );
+    if (!inProgress) return false;
+    return tab === "deployments" || tab === "overview";
   }, [row, tab]);
 
   const pollDeployments = useCallback(() => {
@@ -299,9 +304,19 @@ export function ApplicationDetailPage() {
   }
 
   const title = row?.service.name ?? "Application";
+  const breadcrumbItems = useMemo(
+    () =>
+      applicationDetailBreadcrumbs(
+        row?.project
+          ? { name: row.project.name, slug: row.project.slug }
+          : undefined,
+        title,
+      ),
+    [row?.project, title],
+  );
 
   return (
-    <DashboardShell title={title} breadcrumb="Applications">
+    <DashboardShell title={title} breadcrumbItems={breadcrumbItems}>
       {loading ? (
         <DockyrdPageLoading />
       ) : error ? (

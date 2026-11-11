@@ -19,6 +19,7 @@ import {
   listDatabases,
   restartDatabaseService,
 } from "@/lib/api";
+import { databaseDetailBreadcrumbs } from "@/lib/resource-breadcrumbs";
 import {
   projectPathLabel,
   resourceStatusDisplay,
@@ -119,6 +120,14 @@ export function DatabaseDetailPage() {
   );
 
   const title = row?.name ?? "Database";
+  const breadcrumbItems = useMemo(
+    () =>
+      databaseDetailBreadcrumbs(
+        row ? { name: row.project_name, slug: row.project_slug } : undefined,
+        title,
+      ),
+    [row, title],
+  );
 
   async function onRestart() {
     if (!row) return;
@@ -135,7 +144,7 @@ export function DatabaseDetailPage() {
   }
 
   return (
-    <DashboardShell title={title} breadcrumb="Databases">
+    <DashboardShell title={title} breadcrumbItems={breadcrumbItems}>
       {loading ? (
         <DockyrdPageLoading />
       ) : error ? (

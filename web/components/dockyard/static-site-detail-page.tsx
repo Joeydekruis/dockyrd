@@ -155,8 +155,12 @@ export function StaticSiteDetailPage() {
   const latest = row?.deployments[0];
 
   const deploymentsPollActive = useMemo(() => {
-    if (!row || tab !== "deployments") return false;
-    return row.deployments.some((d) => deploymentIsInProgress(d.status));
+    if (!row) return false;
+    const inProgress = row.deployments.some((d) =>
+      deploymentIsInProgress(d.status),
+    );
+    if (!inProgress) return false;
+    return tab === "deployments" || tab === "overview";
   }, [row, tab]);
 
   const pollDeployments = useCallback(() => {

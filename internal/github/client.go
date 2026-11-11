@@ -19,7 +19,7 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
 )
 
-const githubAPI = "https://api.github.com"
+var githubAPI = "https://api.github.com"
 
 // AppCredentials loaded from git_sources.
 type AppCredentials struct {

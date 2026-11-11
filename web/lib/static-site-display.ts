@@ -112,7 +112,12 @@ export function deploymentStatusDisplay(status: string): {
 export function deploymentIsInProgress(status: string): boolean {
   const s = status.trim().toLowerCase();
   return (
-    s === "building" || s === "queued" || s === "running" || s === "waiting"
+    s === "building" ||
+    s === "queued" ||
+    s === "running" ||
+    s === "waiting" ||
+    s === "starting" ||
+    s === "healthchecking"
   );
 }
 
@@ -199,7 +204,10 @@ export function truncateDeploymentTitle(title: string, max = 48): string {
 
 export function deploymentAuthorLabel(d: Deployment): string {
   const author = d.commit_author?.trim();
-  return author || "—";
+  if (author) return author;
+  const triggered = d.triggered_by_name?.trim();
+  if (triggered) return triggered;
+  return "—";
 }
 
 export function deploymentCommitShaShort(d: Deployment): string {

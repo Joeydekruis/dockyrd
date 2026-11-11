@@ -2,7 +2,7 @@
 
 import type { LucideIcon } from "lucide-react";
 import { Box, Database, Globe, HardDrive, Layers } from "lucide-react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { CommitChip } from "@/components/dockyard/ui/commit-chip";
 import { StatusBadge } from "@/components/dockyard/ui/status-badge";
 import type { Deployment, Service } from "@/lib/api";
@@ -55,6 +55,8 @@ type ProjectResourceTableProps = {
 };
 
 export function ProjectResourceTable({ rows }: ProjectResourceTableProps) {
+  const router = useRouter();
+
   return (
     <div
       className="overflow-x-auto rounded-[20px] border"
@@ -93,11 +95,24 @@ export function ProjectResourceTable({ rows }: ProjectResourceTableProps) {
               const href = serviceDetailHref(service.kind, service.slug);
               const host = servicePublicHost(service);
               const dep = deployment;
+              const goToResource = () => router.push(href);
+
               return (
                 <tr
                   key={service.id}
-                  className="border-t"
+                  className="cursor-pointer border-t transition-colors hover:bg-[var(--hover-row)]"
                   style={{ borderColor: "var(--border)" }}
+                  tabIndex={0}
+                  aria-label={`View ${service.name}`}
+                  onClick={(e) => {
+                    if ((e.target as HTMLElement).closest("a")) return;
+                    goToResource();
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key !== "Enter" && e.key !== " ") return;
+                    e.preventDefault();
+                    goToResource();
+                  }}
                 >
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
@@ -115,13 +130,12 @@ export function ProjectResourceTable({ rows }: ProjectResourceTableProps) {
                         />
                       </div>
                       <div>
-                        <Link
-                          href={href}
-                          className="font-semibold hover:underline"
+                        <span
+                          className="font-semibold"
                           style={{ color: "var(--ink-navy)" }}
                         >
                           {service.name}
-                        </Link>
+                        </span>
                         <p
                           className="mt-0.5 font-mono text-[11px] uppercase tracking-wide"
                           style={{ color: "var(--muted-text)" }}
@@ -153,8 +167,9 @@ export function ProjectResourceTable({ rows }: ProjectResourceTableProps) {
                         }
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="font-medium hover:underline"
+                        className="relative z-[1] font-medium hover:underline"
                         style={{ color: "var(--link-blue)" }}
+                        onClick={(e) => e.stopPropagation()}
                       >
                         {host}
                       </a>
