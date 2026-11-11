@@ -50,43 +50,43 @@ export function AccountActiveSessionsSection() {
     <>
       <SettingsErrorBanner message={error} />
       <SettingsSection title="Active sessions">
-          {loading ? (
-            <DockyrdPageLoading className="py-2" cubeSize={28} />
-          ) : (
-            <ul className="divide-y divide-[var(--border)] rounded-xl border border-[var(--border)] bg-[var(--surface)]">
-              {sessions.length === 0 ? (
-                <li className="px-4 py-4 text-sm text-[var(--muted-foreground)]">
-                  No sessions.
+        {loading ? (
+          <DockyrdPageLoading className="py-2" cubeSize={28} />
+        ) : (
+          <ul className="divide-y divide-[var(--border)] rounded-xl border border-[var(--border)] bg-[var(--surface)]">
+            {sessions.length === 0 ? (
+              <li className="px-4 py-4 text-sm text-[var(--muted-foreground)]">
+                No sessions.
+              </li>
+            ) : (
+              sessions.map((s) => (
+                <li
+                  key={s.id}
+                  className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm"
+                >
+                  <div>
+                    <p>{s.user_agent || "Unknown device"}</p>
+                    <p className="text-xs text-[var(--muted-foreground)]">
+                      {s.ip || "—"} ·{" "}
+                      {s.current ? "This device" : "Other device"}
+                    </p>
+                  </div>
+                  {!s.current ? (
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="text-xs"
+                      style={{ color: "var(--danger)" }}
+                      onClick={() => void onRevoke(s.id)}
+                    >
+                      Revoke
+                    </Button>
+                  ) : null}
                 </li>
-              ) : (
-                sessions.map((s) => (
-                  <li
-                    key={s.id}
-                    className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm"
-                  >
-                    <div>
-                      <p>{s.user_agent || "Unknown device"}</p>
-                      <p className="text-xs text-[var(--muted-foreground)]">
-                        {s.ip || "—"} ·{" "}
-                        {s.current ? "This device" : "Other device"}
-                      </p>
-                    </div>
-                    {!s.current ? (
-                      <Button
-                        type="button"
-                        variant="link"
-                        className="text-xs"
-                        style={{ color: "var(--danger)" }}
-                        onClick={() => void onRevoke(s.id)}
-                      >
-                        Revoke
-                      </Button>
-                    ) : null}
-                  </li>
-                ))
-              )}
-            </ul>
-          )}
+              ))
+            )}
+          </ul>
+        )}
       </SettingsSection>
     </>
   );

@@ -2,16 +2,16 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  DeployBreakGame,
+  DeployBreakStatBar,
+} from "@/components/dockyard/deploy-break-game";
+import {
   type Deployment,
   type DeploymentBreakScoreSummary,
   fetchDeploymentBreakScore,
   putDeploymentBreakScore,
   type Service,
 } from "@/lib/api";
-import {
-  DeployBreakGame,
-  DeployBreakStatBar,
-} from "@/components/dockyard/deploy-break-game";
 import {
   deploymentDeployDone,
   deploymentProgressPercent,
@@ -99,10 +99,7 @@ export function DeploymentDeployBreakSection({
   const allTime = summary?.all_time_best;
 
   return (
-    <section
-      className="w-full space-y-4"
-      aria-label="Deploy Break"
-    >
+    <section className="w-full space-y-4" aria-label="Deploy Break">
       <div>
         <p className="font-mono text-[11px] uppercase tracking-widest text-[var(--muted-text)] m-0">
           While you wait

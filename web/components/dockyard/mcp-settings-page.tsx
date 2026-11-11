@@ -137,7 +137,9 @@ export function McpSettingsPage() {
                   </div>
                   <div className="flex items-center justify-between gap-4">
                     <span className="text-sm">
-                      <span className="font-medium">Allow API tokens on MCP</span>
+                      <span className="font-medium">
+                        Allow API tokens on MCP
+                      </span>
                       <span className="mt-0.5 block text-[var(--muted-foreground)]">
                         Optional: accept <code className="text-xs">dyk_*</code>{" "}
                         bearer tokens (not OAuth).

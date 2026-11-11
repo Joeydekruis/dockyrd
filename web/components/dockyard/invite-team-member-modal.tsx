@@ -6,10 +6,10 @@ import { Button } from "@/components/dockyard/ui/button";
 import { Modal } from "@/components/dockyard/ui/modal";
 import { createInvite, type TeamInvite } from "@/lib/api";
 import {
+  type AssignableTeamRole,
   INVITE_ROLE_OPTIONS,
   TEAM_ROLE_META,
   teamRoleLabel,
-  type AssignableTeamRole,
 } from "@/lib/team-roles";
 
 type InviteTeamMemberModalProps = {
@@ -138,9 +138,7 @@ export function InviteTeamMemberModal({
         open={open}
         size="lg"
         title={
-          sent.every((r) => r.emailSent)
-            ? "Email sent"
-            : "Invites created"
+          sent.every((r) => r.emailSent) ? "Email sent" : "Invites created"
         }
         description="Each link is valid for 7 days. You can resend or revoke it from this page."
         onClose={handleClose}
@@ -162,7 +160,10 @@ export function InviteTeamMemberModal({
           </>
         }
       >
-        <ul className="divide-y rounded-xl border" style={{ borderColor: "var(--border)" }}>
+        <ul
+          className="divide-y rounded-xl border"
+          style={{ borderColor: "var(--border)" }}
+        >
           {sent.map((row) => {
             const url = inviteUrl(row.token);
             return (
@@ -230,7 +231,9 @@ export function InviteTeamMemberModal({
               type="button"
               disabled={busy}
               onClick={() =>
-                void (method === "email" ? submitEmailInvites() : createLinkInvite())
+                void (method === "email"
+                  ? submitEmailInvites()
+                  : createLinkInvite())
               }
             >
               {busy
@@ -243,12 +246,11 @@ export function InviteTeamMemberModal({
         )
       }
     >
-      <div
-        role="group"
-        aria-label="Invite method"
-        className="mb-5 flex gap-1 rounded-xl p-1"
+      <fieldset
+        className="mb-5 flex gap-1 rounded-xl p-1 border-0 m-0 min-w-0"
         style={{ background: "#F1F0ED" }}
       >
+        <legend className="sr-only">Invite method</legend>
         {(["email", "link"] as const).map((key) => {
           const active = method === key;
           return (
@@ -271,7 +273,7 @@ export function InviteTeamMemberModal({
             </button>
           );
         })}
-      </div>
+      </fieldset>
 
       {error ? (
         <p className="mb-3 text-sm text-red-600" role="alert">
@@ -367,11 +369,16 @@ export function InviteTeamMemberModal({
       {!(method === "link" && linkInvite) ? (
         <>
           <p className="mb-2 text-sm font-semibold">Role</p>
-          <div className="mb-4 flex flex-col gap-2" role="radiogroup" aria-label="Role">
+          <div
+            className="mb-4 flex flex-col gap-2"
+            role="radiogroup"
+            aria-label="Role"
+          >
             {INVITE_ROLE_OPTIONS.map((key) => {
               const meta = TEAM_ROLE_META[key];
               const selected = role === key;
               return (
+                // biome-ignore lint/a11y/useSemanticElements: custom role card selector
                 <button
                   key={key}
                   type="button"
@@ -415,7 +422,8 @@ export function InviteTeamMemberModal({
               className="rounded-xl px-3.5 py-3 text-sm"
               style={{ background: "#F1F0ED", color: "#3A4A63" }}
             >
-              Admins always have access to every project and all server settings.
+              Admins always have access to every project and all server
+              settings.
             </p>
           ) : null}
         </>

@@ -117,117 +117,115 @@ export function AccountPasswordAndTotpSections() {
       <Owner2FARequiredBanner show={!loading && !!needs2FA} />
       <SettingsErrorBanner message={error} />
 
-      <SettingsSection title="Password" className={`${settingsCardClass} scroll-mt-24`}>
-          {passwordSaved ? (
-            <p className="text-sm text-green-700" role="status">
-              Password updated.
-            </p>
-          ) : null}
-          <form
-            onSubmit={(e) => void onChangePassword(e)}
-            className="space-y-3"
-          >
-            <label className="flex flex-col gap-1 text-sm">
-              <span className="text-[var(--muted-foreground)]">
-                Current password
-              </span>
-              <input
-                type="password"
-                className="field-input"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                autoComplete="current-password"
-                required
-              />
-            </label>
-            <label className="flex flex-col gap-1 text-sm">
-              <span className="text-[var(--muted-foreground)]">
-                New password
-              </span>
-              <input
-                type="password"
-                className="field-input"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                autoComplete="new-password"
-                minLength={12}
-                required
-              />
-            </label>
-            <label className="flex flex-col gap-1 text-sm">
-              <span className="text-[var(--muted-foreground)]">
-                Confirm new password
-              </span>
-              <input
-                type="password"
-                className="field-input"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                autoComplete="new-password"
-                minLength={12}
-                required
-              />
-            </label>
-            <Button type="submit" disabled={changingPassword}>
-              {changingPassword ? "Updating…" : "Update password"}
-            </Button>
-          </form>
-        </SettingsSection>
+      <SettingsSection
+        title="Password"
+        className={`${settingsCardClass} scroll-mt-24`}
+      >
+        {passwordSaved ? (
+          <p className="text-sm text-green-700" role="status">
+            Password updated.
+          </p>
+        ) : null}
+        <form onSubmit={(e) => void onChangePassword(e)} className="space-y-3">
+          <label className="flex flex-col gap-1 text-sm">
+            <span className="text-[var(--muted-foreground)]">
+              Current password
+            </span>
+            <input
+              type="password"
+              className="field-input"
+              value={currentPassword}
+              onChange={(e) => setCurrentPassword(e.target.value)}
+              autoComplete="current-password"
+              required
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-sm">
+            <span className="text-[var(--muted-foreground)]">New password</span>
+            <input
+              type="password"
+              className="field-input"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              autoComplete="new-password"
+              minLength={12}
+              required
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-sm">
+            <span className="text-[var(--muted-foreground)]">
+              Confirm new password
+            </span>
+            <input
+              type="password"
+              className="field-input"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              autoComplete="new-password"
+              minLength={12}
+              required
+            />
+          </label>
+          <Button type="submit" disabled={changingPassword}>
+            {changingPassword ? "Updating…" : "Update password"}
+          </Button>
+        </form>
+      </SettingsSection>
 
       <SettingsSection
         title="Two-factor authentication"
         className={`${settingsCardClass} scroll-mt-24`}
       >
-          {loading ? (
-            <DockyrdPageLoading className="py-2" cubeSize={28} />
-          ) : totpEnabled ? (
-            <p className="text-sm text-green-700">
-              Authenticator app is enabled for this account.
-            </p>
-          ) : setupSecret ? (
-            <form onSubmit={onEnableTotp} className="space-y-3">
-              {setupURL ? (
-                <p className="break-all text-xs text-[var(--muted-foreground)]">
-                  Add this account in your app (or scan URL):{" "}
-                  <code className="rounded bg-[var(--muted)]/30 px-1">
-                    {setupSecret}
-                  </code>
-                </p>
-              ) : null}
-              <label className="flex flex-col gap-1 text-sm">
-                <span className="text-[var(--muted-foreground)]">
-                  6-digit code
-                </span>
-                <input
-                  value={confirmCode}
-                  onChange={(e) => setConfirmCode(e.target.value)}
-                  className="field-input"
-                  inputMode="numeric"
-                  autoComplete="one-time-code"
-                  placeholder="000000"
-                />
-              </label>
-              <Button type="submit">Confirm and enable</Button>
-            </form>
-          ) : (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => void onStartTotp()}
-            >
-              Set up authenticator app
-            </Button>
-          )}
-          {recoveryCodes ? (
-            <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
-              <p className="font-medium">
-                Save these recovery codes (shown once):
+        {loading ? (
+          <DockyrdPageLoading className="py-2" cubeSize={28} />
+        ) : totpEnabled ? (
+          <p className="text-sm text-green-700">
+            Authenticator app is enabled for this account.
+          </p>
+        ) : setupSecret ? (
+          <form onSubmit={onEnableTotp} className="space-y-3">
+            {setupURL ? (
+              <p className="break-all text-xs text-[var(--muted-foreground)]">
+                Add this account in your app (or scan URL):{" "}
+                <code className="rounded bg-[var(--muted)]/30 px-1">
+                  {setupSecret}
+                </code>
               </p>
-              <pre className="mt-2 whitespace-pre-wrap font-mono text-xs">
-                {recoveryCodes.join("\n")}
-              </pre>
-            </div>
-          ) : null}
+            ) : null}
+            <label className="flex flex-col gap-1 text-sm">
+              <span className="text-[var(--muted-foreground)]">
+                6-digit code
+              </span>
+              <input
+                value={confirmCode}
+                onChange={(e) => setConfirmCode(e.target.value)}
+                className="field-input"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                placeholder="000000"
+              />
+            </label>
+            <Button type="submit">Confirm and enable</Button>
+          </form>
+        ) : (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => void onStartTotp()}
+          >
+            Set up authenticator app
+          </Button>
+        )}
+        {recoveryCodes ? (
+          <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 p-3 text-sm">
+            <p className="font-medium">
+              Save these recovery codes (shown once):
+            </p>
+            <pre className="mt-2 whitespace-pre-wrap font-mono text-xs">
+              {recoveryCodes.join("\n")}
+            </pre>
+          </div>
+        ) : null}
       </SettingsSection>
     </>
   );

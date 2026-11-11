@@ -153,10 +153,7 @@ export function DashboardActivityPanel({
         className="border-t px-5 py-3"
         style={{ borderColor: "var(--border)" }}
       >
-        <Link
-          href="/notifications"
-          className="dockyrd-text-link text-sm"
-        >
+        <Link href="/notifications" className="dockyrd-text-link text-sm">
           View all notifications →
         </Link>
       </div>

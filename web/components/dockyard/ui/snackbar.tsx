@@ -111,7 +111,10 @@ export function Snackbar({
           aria-hidden
         >
           {loading ? (
-            <Loader2 strokeWidth={2.2} className="size-3.5 text-white animate-spin" />
+            <Loader2
+              strokeWidth={2.2}
+              className="size-3.5 text-white animate-spin"
+            />
           ) : (
             <Icon strokeWidth={2.2} className="size-3.5 text-white" />
           )}

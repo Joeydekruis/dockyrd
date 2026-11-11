@@ -48,8 +48,7 @@ export function DeployActivitySnackbar() {
 
   const href = activeDeploymentHref(active);
   const onDetail =
-    pathname === href ||
-    pathname.endsWith(`/deployments/${active.id}`);
+    pathname === href || pathname.endsWith(`/deployments/${active.id}`);
 
   if (onDetail) return null;
 

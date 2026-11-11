@@ -2,20 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { AccountPasswordAndTotpSections } from "@/components/dockyard/account-password-settings-page";
+import { AccountRegionalSettingsSection } from "@/components/dockyard/account-regional-settings-page";
+import { AccountActiveSessionsSection } from "@/components/dockyard/account-security-settings-page";
 import {
   SettingsErrorBanner,
   SettingsSection,
 } from "@/components/dockyard/account-settings-shared";
-import { AccountRegionalSettingsSection } from "@/components/dockyard/account-regional-settings-page";
-import { AccountActiveSessionsSection } from "@/components/dockyard/account-security-settings-page";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import { SettingsPageBody } from "@/components/dockyard/settings-page-body";
 import { Button } from "@/components/dockyard/ui/button";
-import { getMe, type MeResponse, patchAccount } from "@/lib/api";
+import { getMe, patchAccount } from "@/lib/api";
 
 export function AccountProfileSettingsPage() {
-  const [user, setUser] = useState<MeResponse | null>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +25,6 @@ export function AccountProfileSettingsPage() {
   useEffect(() => {
     getMe()
       .then((me) => {
-        setUser(me);
         setName(me.name);
         setEmail(me.email);
       })
@@ -41,11 +39,10 @@ export function AccountProfileSettingsPage() {
     setSaving(true);
     setSaved(false);
     try {
-      const updated = await patchAccount({
+      await patchAccount({
         name: name.trim(),
         email: email.trim(),
       });
-      setUser(updated);
       setError(null);
       setSaved(true);
     } catch (err) {

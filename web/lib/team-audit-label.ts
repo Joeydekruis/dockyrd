@@ -9,7 +9,10 @@ const ACTION_LABELS: Record<string, string> = {
   "invite.accept": "accepted a team invite",
 };
 
-export function describeTeamAuditEntry(row: AuditEntry, userNameById?: Map<string, string>) {
+export function describeTeamAuditEntry(
+  row: AuditEntry,
+  userNameById?: Map<string, string>,
+) {
   const who =
     row.user_id && userNameById?.get(row.user_id)
       ? userNameById.get(row.user_id)
@@ -21,8 +24,7 @@ export function describeTeamAuditEntry(row: AuditEntry, userNameById?: Map<strin
   let time = "—";
   if (row.created_at > 0) {
     const rel = formatRelativeTime(row.created_at);
-    time =
-      rel === "Active now" ? "Just now" : rel.replace(/^Active /, "");
+    time = rel === "Active now" ? "Just now" : rel.replace(/^Active /, "");
   }
   return { who, text, ref, time };
 }

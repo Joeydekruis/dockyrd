@@ -1,7 +1,6 @@
 "use client";
 
 import { Mail, MoreHorizontal, Plus, Shield, UserPlus, X } from "lucide-react";
-import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
@@ -30,7 +29,11 @@ import {
   formatRelativeTime,
   initialsFromName,
 } from "@/lib/team-format";
-import { INVITE_ROLE_OPTIONS, TEAM_ROLE_META, memberScopeText } from "@/lib/team-roles";
+import {
+  INVITE_ROLE_OPTIONS,
+  memberScopeText,
+  TEAM_ROLE_META,
+} from "@/lib/team-roles";
 
 export function TeamSettingsPage() {
   const [users, setUsers] = useState<TeamUser[]>([]);
@@ -59,8 +62,7 @@ export function TeamSettingsPage() {
       try {
         const { entries } = await listAuditLog();
         const teamish = entries.filter(
-          (e) =>
-            e.action.startsWith("user.") || e.action.startsWith("invite."),
+          (e) => e.action.startsWith("user.") || e.action.startsWith("invite."),
         );
         setAudit(teamish.slice(0, 6));
       } catch {
@@ -143,8 +145,9 @@ export function TeamSettingsPage() {
                 Team
               </h1>
               <p className="text-[15px]" style={{ color: "var(--muted-text)" }}>
-                People who can sign in to this Dockyrd instance. Give each person a
-                role, and limit freelancers or clients to the projects they need.
+                People who can sign in to this Dockyrd instance. Give each
+                person a role, and limit freelancers or clients to the projects
+                they need.
               </p>
             </div>
             <Button
@@ -158,13 +161,19 @@ export function TeamSettingsPage() {
 
           <div className="flex flex-wrap items-start gap-6">
             <div className="min-w-0 flex-1 space-y-7">
-              <section aria-labelledby="team-members-heading" className="space-y-3">
+              <section
+                aria-labelledby="team-members-heading"
+                className="space-y-3"
+              >
                 <h2
                   id="team-members-heading"
                   className="text-lg font-semibold tracking-tight"
                 >
                   Members{" "}
-                  <span className="font-normal" style={{ color: "var(--muted-text)" }}>
+                  <span
+                    className="font-normal"
+                    style={{ color: "var(--muted-text)" }}
+                  >
                     · {users.length}
                   </span>
                 </h2>
@@ -173,7 +182,10 @@ export function TeamSettingsPage() {
                 ) : (
                   <div
                     className="overflow-x-auto rounded-[20px] border"
-                    style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+                    style={{
+                      borderColor: "var(--border)",
+                      background: "var(--surface)",
+                    }}
                   >
                     <div className="min-w-[640px]">
                       <div
@@ -200,13 +212,18 @@ export function TeamSettingsPage() {
                               gridTemplateColumns:
                                 "minmax(0,2.2fr) minmax(0,1.5fr) minmax(0,1.1fr) 44px",
                               borderTop:
-                                index === 0 ? undefined : "1px solid var(--border)",
+                                index === 0
+                                  ? undefined
+                                  : "1px solid var(--border)",
                             }}
                           >
                             <div className="flex min-w-0 items-center gap-3">
                               <span
                                 className="inline-flex size-10 shrink-0 items-center justify-center rounded-full text-[13px] font-semibold"
-                                style={{ background: "#E3F0FF", color: "#0B57C9" }}
+                                style={{
+                                  background: "#E3F0FF",
+                                  color: "#0B57C9",
+                                }}
                               >
                                 {initialsFromName(u.name)}
                               </span>
@@ -248,7 +265,11 @@ export function TeamSettingsPage() {
                                   color: u.totp_enabled ? "#176B3D" : "#8A5200",
                                 }}
                               >
-                                <Shield className="size-3.5" strokeWidth={2} aria-hidden />
+                                <Shield
+                                  className="size-3.5"
+                                  strokeWidth={2}
+                                  aria-hidden
+                                />
                                 {u.totp_enabled ? "2FA on" : "2FA off"}
                               </p>
                             </div>
@@ -287,25 +308,38 @@ export function TeamSettingsPage() {
                 )}
               </section>
 
-              <section aria-labelledby="team-invites-heading" className="space-y-3">
+              <section
+                aria-labelledby="team-invites-heading"
+                className="space-y-3"
+              >
                 <h2
                   id="team-invites-heading"
                   className="text-lg font-semibold tracking-tight"
                 >
                   Pending invites{" "}
-                  <span className="font-normal" style={{ color: "var(--muted-text)" }}>
+                  <span
+                    className="font-normal"
+                    style={{ color: "var(--muted-text)" }}
+                  >
                     · {invites.length}
                   </span>
                 </h2>
                 <div
                   className="overflow-hidden rounded-[20px] border"
-                  style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+                  style={{
+                    borderColor: "var(--border)",
+                    background: "var(--surface)",
+                  }}
                 >
                   {!loading && invites.length === 0 ? (
                     <div className="flex flex-col items-start gap-2.5 px-5 py-6">
                       <p className="font-semibold">No pending invites</p>
-                      <p className="text-sm" style={{ color: "var(--muted-text)" }}>
-                        Invite a colleague, freelancer or client to give them access.
+                      <p
+                        className="text-sm"
+                        style={{ color: "var(--muted-text)" }}
+                      >
+                        Invite a colleague, freelancer or client to give them
+                        access.
                       </p>
                       <Button
                         type="button"
@@ -325,35 +359,51 @@ export function TeamSettingsPage() {
                           className="flex flex-wrap items-center gap-3 px-5 py-3.5"
                           style={{
                             borderTop:
-                              index === 0 ? undefined : "1px solid var(--border)",
+                              index === 0
+                                ? undefined
+                                : "1px solid var(--border)",
                           }}
                         >
                           <span
                             className="inline-flex size-10 shrink-0 items-center justify-center rounded-full"
-                            style={{ background: "#F1F0ED", color: "var(--muted-text)" }}
+                            style={{
+                              background: "#F1F0ED",
+                              color: "var(--muted-text)",
+                            }}
                           >
-                            <Mail className="size-[18px]" strokeWidth={1.8} aria-hidden />
+                            <Mail
+                              className="size-[18px]"
+                              strokeWidth={1.8}
+                              aria-hidden
+                            />
                           </span>
                           <div className="min-w-0 flex-1">
                             <p className="flex flex-wrap items-center gap-2 font-semibold">
                               {emailLabel}
                               <TeamRoleBadge role={inv.role} />
                             </p>
-                            <p className="text-[13px]" style={{ color: "var(--muted-text)" }}>
+                            <p
+                              className="text-[13px]"
+                              style={{ color: "var(--muted-text)" }}
+                            >
                               {memberScopeText(inv.role)} · {expiry.detail}
                             </p>
                           </div>
                           <span
                             className="inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 font-mono text-[11px] font-medium uppercase tracking-wide"
                             style={{
-                              background: expiry.expired ? "#FBE8E6" : "#FBF0DC",
+                              background: expiry.expired
+                                ? "#FBE8E6"
+                                : "#FBF0DC",
                               color: expiry.expired ? "#B3261E" : "#8A5200",
                             }}
                           >
                             <span
                               className="size-1.5 rounded-full"
                               style={{
-                                background: expiry.expired ? "#B3261E" : "#D98A00",
+                                background: expiry.expired
+                                  ? "#B3261E"
+                                  : "#D98A00",
                               }}
                             />
                             {expiry.status}
@@ -392,7 +442,10 @@ export function TeamSettingsPage() {
               </section>
 
               {audit.length > 0 ? (
-                <section aria-labelledby="team-activity-heading" className="space-y-3">
+                <section
+                  aria-labelledby="team-activity-heading"
+                  className="space-y-3"
+                >
                   <div className="flex items-center justify-between gap-3">
                     <h2
                       id="team-activity-heading"
@@ -400,13 +453,19 @@ export function TeamSettingsPage() {
                     >
                       Team activity
                     </h2>
-                    <span className="text-sm" style={{ color: "var(--muted-text)" }}>
+                    <span
+                      className="text-sm"
+                      style={{ color: "var(--muted-text)" }}
+                    >
                       Recent team events
                     </span>
                   </div>
                   <div
                     className="overflow-hidden rounded-[20px] border"
-                    style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+                    style={{
+                      borderColor: "var(--border)",
+                      background: "var(--surface)",
+                    }}
                   >
                     {audit.map((row, index) => {
                       const names = new Map(users.map((u) => [u.id, u.name]));
@@ -417,7 +476,9 @@ export function TeamSettingsPage() {
                           className="flex items-center gap-3.5 px-5 py-3.5"
                           style={{
                             borderTop:
-                              index === 0 ? undefined : "1px solid var(--border)",
+                              index === 0
+                                ? undefined
+                                : "1px solid var(--border)",
                           }}
                         >
                           <span
@@ -464,7 +525,10 @@ export function TeamSettingsPage() {
             >
               <section
                 className="space-y-4 rounded-[20px] border p-5"
-                style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+                style={{
+                  borderColor: "var(--border)",
+                  background: "var(--surface)",
+                }}
               >
                 <h2 className="text-lg font-semibold tracking-tight">Roles</h2>
                 {(["owner", ...INVITE_ROLE_OPTIONS] as const).map((key) => {
@@ -484,12 +548,16 @@ export function TeamSettingsPage() {
                 style={{ background: "#E3F0FF" }}
               >
                 <p className="flex items-center gap-2 font-semibold">
-                  <Shield className="size-[18px]" strokeWidth={1.8} aria-hidden />
+                  <Shield
+                    className="size-[18px]"
+                    strokeWidth={1.8}
+                    aria-hidden
+                  />
                   Working with clients?
                 </p>
                 <p className="text-sm" style={{ color: "#3A4A63" }}>
-                  Give clients the Viewer role on just their project. They can see
-                  logs and metrics but cannot deploy or change anything.
+                  Give clients the Viewer role on just their project. They can
+                  see logs and metrics but cannot deploy or change anything.
                 </p>
               </section>
             </aside>

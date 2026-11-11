@@ -14,8 +14,7 @@ export const TEAM_ROLE_META: Record<
   },
   admin: {
     label: "Admin",
-    description:
-      "Manages team, server settings, security and every project.",
+    description: "Manages team, server settings, security and every project.",
     bg: "#E3F0FF",
     fg: "#0B3D91",
   },

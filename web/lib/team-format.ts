@@ -5,7 +5,10 @@ export function initialsFromName(name: string): string {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
-export function formatRelativeTime(unixSec: number, nowSec = Date.now() / 1000): string {
+export function formatRelativeTime(
+  unixSec: number,
+  nowSec = Date.now() / 1000,
+): string {
   const diff = Math.max(0, nowSec - unixSec);
   if (diff < 120) return "Active now";
   if (diff < 3600) {
@@ -21,7 +24,10 @@ export function formatRelativeTime(unixSec: number, nowSec = Date.now() / 1000):
   return `Active ${d} days ago`;
 }
 
-export function formatInviteExpiry(expiresAt: number, nowSec = Date.now() / 1000): {
+export function formatInviteExpiry(
+  expiresAt: number,
+  nowSec = Date.now() / 1000,
+): {
   expired: boolean;
   status: string;
   detail: string;

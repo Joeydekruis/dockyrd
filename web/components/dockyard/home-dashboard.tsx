@@ -78,10 +78,7 @@ export function HomeDashboard() {
           >
             Projects
           </h2>
-          <Link
-            href="/projects"
-            className="dockyrd-text-link text-sm"
-          >
+          <Link href="/projects" className="dockyrd-text-link text-sm">
             All projects →
           </Link>
         </div>
@@ -99,10 +96,7 @@ export function HomeDashboard() {
         >
           Monitoring
         </h2>
-        <Link
-          href="/analytics"
-          className="dockyrd-text-link text-sm"
-        >
+        <Link href="/analytics" className="dockyrd-text-link text-sm">
           Open server analytics →
         </Link>
       </div>

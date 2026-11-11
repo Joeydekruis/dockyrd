@@ -1,16 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { TeamRoleBadge } from "@/components/dockyard/team-role-badge";
 import { Button } from "@/components/dockyard/ui/button";
 import { Modal } from "@/components/dockyard/ui/modal";
-import { TeamRoleBadge } from "@/components/dockyard/team-role-badge";
 import { patchTeamUser, type TeamUser } from "@/lib/api";
+import { initialsFromName } from "@/lib/team-format";
 import {
+  type AssignableTeamRole,
   INVITE_ROLE_OPTIONS,
   TEAM_ROLE_META,
-  type AssignableTeamRole,
 } from "@/lib/team-roles";
-import { initialsFromName } from "@/lib/team-format";
 
 type TeamChangeRoleModalProps = {
   open: boolean;
@@ -36,7 +36,7 @@ export function TeamChangeRoleModal({
       setRole("member");
     }
     setError(null);
-  }, [user, open]);
+  }, [user]);
 
   async function save() {
     if (!user) return;
@@ -92,15 +92,12 @@ export function TeamChangeRoleModal({
         <TeamRoleBadge role={user.role} />
       </div>
       <p className="mb-2 text-sm font-semibold">Role</p>
-      <div
-        className="flex flex-col gap-2"
-        role="radiogroup"
-        aria-label="Role"
-      >
+      <div className="flex flex-col gap-2" role="radiogroup" aria-label="Role">
         {INVITE_ROLE_OPTIONS.map((key) => {
           const meta = TEAM_ROLE_META[key];
           const selected = role === key;
           return (
+            // biome-ignore lint/a11y/useSemanticElements: custom role card selector
             <button
               key={key}
               type="button"

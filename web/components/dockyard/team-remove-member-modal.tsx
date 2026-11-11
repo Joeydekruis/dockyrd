@@ -1,9 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import { TeamRoleBadge } from "@/components/dockyard/team-role-badge";
 import { Button } from "@/components/dockyard/ui/button";
 import { Modal } from "@/components/dockyard/ui/modal";
-import { TeamRoleBadge } from "@/components/dockyard/team-role-badge";
 import { patchTeamUser, type TeamUser } from "@/lib/api";
 
 type TeamRemoveMemberModalProps = {
@@ -69,7 +69,10 @@ export function TeamRemoveMemberModal({
       <div className="mb-4">
         <TeamRoleBadge role={user.role} />
       </div>
-      <ul className="list-none space-y-2.5 text-sm" style={{ color: "#3A4A63" }}>
+      <ul
+        className="list-none space-y-2.5 text-sm"
+        style={{ color: "#3A4A63" }}
+      >
         <li className="flex gap-2.5">
           <span
             className="mt-1.5 size-1.5 shrink-0 rounded-full"

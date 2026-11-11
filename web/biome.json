@@ -16,6 +16,13 @@
   "linter": {
     "enabled": true
   },
+  "overrides": [
+    {
+      "includes": ["lib/deploy-break/**"],
+      "linter": { "enabled": false },
+      "formatter": { "enabled": false }
+    }
+  ],
   "css": {
     "parser": {
       "tailwindDirectives": true

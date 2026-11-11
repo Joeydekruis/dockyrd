@@ -781,8 +781,8 @@ button.btn-text:disabled {
   transition: width 0.05s linear;
 }
 
-.snackbar-toast-progress-indeterminate {
-  width: 40% !important;
+.snackbar-toast-progress-track .snackbar-toast-progress-indeterminate {
+  width: 40%;
   animation: snackbar-indeterminate 1.2s ease-in-out infinite;
 }
 

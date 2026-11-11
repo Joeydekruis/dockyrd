@@ -7,6 +7,7 @@ import {
   CommandPalette,
   useCommandPalette,
 } from "@/components/dockyard/command-palette";
+import { DeployActivitySnackbar } from "@/components/dockyard/deploy-activity-snackbar";
 import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import { Sidebar } from "@/components/dockyard/sidebar";
 import { BANNER_HEIGHT_PX, TopBar } from "@/components/dockyard/top-bar";
@@ -14,7 +15,6 @@ import type { BreadcrumbItem } from "@/components/dockyard/ui/breadcrumbs";
 import { UpdateAvailableNotifier } from "@/components/dockyard/update-available-modal";
 import { getMe, type MeResponse } from "@/lib/api";
 import { isAccountSettingsPath, isSettingsPath } from "@/lib/nav";
-import { DeployActivitySnackbar } from "@/components/dockyard/deploy-activity-snackbar";
 import { SnackbarProvider } from "@/lib/snackbar-context";
 import { UserLocaleProvider } from "@/lib/user-locale-context";
 
