@@ -1,12 +1,14 @@
 "use client";
 
 import { ExternalLink } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import { SettingsPageBody } from "@/components/dockyard/settings-page-body";
 import { Button } from "@/components/dockyard/ui/button";
+import { SettingsCopyPill } from "@/components/dockyard/ui/settings-detail-block";
 import { Switch } from "@/components/dockyard/ui/switch";
+import { Tabs } from "@/components/dockyard/ui/tabs";
 import {
   getGitHubStatus,
   getInstanceSettings,
@@ -17,6 +19,98 @@ import {
 import { openExternalUrl } from "@/lib/open-external-url";
 import { PUBLIC_SITE_ORIGIN } from "@/lib/public-links";
 
+const CONNECT_TABS = [
+  { id: "claude", label: "Claude" },
+  { id: "cursor", label: "Cursor" },
+] as const;
+
+type ConnectTabId = (typeof CONNECT_TABS)[number]["id"];
+
+function buildMcpUrl(inst: InstanceSettings | null, origin: string): string {
+  const fromApi = inst?.mcp_url?.trim();
+  if (fromApi) {
+    return fromApi.replace(/\/$/, "");
+  }
+  const base = origin.trim() || "https://your-panel";
+  return `${base.replace(/\/$/, "")}/mcp`;
+}
+
+function ConnectInstructions({ client }: { client: ConnectTabId }) {
+  if (client === "claude") {
+    return (
+      <ol className="list-decimal space-y-2 pl-5 text-sm text-[var(--muted-foreground)]">
+        <li>
+          In{" "}
+          <strong className="font-medium text-[var(--foreground)]">
+            Claude
+          </strong>
+          , open{" "}
+          <strong className="font-medium text-[var(--foreground)]">
+            Settings
+          </strong>{" "}
+          →{" "}
+          <strong className="font-medium text-[var(--foreground)]">
+            Connectors
+          </strong>{" "}
+          → add a{" "}
+          <strong className="font-medium text-[var(--foreground)]">
+            custom connector
+          </strong>{" "}
+          (remote MCP).
+        </li>
+        <li>
+          Paste the{" "}
+          <strong className="font-medium text-[var(--foreground)]">
+            MCP server URL
+          </strong>{" "}
+          above. Use the same HTTPS host as this panel (not{" "}
+          <code className="text-xs">localhost</code> unless you develop on the
+          server).
+        </li>
+        <li>
+          On first use, Claude opens this Dockyrd instance to sign in (OAuth).
+          Approve the scopes your role allows.
+        </li>
+        <li>
+          If connection fails, remove the connector and add it again after
+          confirming MCP is enabled below and your instance is on the latest
+          version.
+        </li>
+      </ol>
+    );
+  }
+  return (
+    <ol className="list-decimal space-y-2 pl-5 text-sm text-[var(--muted-foreground)]">
+      <li>
+        In{" "}
+        <strong className="font-medium text-[var(--foreground)]">Cursor</strong>
+        , open{" "}
+        <strong className="font-medium text-[var(--foreground)]">
+          Settings
+        </strong>{" "}
+        → <strong className="font-medium text-[var(--foreground)]">MCP</strong>{" "}
+        → add an{" "}
+        <strong className="font-medium text-[var(--foreground)]">HTTP</strong>{" "}
+        server.
+      </li>
+      <li>
+        Set the server URL to the copied MCP endpoint (Streamable HTTP). Cursor
+        discovers OAuth from the panel when you connect.
+      </li>
+      <li>
+        Complete sign-in in the browser when prompted, including 2FA if your
+        instance requires it.
+      </li>
+      <li>
+        Prefer OAuth over pasting API tokens into project files. For{" "}
+        <code className="text-xs">dockyrd mcp --stdio</code> on the host only,
+        use a <code className="text-xs">dyk_*</code> token from Account
+        settings.
+      </li>
+    </ol>
+  );
+}
+
 export function McpSettingsPage() {
   const [instSettings, setInstSettings] = useState<InstanceSettings | null>(
     null,
@@ -26,6 +120,7 @@ export function McpSettingsPage() {
   const [mcpSaving, setMcpSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [connectTab, setConnectTab] = useState<ConnectTabId>("claude");
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -55,6 +150,11 @@ export function McpSettingsPage() {
     void refresh();
   }, [refresh]);
 
+  const mcpUrl = useMemo(
+    () => buildMcpUrl(instSettings, instanceUrl),
+    [instSettings, instanceUrl],
+  );
+
   async function onMcpToggle(
     field: "mcp_disabled" | "mcp_allow_api_token",
     value: boolean,
@@ -75,7 +175,7 @@ export function McpSettingsPage() {
     <DashboardShell title="AI assistants (MCP)" breadcrumb="Server settings">
       <SettingsPageBody>
         <p className="mb-6 max-w-2xl text-sm text-[var(--muted-foreground)]">
-          Connect Cursor or Claude to debug deploys, read logs, and trigger
+          Connect Claude or Cursor to debug deploys, read logs, and trigger
           releases on this Dockyrd instance.
         </p>
 
@@ -90,36 +190,32 @@ export function McpSettingsPage() {
             <DockyrdPageLoading className="py-8" cubeSize={28} />
           ) : (
             <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6">
-              <p className="max-w-2xl text-sm text-[var(--muted-foreground)]">
-                Remote clients use OAuth 2.1 at{" "}
-                <code className="text-xs">
-                  {instSettings?.mcp_url ??
-                    `${instanceUrl || "https://your-panel"}/mcp`}
-                </code>
-                .
-              </p>
-              {instSettings?.mcp_disabled ? (
-                <p className="mt-2 text-sm text-amber-700" role="status">
-                  MCP is disabled on this instance. Re-enable below to connect
-                  clients.
-                </p>
-              ) : null}
-              <ul className="mt-4 list-disc space-y-1 pl-5 text-sm text-[var(--muted-foreground)]">
-                <li>
-                  Add an HTTP MCP server in Cursor or Claude pointing at your
-                  panel URL.
-                </li>
-                <li>
-                  Sign in when prompted (PKCE). Scopes: read, deploy, write.
-                </li>
-                <li>
-                  On the server only:{" "}
-                  <code className="text-xs">dockyrd mcp --stdio</code> with a{" "}
-                  <code className="text-xs">dyk_</code> API token.
-                </li>
-              </ul>
+              <McpUrlBlock
+                mcpUrl={mcpUrl}
+                mcpDisabled={Boolean(instSettings?.mcp_disabled)}
+              />
+
+              <div className="mt-8">
+                <h2 className="mb-3 text-sm font-medium">How to connect</h2>
+                <Tabs
+                  tabs={[...CONNECT_TABS]}
+                  activeId={connectTab}
+                  onChange={(id) => setConnectTab(id as ConnectTabId)}
+                />
+                <div
+                  className="mt-4"
+                  role="tabpanel"
+                  aria-label={
+                    connectTab === "claude" ? "Claude setup" : "Cursor setup"
+                  }
+                >
+                  <ConnectInstructions client={connectTab} />
+                </div>
+              </div>
+
               {isAdmin && instSettings ? (
-                <div className="mt-6 space-y-4 border-t border-[var(--border)] pt-4">
+                <div className="mt-8 space-y-4 border-t border-[var(--border)] pt-6">
+                  <h2 className="text-sm font-medium">Instance controls</h2>
                   <div className="flex items-center justify-between gap-4">
                     <span className="text-sm">
                       <span className="font-medium">Allow MCP</span>
@@ -156,7 +252,7 @@ export function McpSettingsPage() {
                   </div>
                 </div>
               ) : null}
-              <div className="mt-4 flex flex-wrap gap-2">
+              <div className="mt-6 flex flex-wrap gap-2">
                 <Button
                   type="button"
                   variant="outline"
@@ -173,5 +269,31 @@ export function McpSettingsPage() {
         </section>
       </SettingsPageBody>
     </DashboardShell>
+  );
+}
+
+function McpUrlBlock({
+  mcpUrl,
+  mcpDisabled,
+}: {
+  mcpUrl: string;
+  mcpDisabled: boolean;
+}) {
+  return (
+    <>
+      <h2 className="text-sm font-medium">MCP server URL</h2>
+      <p className="mt-1 max-w-2xl text-sm text-[var(--muted-foreground)]">
+        Remote clients use this Streamable HTTP endpoint with OAuth 2.1.
+      </p>
+      <div className="mt-3 max-w-full">
+        <SettingsCopyPill value={mcpUrl} />
+      </div>
+      {mcpDisabled ? (
+        <p className="mt-3 text-sm text-amber-700" role="status">
+          MCP is disabled on this instance. Re-enable below before connecting
+          clients.
+        </p>
+      ) : null}
+    </>
   );
 }

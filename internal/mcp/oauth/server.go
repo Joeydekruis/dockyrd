@@ -48,9 +48,12 @@ func (s *Server) resourceURL(r *http.Request) string {
 
 func (s *Server) Register(mux *http.ServeMux) {
 	mux.HandleFunc("GET /.well-known/oauth-protected-resource", s.handleProtectedResourceMetadata)
+	mux.HandleFunc("GET /.well-known/oauth-protected-resource/mcp", s.handleProtectedResourceMetadata)
 	mux.HandleFunc("GET /.well-known/oauth-authorization-server", s.handleAuthorizationServerMetadata)
+	mux.HandleFunc("GET /.well-known/openid-configuration", s.handleAuthorizationServerMetadata)
 	mux.HandleFunc("GET /oauth/authorize", s.handleAuthorize)
 	mux.HandleFunc("POST /oauth/token", s.handleToken)
+	mux.HandleFunc("POST /oauth/register", s.handleRegisterClient)
 }
 
 func (s *Server) handleProtectedResourceMetadata(w http.ResponseWriter, r *http.Request) {
@@ -69,6 +72,7 @@ func (s *Server) handleAuthorizationServerMetadata(w http.ResponseWriter, r *htt
 		"issuer":                                origin,
 		"authorization_endpoint":                origin + "/oauth/authorize",
 		"token_endpoint":                        origin + "/oauth/token",
+		"registration_endpoint":                 origin + "/oauth/register",
 		"scopes_supported":                      mcpscope.AllScopes,
 		"response_types_supported":              []string{"code"},
 		"grant_types_supported":                 []string{"authorization_code"},
@@ -184,16 +188,30 @@ func (s *Server) handleToken(w http.ResponseWriter, r *http.Request) {
 
 	row, err := s.Q.GetMCPOAuthCode(r.Context(), codeHash)
 	if err != nil {
-		http.Error(w, "invalid_grant", http.StatusBadRequest)
+		writeOAuthJSONError(w, http.StatusBadRequest, "invalid_grant", "invalid authorization code")
 		return
 	}
 	_ = s.Q.DeleteMCPOAuthCode(r.Context(), codeHash)
 	if time.Now().Unix() > row.ExpiresAt {
-		http.Error(w, "invalid_grant", http.StatusBadRequest)
+		writeOAuthJSONError(w, http.StatusBadRequest, "invalid_grant", "authorization code expired")
+		return
+	}
+	clientID := strings.TrimSpace(r.Form.Get("client_id"))
+	if clientID != "" && clientID != row.ClientID {
+		writeOAuthJSONError(w, http.StatusBadRequest, "invalid_grant", "client_id mismatch")
+		return
+	}
+	redirectURI := strings.TrimSpace(r.Form.Get("redirect_uri"))
+	if redirectURI != "" && !redirectURIMatchesAuth(row.RedirectUri, redirectURI) {
+		writeOAuthJSONError(w, http.StatusBadRequest, "invalid_grant", "redirect_uri mismatch")
+		return
+	}
+	if redirectURI == "" && row.RedirectUri != "" {
+		writeOAuthJSONError(w, http.StatusBadRequest, "invalid_grant", "redirect_uri required")
 		return
 	}
 	if !pkceValid(row.CodeChallenge, codeVerifier) {
-		http.Error(w, "invalid_grant", http.StatusBadRequest)
+		writeOAuthJSONError(w, http.StatusBadRequest, "invalid_grant", "invalid code_verifier")
 		return
 	}
 

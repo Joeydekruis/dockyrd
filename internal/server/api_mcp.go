@@ -84,7 +84,7 @@ func (d apiDeps) registerMCPRoutes(mux *http.ServeMux) {
 		}
 		panel, _ := instance.LoadPanel(r.Context(), d.q)
 		origin := mcpsoaut.PanelOrigin(r, d.cfg, panel)
-		prm := origin + "/.well-known/oauth-protected-resource"
+		prm := origin + "/.well-known/oauth-protected-resource/mcp"
 		handler := mcpsdkauth.RequireBearerToken(verifier, &mcpsdkauth.RequireBearerTokenOptions{
 			ResourceMetadataURL: prm,
 		})(stream)

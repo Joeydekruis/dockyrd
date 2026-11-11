@@ -1,11 +1,18 @@
 import type { StatusVariant } from "@/components/dockyard/ui/status-badge";
+import { isUnassignedProject } from "@/lib/project-optional";
 
 export function formatResourceCount(count: number, noun: string): string {
   const label = count === 1 ? noun : `${noun}s`;
   return `${count} ${label}`.toUpperCase();
 }
 
-export function projectPathLabel(projectName: string): string {
+export function projectPathLabel(
+  projectName: string,
+  projectSlug?: string | null,
+): string {
+  if (isUnassignedProject(projectSlug) || !projectName.trim()) {
+    return "No project";
+  }
   return `${projectName} / production`;
 }
 
@@ -13,7 +20,12 @@ export function projectPathLabel(projectName: string): string {
 export function projectBranchLabel(
   projectName: string,
   branch?: string,
+  projectSlug?: string | null,
 ): string {
+  if (isUnassignedProject(projectSlug) || !projectName.trim()) {
+    const b = (branch ?? "main").trim() || "main";
+    return `No project / ${b}`;
+  }
   const b = (branch ?? "main").trim() || "main";
   return `${projectName} / ${b}`;
 }

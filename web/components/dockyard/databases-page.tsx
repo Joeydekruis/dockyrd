@@ -193,7 +193,7 @@ export function DatabasesPage() {
                   key={row.id}
                   name={row.name}
                   href={serviceDetailHref(row.kind, row.slug)}
-                  meta={projectPathLabel(row.project_name)}
+                  meta={projectPathLabel(row.project_name, row.project_slug)}
                   subMeta={databaseConnectionMeta(row.kind)}
                   statusLabel={status.label}
                   statusVariant={status.variant}

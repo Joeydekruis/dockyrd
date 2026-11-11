@@ -19,6 +19,10 @@ import {
   listDatabases,
   restartDatabaseService,
 } from "@/lib/api";
+import {
+  isUnassignedProject,
+  projectDisplayName,
+} from "@/lib/project-optional";
 import { databaseDetailBreadcrumbs } from "@/lib/resource-breadcrumbs";
 import {
   projectPathLabel,
@@ -173,13 +177,19 @@ export function DatabaseDetailPage() {
                 className="mt-2 text-[13px]"
                 style={{ color: "var(--muted-text)" }}
               >
-                <Link
-                  href={`/projects/${row.project_slug}`}
-                  className="hover:underline"
-                  style={{ color: "var(--link-blue)" }}
-                >
-                  {projectPathLabel(row.project_name)}
-                </Link>
+                {isUnassignedProject(row.project_slug) ? (
+                  <span>
+                    {projectPathLabel(row.project_name, row.project_slug)}
+                  </span>
+                ) : (
+                  <Link
+                    href={`/projects/${row.project_slug}`}
+                    className="hover:underline"
+                    style={{ color: "var(--link-blue)" }}
+                  >
+                    {projectPathLabel(row.project_name, row.project_slug)}
+                  </Link>
+                )}
                 <span className="mx-2">·</span>
                 <span className="font-mono">{internalEndpoint(row)}</span>
               </p>
@@ -224,13 +234,17 @@ export function DatabaseDetailPage() {
                   <KeyValueRow
                     label="Project"
                     value={
-                      <Link
-                        href={`/projects/${row.project_slug}`}
-                        className="hover:underline"
-                        style={{ color: "var(--link-blue)" }}
-                      >
-                        {row.project_name}
-                      </Link>
+                      isUnassignedProject(row.project_slug) ? (
+                        projectDisplayName(row.project_name, row.project_slug)
+                      ) : (
+                        <Link
+                          href={`/projects/${row.project_slug}`}
+                          className="hover:underline"
+                          style={{ color: "var(--link-blue)" }}
+                        >
+                          {row.project_name}
+                        </Link>
+                      )
                     }
                   />
                   <KeyValueRow

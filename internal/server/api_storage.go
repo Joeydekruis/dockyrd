@@ -5,8 +5,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/Joeydekruis/dockyrd/internal/docker"
 	"github.com/Joeydekruis/dockyrd/internal/dbkind"
+	"github.com/Joeydekruis/dockyrd/internal/docker"
+	"github.com/Joeydekruis/dockyrd/internal/project"
 	"github.com/Joeydekruis/dockyrd/internal/storage"
 )
 
@@ -34,7 +35,8 @@ func (d apiDeps) handleGetStorage(w http.ResponseWriter, r *http.Request) {
 			"name":         b.Name,
 			"slug":         b.Slug,
 			"project_id":   b.ProjectID,
-			"project_name": b.ProjectName,
+			"project_name": project.DisplayName(b.ProjectName, b.ProjectSlug),
+			"project_slug": project.DisplaySlug(b.ProjectSlug),
 			"config":       dbkind.RedactConfig("bucket", cfg),
 		})
 	}

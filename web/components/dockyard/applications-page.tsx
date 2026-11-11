@@ -174,7 +174,7 @@ export function ApplicationsPage() {
                   key={app.id}
                   name={app.name}
                   href={serviceDetailHref("app", app.slug)}
-                  meta={projectPathLabel(app.project_name)}
+                  meta={projectPathLabel(app.project_name, app.project_slug)}
                   url={host}
                   urlHref={visitSiteHref(host)}
                   internalOnly={!host}

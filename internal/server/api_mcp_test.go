@@ -122,6 +122,8 @@ func TestMCPOAuthPKCERoundtrip(t *testing.T) {
 	form.Set("grant_type", "authorization_code")
 	form.Set("code", code)
 	form.Set("code_verifier", verifier)
+	form.Set("client_id", "cursor")
+	form.Set("redirect_uri", "http://127.0.0.1/callback")
 	recTok := httptest.NewRecorder()
 	reqTok := httptest.NewRequest(http.MethodPost, "/oauth/token", strings.NewReader(form.Encode()))
 	reqTok.Header.Set("Content-Type", "application/x-www-form-urlencoded")

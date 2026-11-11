@@ -28,19 +28,26 @@ type clientMetadata struct {
 
 // oauthClient is either a legacy opaque client_id or a resolved CIMD client.
 type oauthClient struct {
-	LegacyID   string
-	Metadata   *clientMetadata
+	LegacyID    string
+	Metadata    *clientMetadata
 	MetadataURL string
+	DCR         *registeredClient
 }
 
 func (c oauthClient) DisplayID() string {
 	if c.MetadataURL != "" {
 		return c.MetadataURL
 	}
+	if c.DCR != nil {
+		return "Registered MCP client"
+	}
 	return c.LegacyID
 }
 
 func (c oauthClient) AllowsRedirectURI(redirectURI, panelOrigin string) bool {
+	if c.DCR != nil {
+		return c.DCR.allowsRedirectURI(redirectURI, panelOrigin)
+	}
 	if c.Metadata != nil {
 		for _, allowed := range c.Metadata.RedirectURIs {
 			if redirectURIMatches(allowed, redirectURI) && redirectURISafe(redirectURI) {
@@ -56,7 +63,10 @@ var pinnedCIMD = map[string]clientMetadata{
 	"https://claude.ai/oauth/mcp-oauth-client-metadata": {
 		ClientID:                "https://claude.ai/oauth/mcp-oauth-client-metadata",
 		ClientName:              "Claude",
-		RedirectURIs:            []string{"https://claude.ai/api/mcp/auth_callback"},
+		RedirectURIs: []string{
+			"https://claude.ai/api/mcp/auth_callback",
+			"https://claude.com/api/mcp/auth_callback",
+		},
 		GrantTypes:              []string{"authorization_code", "refresh_token"},
 		ResponseTypes:           []string{"code"},
 		TokenEndpointAuthMethod: "none",
@@ -64,7 +74,10 @@ var pinnedCIMD = map[string]clientMetadata{
 	"https://claude.ai/api/oauth/mcp-oauth-client-metadata": {
 		ClientID:                "https://claude.ai/api/oauth/mcp-oauth-client-metadata",
 		ClientName:              "Claude",
-		RedirectURIs:            []string{"https://claude.ai/api/mcp/auth_callback"},
+		RedirectURIs: []string{
+			"https://claude.ai/api/mcp/auth_callback",
+			"https://claude.com/api/mcp/auth_callback",
+		},
 		GrantTypes:              []string{"authorization_code", "refresh_token"},
 		ResponseTypes:           []string{"code"},
 		TokenEndpointAuthMethod: "none",
@@ -86,16 +99,61 @@ func ResolveOAuthClient(ctx context.Context, clientID string, httpClient *http.C
 		return oauthClient{}, errors.New("empty client_id")
 	}
 	if !isCIMDClientID(clientID) {
+		if rec, ok := lookupRegisteredClient(clientID); ok {
+			return oauthClient{DCR: &rec}, nil
+		}
 		return oauthClient{LegacyID: clientID}, nil
 	}
 	meta, err := fetchCIMD(ctx, clientID, httpClient)
 	if err != nil {
-		return oauthClient{}, err
-	}
-	if err := validateCIMD(clientID, meta); err != nil {
-		return oauthClient{}, err
+		if pin, ok := pinnedCIMD[clientID]; ok {
+			meta = cloneClientMetadata(pin)
+		} else {
+			return oauthClient{}, err
+		}
+	} else if err := validateCIMD(clientID, meta); err != nil {
+		if pin, ok := pinnedCIMD[clientID]; ok {
+			meta = cloneClientMetadata(pin)
+			if err := validateCIMD(clientID, meta); err != nil {
+				return oauthClient{}, err
+			}
+		} else {
+			return oauthClient{}, err
+		}
+	} else {
+		meta = enrichCIMDFromPin(clientID, meta)
 	}
 	return oauthClient{Metadata: meta, MetadataURL: clientID}, nil
+}
+
+func cloneClientMetadata(in clientMetadata) *clientMetadata {
+	out := in
+	out.RedirectURIs = append([]string(nil), in.RedirectURIs...)
+	out.GrantTypes = append([]string(nil), in.GrantTypes...)
+	out.ResponseTypes = append([]string(nil), in.ResponseTypes...)
+	return &out
+}
+
+func enrichCIMDFromPin(clientID string, meta *clientMetadata) *clientMetadata {
+	pin, ok := pinnedCIMD[clientID]
+	if !ok || meta == nil {
+		return meta
+	}
+	seen := map[string]struct{}{}
+	var merged []string
+	for _, u := range append(meta.RedirectURIs, pin.RedirectURIs...) {
+		u = strings.TrimSpace(u)
+		if u == "" {
+			continue
+		}
+		if _, dup := seen[strings.ToLower(u)]; dup {
+			continue
+		}
+		seen[strings.ToLower(u)] = struct{}{}
+		merged = append(merged, u)
+	}
+	meta.RedirectURIs = merged
+	return meta
 }
 
 func isCIMDClientID(clientID string) bool {

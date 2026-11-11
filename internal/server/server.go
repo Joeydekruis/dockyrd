@@ -200,6 +200,10 @@ func mountUI(mux *http.ServeMux, root fs.FS) {
 			http.NotFound(w, r)
 			return
 		}
+		if strings.HasPrefix(r.URL.Path, "/.well-known/") {
+			http.NotFound(w, r)
+			return
+		}
 		rel := strings.TrimPrefix(r.URL.Path, "/")
 		rel = strings.TrimSuffix(rel, "/")
 		if rel == "" {

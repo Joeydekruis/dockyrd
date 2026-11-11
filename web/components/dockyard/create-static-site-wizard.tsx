@@ -27,6 +27,10 @@ import {
   type Project,
   putServiceVariables,
 } from "@/lib/api";
+import {
+  NO_PROJECT_FIELD_HINT,
+  projectSelectOptions,
+} from "@/lib/create-project-field";
 import { previewDefaultPlatformHostname } from "@/lib/domain-dns";
 import { serviceDetailHref } from "@/lib/service-routes";
 
@@ -235,7 +239,6 @@ export function CreateStaticSiteWizard({
     }
     if (step === 2) {
       if (!draft.siteName.trim()) return "Site name is required.";
-      if (!draft.projectId) return "Pick a project.";
     }
     if (step === 3) {
       if (!draft.buildCmd.trim()) return "Build command is required.";
@@ -271,7 +274,7 @@ export function CreateStaticSiteWizard({
       const nodeImage =
         draft.nodeVersion === "20" ? "node:20-alpine" : "node:22-alpine";
       const service = await createService({
-        project_id: draft.projectId,
+        ...(draft.projectId ? { project_id: draft.projectId } : {}),
         kind: "static_site",
         name: draft.siteName.trim(),
         config: {
@@ -499,10 +502,11 @@ function StepNameProject({
         {lockProject ? null : (
           <SelectField
             label="Project"
-            placeholder="Select project"
+            placeholder="No project"
             value={draft.projectId}
             onChange={(v) => onChange({ projectId: v })}
-            options={projects.map((p) => ({ value: p.id, label: p.name }))}
+            options={projectSelectOptions(projects)}
+            hint={NO_PROJECT_FIELD_HINT}
           />
         )}
       </div>

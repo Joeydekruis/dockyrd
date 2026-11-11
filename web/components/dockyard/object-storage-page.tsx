@@ -24,11 +24,13 @@ import {
   type Project,
   type StorageStatus,
 } from "@/lib/api";
+import { isUnassignedProject } from "@/lib/project-optional";
 import {
   formatResourceCount,
   projectPathLabel,
 } from "@/lib/resource-dashboard";
 import { filterByQuery } from "@/lib/service-display";
+import { serviceDetailHref } from "@/lib/service-routes";
 
 export function ObjectStoragePage() {
   const [status, setStatus] = useState<StorageStatus | null>(null);
@@ -219,14 +221,18 @@ export function ObjectStoragePage() {
                 (b.config as { bucket_name?: string }).bucket_name ?? b.slug,
               );
               const projectSlug =
-                projects.find((p) => p.id === b.project_id)?.slug ??
-                b.project_id;
+                b.project_slug ||
+                projects.find((p) => p.id === b.project_id)?.slug;
+              const href =
+                projectSlug && !isUnassignedProject(projectSlug)
+                  ? `/projects/${projectSlug}`
+                  : serviceDetailHref("bucket", b.slug);
               return (
                 <ResourceRow
                   key={b.id}
                   name={b.name}
-                  href={`/projects/${projectSlug}`}
-                  meta={projectPathLabel(b.project_name)}
+                  href={href}
+                  meta={projectPathLabel(b.project_name, projectSlug)}
                   subMeta={`S3 · ${bucketNameValue}`}
                   statusLabel="Ready"
                   statusVariant="ok"

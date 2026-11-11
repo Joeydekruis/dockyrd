@@ -83,12 +83,15 @@ If Claude shows **“Couldn’t register”** with your panel name, it usually m
 **Check on the panel (as an admin, logged in):**
 
 ```bash
-curl -sS "https://YOUR_PANEL/.well-known/oauth-authorization-server" | jq '.client_id_metadata_document_supported'
+curl -sS "https://YOUR_PANEL/.well-known/oauth-authorization-server" | jq '{cimd: .client_id_metadata_document_supported, register: .registration_endpoint}'
+curl -sS "https://YOUR_PANEL/.well-known/oauth-protected-resource/mcp" | jq '.resource'
 ```
 
-This must be `true` on builds that support Claude/Cursor OAuth.
+`cimd` must be `true`. `register` should be `https://YOUR_PANEL/oauth/register` (fallback when a client still attempts dynamic registration). The protected-resource `resource` value must end with `/mcp` and match the MCP URL you enter in Claude exactly (including `https` and host).
 
 Also confirm **MCP is enabled** under Server settings → MCP, the panel **public URL** is correct HTTPS (used in OAuth metadata), and the instance allows outbound HTTPS from the server when fetching Claude’s client metadata document.
+
+Implementer checklist vs Claude’s connector docs: `docs/project/patterns/mcp-claude-connect.md`.
 
 ## Security practices
 

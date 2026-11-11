@@ -240,6 +240,8 @@ export function completeSetup(input: {
 }
 
 export type Project = {
+  /** Instance bucket for resources created without a project; hidden from project UI. */
+  system?: boolean;
   id: string;
   server_id: string;
   name: string;
@@ -294,7 +296,7 @@ export function listServices(projectId: string, kind?: string) {
 }
 
 export function createService(input: {
-  project_id: string;
+  project_id?: string;
   environment?: string;
   kind: "app" | "static_site" | "postgres" | "redis" | "bucket" | "compose";
   name: string;
@@ -656,6 +658,7 @@ export type StorageStatus = {
     slug: string;
     project_id: string;
     project_name: string;
+    project_slug?: string;
     config: Record<string, unknown>;
   }[];
 };

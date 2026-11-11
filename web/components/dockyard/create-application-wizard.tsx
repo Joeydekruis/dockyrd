@@ -27,6 +27,10 @@ import {
   type Project,
   putServiceVariables,
 } from "@/lib/api";
+import {
+  NO_PROJECT_FIELD_HINT,
+  projectSelectOptions,
+} from "@/lib/create-project-field";
 import { previewDefaultPlatformHostname } from "@/lib/domain-dns";
 import { serviceDetailHref } from "@/lib/service-routes";
 
@@ -172,7 +176,6 @@ export function CreateApplicationWizard({
     }
     if (step === 2) {
       if (!draft.appName.trim()) return "Application name is required.";
-      if (!draft.projectId) return "Pick a project.";
     }
     if (step === 4) {
       const p = Number.parseInt(draft.port, 10);
@@ -216,7 +219,7 @@ export function CreateApplicationWizard({
 
     try {
       const service = await createService({
-        project_id: draft.projectId,
+        ...(draft.projectId ? { project_id: draft.projectId } : {}),
         kind: "app",
         name: draft.appName.trim(),
         config: {
@@ -436,10 +439,11 @@ function StepNameProject({
         {hideProject ? null : (
           <SelectField
             label="Project"
-            placeholder="Select project"
+            placeholder="No project"
             value={draft.projectId}
             onChange={(v) => onChange({ projectId: v })}
-            options={projects.map((p) => ({ value: p.id, label: p.name }))}
+            options={projectSelectOptions(projects)}
+            hint={NO_PROJECT_FIELD_HINT}
           />
         )}
       </div>

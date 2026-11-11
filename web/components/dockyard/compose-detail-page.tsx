@@ -187,7 +187,7 @@ export function ComposeDetailPage() {
             className="font-mono text-[11px] uppercase tracking-widest"
             style={{ color: "var(--muted-text)" }}
           >
-            {projectPathLabel(project.name)} · Compose stack
+            {projectPathLabel(project.name, project.slug)} · Compose stack
           </p>
           <div className="flex flex-wrap items-center gap-3">
             <h1 className="text-2xl font-semibold tracking-tight">

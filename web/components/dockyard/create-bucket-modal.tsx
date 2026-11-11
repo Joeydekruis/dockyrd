@@ -7,6 +7,10 @@ import { Field } from "@/components/dockyard/ui/field";
 import { Modal } from "@/components/dockyard/ui/modal";
 import { SelectField } from "@/components/dockyard/ui/select-field";
 import { createService, listProjects, type Project } from "@/lib/api";
+import {
+  NO_PROJECT_FIELD_HINT,
+  projectSelectOptions,
+} from "@/lib/create-project-field";
 import { serviceDetailHref } from "@/lib/service-routes";
 
 type CreateBucketModalProps = {
@@ -38,15 +42,15 @@ export function CreateBucketModal({
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!projectId || !bucketName.trim()) {
-      setError("Project and bucket name are required.");
+    if (!bucketName.trim()) {
+      setError("Bucket name is required.");
       return;
     }
     setBusy(true);
     setError(null);
     try {
       const service = await createService({
-        project_id: projectId,
+        ...(projectId ? { project_id: projectId } : {}),
         kind: "bucket",
         name: bucketName.trim(),
         config: {
@@ -103,10 +107,11 @@ export function CreateBucketModal({
         {defaultProjectId ? null : (
           <SelectField
             label="Project"
-            placeholder="Select project"
+            placeholder="No project"
             value={projectId}
             onChange={setProjectId}
-            options={projects.map((p) => ({ value: p.id, label: p.name }))}
+            options={projectSelectOptions(projects)}
+            hint={NO_PROJECT_FIELD_HINT}
           />
         )}
         <Field

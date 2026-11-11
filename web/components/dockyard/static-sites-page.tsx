@@ -239,7 +239,11 @@ export function StaticSitesPage() {
                   key={service.id}
                   name={service.name}
                   href={`/static-sites/${service.slug}`}
-                  meta={projectBranchLabel(project.name, cfg.source?.branch)}
+                  meta={projectBranchLabel(
+                    project.name,
+                    cfg.source?.branch,
+                    project.slug,
+                  )}
                   url={host}
                   urlHref={visit}
                   internalOnly={!host}

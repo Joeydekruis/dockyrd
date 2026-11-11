@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.7.21] - 2026-11-11
+
+_Finished: 2026-11-11_
+
+### Added
+
+- **MCP OAuth (Claude)** — dynamic client registration (`POST /oauth/register`), authorize/token hardening (client_id + redirect_uri checks, JSON OAuth errors); PRM at `/mcp` metadata; unknown `/.well-known/*` returns 404 (no dashboard HTML); `docs/project/patterns/mcp-claude-connect.md`
+- **MCP settings** — Claude / Cursor instruction tabs; one-click copy for full MCP URL (`…/mcp`) on server MCP settings
+- **Unassigned project** — optional `project_id` on create APIs lands resources in system **Unassigned** bucket; UI shows **No project** instead of slug noise
+
+### Changed
+
+- **MCP OAuth** — CIMD merge/pin tweaks, `PanelOrigin` https when TLS, DCR 415 for non-JSON; user `docs/user/mcp.md` troubleshooting
+- **Create flows** — project field optional across application, database, compose, bucket, and static-site wizards
+
 ## [0.7.20] - 2026-11-11
 
 _Finished: 2026-11-11_

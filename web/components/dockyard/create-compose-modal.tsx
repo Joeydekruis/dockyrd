@@ -7,6 +7,10 @@ import { Field } from "@/components/dockyard/ui/field";
 import { Modal } from "@/components/dockyard/ui/modal";
 import { SelectField } from "@/components/dockyard/ui/select-field";
 import { createService, listProjects, type Project } from "@/lib/api";
+import {
+  NO_PROJECT_FIELD_HINT,
+  projectSelectOptions,
+} from "@/lib/create-project-field";
 import { serviceDetailHref } from "@/lib/service-routes";
 
 const DEFAULT_YAML = `services:
@@ -49,15 +53,15 @@ export function CreateComposeModal({
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!projectId || !name.trim()) {
-      setError("Project and name are required.");
+    if (!name.trim()) {
+      setError("Stack name is required.");
       return;
     }
     setBusy(true);
     setError(null);
     try {
       const service = await createService({
-        project_id: projectId,
+        ...(projectId ? { project_id: projectId } : {}),
         kind: "compose",
         name: name.trim(),
         config: { source: { type: "inline", yaml } },
@@ -105,8 +109,9 @@ export function CreateComposeModal({
             label="Project"
             value={projectId}
             onChange={setProjectId}
-            options={projects.map((p) => ({ value: p.id, label: p.name }))}
-            placeholder="Select project"
+            options={projectSelectOptions(projects)}
+            placeholder="No project"
+            hint={NO_PROJECT_FIELD_HINT}
           />
         ) : null}
         <Field

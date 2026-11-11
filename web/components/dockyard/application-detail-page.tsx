@@ -47,6 +47,7 @@ import {
 } from "@/lib/api";
 import { hasDeploymentResourceMetrics } from "@/lib/build-resilience";
 import { hasPendingEnvRedeploy } from "@/lib/env-var-ref";
+import { isUnassignedProject } from "@/lib/project-optional";
 import { applicationDetailBreadcrumbs } from "@/lib/resource-breadcrumbs";
 import {
   formatTimeAgo,
@@ -376,13 +377,19 @@ export function ApplicationDetailPage() {
                   className="mt-1 text-[13px]"
                   style={{ color: "var(--muted-text)" }}
                 >
-                  <Link
-                    href={`/projects/${row.project.slug}`}
-                    className="hover:underline"
-                    style={{ color: "var(--link-blue)" }}
-                  >
-                    {projectPathLabel(row.project.name)}
-                  </Link>
+                  {isUnassignedProject(row.project.slug) ? (
+                    <span>
+                      {projectPathLabel(row.project.name, row.project.slug)}
+                    </span>
+                  ) : (
+                    <Link
+                      href={`/projects/${row.project.slug}`}
+                      className="hover:underline"
+                      style={{ color: "var(--link-blue)" }}
+                    >
+                      {projectPathLabel(row.project.name, row.project.slug)}
+                    </Link>
+                  )}
                 </p>
               </div>
             </div>

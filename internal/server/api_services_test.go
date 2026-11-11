@@ -110,6 +110,81 @@ func TestCreatePostgresService(t *testing.T) {
 	}
 }
 
+func TestCreateServiceWithoutProject(t *testing.T) {
+	dir := t.TempDir()
+	cfg := config.Config{
+		DataDir:   filepath.Join(dir, "data"),
+		ConfigDir: filepath.Join(dir, "etc"),
+	}
+	initRes, err := setup.Init(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	conn, q, err := db.Open(cfg.DatabasePath())
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = conn.Close() })
+
+	mux := http.NewServeMux()
+	deps := apiDeps{cfg: cfg, q: q}
+	registerAPIRoutes(mux, deps)
+
+	setupBody, _ := json.Marshal(map[string]string{
+		"token": initRes.Token, "name": "Joey", "email": "o@example.com", "password": "longpassword12",
+	})
+	recSetup := httptest.NewRecorder()
+	reqSetup := httptest.NewRequest(http.MethodPost, "/api/v1/setup", bytes.NewReader(setupBody))
+	mux.ServeHTTP(recSetup, reqSetup)
+	if recSetup.Code != http.StatusOK {
+		t.Fatalf("setup: %d %s", recSetup.Code, recSetup.Body.String())
+	}
+	cookies := recSetup.Result().Cookies()
+
+	svcBody, _ := json.Marshal(map[string]any{
+		"kind":   "postgres",
+		"name":   "Loose DB",
+		"config": map[string]any{"version": 17},
+	})
+	recSvc := httptest.NewRecorder()
+	reqSvc := httptest.NewRequest(http.MethodPost, "/api/v1/services", bytes.NewReader(svcBody))
+	for _, c := range cookies {
+		reqSvc.AddCookie(c)
+	}
+	mux.ServeHTTP(recSvc, reqSvc)
+	if recSvc.Code != http.StatusCreated {
+		t.Fatalf("create service: %d %s", recSvc.Code, recSvc.Body.String())
+	}
+
+	recList := httptest.NewRecorder()
+	reqList := httptest.NewRequest(http.MethodGet, "/api/v1/projects", nil)
+	for _, c := range cookies {
+		reqList.AddCookie(c)
+	}
+	mux.ServeHTTP(recList, reqList)
+	if recList.Code != http.StatusOK {
+		t.Fatalf("list projects: %d %s", recList.Code, recList.Body.String())
+	}
+	var list struct {
+		Projects []projectResponse `json:"projects"`
+	}
+	if err := json.NewDecoder(recList.Body).Decode(&list); err != nil {
+		t.Fatal(err)
+	}
+	var foundSystem bool
+	for _, p := range list.Projects {
+		if p.Slug == "unassigned" {
+			if !p.System {
+				t.Fatal("unassigned bucket must be marked system")
+			}
+			foundSystem = true
+		}
+	}
+	if !foundSystem {
+		t.Fatal("expected system unassigned project after create without project_id")
+	}
+}
+
 func TestPatchStaticSiteService(t *testing.T) {
 	dir := t.TempDir()
 	cfg := config.Config{

@@ -12,6 +12,7 @@ import (
 	"github.com/oklog/ulid/v2"
 
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
+	"github.com/Joeydekruis/dockyrd/internal/project"
 	"github.com/Joeydekruis/dockyrd/internal/slug"
 )
 
@@ -22,6 +23,7 @@ type projectResponse struct {
 	Slug        string  `json:"slug"`
 	Description *string `json:"description,omitempty"`
 	LinksMode   string  `json:"links_mode"`
+	System      bool    `json:"system,omitempty"`
 	CreatedAt   int64   `json:"created_at"`
 	UpdatedAt   int64   `json:"updated_at"`
 }
@@ -296,13 +298,19 @@ func projectFromRow(row sqlc.Project) projectResponse {
 	if row.UpdatedAt.Valid {
 		updated = row.UpdatedAt.Int64
 	}
+	system := project.IsUnassignedSlug(row.Slug)
+	name := row.Name
+	if system {
+		name = ""
+	}
 	return projectResponse{
 		ID:          row.ID,
 		ServerID:    row.ServerID,
-		Name:        row.Name,
+		Name:        name,
 		Slug:        row.Slug,
 		Description: desc,
 		LinksMode:   row.LinksMode,
+		System:      system,
 		CreatedAt:   created,
 		UpdatedAt:   updated,
 	}

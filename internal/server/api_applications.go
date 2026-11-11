@@ -2,6 +2,8 @@ package server
 
 import (
 	"net/http"
+
+	"github.com/Joeydekruis/dockyrd/internal/project"
 )
 
 func registerApplicationRoutes(mux *http.ServeMux, deps apiDeps) {
@@ -40,8 +42,8 @@ func (d apiDeps) handleListApplications(w http.ResponseWriter, r *http.Request) 
 			Slug:            row.Slug,
 			DesiredState:    row.DesiredState,
 			ProjectID:       row.ProjectID,
-			ProjectName:     row.ProjectName,
-			ProjectSlug:     row.ProjectSlug,
+			ProjectName:     project.DisplayName(row.ProjectName, row.ProjectSlug),
+			ProjectSlug:     project.DisplaySlug(row.ProjectSlug),
 			PrimaryHostname: host,
 		})
 	}

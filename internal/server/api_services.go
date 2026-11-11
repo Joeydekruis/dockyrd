@@ -97,10 +97,16 @@ func (d apiDeps) handleCreateService(w http.ResponseWriter, r *http.Request) {
 	if body.Environment == "" {
 		body.Environment = "production"
 	}
-	if body.ProjectID == "" || body.Name == "" || body.Kind == "" {
-		writeJSONError(w, http.StatusBadRequest, "project_id, kind, and name required")
+	if body.Name == "" || body.Kind == "" {
+		writeJSONError(w, http.StatusBadRequest, "kind and name required")
 		return
 	}
+	projectID, err := resolveCreateProjectID(r.Context(), d.q, strings.TrimSpace(body.ProjectID))
+	if err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "project bootstrap error")
+		return
+	}
+	body.ProjectID = projectID
 	if body.Kind == "compose" {
 		if _, ok := d.requireAdmin(w, r); !ok {
 			return

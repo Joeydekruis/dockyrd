@@ -35,8 +35,9 @@ export function HomeDashboard() {
         listProjects(),
         getServerInfo().catch(() => null),
       ]);
+      const userProjects = projects.filter((p) => !p.system);
       const built = await Promise.all(
-        projects.map(async (project) => {
+        userProjects.map(async (project) => {
           const { services } = await listServices(project.id);
           return buildProjectOverview(project, services);
         }),

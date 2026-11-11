@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/Joeydekruis/dockyrd/internal/dbkind"
+	"github.com/Joeydekruis/dockyrd/internal/project"
 )
 
 func registerDatabaseRoutes(mux *http.ServeMux, deps apiDeps) {
@@ -44,8 +45,8 @@ func (d apiDeps) handleListDatabases(w http.ResponseWriter, r *http.Request) {
 			DesiredState: row.DesiredState,
 			Config:       dbkind.RedactConfig(row.Kind, cfg),
 			ProjectID:    row.ProjectID,
-			ProjectName:  row.ProjectName,
-			ProjectSlug:  row.ProjectSlug,
+			ProjectName:  project.DisplayName(row.ProjectName, row.ProjectSlug),
+			ProjectSlug:  project.DisplaySlug(row.ProjectSlug),
 		})
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"databases": out})
