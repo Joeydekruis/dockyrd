@@ -88,6 +88,18 @@ Use the matrix in **`.cursor/skills/push-to-main/SKILL.md`** before merging to `
 
 M5 exit checklist: [`m5-exit.md`](m5-exit.md).
 
-## MCP / env
+## Dockyrd MCP (when implemented)
 
-Document secrets here as they appear (GitHub App, test tokens). Never commit values — use env files listed in `.gitignore`.
+Product contract: **ADR-0002** (`docs/adr/0002-dockyrd-mcp.md`), pattern `docs/project/patterns/mcp-auth.md`, user guide `docs/user/mcp.md`.
+
+| Item | Value |
+|------|--------|
+| HTTP transport | Streamable HTTP, `POST {PUBLIC_URL}/mcp` |
+| OAuth PRM | `GET {PUBLIC_URL}/.well-known/oauth-protected-resource` |
+| Local stdio | `DOCKYRD_URL`, `DOCKYRD_TOKEN` for `dockyrd mcp --stdio` |
+
+Until `/mcp` exists in the binary, verify MCP-related auth/UI with `go test` on packages touched by the Feature issue; smoke OAuth only against a dev panel with HTTPS or trusted localhost.
+
+## MCP / env (development harness)
+
+Document secrets here as they appear (GitHub App, test tokens, OAuth client metadata URLs). Never commit values — use env files listed in `.gitignore`.

@@ -1,5 +1,10 @@
+import { Suspense } from "react";
 import { SignInClient } from "./sign-in-client";
 
 export default function SignInPage() {
-  return <SignInClient />;
+  return (
+    <Suspense fallback={null}>
+      <SignInClient />
+    </Suspense>
+  );
 }

@@ -170,7 +170,7 @@ export function ApplicationDeploymentDetailPage() {
           </p>
 
           <section className="py-2" aria-label="Deployment summary">
-            <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="flex flex-wrap lg:flex-nowrap items-start justify-between gap-4">
               <div className="min-w-0 space-y-3">
                 <div>
                   <h1 className="text-2xl font-semibold tracking-tight">

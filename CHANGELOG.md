@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.7.18] - 2026-11-11
+
+_Finished: 2026-11-11_
+
+### Added
+
+- **#83 / MCP** — Streamable HTTP `POST /mcp`, OAuth 2.1 (PRM, authorize + PKCE token, consent), seven v1 tools (projects, services, deploys, logs, trigger deploy), `dockyrd mcp --stdio`, instance toggles `mcp_disabled` / `mcp_allow_api_token`; ADR-0002, `docs/user/mcp.md`, public `/docs/mcp.html` ([issue #83](https://github.com/Joeydekruis/dockyrd/issues/83))
+- **Dashboard** — home activity panel, server monitoring cards, project status tiles; sidebar server health; `RevealableCopyField` for connection secrets
+
+### Changed
+
+- **Sign-in** — safe `?return=` redirect for OAuth resume after login/MFA; `GET /login` → `/sign-in`
+- **Project settings** — settings tab on project detail (replaces standalone links settings component)
+- **Integrations** — MCP section with URL, connection steps, admin switches
+
 ## [0.7.17] - 2026-11-11
 
 _Finished: 2026-11-11_

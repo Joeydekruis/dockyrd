@@ -9,13 +9,14 @@ func registerApplicationRoutes(mux *http.ServeMux, deps apiDeps) {
 }
 
 type applicationResponse struct {
-	ID          string `json:"id"`
-	Name        string `json:"name"`
-	Slug        string `json:"slug"`
-	DesiredState string `json:"desired_state"`
-	ProjectID   string `json:"project_id"`
-	ProjectName string `json:"project_name"`
-	ProjectSlug string `json:"project_slug"`
+	ID               string  `json:"id"`
+	Name             string  `json:"name"`
+	Slug             string  `json:"slug"`
+	DesiredState     string  `json:"desired_state"`
+	ProjectID        string  `json:"project_id"`
+	ProjectName      string  `json:"project_name"`
+	ProjectSlug      string  `json:"project_slug"`
+	PrimaryHostname  *string `json:"primary_hostname,omitempty"`
 }
 
 func (d apiDeps) handleListApplications(w http.ResponseWriter, r *http.Request) {
@@ -29,14 +30,19 @@ func (d apiDeps) handleListApplications(w http.ResponseWriter, r *http.Request) 
 	}
 	out := make([]applicationResponse, 0, len(rows))
 	for _, row := range rows {
+		var host *string
+		if h := row.PrimaryHostname; h != "" {
+			host = &h
+		}
 		out = append(out, applicationResponse{
-			ID:           row.ID,
-			Name:         row.Name,
-			Slug:         row.Slug,
-			DesiredState: row.DesiredState,
-			ProjectID:    row.ProjectID,
-			ProjectName:  row.ProjectName,
-			ProjectSlug:  row.ProjectSlug,
+			ID:              row.ID,
+			Name:            row.Name,
+			Slug:            row.Slug,
+			DesiredState:    row.DesiredState,
+			ProjectID:       row.ProjectID,
+			ProjectName:     row.ProjectName,
+			ProjectSlug:     row.ProjectSlug,
+			PrimaryHostname: host,
 		})
 	}
 	writeJSON(w, http.StatusOK, map[string]any{"applications": out})

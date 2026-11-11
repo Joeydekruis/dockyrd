@@ -7,8 +7,7 @@ import { AddEnvVariableModal } from "@/components/dockyard/add-env-variable-moda
 import { PendingEnvRedeployBanner } from "@/components/dockyard/pending-env-redeploy-banner";
 import { Button } from "@/components/dockyard/ui/button";
 import { Chip } from "@/components/dockyard/ui/chip";
-import { CopyIconButton } from "@/components/dockyard/ui/copy-icon-button";
-import { IconButton } from "@/components/dockyard/ui/icon-button";
+import { RevealableCopyField } from "@/components/dockyard/ui/revealable-copy-field";
 import type { Service, ServiceVariable } from "@/lib/api";
 import {
   envVarScopeLabel,
@@ -124,7 +123,7 @@ export function ApplicationEnvironmentTab({
         <span>Kind</span>
         <span>Scope</span>
         <span>Value</span>
-        <span className="text-right">Actions</span>
+        <span className="text-right sr-only">Actions</span>
       </div>
 
       <ul className="mt-0 list-none p-0">
@@ -135,9 +134,6 @@ export function ApplicationEnvironmentTab({
             ? revealedSecrets || rowReveal[v.key]
             : true;
           const canCopy = Boolean(v.value) && (!v.is_secret || revealed);
-          const display =
-            v.is_secret && !revealed ? "••••••••" : (v.value ?? "");
-
           return (
             <li
               key={v.key}
@@ -163,13 +159,24 @@ export function ApplicationEnvironmentTab({
                 {envVarScopeLabel(v)}
               </span>
               <div className="mt-2 min-w-0 md:mt-0">
-                <p
-                  className="truncate font-mono text-[13px]"
-                  style={{ color: "var(--muted-text)" }}
-                >
-                  {display}
-                </p>
-                <div className="mt-1 flex flex-wrap gap-1">
+                <RevealableCopyField
+                  displayValue={v.value ?? ""}
+                  copyValue={v.value ?? ""}
+                  copyLabel={`Copy ${v.key}`}
+                  copyMessage={`Copied ${v.key}`}
+                  canCopy={canCopy}
+                  revealable={v.is_secret}
+                  revealed={revealed}
+                  onToggleReveal={() =>
+                    setRowReveal((prev) => ({
+                      ...prev,
+                      [v.key]: !prev[v.key],
+                    }))
+                  }
+                  revealLabel={`Show ${v.key}`}
+                  hideLabel={`Hide ${v.key}`}
+                />
+                <div className="mt-2 flex flex-wrap gap-1">
                   {v.link_id ? <Chip>via link</Chip> : null}
                   {ref ? (
                     <Chip>
@@ -181,18 +188,6 @@ export function ApplicationEnvironmentTab({
                 </div>
               </div>
               <div className="mt-2 flex flex-wrap items-center justify-end gap-2 md:mt-0">
-                {v.is_secret ? (
-                  <IconButton
-                    icon={revealed ? EyeOff : Eye}
-                    label={revealed ? "Hide value" : "Show value"}
-                    onClick={() =>
-                      setRowReveal((prev) => ({
-                        ...prev,
-                        [v.key]: !prev[v.key],
-                      }))
-                    }
-                  />
-                ) : null}
                 {broken ? (
                   <Button
                     type="button"
@@ -202,12 +197,6 @@ export function ApplicationEnvironmentTab({
                     Connect
                   </Button>
                 ) : null}
-                <CopyIconButton
-                  value={v.value ?? ""}
-                  label={`Copy ${v.key}`}
-                  message={`Copied ${v.key}`}
-                  disabled={!canCopy}
-                />
               </div>
             </li>
           );

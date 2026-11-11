@@ -1,6 +1,19 @@
+import type { LucideIcon } from "lucide-react";
+import { AppWindow, Database, Globe, HardDrive, Layers } from "lucide-react";
 import type { StatusVariant } from "@/components/dockyard/ui/status-badge";
 import type { Project, Service } from "@/lib/api";
-import { formatTimeAgo } from "@/lib/resource-dashboard";
+import { formatTimeAgo, resourceStatusDisplay } from "@/lib/resource-dashboard";
+
+export type ProjectResourceRow = {
+  id: string;
+  name: string;
+  kindLabel: string;
+  icon: LucideIcon;
+  statusLabel: string;
+  statusVariant: StatusVariant;
+};
+
+export const PROJECT_CARD_RESOURCE_LIMIT = 5;
 
 export type ProjectOverview = {
   project: Project;
@@ -13,7 +26,76 @@ export type ProjectOverview = {
   activityLine: string;
   environments: string[];
   summaryLine: string;
+  resources: ProjectResourceRow[];
+  extraResourceCount: number;
 };
+
+function serviceResourceSurface(
+  kind: string,
+): "application" | "static" | "database" {
+  if (kind === "static_site") return "static";
+  if (kind === "postgres" || kind === "redis") return "database";
+  return "application";
+}
+
+function serviceKindLabel(service: Service): string {
+  switch (service.kind) {
+    case "app":
+      return "App";
+    case "static_site":
+      return "Static site";
+    case "postgres": {
+      const version = service.config?.version;
+      return typeof version === "number" || typeof version === "string"
+        ? `Postgres ${version}`
+        : "Postgres";
+    }
+    case "redis": {
+      const version = service.config?.version;
+      return typeof version === "number" || typeof version === "string"
+        ? `Redis ${version}`
+        : "Redis";
+    }
+    case "bucket":
+      return "Object storage";
+    case "compose":
+      return "Compose stack";
+    default:
+      return service.kind;
+  }
+}
+
+function serviceResourceIcon(kind: string): LucideIcon {
+  switch (kind) {
+    case "static_site":
+      return Globe;
+    case "postgres":
+    case "redis":
+      return Database;
+    case "bucket":
+      return HardDrive;
+    case "compose":
+      return Layers;
+    default:
+      return AppWindow;
+  }
+}
+
+function buildResourceRows(services: Service[]): ProjectResourceRow[] {
+  const sorted = [...services].sort((a, b) => b.updated_at - a.updated_at);
+  return sorted.map((service) => {
+    const surface = serviceResourceSurface(service.kind);
+    const status = resourceStatusDisplay(service.desired_state, surface);
+    return {
+      id: service.id,
+      name: service.name,
+      kindLabel: serviceKindLabel(service),
+      icon: serviceResourceIcon(service.kind),
+      statusLabel: status.label,
+      statusVariant: status.variant,
+    };
+  });
+}
 
 function countServices(services: Service[]) {
   let appCount = 0;
@@ -106,6 +188,12 @@ export function buildProjectOverview(
     ...services.map((s) => s.updated_at),
     0,
   );
+  const resources = buildResourceRows(services);
+  const extraResourceCount = Math.max(
+    0,
+    resources.length - PROJECT_CARD_RESOURCE_LIMIT,
+  );
+
   return {
     project,
     ...counts,
@@ -114,5 +202,7 @@ export function buildProjectOverview(
     activityLine: projectActivityLine(status, latestUnix || undefined),
     environments: ["Production"],
     summaryLine: formatProjectServiceSummary(counts),
+    resources,
+    extraResourceCount,
   };
 }

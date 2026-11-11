@@ -815,6 +815,18 @@ GET    /search?q=
 
 Conventies: ULID-ID's, `snake_case` JSON, foutformaat RFC 9457 (`application/problem+json`, Huma default), cursor-paginatie (`?cursor=&limit=`), tijden als Unix-ms in de API en relatief geformatteerd in de UI ("12 min ago").
 
+### 10.3 MCP (AI-assistenten — gepland)
+
+Doel: **Claude** en **Cursor** kunnen op dezelfde host als het panel deploys debuggen, logs lezen, analytics opvragen, handmatig deployen en (scoped) resources beheren. Zie **ADR-0002** (`docs/adr/0002-dockyrd-mcp.md`) en `docs/user/mcp.md`.
+
+| Surface | Transport | Authenticatie |
+|---|---|---|
+| Remote MCP | **Streamable HTTP**, `POST /mcp` (spec 2026-07-28) | **OAuth 2.1** resource server: PRM op `/.well-known/oauth-protected-resource`, authorization code + **PKCE**, Bearer op elke request; scopes `mcp:read` \| `mcp:deploy` \| `mcp:write` \| `mcp:instance:read` → bestaande RBAC |
+| Lokaal subprocess | **stdio**, `dockyrd mcp --stdio` | Env `DOCKYRD_URL` + `DOCKYRD_TOKEN` (`dyk_*`); geen OAuth op stdio (MCP-spec) |
+| Dashboard | `/settings/integrations` (gepland) | OAuth “Connect Cursor/Claude”, MCP URL tonen, instance-toggle MCP aan/uit |
+
+Implementatie: MCP-tools roepen `internal/`-logica aan (niet alleen HTTP-proxy). UI bevat geen eigen MCP-server; alleen configuratie en consent.
+
 ---
 
 ## 11. Kernfunctionaliteit in detail

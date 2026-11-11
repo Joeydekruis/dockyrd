@@ -105,6 +105,17 @@ func (d apiDeps) handleCreateDomain(w http.ResponseWriter, r *http.Request) {
 	hostname := normalizeHostname(body.Hostname)
 	isPlatform := body.Platform || hostname == ""
 	if isPlatform {
+		existing, listErr := d.q.ListDomainsForService(ctx, serviceID)
+		if listErr != nil {
+			writeJSONError(w, http.StatusInternalServerError, "database error")
+			return
+		}
+		for _, row := range existing {
+			if row.IsPlatform != 0 {
+				writeJSONError(w, http.StatusConflict, "this service already has a default URL")
+				return
+			}
+		}
 		var err error
 		hostname, err = d.platformHostname(ctx, svc.Slug)
 		if err != nil {

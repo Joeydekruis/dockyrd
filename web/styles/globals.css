@@ -328,10 +328,10 @@ button.btn-text:disabled {
 @media (min-width: 768px) {
   .resource-row {
     grid-template-columns:
-      minmax(0, 1fr)
-      minmax(0, 1.1fr)
-      auto
-      minmax(0, 1fr);
+      minmax(0, 1.15fr)
+      minmax(0, 0.85fr)
+      minmax(0, auto)
+      minmax(0, 200px);
   }
 }
 
@@ -469,6 +469,12 @@ button.btn-text:disabled {
 .dockyrd-icon-btn:focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
+}
+
+.dockyrd-revealable-copy-field .dockyrd-icon-btn {
+  min-height: 36px;
+  min-width: 36px;
+  border-radius: 8px;
 }
 
 .dockyrd-search-trigger {

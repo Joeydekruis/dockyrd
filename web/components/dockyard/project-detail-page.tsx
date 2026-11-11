@@ -13,11 +13,11 @@ import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import { ProjectHardwareUsageSection } from "@/components/dockyard/project-hardware-usage-section";
 import { ProjectLinksMap } from "@/components/dockyard/project-links-map";
-import { ProjectLinksSettings } from "@/components/dockyard/project-links-settings";
 import {
   type ProjectResourceRow,
   ProjectResourceTable,
 } from "@/components/dockyard/project-resource-table";
+import { ProjectSettingsTab } from "@/components/dockyard/project-settings-tab";
 import {
   type ResourceProvisionContext,
   ResourceProvisioningModal,
@@ -292,25 +292,13 @@ export function ProjectDetailPage() {
           <Tabs tabs={PROJECT_TABS} activeId={tab} onChange={setTab} />
 
           {tab === "settings" ? (
-            <section
-              className="mt-8 rounded-[20px] border px-6 py-8"
-              style={{
-                borderColor: "var(--border)",
-                background: "var(--surface)",
-              }}
-            >
-              <h2 className="text-lg font-semibold">Project settings</h2>
-              <p
-                className="mt-2 text-sm"
-                style={{ color: "var(--muted-text)" }}
-              >
-                Slug: <span className="font-mono">{project.slug}</span>
-              </p>
-              <ProjectLinksSettings
+            <div className="mt-8">
+              <ProjectSettingsTab
                 project={project}
-                onUpdated={() => void refresh()}
+                onUpdated={() => void refresh({ silent: true })}
+                onError={setError}
               />
-            </section>
+            </div>
           ) : (
             <>
               <section className="mt-8" aria-label="Resources">

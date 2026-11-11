@@ -45,10 +45,13 @@ const KINDS: {
 
 type ProjectsWelcomeHeroProps = {
   onCreateProject: () => void;
+  /** Overrides default “Self-hosted · Open source” eyebrow (e.g. server hostname). */
+  eyebrow?: string;
 };
 
 export function ProjectsWelcomeHero({
   onCreateProject,
+  eyebrow = "Self-hosted · Open source",
 }: ProjectsWelcomeHeroProps) {
   const [kind, setKind] = useState<ServiceKind>("app");
   const active = KINDS.find((k) => k.id === kind) ?? KINDS[0];
@@ -61,7 +64,7 @@ export function ProjectsWelcomeHero({
     >
       <div className="flex flex-col gap-8 lg:flex-row lg:items-stretch lg:justify-between">
         <div className="max-w-xl flex flex-col gap-4 justify-center">
-          <p className="auth-brand-badge">Self-hosted · Open source</p>
+          <p className="auth-brand-badge">{eyebrow}</p>
           <h1 className="auth-brand-headline mt-4 text-white">
             Deploy to your own servers. Without the mess.
           </h1>

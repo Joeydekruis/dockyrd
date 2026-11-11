@@ -44,6 +44,7 @@ const DOC_USER_MAP = {
   updates: null,
   cli: null,
   troubleshooting: "troubleshooting.md",
+  mcp: "mcp.md",
   architecture: null,
   security: null,
 };

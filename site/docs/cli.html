@@ -15,7 +15,7 @@
 <meta name="twitter:title" content="CLI reference · Dockyrd">
 <meta name="twitter:description" content="The dockyrd binary is both the server and its admin tool. Run commands as root on the server.">
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../assets/site.css?v=0.7.4">
+<link rel="stylesheet" href="../assets/site.css?v=0.7.17">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -64,7 +64,7 @@
       <button class="search-btn" type="button" id="searchBtn" aria-label="Search documentation">
         <svg width="16" height="16" aria-hidden="true"><use href="#i-search"/></svg><span>Search docs</span><kbd>⌘K</kbd>
       </button>
-      <span class="version">v0.7.4</span>
+      <span class="version">v0.7.17</span>
       <a class="btn btn-outline gh-btn" href="https://github.com/Joeydekruis/dockyrd" target="_blank" rel="noopener noreferrer" aria-label="Star Dockyrd on GitHub">
         <svg width="16" height="16" aria-hidden="true"><use href="#i-github"/></svg>
         <span class="gh-label">Star</span>
@@ -75,10 +75,10 @@
 </header>
 <div class="docs">
   <aside class="sidebar" id="sidebar" aria-label="Documentation">
-    <nav id="docnav"><div class="group"><span class="eyebrow">Getting started</span><a href="introduction.html">Introduction</a><a href="installation.html">Installation</a><a href="quick-start.html">Quick start</a></div><div class="group"><span class="eyebrow">Guides</span><a href="nextjs.html">Next.js apps</a><a href="static-sites.html">Static sites</a><a href="databases.html">Databases</a><a href="object-storage.html">Object storage</a><a href="domains.html">Domains & HTTPS</a><a href="variables.html">Environment variables</a></div><div class="group"><span class="eyebrow">Operations</span><a href="updates.html">Updates</a><a href="cli.html" aria-current="page">CLI reference</a><a href="troubleshooting.html">Troubleshooting</a></div><div class="group"><span class="eyebrow">Concepts</span><a href="architecture.html">Architecture</a><a href="security.html">Users & security</a></div></nav>
+    <nav id="docnav"><div class="group"><span class="eyebrow">Getting started</span><a href="introduction.html">Introduction</a><a href="installation.html">Installation</a><a href="quick-start.html">Quick start</a></div><div class="group"><span class="eyebrow">Guides</span><a href="nextjs.html">Next.js apps</a><a href="static-sites.html">Static sites</a><a href="databases.html">Databases</a><a href="object-storage.html">Object storage</a><a href="domains.html">Domains & HTTPS</a><a href="variables.html">Environment variables</a></div><div class="group"><span class="eyebrow">Operations</span><a href="updates.html">Updates</a><a href="cli.html" aria-current="page">CLI reference</a><a href="mcp.html">AI assistants (MCP)</a><a href="troubleshooting.html">Troubleshooting</a></div><div class="group"><span class="eyebrow">Concepts</span><a href="architecture.html">Architecture</a><a href="security.html">Users & security</a></div></nav>
     <div class="side-foot">
       <span class="status warn">Pre-release</span>
-      <span style="color:var(--ink-2)">These docs track v0.7.4. Details can change before the next release.</span>
+      <span style="color:var(--ink-2)">These docs track v0.7.17. Details can change before the next release.</span>
     </div>
   </aside>
   <main class="article" id="main">
@@ -98,6 +98,7 @@
 <tr><td><code>dockyrd proxy dump</code></td><td>Prints the Caddy configuration currently loaded.</td></tr>
 <tr><td><code>dockyrd backup</code></td><td>Writes a snapshot of the control-plane database.</td></tr>
 <tr><td><code>dockyrd version</code></td><td>Prints version, commit and build date.</td></tr>
+<tr><td><code>dockyrd mcp --stdio</code></td><td>Local MCP server for editors on the same host (uses <code>DOCKYRD_URL</code> and <code>DOCKYRD_TOKEN</code>). Remote Cursor and Claude use HTTPS <code>/mcp</code> with OAuth — see <a href="mcp.html">AI assistants</a>.</td></tr>
 </tbody></table></div>
 <h2 id="cli-dy">API client (<code>dy</code>)</h2>
 <p>Installed next to <code>dockyrd</code> for tokens and CI. Log in with an API token from Settings → Account → API tokens, then run deploy and log commands from SSH or scripts.</p>
@@ -119,7 +120,7 @@
 </tbody></table></div>
 <p>Logs go to journald: <code>journalctl -u dockyrd -f</code>.</p>
 </article>
-    <nav class="pager" aria-label="Previous and next page"><a class="prev" href="updates.html"><span class="eyebrow">Previous</span><span>Updates</span></a><a class="next" href="troubleshooting.html"><span class="eyebrow">Next</span><span>Troubleshooting</span></a></nav>
+    <nav class="pager" aria-label="Previous and next page"><a class="prev" href="updates.html"><span class="eyebrow">Previous</span><span>Updates</span></a><a class="next" href="mcp.html"><span class="eyebrow">Next</span><span>AI assistants (MCP)</span></a></nav>
     <div class="edit"><a href="https://github.com/Joeydekruis/dockyrd/tree/development/site/source.html" target="_blank" rel="noopener noreferrer">Edit this page on GitHub</a><span>Apache-2.0 licensed</span></div>
   </main>
   <aside class="toc" aria-label="On this page"><span class="eyebrow">On this page</span><ol><li><a href="#cli-commands">Commands</a></li><li><a href="#cli-dy">API client (</a></li><li><a href="#cli-paths">Files and paths</a></li></ol></aside>

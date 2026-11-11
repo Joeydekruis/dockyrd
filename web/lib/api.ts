@@ -1361,6 +1361,9 @@ export type InstanceSettings = {
   public_ipv4?: string;
   require_2fa_all: boolean;
   terminal_allow_host?: boolean;
+  mcp_disabled?: boolean;
+  mcp_allow_api_token?: boolean;
+  mcp_url?: string;
   smtp: {
     host: string;
     port: number;
@@ -1392,6 +1395,8 @@ export function patchInstanceSettings(body: {
   require_2fa_all?: boolean;
   terminal_allow_host?: boolean;
   terminal_host_mfa_code?: string;
+  mcp_disabled?: boolean;
+  mcp_allow_api_token?: boolean;
   smtp?: {
     host: string;
     port: number;
@@ -1485,6 +1490,7 @@ export type ApplicationRow = {
   project_id: string;
   project_name: string;
   project_slug: string;
+  primary_hostname?: string;
 };
 
 export function listApplications() {

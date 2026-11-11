@@ -62,8 +62,9 @@ function UrlCell({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="relative z-[2] truncate text-[13px] font-medium hover:underline pointer-events-auto"
+      className="relative z-[2] block max-w-full truncate text-[13px] font-medium hover:underline pointer-events-auto"
       style={{ color: "var(--link-blue)" }}
+      title={url}
     >
       {url}
     </a>
@@ -95,7 +96,7 @@ export function ResourceRow({
 
   return (
     <div
-      className={`resource-row relative -mx-6 grid grid-cols-1 items-center gap-4 border-t px-6 py-4 first:border-t-0${navigable ? " transition-colors hover:bg-[var(--hover-row)]" : ""}`}
+      className={`resource-row relative -mx-6 grid grid-cols-1 items-center gap-4 border-t px-6 py-4 first:border-t-0 md:min-w-0${navigable ? " transition-colors hover:bg-[var(--hover-row)]" : ""}`}
       style={{ borderColor: "var(--border)" }}
     >
       {navigable ? (
@@ -114,17 +115,20 @@ export function ResourceRow({
         >
           <Icon strokeWidth={1.8} className="size-5" aria-hidden />
         </div>
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 overflow-hidden">
           <div className="flex items-start justify-between gap-3">
-            <RowName name={name} navigable={navigable} />
+            <span className="min-w-0 truncate">
+              <RowName name={name} navigable={navigable} />
+            </span>
             <div className="shrink-0 md:hidden">
               <StatusBadge label={statusLabel} variant={statusVariant} />
             </div>
           </div>
           {meta ? (
             <p
-              className="mt-0.5 font-mono text-[13px]"
+              className="mt-0.5 truncate font-mono text-[13px]"
               style={{ color: "var(--muted-text)" }}
+              title={meta}
             >
               {meta}
             </p>
@@ -163,7 +167,9 @@ export function ResourceRow({
       </div>
 
       {showDeployMeta ? (
-        <div className={`justify-self-end ${cellClass ?? ""}`}>
+        <div
+          className={`min-w-0 justify-self-end overflow-hidden ${cellClass ?? ""}`}
+        >
           <CommitChip
             sha={sha ?? ""}
             message={commitMessage}

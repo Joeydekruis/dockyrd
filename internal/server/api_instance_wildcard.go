@@ -37,6 +37,9 @@ func (d apiDeps) instanceSettingsPayload(ctx context.Context, panel instance.Pan
 		"public_ipv4":               expected,
 		"require_2fa_all":           panel.Require2FAAll,
 		"terminal_allow_host":       panel.TerminalAllowHost,
+		"mcp_disabled":              panel.MCPDisabled,
+		"mcp_allow_api_token":       panel.MCPAllowAPIToken,
+		"mcp_url":                   strings.TrimRight(instance.EffectivePublicURL(d.cfg, panel), "/") + "/mcp",
 		"smtp":                      smtp,
 	}
 }

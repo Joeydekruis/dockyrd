@@ -28,7 +28,7 @@ export function ResourceListSection({
         style={{ background: "var(--surface)", borderColor: "var(--border)" }}
       >
         <div
-          className="flex flex-wrap items-end justify-between gap-4 border-b px-6 py-5"
+          className="flex flex-wrap items-center justify-between gap-4 border-b px-6 py-5"
           style={{ borderColor: "var(--border)" }}
         >
           <h2
@@ -37,34 +37,31 @@ export function ResourceListSection({
           >
             {title}
           </h2>
-          {countLabel ? (
-            <p
-              className="font-mono text-[11px] uppercase tracking-widest tabular-nums"
-              style={{ color: "var(--muted-text)" }}
-            >
-              {countLabel}
-            </p>
-          ) : null}
-        </div>
-        {showFilter ? (
-          <div
-            className="border-b px-6 py-4"
-            style={{ borderColor: "var(--border)" }}
-          >
-            <label className="block max-w-md">
-              <span className="sr-only">{filterAriaLabel}</span>
-              <input
-                type="search"
-                value={filterValue ?? ""}
-                onChange={(e) => onFilterChange(e.target.value)}
-                placeholder={filterPlaceholder}
-                className="field-input w-full"
-                aria-label={filterAriaLabel}
-              />
-            </label>
+          <div className="flex w-full min-w-0 flex-wrap items-center justify-end gap-3 sm:w-auto sm:flex-nowrap sm:gap-4">
+            {showFilter ? (
+              <label className="block w-full min-w-0 sm:w-56 md:w-64">
+                <span className="sr-only">{filterAriaLabel}</span>
+                <input
+                  type="search"
+                  value={filterValue ?? ""}
+                  onChange={(e) => onFilterChange(e.target.value)}
+                  placeholder={filterPlaceholder}
+                  className="field-input w-full"
+                  aria-label={filterAriaLabel}
+                />
+              </label>
+            ) : null}
+            {countLabel ? (
+              <p
+                className="shrink-0 font-mono text-[11px] uppercase tracking-widest tabular-nums"
+                style={{ color: "var(--muted-text)" }}
+              >
+                {countLabel}
+              </p>
+            ) : null}
           </div>
-        ) : null}
-        <div className="px-6 py-2">{children}</div>
+        </div>
+        <div className="min-w-0 px-6 py-2">{children}</div>
         {footer ? footer : null}
       </div>
     </section>

@@ -31,3 +31,11 @@ Use when building MCP servers in product repos.
 ## Review
 
 **mcp-reviewer** subagent owns harness feedback at `docs/project/feedback/<n>/mcp-review-i<i>.md`.
+
+## Dockyrd product MCP
+
+When building **Dockyrd’s** MCP (not dev harness MCPs in `.cursor/mcp.json`):
+
+- **ADR-0002** — Streamable HTTP `/mcp`, OAuth 2.1 resource server (Claude/Cursor), stdio + env for local `dockyrd mcp`.
+- **Pattern** — `docs/project/patterns/mcp-auth.md`
+- **Users** — `docs/user/mcp.md`

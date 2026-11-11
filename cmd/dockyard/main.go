@@ -9,6 +9,7 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/config"
 	"github.com/Joeydekruis/dockyrd/internal/hostops"
 	"github.com/Joeydekruis/dockyrd/internal/doctor"
+	mcpsdk "github.com/Joeydekruis/dockyrd/internal/mcp"
 	"github.com/Joeydekruis/dockyrd/internal/server"
 	"github.com/Joeydekruis/dockyrd/internal/setup"
 	"github.com/Joeydekruis/dockyrd/internal/updater"
@@ -77,6 +78,11 @@ func main() {
 			fmt.Fprintf(os.Stderr, "update: %v\n", err)
 			os.Exit(1)
 		}
+	case "mcp":
+		if err := mcpsdk.RunStdio(cfg); err != nil {
+			fmt.Fprintf(os.Stderr, "mcp: %v\n", err)
+			os.Exit(1)
+		}
 	case "help", "-h", "--help":
 		printUsage()
 	default:
@@ -132,7 +138,7 @@ func runHost(cfg config.Config, args []string) error {
 }
 
 func printUsage() {
-	fmt.Fprintf(os.Stderr, "Usage: dockyrd <serve|version|init|setup-token|doctor|repair-edge|update|admin|host>\n")
+	fmt.Fprintf(os.Stderr, "Usage: dockyrd <serve|version|init|setup-token|doctor|repair-edge|update|mcp|admin|host>\n")
 	fmt.Fprintf(os.Stderr, "       dockyrd update [--check] [--rollback]\n")
 	fmt.Fprintf(os.Stderr, "       dockyrd admin reset-password <email> [password]\n")
 	fmt.Fprintf(os.Stderr, "       dockyrd admin disable-2fa <email>\n")

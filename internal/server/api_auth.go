@@ -101,6 +101,16 @@ func registerAPIRoutes(mux *http.ServeMux, deps apiDeps) {
 	registerSecurityCheckRoutes(mux, deps)
 	registerSecurityAddonRoutes(mux, deps)
 	registerSecurityPolicyRoutes(mux, deps)
+	deps.registerMCPRoutes(mux)
+	mux.HandleFunc("GET /login", redirectLoginToSignIn)
+}
+
+func redirectLoginToSignIn(w http.ResponseWriter, r *http.Request) {
+	target := "/sign-in"
+	if q := r.URL.RawQuery; q != "" {
+		target += "?" + q
+	}
+	http.Redirect(w, r, target, http.StatusFound)
 }
 
 func (d apiDeps) handleLogin(w http.ResponseWriter, r *http.Request) {

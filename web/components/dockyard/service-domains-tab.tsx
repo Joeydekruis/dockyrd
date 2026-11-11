@@ -318,18 +318,6 @@ export function ServiceDomainsTab({
     </Button>
   );
 
-  const addPlatformButton =
-    platformDomains.length > 0 ? (
-      <Button
-        type="button"
-        variant="outline"
-        disabled={busy}
-        onClick={() => void ensurePlatformDomain()}
-      >
-        Add default URL
-      </Button>
-    ) : null;
-
   const platformEmpty = (
     <div className="mt-5 space-y-3">
       <p className="text-sm" style={{ color: "var(--muted-text)" }}>
@@ -361,7 +349,7 @@ export function ServiceDomainsTab({
         <DomainSection
           title="Default URL"
           description={composeLead}
-          action={addPlatformButton}
+          action={undefined}
           domains={platformDomains}
           busy={busy}
           onShowDns={setDnsDomain}

@@ -6,17 +6,17 @@ type CommitChipProps = {
 
 export function CommitChip({ sha, message, timeAgo }: CommitChipProps) {
   return (
-    <span className="inline-flex max-w-[min(100%,280px)] flex-col items-end gap-0.5 text-right text-[13px] sm:max-w-[320px]">
-      <span className="inline-flex items-center gap-2">
+    <span className="inline-flex w-full min-w-0 max-w-full flex-col items-end gap-0.5 text-right text-[13px]">
+      <span className="inline-flex w-full min-w-0 max-w-full items-center justify-end gap-2">
         <code
-          className="rounded-md px-2 py-0.5 font-mono text-[11px] uppercase"
+          className="shrink-0 rounded-md px-2 py-0.5 font-mono text-[11px] uppercase"
           style={{ background: "var(--hover-row)", color: "var(--ink-navy)" }}
         >
           {sha.slice(0, 7)}
         </code>
         {message ? (
           <span
-            className="hidden truncate sm:inline"
+            className="min-w-0 truncate"
             style={{ color: "var(--muted-text)" }}
             title={message}
           >

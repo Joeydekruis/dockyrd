@@ -4,6 +4,7 @@ import type { LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { DockyrdLogo } from "@/components/dockyard/dockyrd-logo";
+import { SidebarServerHealth } from "@/components/dockyard/sidebar-server-health";
 import {
   accountSettingsBackNav,
   accountSettingsNav,
@@ -163,27 +164,7 @@ export function Sidebar() {
         <DockyrdLogo />
       </Link>
       {inSettings && settingsSidebar ? settingsSidebar : <MainSidebar />}
-      {!inSettings ? (
-        <div
-          className="mt-auto rounded-[20px] border p-4 text-xs"
-          style={{ borderColor: "var(--border)", background: "var(--surface)" }}
-        >
-          <div className="flex items-center gap-2">
-            <span
-              className="inline-block h-2 w-2 rounded-full"
-              style={{ background: "var(--status-ok-dot)" }}
-              aria-hidden
-            />
-            <span className="font-medium">Server healthy</span>
-          </div>
-          <p
-            className="mt-1 font-mono text-[11px]"
-            style={{ color: "var(--muted-text)" }}
-          >
-            v0.0.3-dev
-          </p>
-        </div>
-      ) : null}
+      {!inSettings ? <SidebarServerHealth /> : null}
     </aside>
   );
 }

@@ -28,6 +28,8 @@ type Panel struct {
 	WildcardProbeHost    string `json:"wildcard_probe_host,omitempty"`
 	Require2FAAll        bool   `json:"require_2fa_all,omitempty"`
 	TerminalAllowHost    bool   `json:"terminal_allow_host,omitempty"`
+	MCPDisabled          bool   `json:"mcp_disabled,omitempty"`
+	MCPAllowAPIToken     bool   `json:"mcp_allow_api_token,omitempty"`
 }
 
 // SMTPPublic is returned to clients (no secrets).

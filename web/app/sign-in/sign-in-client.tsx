@@ -1,15 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { type FormEvent, useEffect, useRef, useState } from "react";
 import { AuthLayout } from "@/components/dockyard/auth-layout";
 import { AuthField } from "@/components/dockyard/ui/auth-field";
 import { Button } from "@/components/dockyard/ui/button";
 import { getSetupStatus, login, probeAuthState, submitMfa } from "@/lib/api";
 
+function safeReturnPath(raw: string | null): string | null {
+  const path = (raw ?? "").trim();
+  if (!path.startsWith("/") || path.startsWith("//")) return null;
+  if (path.startsWith("/sign-in") || path.startsWith("/setup")) return null;
+  return path;
+}
+
 export function SignInClient() {
   const router = useRouter();
+  const search = useSearchParams();
+  const returnTo = safeReturnPath(search.get("return"));
   const loginFormRef = useRef<HTMLFormElement>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -30,14 +39,14 @@ export function SignInClient() {
       .catch(() => {});
     probeAuthState().then((state) => {
       if (state.status === "authenticated") {
-        router.replace("/");
+        router.replace(returnTo ?? "/");
         return;
       }
       if (state.status === "mfa_pending") {
         setMfaStep(true);
       }
     });
-  }, [router]);
+  }, [router, returnTo]);
 
   useEffect(() => {
     if (mfaStep) {
@@ -70,7 +79,7 @@ export function SignInClient() {
         setMfaStep(true);
         return;
       }
-      router.replace("/");
+      router.replace(returnTo ?? "/");
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Incorrect email or password",
@@ -90,7 +99,7 @@ export function SignInClient() {
       } else {
         await submitMfa(mfaCode.trim());
       }
-      router.replace("/");
+      router.replace(returnTo ?? "/");
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Invalid authentication code",

@@ -279,6 +279,24 @@ type Job struct {
 	CreatedAt   sql.NullInt64
 }
 
+type McpAccessToken struct {
+	TokenHash []byte
+	UserID    string
+	Scope     string
+	ExpiresAt int64
+	CreatedAt int64
+}
+
+type McpOauthCode struct {
+	CodeHash      []byte
+	ClientID      string
+	UserID        string
+	RedirectUri   string
+	CodeChallenge string
+	Scope         string
+	ExpiresAt     int64
+}
+
 type MetricContainer struct {
 	Ts        sql.NullInt64
 	Res       sql.NullInt64

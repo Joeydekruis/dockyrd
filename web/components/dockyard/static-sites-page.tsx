@@ -36,6 +36,7 @@ import { filterByQuery } from "@/lib/service-display";
 import {
   parseStaticSiteConfig,
   primaryDomainHost,
+  truncateDeploymentTitle,
   visitSiteHref,
 } from "@/lib/static-site-display";
 
@@ -70,7 +71,7 @@ function deploymentSummary(latest?: Deployment) {
     latest.trigger;
   return {
     sha: sha || undefined,
-    message,
+    message: message ? truncateDeploymentTitle(message) : undefined,
     timeAgo: formatTimeAgo(latest.finished_at ?? latest.started_at),
   };
 }

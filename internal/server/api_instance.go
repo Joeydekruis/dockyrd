@@ -63,6 +63,8 @@ func (d apiDeps) handlePatchInstanceSettings(w http.ResponseWriter, r *http.Requ
 		Require2FAAll        *bool   `json:"require_2fa_all"`
 		TerminalAllowHost    *bool   `json:"terminal_allow_host"`
 		TerminalHostMfaCode  *string `json:"terminal_host_mfa_code"`
+		MCPDisabled          *bool   `json:"mcp_disabled"`
+		MCPAllowAPIToken     *bool   `json:"mcp_allow_api_token"`
 		SMTP                 *struct {
 			Host     string `json:"host"`
 			Port     int    `json:"port"`
@@ -111,6 +113,12 @@ func (d apiDeps) handlePatchInstanceSettings(w http.ResponseWriter, r *http.Requ
 			})
 		}
 		panel.TerminalAllowHost = want
+	}
+	if body.MCPDisabled != nil {
+		panel.MCPDisabled = *body.MCPDisabled
+	}
+	if body.MCPAllowAPIToken != nil {
+		panel.MCPAllowAPIToken = *body.MCPAllowAPIToken
 	}
 	instance.EnsureACMEDefaults(ctx, d.q, d.cfg, &panel)
 	if err := instance.SavePanel(ctx, d.q, panel); err != nil {

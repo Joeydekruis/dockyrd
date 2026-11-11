@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { AppWindow, Database, Globe } from "lucide-react";
 import { ProjectCard } from "@/components/dockyard/ui/project-card";
 
 /** **Source:** `web/components/dockyrd/ui/project-card.tsx` */
@@ -36,7 +37,32 @@ export const OverviewGrid: Story = {
     statusLabel: "Healthy",
     statusVariant: "ok",
     environments: ["Production", "Staging"],
-    summaryLine: "3 apps · 1 database · 1 static site",
+    resources: [
+      {
+        id: "1",
+        name: "api",
+        kindLabel: "App",
+        icon: AppWindow,
+        statusLabel: "Healthy",
+        statusVariant: "ok",
+      },
+      {
+        id: "2",
+        name: "db",
+        kindLabel: "Postgres 16",
+        icon: Database,
+        statusLabel: "Healthy",
+        statusVariant: "ok",
+      },
+      {
+        id: "3",
+        name: "clientx.nl",
+        kindLabel: "Static site",
+        icon: Globe,
+        statusLabel: "Live",
+        statusVariant: "ok",
+      },
+    ],
     activityLine: "Deployed 12 min ago",
     repo: undefined,
     servicesCount: undefined,

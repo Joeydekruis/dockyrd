@@ -6,7 +6,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { CreateProjectModal } from "@/components/dockyard/create-project-modal";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
-import { ProjectsWelcomeHero } from "@/components/dockyard/projects-welcome-hero";
 import { Button } from "@/components/dockyard/ui/button";
 import { ProjectCard } from "@/components/dockyard/ui/project-card";
 import { listProjects, listServices, type Project } from "@/lib/api";
@@ -64,8 +63,6 @@ export function ProjectsPage() {
 
   return (
     <DashboardShell title="Projects">
-      <ProjectsWelcomeHero onCreateProject={openCreate} />
-
       {error ? (
         <p className="mb-4 text-sm text-red-600" role="alert">
           {error}
@@ -128,7 +125,8 @@ export function ProjectsPage() {
                   statusLabel={row.status.label}
                   statusVariant={row.status.variant}
                   environments={row.environments}
-                  summaryLine={row.summaryLine}
+                  resources={row.resources}
+                  extraResourceCount={row.extraResourceCount}
                   activityLine={row.activityLine}
                 />
               </li>

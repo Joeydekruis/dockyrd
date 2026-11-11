@@ -1,75 +1,68 @@
-"use client";
+import { ArrowUpRight, BookOpen } from "lucide-react";
+import {
+  PUBLIC_DOCS_INTRO_URL,
+  PUBLIC_GITHUB_REPO_URL,
+} from "@/lib/public-links";
 
-import { ArrowRight, X } from "lucide-react";
-import { useEffect, useState } from "react";
-import { Chip } from "@/components/dockyard/ui/chip";
-import { PUBLIC_SITE_ORIGIN } from "@/lib/public-links";
-
-const STORAGE_KEY = "dy_announcement_dismissed";
-
-export function isAnnouncementDismissed(): boolean {
-  if (typeof window === "undefined") return false;
-  return window.localStorage.getItem(STORAGE_KEY) === "1";
-}
-
-type AnnouncementBannerProps = {
-  onDismiss?: () => void;
-};
-
-export function AnnouncementBanner({ onDismiss }: AnnouncementBannerProps) {
-  const [hidden, setHidden] = useState(true);
-
-  useEffect(() => {
-    setHidden(isAnnouncementDismissed());
-  }, []);
-
-  if (hidden) return null;
-
-  function dismiss() {
-    window.localStorage.setItem(STORAGE_KEY, "1");
-    setHidden(true);
-    onDismiss?.();
-  }
-
+/** Permanent full-width announcement strip (not dismissible). */
+export function AnnouncementBanner() {
   return (
     <section
       aria-label="Announcement"
-      className="relative flex h-full min-h-11 w-full items-center gap-4 border-b px-6 py-2 text-sm"
+      className="relative flex h-full min-h-11 w-full flex-wrap items-center justify-between gap-2 border-b px-6 py-2 text-sm sm:gap-4"
       style={{
         background: "var(--banner-blue)",
         borderColor: "var(--border)",
         color: "var(--ink-navy)",
       }}
     >
-      <div className="flex w-[140px] shrink-0 justify-start">
-        <Chip>Open source</Chip>
+      <div className="flex min-w-0 flex-wrap items-center gap-2 sm:gap-3">
+        <span
+          className="inline-flex items-center rounded-md px-2 py-0.5 font-mono text-[11px] uppercase tracking-widest"
+          style={{ background: "var(--ink-navy)", color: "#ffffff" }}
+        >
+          Open source
+        </span>
+        <p className="text-[13px] font-medium leading-snug">
+          Self-hosted deploys on your own servers.
+        </p>
       </div>
-      <p className="min-w-0 flex-1 text-center text-sm leading-snug">
-        One lightweight binary on your own server. No lock-in, no mess.
-      </p>
-      <div className="flex w-[140px] shrink-0 items-center justify-end gap-1">
+      <div className="flex flex-wrap items-center gap-1">
         <a
-          href={PUBLIC_SITE_ORIGIN}
+          href={PUBLIC_DOCS_INTRO_URL}
           target="_blank"
           rel="noopener noreferrer"
-          aria-label="Learn more about Dockyrd"
-          className="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-[13px] font-medium no-underline"
-          style={{
-            background: "rgba(255, 255, 255, 0.35)",
-            color: "var(--ink-navy)",
-          }}
+          className="inline-flex min-h-9 items-center gap-2 rounded-[10px] px-3 py-1.5 text-[13px] font-medium no-underline transition-colors hover:bg-white/50"
         >
-          Learn more
-          <ArrowRight strokeWidth={2} className="size-3.5" aria-hidden />
+          <BookOpen strokeWidth={1.8} className="size-4" aria-hidden />
+          Documentation
+          <ArrowUpRight strokeWidth={2} className="size-3.5" aria-hidden />
         </a>
-        <button
-          type="button"
-          onClick={dismiss}
-          className="dockyrd-icon-btn ml-1"
-          aria-label="Dismiss announcement"
+        <a
+          href={PUBLIC_GITHUB_REPO_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex min-h-9 items-center gap-2 rounded-[10px] px-3 py-1.5 text-[13px] font-medium no-underline transition-colors hover:bg-white/50"
         >
-          <X strokeWidth={1.8} className="size-4" aria-hidden />
-        </button>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden
+          >
+            <circle cx="6" cy="5" r="2.2" />
+            <circle cx="6" cy="19" r="2.2" />
+            <circle cx="18" cy="9" r="2.2" />
+            <path d="M6 7.2v9.6M18 11.2v5.8M6 7.2L18 9" />
+          </svg>
+          GitHub
+          <ArrowUpRight strokeWidth={2} className="size-3.5" aria-hidden />
+        </a>
       </div>
     </section>
   );

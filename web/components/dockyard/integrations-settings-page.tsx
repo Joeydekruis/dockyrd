@@ -10,14 +10,18 @@ import { SettingsPageBody } from "@/components/dockyard/settings-page-body";
 import { Button } from "@/components/dockyard/ui/button";
 import { ConfirmDialog } from "@/components/dockyard/ui/confirm-dialog";
 import { StatusBadge } from "@/components/dockyard/ui/status-badge";
+import { Switch } from "@/components/dockyard/ui/switch";
 import {
   disconnectGitHub,
   type GitHubStatus,
   getGitHubStatus,
   getInstanceSettings,
   getMe,
+  type InstanceSettings,
+  patchInstanceSettings,
 } from "@/lib/api";
 import { openExternalUrl } from "@/lib/open-external-url";
+import { PUBLIC_SITE_ORIGIN } from "@/lib/public-links";
 
 type WizardStep = 1 | 2 | 3 | 4;
 
@@ -34,6 +38,11 @@ export function IntegrationsSettingsPage() {
   const [wizardOpen, setWizardOpen] = useState(false);
   const [wizardStep, setWizardStep] = useState<WizardStep>(1);
   const [disconnectOpen, setDisconnectOpen] = useState(false);
+  const [instSettings, setInstSettings] = useState<InstanceSettings | null>(
+    null,
+  );
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [mcpSaving, setMcpSaving] = useState(false);
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -44,11 +53,14 @@ export function IntegrationsSettingsPage() {
         getMe().catch(() => null),
       ]);
       setStatus(st);
+      setInstSettings(inst);
       const url =
+        inst?.mcp_url?.replace(/\/mcp$/, "") ||
         st.public_url?.trim() ||
         inst?.public_url?.trim() ||
         (typeof window !== "undefined" ? window.location.origin : "");
       setInstanceUrl(url);
+      setIsAdmin(me?.role === "owner" || me?.role === "admin");
       if (me?.name) {
         setAccountHint(me.name.split(/\s+/)[0] ?? me.email.split("@")[0] ?? "");
       } else if (me?.email) {
@@ -85,6 +97,22 @@ export function IntegrationsSettingsPage() {
   function openWizard(step: WizardStep = 1) {
     setWizardStep(step);
     setWizardOpen(true);
+  }
+
+  async function onMcpToggle(
+    field: "mcp_disabled" | "mcp_allow_api_token",
+    value: boolean,
+  ) {
+    setMcpSaving(true);
+    try {
+      const updated = await patchInstanceSettings({ [field]: value });
+      setInstSettings(updated);
+      setError(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not save MCP settings");
+    } finally {
+      setMcpSaving(false);
+    }
   }
 
   async function onDisconnect() {
@@ -144,6 +172,97 @@ export function IntegrationsSettingsPage() {
               No git providers connected yet.
             </p>
           )}
+        </section>
+
+        <section aria-label="AI assistants" className="mb-8 space-y-3">
+          <h2 className="text-sm font-medium">AI assistants (MCP)</h2>
+          <div className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6">
+            <p className="max-w-2xl text-sm text-[var(--muted-foreground)]">
+              Connect{" "}
+              <strong className="font-medium text-[var(--foreground)]">
+                Cursor
+              </strong>{" "}
+              or{" "}
+              <strong className="font-medium text-[var(--foreground)]">
+                Claude
+              </strong>{" "}
+              to debug deploys, read logs, and trigger releases. Remote clients
+              use OAuth 2.1 at{" "}
+              <code className="text-xs">
+                {instSettings?.mcp_url ??
+                  `${instanceUrl || "https://your-panel"}/mcp`}
+              </code>
+              .
+            </p>
+            {instSettings?.mcp_disabled ? (
+              <p className="mt-2 text-sm text-amber-700" role="status">
+                MCP is disabled on this instance. Re-enable below to connect
+                clients.
+              </p>
+            ) : null}
+            <ul className="mt-4 list-disc space-y-1 pl-5 text-sm text-[var(--muted-foreground)]">
+              <li>
+                Add an HTTP MCP server in Cursor or Claude pointing at your
+                panel URL.
+              </li>
+              <li>
+                Sign in when prompted (PKCE). Scopes: read, deploy, write.
+              </li>
+              <li>
+                On the server only:{" "}
+                <code className="text-xs">dockyrd mcp --stdio</code> with a{" "}
+                <code className="text-xs">dyk_</code> API token.
+              </li>
+            </ul>
+            {isAdmin && instSettings ? (
+              <div className="mt-6 space-y-4 border-t border-[var(--border)] pt-4">
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-sm">
+                    <span className="font-medium">Allow MCP</span>
+                    <span className="mt-0.5 block text-[var(--muted-foreground)]">
+                      When off, <code className="text-xs">POST /mcp</code>{" "}
+                      returns 404.
+                    </span>
+                  </span>
+                  <Switch
+                    checked={!instSettings.mcp_disabled}
+                    disabled={mcpSaving}
+                    label="Allow MCP"
+                    onChange={(on) => void onMcpToggle("mcp_disabled", !on)}
+                  />
+                </div>
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-sm">
+                    <span className="font-medium">Allow API tokens on MCP</span>
+                    <span className="mt-0.5 block text-[var(--muted-foreground)]">
+                      Optional: accept <code className="text-xs">dyk_*</code>{" "}
+                      bearer tokens (not OAuth).
+                    </span>
+                  </span>
+                  <Switch
+                    checked={Boolean(instSettings.mcp_allow_api_token)}
+                    disabled={mcpSaving || instSettings.mcp_disabled}
+                    label="Allow API tokens on MCP"
+                    onChange={(on) =>
+                      void onMcpToggle("mcp_allow_api_token", on)
+                    }
+                  />
+                </div>
+              </div>
+            ) : null}
+            <div className="mt-4 flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                iconRight={ExternalLink}
+                onClick={() =>
+                  openExternalUrl(`${PUBLIC_SITE_ORIGIN}/docs/mcp.html`)
+                }
+              >
+                MCP setup guide
+              </Button>
+            </div>
+          </div>
         </section>
 
         <section aria-label="Add a provider" className="space-y-3">

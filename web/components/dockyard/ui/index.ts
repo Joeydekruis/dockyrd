@@ -44,6 +44,7 @@ export { RadioGroup } from "./radio-group";
 export { ResourceListAddLink } from "./resource-list-add-link";
 export { ResourceListSection } from "./resource-list-section";
 export { ResourceRow } from "./resource-row";
+export { RevealableCopyField } from "./revealable-copy-field";
 export { SearchPalette, type SearchResultRow } from "./search-palette";
 export { SearchSelect, type SearchSelectOption } from "./search-select";
 export { SearchSelectField } from "./search-select-field";

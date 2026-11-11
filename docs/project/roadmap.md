@@ -4,6 +4,7 @@ From briefing §15. Update when a milestone closes.
 
 | Milestone | Summary | Done when | Status |
 |--|--|--|--|
+| **MCP · AI assistants** | Streamable HTTP `/mcp`, OAuth 2.1 (Claude/Cursor), tool surface over control plane, Integrations UI | Connect Cursor/Claude to live panel for debug + deploy | **Done** @ **v0.7.18** ([#83](https://github.com/Joeydekruis/dockyrd/issues/83); ADR-0002) |
 | **M0 · Fundament** | Repo, CI, Go skeleton, SQLite, install/systemd, setup-token, login, AppShell + tokens, ⌘K skeleton | Fresh VPS → install → login to empty dashboard | **Done** |
 | **M1 · Apps image/Dockerfile** | Projects, services, Docker labels, Caddy, domains, blue/green, logs SSE, env vars, reconciler | Image + Dockerfile app on HTTPS domain, zero-downtime redeploy | **Done** |
 | **M2 · GitHub + Railpack + static** | GitHub App, webhooks, Railpack builds, static sites, rollback | Next.js via push; static site rollback | **Done** |

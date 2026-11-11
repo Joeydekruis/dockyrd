@@ -515,6 +515,8 @@ export function StaticSiteDetailPage() {
                     name={v.key}
                     value={v.value ?? ""}
                     secret={v.is_secret}
+                    linkId={v.link_id}
+                    secretsRevealed={revealedSecrets}
                   />
                 ))}
                 {row.variables.length === 0 ? (

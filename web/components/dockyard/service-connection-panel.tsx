@@ -1,25 +1,15 @@
 "use client";
 
-import { Copy, Eye, EyeOff } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
-import { IconButton } from "@/components/dockyard/ui/icon-button";
 import { KeyValueRow } from "@/components/dockyard/ui/key-value-row";
+import { RevealableCopyField } from "@/components/dockyard/ui/revealable-copy-field";
 import { getServiceConnection } from "@/lib/api";
+import { isSecretConnectionVariableKey } from "@/lib/connection-secret";
 import {
   RESOURCE_DETAIL_CARD,
   resourceDetailCardStyle,
 } from "@/lib/resource-detail-page";
-import { useCopyToClipboard } from "@/lib/snackbar-context";
-
-const MASK = "••••••••";
-
-function isSecretVariableKey(key: string): boolean {
-  const upper = key.toUpperCase();
-  return (
-    upper.includes("PASSWORD") || key === "DATABASE_URL" || key === "REDIS_URL"
-  );
-}
 
 function ConnectionValue({
   name,
@@ -36,42 +26,28 @@ function ConnectionValue({
   onReveal: () => void;
   onHide: () => void;
 }) {
-  const secret = isSecretVariableKey(name);
+  const secret = isSecretConnectionVariableKey(name);
   const plain = plainSecrets?.[name];
-  const display = secret && !revealed ? MASK : (plain ?? maskedValue);
+  const display = plain ?? maskedValue;
   const copyValue = secret ? (plain ?? "") : maskedValue;
-  const copyToClipboard = useCopyToClipboard();
   const canCopy = !(secret && !plain);
 
   return (
-    <span className="inline-flex min-w-0 max-w-full items-start justify-end gap-1.5 sm:gap-2">
-      <span className="min-w-0 break-all text-right font-mono text-sm">
-        {display}
-      </span>
-      <span className="inline-flex shrink-0 items-center gap-0.5">
-        {secret ? (
-          <IconButton
-            icon={revealed ? EyeOff : Eye}
-            iconClassName="size-4"
-            label={revealed ? `Hide ${name}` : `Reveal ${name}`}
-            onClick={() => {
-              if (revealed) onHide();
-              else onReveal();
-            }}
-          />
-        ) : null}
-        <IconButton
-          icon={Copy}
-          iconClassName="size-4"
-          label={`Copy ${name}`}
-          disabled={!canCopy}
-          onClick={() => {
-            if (!canCopy) return;
-            void copyToClipboard(copyValue, `Copied ${name}`);
-          }}
-        />
-      </span>
-    </span>
+    <RevealableCopyField
+      displayValue={display}
+      copyValue={copyValue}
+      copyLabel={`Copy ${name}`}
+      copyMessage={`Copied ${name}`}
+      canCopy={canCopy}
+      revealable={secret}
+      revealed={revealed}
+      onToggleReveal={() => {
+        if (revealed) onHide();
+        else onReveal();
+      }}
+      revealLabel={`Reveal ${name}`}
+      hideLabel={`Hide ${name}`}
+    />
   );
 }
 

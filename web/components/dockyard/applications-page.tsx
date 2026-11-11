@@ -23,6 +23,7 @@ import {
 } from "@/lib/resource-dashboard";
 import { filterByQuery } from "@/lib/service-display";
 import { serviceDetailHref } from "@/lib/service-routes";
+import { visitSiteHref } from "@/lib/static-site-display";
 
 export function ApplicationsPage() {
   const [rows, setRows] = useState<ApplicationRow[]>([]);
@@ -167,13 +168,16 @@ export function ApplicationsPage() {
                 app.desired_state,
                 "application",
               );
+              const host = app.primary_hostname?.trim();
               return (
                 <ResourceRow
                   key={app.id}
                   name={app.name}
                   href={serviceDetailHref("app", app.slug)}
                   meta={projectPathLabel(app.project_name)}
-                  internalOnly
+                  url={host}
+                  urlHref={visitSiteHref(host)}
+                  internalOnly={!host}
                   statusLabel={status.label}
                   statusVariant={status.variant}
                   icon={Box}

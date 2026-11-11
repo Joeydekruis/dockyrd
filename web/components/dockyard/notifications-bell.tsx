@@ -30,6 +30,8 @@ export function NotificationsBell({ className }: NotificationsBellProps) {
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
+  const itemsRef = useRef(items);
+  itemsRef.current = items;
 
   useEffect(() => {
     setMounted(true);
@@ -77,14 +79,39 @@ export function NotificationsBell({ className }: NotificationsBellProps) {
     void loadList(filter);
   }, [open, filter, loadList]);
 
+  const closePanel = useCallback(() => {
+    const unreadVisible = itemsRef.current.filter((n) => !n.read_at);
+    setOpen(false);
+    if (unreadVisible.length === 0) return;
+
+    const now = Math.floor(Date.now() / 1000);
+    const unreadIds = new Set(unreadVisible.map((n) => n.id));
+    setItems((prev) =>
+      prev.map((n) =>
+        unreadIds.has(n.id) ? { ...n, read_at: n.read_at ?? now } : n,
+      ),
+    );
+
+    void (async () => {
+      try {
+        await Promise.all(
+          unreadVisible.map((n) => markInboxNotificationRead(n.id)),
+        );
+      } catch {
+        /* ignore */
+      }
+      await refreshSummary();
+    })();
+  }, [refreshSummary]);
+
   useEffect(() => {
     if (!open) return;
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") closePanel();
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+  }, [open, closePanel]);
 
   async function handleMarkRead(id: string) {
     try {
@@ -124,7 +151,7 @@ export function NotificationsBell({ className }: NotificationsBellProps) {
           unread > 0 ? `Notifications, ${unread} unread` : "Notifications"
         }
         aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => (open ? closePanel() : setOpen(true))}
       >
         <Bell className="size-5 shrink-0" strokeWidth={1.8} aria-hidden />
         {unread > 0 ? (
@@ -145,7 +172,7 @@ export function NotificationsBell({ className }: NotificationsBellProps) {
                 className="absolute inset-0 border-0"
                 style={{ background: "rgba(11, 31, 58, 0.45)" }}
                 aria-label="Close notifications"
-                onClick={() => setOpen(false)}
+                onClick={closePanel}
               />
               <div
                 ref={panelRef}
@@ -160,7 +187,7 @@ export function NotificationsBell({ className }: NotificationsBellProps) {
               >
                 <NotificationsPanelHeader
                   title="Notifications"
-                  onClose={() => setOpen(false)}
+                  onClose={closePanel}
                   onMarkAllRead={() => void handleMarkAllRead()}
                   markAllDisabled={unread === 0}
                 />
@@ -196,7 +223,7 @@ export function NotificationsBell({ className }: NotificationsBellProps) {
                         item={item}
                         compact
                         onMarkRead={(id) => void handleMarkRead(id)}
-                        onNavigate={() => setOpen(false)}
+                        onNavigate={closePanel}
                       />
                     ))
                   )}
@@ -208,7 +235,7 @@ export function NotificationsBell({ className }: NotificationsBellProps) {
                   <Link
                     href="/notifications"
                     className="btn-link text-sm font-medium"
-                    onClick={() => setOpen(false)}
+                    onClick={closePanel}
                   >
                     View all notifications →
                   </Link>

@@ -15,7 +15,7 @@
 <meta name="twitter:title" content="Users & security · Dockyrd">
 <meta name="twitter:description" content="Dockyrd has team accounts, roles and two-factor sign-in from the first release.">
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../assets/site.css?v=0.7.4">
+<link rel="stylesheet" href="../assets/site.css?v=0.7.17">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -64,7 +64,7 @@
       <button class="search-btn" type="button" id="searchBtn" aria-label="Search documentation">
         <svg width="16" height="16" aria-hidden="true"><use href="#i-search"/></svg><span>Search docs</span><kbd>⌘K</kbd>
       </button>
-      <span class="version">v0.7.4</span>
+      <span class="version">v0.7.17</span>
       <a class="btn btn-outline gh-btn" href="https://github.com/Joeydekruis/dockyrd" target="_blank" rel="noopener noreferrer" aria-label="Star Dockyrd on GitHub">
         <svg width="16" height="16" aria-hidden="true"><use href="#i-github"/></svg>
         <span class="gh-label">Star</span>
@@ -75,10 +75,10 @@
 </header>
 <div class="docs">
   <aside class="sidebar" id="sidebar" aria-label="Documentation">
-    <nav id="docnav"><div class="group"><span class="eyebrow">Getting started</span><a href="introduction.html">Introduction</a><a href="installation.html">Installation</a><a href="quick-start.html">Quick start</a></div><div class="group"><span class="eyebrow">Guides</span><a href="nextjs.html">Next.js apps</a><a href="static-sites.html">Static sites</a><a href="databases.html">Databases</a><a href="object-storage.html">Object storage</a><a href="domains.html">Domains & HTTPS</a><a href="variables.html">Environment variables</a></div><div class="group"><span class="eyebrow">Operations</span><a href="updates.html">Updates</a><a href="cli.html">CLI reference</a><a href="troubleshooting.html">Troubleshooting</a></div><div class="group"><span class="eyebrow">Concepts</span><a href="architecture.html">Architecture</a><a href="security.html" aria-current="page">Users & security</a></div></nav>
+    <nav id="docnav"><div class="group"><span class="eyebrow">Getting started</span><a href="introduction.html">Introduction</a><a href="installation.html">Installation</a><a href="quick-start.html">Quick start</a></div><div class="group"><span class="eyebrow">Guides</span><a href="nextjs.html">Next.js apps</a><a href="static-sites.html">Static sites</a><a href="databases.html">Databases</a><a href="object-storage.html">Object storage</a><a href="domains.html">Domains & HTTPS</a><a href="variables.html">Environment variables</a></div><div class="group"><span class="eyebrow">Operations</span><a href="updates.html">Updates</a><a href="cli.html">CLI reference</a><a href="mcp.html">AI assistants (MCP)</a><a href="troubleshooting.html">Troubleshooting</a></div><div class="group"><span class="eyebrow">Concepts</span><a href="architecture.html">Architecture</a><a href="security.html" aria-current="page">Users & security</a></div></nav>
     <div class="side-foot">
       <span class="status warn">Pre-release</span>
-      <span style="color:var(--ink-2)">These docs track v0.7.4. Details can change before the next release.</span>
+      <span style="color:var(--ink-2)">These docs track v0.7.17. Details can change before the next release.</span>
     </div>
   </aside>
   <main class="article" id="main">
@@ -110,13 +110,15 @@
 <li>Projects cannot reach each other's networks.</li>
 <li>Every change is written to the audit log with user, target and IP.</li>
 </ul>
+<h2 id="security-mcp">AI assistants (MCP)</h2>
+<p>Remote MCP uses <b>OAuth 2.1</b> and short-lived access tokens to <code>/mcp</code>. Scopes follow the same role model as the dashboard. See <a href="mcp.html">AI assistants (MCP)</a>.</p>
 <h2 id="security-report">Reporting a vulnerability</h2>
 <p>Please report security issues privately as described in <code>SECURITY.md</code> in the repository. We follow a 90-day disclosure policy.</p>
 </article>
     <nav class="pager" aria-label="Previous and next page"><a class="prev" href="architecture.html"><span class="eyebrow">Previous</span><span>Architecture</span></a></nav>
     <div class="edit"><a href="https://github.com/Joeydekruis/dockyrd/tree/development/site/source.html" target="_blank" rel="noopener noreferrer">Edit this page on GitHub</a><span>Apache-2.0 licensed</span></div>
   </main>
-  <aside class="toc" aria-label="On this page"><span class="eyebrow">On this page</span><ol><li><a href="#security-roles">Roles</a></li><li><a href="#security-signin">Sign-in</a></li><li><a href="#security-data">Secrets and isolation</a></li><li><a href="#security-report">Reporting a vulnerability</a></li></ol></aside>
+  <aside class="toc" aria-label="On this page"><span class="eyebrow">On this page</span><ol><li><a href="#security-roles">Roles</a></li><li><a href="#security-signin">Sign-in</a></li><li><a href="#security-data">Secrets and isolation</a></li><li><a href="#security-mcp">AI assistants (MCP)</a></li><li><a href="#security-report">Reporting a vulnerability</a></li></ol></aside>
 </div>
 <footer class="site">
   <div class="in">
