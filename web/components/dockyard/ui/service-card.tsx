@@ -26,7 +26,7 @@ export function ServiceCard({
   return (
     <a
       href={href}
-      className="flex items-start gap-4 rounded-[20px] border p-5 transition-colors hover:bg-[var(--hover-row)]"
+      className="dockyrd-surface-interactive flex items-start gap-4 rounded-[20px] border p-5"
       style={{ background: "var(--surface)", borderColor: "var(--border)" }}
     >
       <IconTile icon={icon ?? Box} label={name} />

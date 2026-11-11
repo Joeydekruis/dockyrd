@@ -43,7 +43,7 @@
     ),
     linear-gradient(120deg, #2f4a8a, #4767bc 55%, #7088da);
   --card-radius: 20px;
-  --dockyrd-announcement-height: 44px;
+  --dockyrd-announcement-height: 40px;
 }
 
 .field-input {
@@ -136,8 +136,14 @@
 }
 
 .search-palette-row:hover,
+.search-palette-row:focus-visible,
 .search-palette-row-active {
   background: #f1f0ed;
+  outline: none;
+}
+
+.search-palette-row:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--ring);
 }
 
 .search-palette-empty {
@@ -560,6 +566,12 @@ button.btn-text:disabled {
   background: var(--hover-row);
 }
 
+.select-option:focus-visible {
+  background: var(--hover-row);
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+
 .select-option[aria-selected="true"] {
   background: var(--brand-soft);
 }
@@ -769,6 +781,20 @@ button.btn-text:disabled {
   transition: width 0.05s linear;
 }
 
+.snackbar-toast-progress-indeterminate {
+  width: 40% !important;
+  animation: snackbar-indeterminate 1.2s ease-in-out infinite;
+}
+
+@keyframes snackbar-indeterminate {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(320%);
+  }
+}
+
 .dockyrd-tooltip {
   display: inline-flex;
   align-items: center;
@@ -914,6 +940,14 @@ button.btn-text:disabled {
   padding: 6px 10px 6px 6px;
   cursor: pointer;
   color: var(--ink-navy);
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.user-menu-trigger:hover {
+  background: var(--hover-row);
+  border-color: var(--secondary-button-border);
 }
 
 .user-menu-trigger:focus-visible {
@@ -938,6 +972,14 @@ button.btn-text:disabled {
   padding: 0;
   cursor: pointer;
   color: var(--ink-navy);
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.header-icon-button:hover {
+  background: var(--hover-row);
+  border-color: var(--secondary-button-border);
 }
 
 .header-icon-button:focus-visible {
@@ -990,6 +1032,131 @@ button.btn-text:disabled {
   text-decoration: underline;
 }
 
+.auth-back-link:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Text links + cards (dashboard lists, breadcrumbs) */
+.dockyrd-text-link {
+  font-weight: 500;
+  color: var(--link-blue);
+  text-decoration: none;
+  border-radius: 6px;
+  transition: text-decoration 0.15s ease;
+}
+
+.dockyrd-text-link:hover {
+  text-decoration: underline;
+}
+
+.dockyrd-text-link:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.dockyrd-focus-ring:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.dockyrd-surface-interactive {
+  transition: background 0.15s ease;
+}
+
+.dockyrd-surface-interactive:hover {
+  background: var(--hover-row);
+}
+
+.dockyrd-surface-interactive:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.dockyrd-page-tab {
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.dockyrd-page-tab:hover:not([aria-selected="true"]) {
+  color: var(--ink-navy);
+}
+
+.dockyrd-page-tab:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+.dockyrd-pill-tab {
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.dockyrd-pill-tab:hover:not([aria-selected="true"]) {
+  background: var(--hover-row);
+  color: var(--ink-navy);
+}
+
+.dockyrd-pill-tab:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.dockyrd-segment-btn {
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.dockyrd-segment-btn:hover:not([aria-pressed="true"]) {
+  background: var(--hover-row);
+  color: var(--ink-navy);
+}
+
+.dockyrd-segment-btn:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.dockyrd-icon-choice {
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.dockyrd-icon-choice:hover {
+  border-color: var(--accent-blue);
+  background: var(--brand-soft);
+}
+
+.dockyrd-icon-choice:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.resource-row:has(> a:focus-visible) {
+  background: var(--hover-row);
+}
+
+.resource-row > a:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+  border-radius: 4px;
+}
+
+.dockyrd-logo:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 4px;
+  border-radius: 10px;
+}
+
 .auth-cli-card {
   display: flex;
   flex-direction: column;
@@ -1026,6 +1193,10 @@ button.btn-text:disabled {
   max-width: 1000px;
   margin-left: auto;
   margin-right: auto;
+}
+
+.settings-page-body:has(.team-settings-layout) {
+  max-width: 1180px;
 }
 
 .create-progress-log {

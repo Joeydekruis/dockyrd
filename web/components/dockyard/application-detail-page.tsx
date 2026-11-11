@@ -2,6 +2,7 @@
 
 import { Monitor } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ApplicationConnectionsFlow } from "@/components/dockyard/application-connections-flow";
 import { ApplicationEnvironmentTab } from "@/components/dockyard/application-environment-tab";
@@ -112,6 +113,7 @@ function appPort(config: Record<string, unknown>): number {
 }
 
 export function ApplicationDetailPage() {
+  const router = useRouter();
   const slug = useRouteParam("slug");
   const [row, setRow] = useState<AppRow | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -253,9 +255,8 @@ export function ApplicationDetailPage() {
     setDeployBusy(true);
     setError(null);
     try {
-      await createDeployment(row.service.id);
-      await refresh({ silent: true });
-      selectTab("deployments");
+      const dep = await createDeployment(row.service.id);
+      router.push(`/applications/${row.service.slug}/deployments/${dep.id}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Deploy failed");
     } finally {

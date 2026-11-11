@@ -1,5 +1,5 @@
-import { AccountRegionalSettingsPage } from "@/components/dockyard/account-regional-settings-page";
+import { SettingsLegacyRedirect } from "@/components/dockyard/settings-legacy-redirect";
 
-export default function Page() {
-  return <AccountRegionalSettingsPage />;
+export default function LegacyRegionalSettingsPage() {
+  return <SettingsLegacyRedirect href="/settings/account/profile" />;
 }

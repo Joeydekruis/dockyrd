@@ -62,8 +62,7 @@ function UrlCell({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="relative z-[2] block max-w-full truncate text-[13px] font-medium hover:underline pointer-events-auto"
-      style={{ color: "var(--link-blue)" }}
+      className="dockyrd-text-link relative z-[2] block max-w-full truncate text-[13px] pointer-events-auto"
       title={url}
     >
       {url}

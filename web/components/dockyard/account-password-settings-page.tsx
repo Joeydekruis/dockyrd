@@ -5,6 +5,7 @@ import {
   Owner2FARequiredBanner,
   SettingsErrorBanner,
   SettingsSection,
+  settingsCardClass,
 } from "@/components/dockyard/account-settings-shared";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
@@ -19,7 +20,7 @@ import {
   setupTotp,
 } from "@/lib/api";
 
-export function AccountPasswordSettingsPage() {
+export function AccountPasswordAndTotpSections() {
   const [user, setUser] = useState<MeResponse | null>(null);
   const [totpEnabled, setTotpEnabled] = useState(false);
   const [setupSecret, setSetupSecret] = useState<string | null>(null);
@@ -112,12 +113,11 @@ export function AccountPasswordSettingsPage() {
     user?.role === "owner" && user.totp_enabled === false && !totpEnabled;
 
   return (
-    <DashboardShell title="Password & 2FA" breadcrumb="Account settings">
-      <SettingsPageBody>
-        <Owner2FARequiredBanner show={!loading && !!needs2FA} />
-        <SettingsErrorBanner message={error} />
+    <>
+      <Owner2FARequiredBanner show={!loading && !!needs2FA} />
+      <SettingsErrorBanner message={error} />
 
-        <SettingsSection title="Password">
+      <SettingsSection title="Password" className={`${settingsCardClass} scroll-mt-24`}>
           {passwordSaved ? (
             <p className="text-sm text-green-700" role="status">
               Password updated.
@@ -174,7 +174,10 @@ export function AccountPasswordSettingsPage() {
           </form>
         </SettingsSection>
 
-        <SettingsSection title="Two-factor authentication">
+      <SettingsSection
+        title="Two-factor authentication"
+        className={`${settingsCardClass} scroll-mt-24`}
+      >
           {loading ? (
             <DockyrdPageLoading className="py-2" cubeSize={28} />
           ) : totpEnabled ? (
@@ -225,7 +228,16 @@ export function AccountPasswordSettingsPage() {
               </pre>
             </div>
           ) : null}
-        </SettingsSection>
+      </SettingsSection>
+    </>
+  );
+}
+
+export function AccountPasswordSettingsPage() {
+  return (
+    <DashboardShell title="Profile & security" breadcrumb="Account settings">
+      <SettingsPageBody>
+        <AccountPasswordAndTotpSections />
       </SettingsPageBody>
     </DashboardShell>
   );

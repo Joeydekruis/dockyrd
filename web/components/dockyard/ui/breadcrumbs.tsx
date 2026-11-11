@@ -24,7 +24,7 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
             {isLast ? (
               <span style={{ color: "var(--ink-navy)" }}>{item.label}</span>
             ) : item.href ? (
-              <a href={item.href} className="hover:underline">
+              <a href={item.href} className="dockyrd-text-link rounded-sm">
                 {item.label}
               </a>
             ) : (

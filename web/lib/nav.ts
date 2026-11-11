@@ -3,13 +3,12 @@ import {
   ArrowLeft,
   BarChart3,
   Bell,
+  Bot,
   Box,
-  Clock,
   Database,
   Globe,
   Hammer,
   HardDrive,
-  KeyRound,
   Layers,
   LayoutDashboard,
   Mail,
@@ -77,16 +76,10 @@ export type SettingsNavItem = {
 };
 
 export const accountSettingsNav: SettingsNavItem[] = [
-  { label: "Profile", href: "/settings/account/profile", icon: User },
   {
-    label: "API tokens",
-    href: "/settings/account/tokens",
-    icon: Plug,
-  },
-  {
-    label: "Password & 2FA",
-    href: "/settings/account/password",
-    icon: KeyRound,
+    label: "Profile & security",
+    href: "/settings/account/profile",
+    icon: User,
   },
   {
     label: "Notifications",
@@ -94,14 +87,9 @@ export const accountSettingsNav: SettingsNavItem[] = [
     icon: Bell,
   },
   {
-    label: "Date & time",
-    href: "/settings/account/regional",
-    icon: Clock,
-  },
-  {
-    label: "Security",
-    href: "/settings/account/security",
-    icon: Shield,
+    label: "API tokens",
+    href: "/settings/account/tokens",
+    icon: Plug,
   },
 ];
 
@@ -132,6 +120,11 @@ export const serverSettingsSidebarNav: SettingsNavItem[] = [
     label: "Git providers",
     href: "/settings/server/integrations",
     icon: Plug,
+  },
+  {
+    label: "MCP",
+    href: "/settings/server/mcp",
+    icon: Bot,
   },
   { label: "Updates", href: "/settings/server/updates", icon: RefreshCw },
 ];

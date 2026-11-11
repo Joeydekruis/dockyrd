@@ -1,6 +1,7 @@
 "use client";
 
 import { ExternalLink, Eye, EyeOff } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { AddEnvVariableModal } from "@/components/dockyard/add-env-variable-modal";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
@@ -72,6 +73,7 @@ function cardClassName() {
 }
 
 export function StaticSiteDetailPage() {
+  const router = useRouter();
   const slug = useRouteParam("slug");
   const [row, setRow] = useState<SiteRow | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -178,9 +180,8 @@ export function StaticSiteDetailPage() {
     setDeployBusy(true);
     setError(null);
     try {
-      await createDeployment(row.service.id);
-      await refresh({ silent: true });
-      selectTab("deployments");
+      const dep = await createDeployment(row.service.id);
+      router.push(`/static-sites/${row.service.slug}/deployments/${dep.id}`);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Deploy failed");
     } finally {

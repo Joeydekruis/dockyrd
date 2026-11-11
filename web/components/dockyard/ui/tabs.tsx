@@ -27,7 +27,7 @@ export function Tabs({ tabs, activeId, onChange }: TabsProps) {
             type="button"
             role="tab"
             aria-selected={active}
-            className="-mb-px border-b-2 pb-3 text-sm font-medium transition-colors"
+            className="dockyrd-page-tab -mb-px border-b-2 pb-3 text-sm font-medium"
             style={{
               borderColor: active ? "var(--ink-navy)" : "transparent",
               color: active ? "var(--ink-navy)" : "var(--muted-text)",

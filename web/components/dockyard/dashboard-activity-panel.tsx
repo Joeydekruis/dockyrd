@@ -102,8 +102,7 @@ export function DashboardActivityPanel({
           </div>
           <button
             type="button"
-            className="text-sm font-medium hover:underline"
-            style={{ color: "var(--link-blue)" }}
+            className="dockyrd-text-link text-sm"
             onClick={() => void markAllRead()}
           >
             Mark all as read
@@ -156,8 +155,7 @@ export function DashboardActivityPanel({
       >
         <Link
           href="/notifications"
-          className="text-sm font-medium hover:underline"
-          style={{ color: "var(--link-blue)" }}
+          className="dockyrd-text-link text-sm"
         >
           View all notifications →
         </Link>

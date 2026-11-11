@@ -12,8 +12,8 @@ export function ResourceListAddLink({
   href,
 }: ResourceListAddLinkProps) {
   const className =
-    "flex w-full items-center justify-center gap-2 border-t py-4 text-sm font-medium no-underline transition-colors hover:bg-[var(--hover-row)]";
-  const style = { borderColor: "var(--border)", color: "var(--link-blue)" };
+    "dockyrd-surface-interactive dockyrd-text-link flex w-full items-center justify-center gap-2 border-t py-4 text-sm no-underline";
+  const style = { borderColor: "var(--border)" };
   const content = (
     <>
       <Plus strokeWidth={2} className="size-4 shrink-0" aria-hidden />

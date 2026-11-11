@@ -38,6 +38,7 @@ var searchNavPages = []searchHit{
 	{Kind: "page", Label: "Team", Href: "/settings/server/team"},
 	{Kind: "page", Label: "Updates", Href: "/settings/server/updates"},
 	{Kind: "page", Label: "Git providers", Href: "/settings/server/integrations"},
+	{Kind: "page", Label: "MCP", Href: "/settings/server/mcp"},
 }
 
 func (d apiDeps) handleSearch(w http.ResponseWriter, r *http.Request) {

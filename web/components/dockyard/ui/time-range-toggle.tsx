@@ -22,7 +22,7 @@ export function TimeRangeToggle({ value, onChange }: TimeRangeToggleProps) {
           <button
             key={range}
             type="button"
-            className="rounded-full px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest transition-colors"
+            className="dockyrd-segment-btn rounded-full px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest"
             style={{
               background: active ? "var(--ink-navy)" : "transparent",
               color: active ? "#fff" : "var(--muted-text)",

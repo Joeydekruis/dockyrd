@@ -132,6 +132,9 @@ func (rt *Runtime) RunStaticSiteDeployment(ctx context.Context, deploymentID str
 	if err != nil {
 		return rt.fail(ctx, deploymentID, err)
 	}
+	if err := rt.ensureNotCancelled(ctx, deploymentID); err != nil {
+		return err
+	}
 	staticsite.PruneReleases(rt.Cfg.SitesDir(), ctxRow.ServiceSlug, 5)
 	_ = rt.Q.SetDeploymentReleasePath(ctx, sqlc.SetDeploymentReleasePathParams{
 		ReleasePath: sql.NullString{String: releasePath, Valid: true},

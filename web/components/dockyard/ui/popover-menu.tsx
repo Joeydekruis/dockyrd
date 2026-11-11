@@ -80,7 +80,7 @@ export function PopoverMenu({
             type="button"
             role="menuitem"
             disabled={item.disabled}
-            className="block w-full px-3 py-2 text-left text-sm hover:bg-[var(--hover-row)] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:bg-transparent"
+            className="dockyrd-menu-item block w-full px-3 py-2 text-left text-sm disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:bg-transparent"
             style={{
               color: item.destructive ? "var(--danger)" : "var(--ink-navy)",
             }}

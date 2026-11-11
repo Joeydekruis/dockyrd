@@ -221,12 +221,47 @@ function headMeta({ title, description, canonical, ogType = "website", depth = 0
 <body>`;
 }
 
-function shellHeader(activeNav, depth = 0) {
+function primaryNavLinks(activeNav, depth) {
   const navItem = (key, href, label) => {
     const cur = activeNav === key ? ' aria-current="page"' : "";
     return `<a href="${href}" data-nav="${key}"${cur}>${label}</a>`;
   };
   const home = homeHref(depth);
+  return `${navItem("home", home, "Product")}
+      ${navItem("docs", docHref(depth, "introduction"), "Docs")}
+      ${navItem("cli", docHref(depth, "cli"), "CLI")}
+      ${navItem("arch", docHref(depth, "architecture"), "Architecture")}`;
+}
+
+function mobilePrimaryNavBlock(activeNav, depth) {
+  return `<div class="nav-drawer-primary">
+    <nav class="group" aria-label="Primary" style="margin:0">
+      <span class="eyebrow">Navigate</span>
+      ${primaryNavLinks(activeNav, depth)}
+    </nav>
+  </div>`;
+}
+
+function mobileNavAside(activeNav, depth) {
+  return `<aside class="mobile-nav" id="mobileNav" aria-label="Site navigation">
+  <nav class="group" aria-label="Primary">
+    <span class="eyebrow">Navigate</span>
+    ${primaryNavLinks(activeNav, depth)}
+  </nav>
+</aside>`;
+}
+
+function navBackdropHtml() {
+  return `<button type="button" class="nav-backdrop" id="navBackdrop" aria-label="Close menu" tabindex="-1"></button>`;
+}
+
+function shellHeader(activeNav, depth = 0, { mobileNav = false } = {}) {
+  const navItem = (key, href, label) => {
+    const cur = activeNav === key ? ' aria-current="page"' : "";
+    return `<a href="${href}" data-nav="${key}"${cur}>${label}</a>`;
+  };
+  const home = homeHref(depth);
+  const menuControls = mobileNav ? "mobileNav" : "sidebar";
   return `${extractSvgPlaceholder()}
 <div class="banner" role="region" aria-label="Announcement">
   <div class="banner-in">
@@ -237,13 +272,10 @@ function shellHeader(activeNav, depth = 0) {
 </div>
 <header class="topbar">
   <div class="topbar-in">
-    <button class="menu-btn" type="button" id="menuBtn" aria-label="Open documentation menu" aria-expanded="false" aria-controls="sidebar"><svg width="20" height="20"><use href="#i-menu"/></svg></button>
+    <button class="menu-btn" type="button" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="${menuControls}"><svg width="20" height="20" aria-hidden="true"><use href="#i-menu"/></svg></button>
     ${dockyrdLogoLink(home, "site-logo-h")}
     <nav class="topnav" aria-label="Primary">
-      ${navItem("home", home, "Product")}
-      ${navItem("docs", docHref(depth, "introduction"), "Docs")}
-      ${navItem("cli", docHref(depth, "cli"), "CLI")}
-      ${navItem("arch", docHref(depth, "architecture"), "Architecture")}
+      ${primaryNavLinks(activeNav, depth)}
     </nav>
     <div class="top-right">
       <button class="search-btn" type="button" id="searchBtn" aria-label="Search documentation">
@@ -257,7 +289,8 @@ function shellHeader(activeNav, depth = 0) {
       </a>
     </div>
   </div>
-</header>`;
+</header>
+${navBackdropHtml()}${mobileNav ? mobileNavAside(activeNav, depth) : ""}`;
 }
 
 let svgCache = "";
@@ -356,6 +389,7 @@ function buildDocPage(article, articles, index) {
 ${shellHeader(navKey, depth)}
 <div class="docs">
   <aside class="sidebar" id="sidebar" aria-label="Documentation">
+    ${mobilePrimaryNavBlock(navKey, depth)}
     <nav id="docnav">${buildSidebarNav(articles, article.page, depth)}</nav>
     <div class="side-foot">
       <span class="status warn">Pre-release</span>
@@ -411,7 +445,7 @@ function buildHome(homeRaw) {
     depth,
   })}
 ${jsonLd}
-${shellHeader("home", depth)}
+${shellHeader("home", depth, { mobileNav: true })}
 ${home}
 ${shellFooter(depth)}
 ${searchDialogHtml()}

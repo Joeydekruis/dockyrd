@@ -12,7 +12,7 @@ export function GitHubRepoLink({ fullName, href }: GitHubRepoLinkProps) {
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex max-w-full items-center gap-2 rounded-lg border px-3 py-1.5 text-[13px] font-medium transition-colors hover:bg-[var(--hover-row)]"
+      className="dockyrd-surface-interactive dockyrd-focus-ring inline-flex max-w-full items-center gap-2 rounded-lg border px-3 py-1.5 text-[13px] font-medium"
       style={{
         borderColor: "var(--border)",
         background: "var(--surface)",

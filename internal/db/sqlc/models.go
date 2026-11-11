@@ -159,6 +159,14 @@ type Deployment struct {
 	FailureKind   sql.NullString
 }
 
+type DeploymentBreakScore struct {
+	ID           string
+	DeploymentID string
+	UserID       string
+	Score        int64
+	UpdatedAt    int64
+}
+
 type Domain struct {
 	ID            string
 	ServiceID     string

@@ -22,8 +22,7 @@ export function InlineLink({
   return (
     <a
       href={href}
-      className={`inline-flex items-center gap-1 font-medium hover:underline ${className}`.trim()}
-      style={{ color: "var(--link-blue)" }}
+      className={`dockyrd-text-link inline-flex items-center gap-1 ${className}`.trim()}
       {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
       {...props}
     >

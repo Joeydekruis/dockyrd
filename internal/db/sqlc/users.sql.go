@@ -45,6 +45,23 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
 	return err
 }
 
+const disableUser = `-- name: DisableUser :exec
+UPDATE users
+SET disabled_at = ?, updated_at = ?
+WHERE id = ?
+`
+
+type DisableUserParams struct {
+	DisabledAt sql.NullInt64
+	UpdatedAt  int64
+	ID         string
+}
+
+func (q *Queries) DisableUser(ctx context.Context, arg DisableUserParams) error {
+	_, err := q.db.ExecContext(ctx, disableUser, arg.DisabledAt, arg.UpdatedAt, arg.ID)
+	return err
+}
+
 const disableUserTOTP = `-- name: DisableUserTOTP :exec
 UPDATE users
 SET
@@ -172,18 +189,23 @@ SELECT
   name,
   role,
   created_at,
+  updated_at,
+  totp_enabled_at,
   disabled_at
 FROM users
+WHERE disabled_at IS NULL
 ORDER BY created_at ASC
 `
 
 type ListUsersRow struct {
-	ID         string
-	Email      string
-	Name       string
-	Role       string
-	CreatedAt  int64
-	DisabledAt sql.NullInt64
+	ID            string
+	Email         string
+	Name          string
+	Role          string
+	CreatedAt     int64
+	UpdatedAt     int64
+	TotpEnabledAt sql.NullInt64
+	DisabledAt    sql.NullInt64
 }
 
 func (q *Queries) ListUsers(ctx context.Context) ([]ListUsersRow, error) {
@@ -201,6 +223,8 @@ func (q *Queries) ListUsers(ctx context.Context) ([]ListUsersRow, error) {
 			&i.Name,
 			&i.Role,
 			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.TotpEnabledAt,
 			&i.DisabledAt,
 		); err != nil {
 			return nil, err

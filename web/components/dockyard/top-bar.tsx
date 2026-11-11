@@ -1,6 +1,6 @@
 import { AnnouncementBanner } from "@/components/dockyard/ui/announcement-banner";
 
-export const BANNER_HEIGHT_PX = 44;
+export const BANNER_HEIGHT_PX = 40;
 
 type TopBarProps = {
   className?: string;
@@ -10,7 +10,7 @@ type TopBarProps = {
 export function TopBar({ className = "" }: TopBarProps) {
   return (
     <div
-      className={className}
+      className={`overflow-hidden ${className}`.trim()}
       style={{
         height: BANNER_HEIGHT_PX,
         minHeight: BANNER_HEIGHT_PX,

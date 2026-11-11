@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { AccountPasswordAndTotpSections } from "@/components/dockyard/account-password-settings-page";
 import {
-  Owner2FARequiredBanner,
   SettingsErrorBanner,
   SettingsSection,
 } from "@/components/dockyard/account-settings-shared";
+import { AccountRegionalSettingsSection } from "@/components/dockyard/account-regional-settings-page";
+import { AccountActiveSessionsSection } from "@/components/dockyard/account-security-settings-page";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
 import { SettingsPageBody } from "@/components/dockyard/settings-page-body";
@@ -53,18 +55,26 @@ export function AccountProfileSettingsPage() {
     }
   }
 
-  const needs2FA = user?.role === "owner" && user.totp_enabled === false;
-
   return (
-    <DashboardShell title="Profile" breadcrumb="Account settings">
+    <DashboardShell title="Profile & security" breadcrumb="Account settings">
       <SettingsPageBody>
-        <Owner2FARequiredBanner show={!loading && !!needs2FA} />
+        <div className="mb-8 max-w-[620px] space-y-1.5">
+          <h1 className="text-[30px] font-semibold leading-tight tracking-tight">
+            Profile &amp; security
+          </h1>
+          <p className="text-[15px]" style={{ color: "var(--muted-text)" }}>
+            Your personal details, password, two-factor authentication and
+            active sessions for this Dockyrd instance.
+          </p>
+        </div>
+
         <SettingsErrorBanner message={error} />
         {saved ? (
           <p className="mb-4 text-sm text-green-700" role="status">
             Profile saved.
           </p>
         ) : null}
+
         <SettingsSection title="Profile">
           {loading ? (
             <DockyrdPageLoading className="py-2" cubeSize={28} />
@@ -97,6 +107,10 @@ export function AccountProfileSettingsPage() {
             </form>
           )}
         </SettingsSection>
+
+        <AccountPasswordAndTotpSections />
+        <AccountRegionalSettingsSection />
+        <AccountActiveSessionsSection />
       </SettingsPageBody>
     </DashboardShell>
   );

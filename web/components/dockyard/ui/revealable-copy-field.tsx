@@ -39,7 +39,7 @@ export function RevealableCopyField({
 
   return (
     <span
-      className={`dockyrd-revealable-copy-field inline-flex min-w-0 max-w-full items-stretch overflow-hidden rounded-full border font-mono text-[13px] ${className}`.trim()}
+      className={`dockyrd-revealable-copy-field inline-flex min-w-0 max-w-full items-stretch overflow-hidden rounded-full border font-mono text-[12px] ${className}`.trim()}
       style={{
         borderColor: "var(--border)",
         background: "var(--hover-row)",
@@ -47,7 +47,7 @@ export function RevealableCopyField({
       }}
     >
       <span
-        className={`flex min-w-0 flex-1 items-center py-1 pl-3 pr-1 ${showMask ? "tracking-widest" : ""}`}
+        className={`flex min-w-0 flex-1 items-center py-0.5 pl-3 pr-1 ${showMask ? "tracking-widest" : ""}`}
         title={showMask ? undefined : displayValue}
       >
         <span className="min-w-0 truncate">{text}</span>

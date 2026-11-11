@@ -15,7 +15,7 @@ import {
   revokeAuthSession,
 } from "@/lib/api";
 
-export function AccountSecuritySettingsPage() {
+export function AccountActiveSessionsSection() {
   const [sessions, setSessions] = useState<AuthSession[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -47,10 +47,9 @@ export function AccountSecuritySettingsPage() {
   }
 
   return (
-    <DashboardShell title="Security" breadcrumb="Account settings">
-      <SettingsPageBody>
-        <SettingsErrorBanner message={error} />
-        <SettingsSection title="Active sessions">
+    <>
+      <SettingsErrorBanner message={error} />
+      <SettingsSection title="Active sessions">
           {loading ? (
             <DockyrdPageLoading className="py-2" cubeSize={28} />
           ) : (
@@ -88,7 +87,16 @@ export function AccountSecuritySettingsPage() {
               )}
             </ul>
           )}
-        </SettingsSection>
+      </SettingsSection>
+    </>
+  );
+}
+
+export function AccountSecuritySettingsPage() {
+  return (
+    <DashboardShell title="Profile & security" breadcrumb="Account settings">
+      <SettingsPageBody>
+        <AccountActiveSessionsSection />
       </SettingsPageBody>
     </DashboardShell>
   );

@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { DashboardShell } from "@/components/dockyard/dashboard-shell";
 import { DeploymentResourceStrip } from "@/components/dockyard/deployment-resource-strip";
 import { DockyrdPageLoading } from "@/components/dockyard/dockyrd-page-loading";
+import { DeploymentDeployBreakSection } from "@/components/dockyard/deployment-deploy-break-section";
 import { Button } from "@/components/dockyard/ui/button";
 import {
   SettingsBranchPill,
@@ -16,6 +17,7 @@ import {
 import { StatusBadge } from "@/components/dockyard/ui/status-badge";
 import {
   type Deployment,
+  cancelDeployment,
   fetchDeploymentLog,
   listDeployments,
   listProjects,
@@ -59,6 +61,7 @@ export function StaticSiteDeploymentDetailPage() {
   const [loadingLog, setLoadingLog] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [cancelBusy, setCancelBusy] = useState(false);
 
   const refresh = useCallback(
     async (opts?: { silent?: boolean }) => {
@@ -215,6 +218,28 @@ export function StaticSiteDeploymentDetailPage() {
                   </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
+                  {row && deploymentIsInProgress(row.deployment.status) ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      disabled={cancelBusy}
+                      onClick={() => {
+                        setCancelBusy(true);
+                        void cancelDeployment(row.deployment.id)
+                          .then(() => refresh({ silent: true }))
+                          .catch((e) =>
+                            setError(
+                              e instanceof Error
+                                ? e.message
+                                : "Could not cancel deployment",
+                            ),
+                          )
+                          .finally(() => setCancelBusy(false));
+                      }}
+                    >
+                      {cancelBusy ? "Cancelling…" : "Cancel deployment"}
+                    </Button>
+                  ) : null}
                   {status ? (
                     <StatusBadge
                       label={status.label}
@@ -242,6 +267,11 @@ export function StaticSiteDeploymentDetailPage() {
           </section>
 
           <DeploymentResourceStrip deployment={row.deployment} />
+
+          <DeploymentDeployBreakSection
+            deployment={row.deployment}
+            service={row.service}
+          />
 
           <section
             className="rounded-[20px] border px-6 py-5"

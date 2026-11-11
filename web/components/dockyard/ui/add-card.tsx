@@ -33,7 +33,7 @@ export function AddCard({
     </>
   );
   const className =
-    "flex min-h-[120px] flex-col items-center justify-center rounded-[20px] border border-dashed p-6 text-center transition-colors hover:bg-[var(--hover-row)]";
+    "dockyrd-surface-interactive flex min-h-[120px] flex-col items-center justify-center rounded-[20px] border border-dashed p-6 text-center";
   const style = {
     borderColor: "var(--input-border)",
     color: "var(--ink-navy)",

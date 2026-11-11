@@ -48,6 +48,16 @@ func (q *Queries) CreateSession(ctx context.Context, arg CreateSessionParams) er
 	return err
 }
 
+const deleteAllSessionsForUser = `-- name: DeleteAllSessionsForUser :exec
+DELETE FROM sessions
+WHERE user_id = ?
+`
+
+func (q *Queries) DeleteAllSessionsForUser(ctx context.Context, userID string) error {
+	_, err := q.db.ExecContext(ctx, deleteAllSessionsForUser, userID)
+	return err
+}
+
 const deleteSession = `-- name: DeleteSession :exec
 DELETE FROM sessions WHERE id_hash = ?
 `

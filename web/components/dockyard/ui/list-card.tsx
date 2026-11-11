@@ -14,7 +14,7 @@ export function ListCard({
   return (
     <a
       href={href}
-      className="block rounded-[20px] border p-5 transition-colors hover:bg-[var(--hover-row)]"
+      className="dockyrd-surface-interactive block rounded-[20px] border p-5"
       style={{ background: "var(--surface)", borderColor: "var(--border)" }}
     >
       <div className="flex items-start justify-between gap-3">

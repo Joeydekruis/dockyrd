@@ -15,7 +15,7 @@
 <meta name="twitter:title" content="Troubleshooting · Dockyrd">
 <meta name="twitter:description" content="Start with dockyrd doctor. It checks the usual suspects and prints a concrete fix for each problem it finds.">
 <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="../assets/site.css?v=0.7.17">
+<link rel="stylesheet" href="../assets/site.css?v=0.7.18">
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -52,7 +52,7 @@
 </div>
 <header class="topbar">
   <div class="topbar-in">
-    <button class="menu-btn" type="button" id="menuBtn" aria-label="Open documentation menu" aria-expanded="false" aria-controls="sidebar"><svg width="20" height="20"><use href="#i-menu"/></svg></button>
+    <button class="menu-btn" type="button" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="sidebar"><svg width="20" height="20" aria-hidden="true"><use href="#i-menu"/></svg></button>
     <a class="logo dockyrd-logo" href="../" aria-label="Dockyrd home"><svg viewBox="0 -1 505.7 105.53" role="img" aria-label="Dockyrd"><defs><mask id="site-logo-h-mask" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64"><rect width="64" height="64" fill="#fff"/><path d="M8 22 L32 36 L56 22 M32 36 V58" fill="none" stroke="#000" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></mask><clipPath id="site-logo-h-clip" clipPathUnits="userSpaceOnUse"><path class="dockyrd-wave" d="M-88 46 q6 7 12 0 t12 0 t12 0 t12 0 t12 0 t12 0 t12 0 t12 0 t12 0 t12 0 t12 0 t12 0 t12 0 t12 0 t12 0 t12 0 V0 H-88 Z"/></clipPath></defs><g transform="translate(-11.5385 -11.5385) scale(1.9231)"><g class="dockyrd-mark"><g mask="url(#site-logo-h-mask)" stroke-width="3" stroke-linejoin="round"><g clip-path="url(#site-logo-h-clip)"><path d="M32 8 L56 22 V70 H8 V22 Z" fill="#8EBEFF" stroke="#8EBEFF"/></g><path d="M32 8 L56 22 L32 36 L8 22 Z" fill="#CFE3FF" stroke="#CFE3FF"/></g></g></g><path d="M156.2 82.73Q148.2 82.73 141.9 78.93Q135.6 75.13 131.95 68.63Q128.3 62.13 128.3 54.23Q128.3 46.23 132 39.78Q135.7 33.33 142 29.53Q148.3 25.73 156.1 25.73Q162.1 25.73 166.8 27.93Q169.7 29.43 171.8 31.53V5.83H186.8V81.53H172.8V76.33Q170.3 79.13 166.6 80.63Q161.8 82.73 156.2 82.73ZM158 69.23Q162.1 69.23 165.2 67.33Q168.3 65.43 170.05 62.03Q171.8 58.63 171.8 54.23Q171.8 49.83 170.05 46.43Q168.3 43.03 165.2 41.13Q162.1 39.23 158 39.23Q153.9 39.23 150.65 41.18Q147.4 43.13 145.6 46.48Q143.8 49.83 143.8 54.23Q143.8 58.63 145.6 62.03Q147.4 65.43 150.65 67.33Q153.9 69.23 158 69.23Z M219.4 82.73Q211.3 82.73 204.65 79.03Q198 75.33 194.05 68.88Q190.1 62.43 190.1 54.23Q190.1 45.93 194.05 39.53Q198 33.13 204.65 29.43Q211.3 25.73 219.4 25.73Q227.5 25.73 234.1 29.43Q240.7 33.13 244.65 39.53Q248.6 45.93 248.6 54.23Q248.6 62.43 244.65 68.88Q240.7 75.33 234.1 79.03Q227.5 82.73 219.4 82.73ZM219.4 69.23Q223.5 69.23 226.55 67.33Q229.6 65.43 231.35 62.03Q233.1 58.63 233.1 54.23Q233.1 49.83 231.35 46.48Q229.6 43.13 226.55 41.18Q223.5 39.23 219.4 39.23Q215.3 39.23 212.2 41.18Q209.1 43.13 207.35 46.48Q205.6 49.83 205.6 54.23Q205.6 58.63 207.35 62.03Q209.1 65.43 212.2 67.33Q215.3 69.23 219.4 69.23Z M278.7 82.73Q270.5 82.73 263.95 78.98Q257.4 75.23 253.55 68.73Q249.7 62.23 249.7 54.13Q249.7 46.03 253.5 39.58Q257.3 33.13 263.9 29.43Q270.5 25.73 278.7 25.73Q284.8 25.73 290 27.83Q295.2 29.93 298.9 33.68Q302.6 37.43 304.2 42.53L291.2 48.13Q289.8 44.03 286.45 41.63Q283.1 39.23 278.7 39.23Q274.8 39.23 271.75 41.13Q268.7 43.03 266.95 46.43Q265.2 49.83 265.2 54.23Q265.2 58.63 266.95 62.03Q268.7 65.43 271.75 67.33Q274.8 69.23 278.7 69.23Q283.2 69.23 286.5 66.83Q289.8 64.43 291.2 60.33L304.2 66.03Q302.7 70.83 299 74.63Q295.3 78.43 290.1 80.58Q284.9 82.73 278.7 82.73Z M307.5 81.53V5.83H322.5V46.63L341 26.93H359.5L339.7 48.93L359.4 81.53H342.4L328.5 58.23L322.5 64.83V81.53Z M369.1 103.53Q366.7 103.53 364.45 103.13Q362.2 102.73 360.5 101.83V89.53Q361.9 89.93 363.8 90.23Q365.7 90.53 367.3 90.53Q371.7 90.53 373.6 88.48Q375.5 86.43 376.7 83.83L377.7 81.53L356.2 26.93H372.3L385.2 62.03L398.1 26.93H414.2L390.8 86.63Q388.6 92.23 385.4 96.03Q382.2 99.83 378.15 101.68Q374.1 103.53 369.1 103.53Z M415.3 81.53V26.93H429.3V35.03Q431.1 30.63 434.3 28.73Q438.4 26.33 444.1 26.33H447.3V39.33H442.6Q437.1 39.33 433.7 42.68Q430.3 46.03 430.3 52.13V81.53Z M474.1 82.73Q466.1 82.73 459.8 78.93Q453.5 75.13 449.85 68.63Q446.2 62.13 446.2 54.23Q446.2 46.23 449.9 39.78Q453.6 33.33 459.9 29.53Q466.2 25.73 474 25.73Q480 25.73 484.7 27.93Q487.6 29.43 489.7 31.53V5.83H504.7V81.53H490.7V76.33Q488.2 79.13 484.5 80.63Q479.7 82.73 474.1 82.73ZM475.9 69.23Q480 69.23 483.1 67.33Q486.2 65.43 487.95 62.03Q489.7 58.63 489.7 54.23Q489.7 49.83 487.95 46.43Q486.2 43.03 483.1 41.13Q480 39.23 475.9 39.23Q471.8 39.23 468.55 41.18Q465.3 43.13 463.5 46.48Q461.7 49.83 461.7 54.23Q461.7 58.63 463.5 62.03Q465.3 65.43 468.55 67.33Q471.8 69.23 475.9 69.23Z" fill="#0B1F3A"/></svg></a>
     <nav class="topnav" aria-label="Primary">
       <a href="../" data-nav="home">Product</a>
@@ -64,7 +64,7 @@
       <button class="search-btn" type="button" id="searchBtn" aria-label="Search documentation">
         <svg width="16" height="16" aria-hidden="true"><use href="#i-search"/></svg><span>Search docs</span><kbd>⌘K</kbd>
       </button>
-      <span class="version">v0.7.17</span>
+      <span class="version">v0.7.18</span>
       <a class="btn btn-outline gh-btn" href="https://github.com/Joeydekruis/dockyrd" target="_blank" rel="noopener noreferrer" aria-label="Star Dockyrd on GitHub">
         <svg width="16" height="16" aria-hidden="true"><use href="#i-github"/></svg>
         <span class="gh-label">Star</span>
@@ -73,12 +73,22 @@
     </div>
   </div>
 </header>
+<button type="button" class="nav-backdrop" id="navBackdrop" aria-label="Close menu" tabindex="-1"></button>
 <div class="docs">
   <aside class="sidebar" id="sidebar" aria-label="Documentation">
+    <div class="nav-drawer-primary">
+    <nav class="group" aria-label="Primary" style="margin:0">
+      <span class="eyebrow">Navigate</span>
+      <a href="../" data-nav="home">Product</a>
+      <a href="introduction.html" data-nav="docs" aria-current="page">Docs</a>
+      <a href="cli.html" data-nav="cli">CLI</a>
+      <a href="architecture.html" data-nav="arch">Architecture</a>
+    </nav>
+  </div>
     <nav id="docnav"><div class="group"><span class="eyebrow">Getting started</span><a href="introduction.html">Introduction</a><a href="installation.html">Installation</a><a href="quick-start.html">Quick start</a></div><div class="group"><span class="eyebrow">Guides</span><a href="nextjs.html">Next.js apps</a><a href="static-sites.html">Static sites</a><a href="databases.html">Databases</a><a href="object-storage.html">Object storage</a><a href="domains.html">Domains & HTTPS</a><a href="variables.html">Environment variables</a></div><div class="group"><span class="eyebrow">Operations</span><a href="updates.html">Updates</a><a href="cli.html">CLI reference</a><a href="mcp.html">AI assistants (MCP)</a><a href="troubleshooting.html" aria-current="page">Troubleshooting</a></div><div class="group"><span class="eyebrow">Concepts</span><a href="architecture.html">Architecture</a><a href="security.html">Users & security</a></div></nav>
     <div class="side-foot">
       <span class="status warn">Pre-release</span>
-      <span style="color:var(--ink-2)">These docs track v0.7.17. Details can change before the next release.</span>
+      <span style="color:var(--ink-2)">These docs track v0.7.18. Details can change before the next release.</span>
     </div>
   </aside>
   <main class="article" id="main">

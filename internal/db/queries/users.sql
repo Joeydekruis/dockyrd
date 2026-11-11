@@ -57,13 +57,21 @@ SELECT
   name,
   role,
   created_at,
+  updated_at,
+  totp_enabled_at,
   disabled_at
 FROM users
+WHERE disabled_at IS NULL
 ORDER BY created_at ASC;
 
 -- name: UpdateUserRole :exec
 UPDATE users
 SET role = ?, updated_at = ?
+WHERE id = ?;
+
+-- name: DisableUser :exec
+UPDATE users
+SET disabled_at = ?, updated_at = ?
 WHERE id = ?;
 
 -- name: UpdateUserPassword :exec

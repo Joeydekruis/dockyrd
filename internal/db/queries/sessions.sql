@@ -38,6 +38,10 @@ DELETE FROM sessions
 WHERE id_hash = ?
   AND user_id = ?;
 
+-- name: DeleteAllSessionsForUser :exec
+DELETE FROM sessions
+WHERE user_id = ?;
+
 -- name: DeleteSession :exec
 DELETE FROM sessions WHERE id_hash = ?;
 

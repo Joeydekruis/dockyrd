@@ -151,7 +151,7 @@ export function NotificationFilterPills({
             type="button"
             role="tab"
             aria-selected={active}
-            className="rounded-full border px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest transition-colors"
+            className="dockyrd-pill-tab rounded-full border px-3 py-1.5 font-mono text-[11px] uppercase tracking-widest"
             style={{
               borderColor: "var(--border)",
               background: active ? "var(--ink-navy)" : "var(--surface)",

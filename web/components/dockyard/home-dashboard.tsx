@@ -80,8 +80,7 @@ export function HomeDashboard() {
           </h2>
           <Link
             href="/projects"
-            className="text-sm font-medium hover:underline"
-            style={{ color: "var(--link-blue)" }}
+            className="dockyrd-text-link text-sm"
           >
             All projects →
           </Link>
@@ -102,8 +101,7 @@ export function HomeDashboard() {
         </h2>
         <Link
           href="/analytics"
-          className="text-sm font-medium hover:underline"
-          style={{ color: "var(--link-blue)" }}
+          className="dockyrd-text-link text-sm"
         >
           Open server analytics →
         </Link>

@@ -5,6 +5,7 @@ import {
   AlertCircle,
   CheckCircle2,
   Info,
+  Loader2,
   TriangleAlert,
   X,
 } from "lucide-react";
@@ -27,6 +28,8 @@ type SnackbarProps = {
   tone?: SnackbarTone;
   /** 0–100 timer/progress bar; omit to hide. */
   progress?: number;
+  /** Indeterminate loading spinner instead of tone icon. */
+  loading?: boolean;
   /** Floating toasts use shadow; set false only for legacy inline use. */
   elevated?: boolean;
 };
@@ -75,13 +78,14 @@ export function Snackbar({
   onDismiss,
   tone = "info",
   progress,
+  loading = false,
   elevated = true,
 }: SnackbarProps) {
   const heading = title ?? message;
   const key = normalizeTone(tone);
   const t = toneConfig[key];
   const Icon = t.Icon;
-  const showProgress = progress !== undefined;
+  const showProgress = progress !== undefined && !loading;
 
   const actionNode =
     action ??
@@ -106,7 +110,11 @@ export function Snackbar({
           style={{ background: t.iconBg }}
           aria-hidden
         >
-          <Icon strokeWidth={2.2} className="size-3.5 text-white" />
+          {loading ? (
+            <Loader2 strokeWidth={2.2} className="size-3.5 text-white animate-spin" />
+          ) : (
+            <Icon strokeWidth={2.2} className="size-3.5 text-white" />
+          )}
         </span>
         <div className="snackbar-toast-content min-w-0 flex-1">
           {heading ? <p className="snackbar-toast-title">{heading}</p> : null}
@@ -128,7 +136,18 @@ export function Snackbar({
           </button>
         ) : null}
       </div>
-      {showProgress ? (
+      {loading ? (
+        <div
+          className="snackbar-toast-progress-track"
+          role="progressbar"
+          aria-valuetext="Deploying"
+        >
+          <span
+            className="snackbar-toast-progress-fill snackbar-toast-progress-indeterminate"
+            style={{ background: t.progress }}
+          />
+        </div>
+      ) : showProgress ? (
         <div
           className="snackbar-toast-progress-track"
           role="progressbar"

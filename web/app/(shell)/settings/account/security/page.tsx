@@ -1,5 +1,5 @@
-import { AccountSecuritySettingsPage } from "@/components/dockyard/account-security-settings-page";
+import { SettingsLegacyRedirect } from "@/components/dockyard/settings-legacy-redirect";
 
-export default function AccountSecurityPage() {
-  return <AccountSecuritySettingsPage />;
+export default function LegacySecuritySettingsPage() {
+  return <SettingsLegacyRedirect href="/settings/account/profile" />;
 }

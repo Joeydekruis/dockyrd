@@ -14,6 +14,7 @@ import type { BreadcrumbItem } from "@/components/dockyard/ui/breadcrumbs";
 import { UpdateAvailableNotifier } from "@/components/dockyard/update-available-modal";
 import { getMe, type MeResponse } from "@/lib/api";
 import { isAccountSettingsPath, isSettingsPath } from "@/lib/nav";
+import { DeployActivitySnackbar } from "@/components/dockyard/deploy-activity-snackbar";
 import { SnackbarProvider } from "@/lib/snackbar-context";
 import { UserLocaleProvider } from "@/lib/user-locale-context";
 
@@ -53,7 +54,7 @@ export function DashboardShell({
           !me.totp_enabled &&
           !isAccountSettingsPath(window.location.pathname)
         ) {
-          router.replace("/settings/account/password");
+          router.replace("/settings/account/profile");
           return;
         }
         setUser(me);
@@ -112,6 +113,7 @@ export function DashboardShell({
             </div>
           </div>
           <CommandPalette open={palette.open} onClose={palette.close} />
+          <DeployActivitySnackbar />
         </div>
       </UserLocaleProvider>
     </SnackbarProvider>

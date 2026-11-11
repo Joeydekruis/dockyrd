@@ -164,6 +164,9 @@ func (rt *Runtime) runAppDeployment(ctx context.Context, deploymentID string, de
 		if buildErr != nil {
 			return rt.fail(ctx, deploymentID, buildErr)
 		}
+		if err := rt.ensureNotCancelled(ctx, deploymentID); err != nil {
+			return err
+		}
 		rt.recordBuildMetrics(ctx, deploymentID, budget, builderLabel, sampler, waitedMs, atomicFrozenMs(frozenAcc))
 		if err := rt.Q.UpdateDeploymentStatus(ctx, sqlc.UpdateDeploymentStatusParams{
 			Status:     "starting",
@@ -248,6 +251,11 @@ func (rt *Runtime) runAppDeployment(ctx context.Context, deploymentID string, de
 	if err := rt.Docker.WaitAppHealthy(ctx, containerID, appCfg.Port, appCfg.HealthPath, healthTimeout); err != nil {
 		_ = rt.Docker.StopAndRemove(ctx, containerID, appCfg.StopGrace)
 		return rt.fail(ctx, deploymentID, fmt.Errorf("health: %w", err))
+	}
+
+	if err := rt.ensureNotCancelled(ctx, deploymentID); err != nil {
+		_ = rt.Docker.StopAndRemove(ctx, containerID, appCfg.StopGrace)
+		return err
 	}
 
 	finished := time.Now().Unix()
@@ -390,6 +398,13 @@ func (rt *Runtime) stopSupersededContainers(ctx context.Context, serviceID, live
 }
 
 func (rt *Runtime) fail(ctx context.Context, deploymentID string, err error) error {
+	if err == ErrDeploymentCancelled {
+		return err
+	}
+	depCheck, checkErr := rt.Q.GetDeploymentByID(ctx, deploymentID)
+	if checkErr == nil && depCheck.Status == "cancelled" {
+		return ErrDeploymentCancelled
+	}
 	msg := err.Error()
 	kind := ""
 	if strings.Contains(strings.ToLower(msg), "out of memory") || strings.Contains(msg, "137") {

@@ -1,0 +1,592 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Dockyrd Team settings</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&amp;family=Geist+Mono:wght@400;500&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:inherit;text-decoration:none}
+.nav:hover{background:#F1F0ED}
+.barlink:hover{background:rgba(255,255,255,0.5)}
+.btn-primary:hover{background:#1A3358}
+.btn-outline:hover{background:#FFFFFF;border-color:#9AA3B2}
+.btn-danger:hover{background:#8F1E18}
+.row:hover{background:#F6F5F2}
+.iconbtn:hover{background:#F1F0ED}
+.opt:hover{border-color:#3B93F5}
+.menuitem:hover{background:#F1F0ED}
+.link:hover{text-decoration:underline}
+.field:focus{outline:none;border-color:#3B93F5;box-shadow:0 0 0 3px rgba(59,147,245,0.25)}
+.wrap:focus-within{border-color:#3B93F5;box-shadow:0 0 0 3px rgba(59,147,245,0.25)}
+button:disabled{opacity:0.45;cursor:not-allowed}
+</style>
+</helmet>
+<div style="position: relative; min-height: 1200px; display: flex; flex-direction: column; background: #FAF9F8; color: #0B1F3A; font-family: 'Geist', system-ui, -apple-system, 'Segoe UI', sans-serif; font-size: 14px; line-height: 1.45">
+
+<nav aria-label="Dockyrd links" style="box-sizing: border-box; min-height: 44px; padding: 4px 32px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 16px; background: #8EBEFF; color: #0B1F3A">
+<span style="display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px">
+<span style="padding: 3px 8px; border-radius: 6px; background: #0B1F3A; color: #FFFFFF; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1.3">Open source</span>
+<span style="font-size: 13px; font-weight: 500">Self-hosted deploys on your own servers.</span>
+</span>
+<span style="display: flex; flex-wrap: wrap; align-items: center; gap: 4px">
+<a class="barlink" href="#" style="display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 12px; border-radius: 10px; font-weight: 500">Documentation
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"></path></svg></a>
+<a class="barlink" href="#" style="display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 12px; border-radius: 10px; font-weight: 500">GitHub
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M9 7h8v8"></path></svg></a>
+</span>
+</nav>
+
+<div style="flex: 1; display: flex; flex-wrap: wrap">
+
+<aside style="flex: 1 1 232px; max-width: 232px; box-sizing: border-box; background: #FAF9F8; border-right: 1px solid #ECEAE6; padding: 20px 12px; display: flex; flex-direction: column; gap: 28px; justify-content: space-between">
+<div style="display: flex; flex-direction: column; gap: 28px">
+<a href="Dashboard.dc.html" aria-label="Dockyrd home" style="display: block; padding: 0 12px; line-height: 0"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0.00 -1.00 505.70 105.53" width="150" height="31" role="img" aria-label="Dockyrd"><defs><mask id="lk1" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64"><rect width="64" height="64" fill="#fff"></rect><path d="M8 22 L32 36 L56 22 M32 36 V52" fill="none" stroke="#000" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"></path></mask></defs><g transform="translate(-11.5385 -11.5385) scale(1.9231)"><g mask="url(#lk1)" stroke-width="3" stroke-linejoin="round"><path d="M32 8 L56 22 V46 q-6 -7 -12 0 t-12 0 t-12 0 t-12 0 V22 Z" fill="#8EBEFF" stroke="#8EBEFF"></path><path d="M32 8 L56 22 L32 36 L8 22 Z" fill="#CFE3FF" stroke="#CFE3FF"></path></g></g><path d="M156.2 82.73Q148.2 82.73 141.9 78.93Q135.6 75.13 131.95 68.63Q128.3 62.13 128.3 54.23Q128.3 46.23 132 39.78Q135.7 33.33 142 29.53Q148.3 25.73 156.1 25.73Q162.1 25.73 166.8 27.93Q169.7 29.43 171.8 31.53V5.83H186.8V81.53H172.8V76.33Q170.3 79.13 166.6 80.63Q161.8 82.73 156.2 82.73ZM158 69.23Q162.1 69.23 165.2 67.33Q168.3 65.43 170.05 62.03Q171.8 58.63 171.8 54.23Q171.8 49.83 170.05 46.43Q168.3 43.03 165.2 41.13Q162.1 39.23 158 39.23Q153.9 39.23 150.65 41.18Q147.4 43.13 145.6 46.48Q143.8 49.83 143.8 54.23Q143.8 58.63 145.6 62.03Q147.4 65.43 150.65 67.33Q153.9 69.23 158 69.23Z M219.4 82.73Q211.3 82.73 204.65 79.03Q198 75.33 194.05 68.88Q190.1 62.43 190.1 54.23Q190.1 45.93 194.05 39.53Q198 33.13 204.65 29.43Q211.3 25.73 219.4 25.73Q227.5 25.73 234.1 29.43Q240.7 33.13 244.65 39.53Q248.6 45.93 248.6 54.23Q248.6 62.43 244.65 68.88Q240.7 75.33 234.1 79.03Q227.5 82.73 219.4 82.73ZM219.4 69.23Q223.5 69.23 226.55 67.33Q229.6 65.43 231.35 62.03Q233.1 58.63 233.1 54.23Q233.1 49.83 231.35 46.48Q229.6 43.13 226.55 41.18Q223.5 39.23 219.4 39.23Q215.3 39.23 212.2 41.18Q209.1 43.13 207.35 46.48Q205.6 49.83 205.6 54.23Q205.6 58.63 207.35 62.03Q209.1 65.43 212.2 67.33Q215.3 69.23 219.4 69.23Z M278.7 82.73Q270.5 82.73 263.95 78.98Q257.4 75.23 253.55 68.73Q249.7 62.23 249.7 54.13Q249.7 46.03 253.5 39.58Q257.3 33.13 263.9 29.43Q270.5 25.73 278.7 25.73Q284.8 25.73 290 27.83Q295.2 29.93 298.9 33.68Q302.6 37.43 304.2 42.53L291.2 48.13Q289.8 44.03 286.45 41.63Q283.1 39.23 278.7 39.23Q274.8 39.23 271.75 41.13Q268.7 43.03 266.95 46.43Q265.2 49.83 265.2 54.23Q265.2 58.63 266.95 62.03Q268.7 65.43 271.75 67.33Q274.8 69.23 278.7 69.23Q283.2 69.23 286.5 66.83Q289.8 64.43 291.2 60.33L304.2 66.03Q302.7 70.83 299 74.63Q295.3 78.43 290.1 80.58Q284.9 82.73 278.7 82.73Z M307.5 81.53V5.83H322.5V46.63L341 26.93H359.5L339.7 48.93L359.4 81.53H342.4L328.5 58.23L322.5 64.83V81.53Z M369.1 103.53Q366.7 103.53 364.45 103.13Q362.2 102.73 360.5 101.83V89.53Q361.9 89.93 363.8 90.23Q365.7 90.53 367.3 90.53Q371.7 90.53 373.6 88.48Q375.5 86.43 376.7 83.83L377.7 81.53L356.2 26.93H372.3L385.2 62.03L398.1 26.93H414.2L390.8 86.63Q388.6 92.23 385.4 96.03Q382.2 99.83 378.15 101.68Q374.1 103.53 369.1 103.53Z M415.3 81.53V26.93H429.3V35.03Q431.1 30.63 434.3 28.73Q438.4 26.33 444.1 26.33H447.3V39.33H442.6Q437.1 39.33 433.7 42.68Q430.3 46.03 430.3 52.13V81.53Z M474.1 82.73Q466.1 82.73 459.8 78.93Q453.5 75.13 449.85 68.63Q446.2 62.13 446.2 54.23Q446.2 46.23 449.9 39.78Q453.6 33.33 459.9 29.53Q466.2 25.73 474 25.73Q480 25.73 484.7 27.93Q487.6 29.43 489.7 31.53V5.83H504.7V81.53H490.7V76.33Q488.2 79.13 484.5 80.63Q479.7 82.73 474.1 82.73ZM475.9 69.23Q480 69.23 483.1 67.33Q486.2 65.43 487.95 62.03Q489.7 58.63 489.7 54.23Q489.7 49.83 487.95 46.43Q486.2 43.03 483.1 41.13Q480 39.23 475.9 39.23Q471.8 39.23 468.55 41.18Q465.3 43.13 463.5 46.48Q461.7 49.83 461.7 54.23Q461.7 58.63 463.5 62.03Q465.3 65.43 468.55 67.33Q471.8 69.23 475.9 69.23Z" fill="#0B1F3A"></path></svg></a>
+<nav aria-label="Settings" style="display: flex; flex-direction: column; gap: 24px"><a class="nav" href="Dashboard.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 10px; color: #3A4A63; font-weight: 500"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"></path></svg><span>Back to dashboard</span></a>
+<div role="group" aria-label="Personal" style="display: flex; flex-direction: column; gap: 4px"><span style="padding: 0 12px 4px; color: #5A6577; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase">Personal</span>
+<a class="nav" href="Settings.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 10px; font-weight: 500; color: #3A4A63"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"></path></svg><span>Profile &amp; security</span></a>
+<a class="nav" href="#" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 10px; font-weight: 500; color: #3A4A63"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 8 3 8H3s3-1 3-8M10 21a2 2 0 0 0 4 0"></path></svg><span>Notifications</span></a>
+<a class="nav" href="#" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 10px; font-weight: 500; color: #3A4A63"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"></circle><path d="M11 12l9-9M16 7l3 3"></path></svg><span>API tokens</span></a></div>
+<div role="group" aria-label="Instance" style="display: flex; flex-direction: column; gap: 4px"><span style="padding: 0 12px 4px; color: #5A6577; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase">Instance</span>
+<a class="nav" href="#" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 10px; font-weight: 500; color: #3A4A63"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"></path></svg><span>General</span></a>
+<a class="nav" href="SettingsTeam.dc.html" aria-current="page" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 10px; font-weight: 500; background: #E3F0FF; color: #0B1F3A"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"></circle><path d="M2 20c0-3.5 3-6 7-6s7 2.5 7 6M17 5a3.5 3.5 0 0 1 0 7M22 20c0-2.5-1.5-4.5-4-5.5"></path></svg><span>Team</span></a>
+<a class="nav" href="SettingsGit.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 10px; font-weight: 500; color: #3A4A63"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="6" cy="6" r="2.5"></circle><circle cx="6" cy="18" r="2.5"></circle><circle cx="18" cy="8" r="2.5"></circle><path d="M6 8.5v7M18 10.5c0 4-6 3-12 5.5"></path></svg><span>Git providers</span></a>
+<a class="nav" href="#" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 10px; font-weight: 500; color: #3A4A63"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="5" rx="1"></rect><path d="M5 9v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V9M10 13h4"></path></svg><span>Backup storage</span></a>
+<a class="nav" href="#" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border-radius: 10px; font-weight: 500; color: #3A4A63"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"></path></svg><span>Updates</span></a></div></nav>
+</div>
+<div style="padding: 14px; border-radius: 16px; background: #FFFFFF; border: 1px solid #ECEAE6; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; align-items: center; gap: 8px; font-weight: 500"><span style="width: 8px; height: 8px; border-radius: 50%; background: #1A7F4B"></span><span>Server healthy</span></div>
+<div style="display: flex; flex-wrap: wrap; gap: 6px">
+<span style="padding: 3px 8px; border-radius: 6px; background: #F1F0ED; color: #3A4A63; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1.3">v0.1.0</span>
+<span style="padding: 3px 8px; border-radius: 6px; background: #F1F0ED; color: #3A4A63; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; line-height: 1.3">Up to date</span>
+</div>
+</div>
+</aside>
+
+<div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column">
+<header style="min-height: 64px; box-sizing: border-box; padding: 10px 32px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1px solid #ECEAE6">
+<nav aria-label="Breadcrumb" style="display: flex; align-items: center; gap: 8px; color: #5A6577">
+<a href="Dashboard.dc.html">Dockyrd</a><span aria-hidden="true">›</span><span>Settings</span><span aria-hidden="true">›</span><span style="color: #0B1F3A; font-weight: 500">Team</span>
+</nav>
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px">
+<a href="Search.dc.html" aria-label="Search pages, resources and actions" style="display: flex; align-items: center; gap: 10px; min-height: 44px; width: 280px; max-width: 100%; box-sizing: border-box; padding: 0 10px 0 12px; border: 1.5px solid #E1DFDA; border-radius: 10px; background: #FFFFFF; color: #5A6577"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg><span style="flex: 1">Search…</span><kbd style="padding: 2px 6px; border-radius: 6px; border: 1px solid #E1DFDA; background: #FAF9F8; color: #5A6577; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; line-height: 1.4">⌘K</kbd></a>
+<a class="btn-outline" href="#" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; box-sizing: border-box; border: 1.5px solid #CBD0D8; border-radius: 10px; color: #0B1F3A; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; font-weight: 500; letter-spacing: 0.02em; text-transform: uppercase">Docs</a>
+<a href="Notifications.dc.html" aria-label="Notifications, 3 unread" style="position: relative; display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; box-sizing: border-box; border-radius: 50%; border: 1.5px solid #E1DFDA; background: #FFFFFF; color: #0B1F3A"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8M10 21a2 2 0 0 0 4 0"></path></svg><span style="position: absolute; top: -4px; right: -4px; min-width: 18px; height: 18px; padding: 0 4px; box-sizing: border-box; border-radius: 9px; background: #B3261E; color: #FFFFFF; border: 2px solid #FAF9F8; display: inline-flex; align-items: center; justify-content: center; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 10px; font-weight: 600; line-height: 1">3</span></a>
+<span aria-label="Account menu" style="display: flex; align-items: center; gap: 6px; min-height: 44px; padding: 0 10px 0 5px; box-sizing: border-box; border-radius: 999px; border: 1.5px solid #E1DFDA; background: #FFFFFF"><span style="width: 32px; height: 32px; border-radius: 50%; background: #E3F0FF; color: #0B57C9; display: inline-flex; align-items: center; justify-content: center; font-weight: 600; font-size: 12px">JK</span><span style="color: #5A6577; display: inline-flex"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></span></span>
+</div>
+</header>
+
+<main style="width: 100%; max-width: 1180px; box-sizing: border-box; margin: 0 auto; padding: 32px 32px 64px; display: flex; flex-direction: column; gap: 28px">
+
+<div style="display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 16px">
+<div style="display: flex; flex-direction: column; gap: 6px; max-width: 620px">
+<h1 style="margin: 0; font-size: 30px; line-height: 1.1; font-weight: 600; letter-spacing: -0.035em">Team</h1>
+<p style="margin: 0; color: #5A6577; font-size: 15px">People who can sign in to this Dockyrd instance. Give each person a role, and limit freelancers or clients to the projects they need.</p>
+</div>
+<button class="btn-primary" type="button" onClick="{{openInvite}}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px; border: 0; border-radius: 10px; background: #0B1F3A; color: #FFFFFF; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; font-weight: 500; letter-spacing: 0.02em; text-transform: uppercase; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Invite member</button>
+</div>
+
+<div style="display: flex; flex-wrap: wrap; align-items: flex-start; gap: 24px">
+
+<div style="flex: 999 1 600px; min-width: 0; display: flex; flex-direction: column; gap: 28px">
+
+<section aria-labelledby="mem-h" style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+<h2 id="mem-h" style="margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -0.02em">Members <span style="color: #5A6577; font-weight: 400">· {{memberCount}}</span></h2>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #ECEAE6; border-radius: 20px; overflow-x: auto">
+<div style="min-width: 640px">
+<div style="display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(0, 1.5fr) minmax(0, 1.1fr) 44px; gap: 12px; align-items: center; padding: 12px 20px; border-bottom: 1px solid #ECEAE6; color: #5A6577; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase">
+<span>Member</span><span>Role &amp; access</span><span>Activity</span><span></span>
+</div>
+<sc-for list="{{members}}" as="m" hint-placeholder-count="4">
+<div style="position: relative; display: grid; grid-template-columns: minmax(0, 2.2fr) minmax(0, 1.5fr) minmax(0, 1.1fr) 44px; gap: 12px; align-items: center; padding: 14px 20px; border-top: {{m.border}}">
+<div style="min-width: 0; display: flex; align-items: center; gap: 12px">
+<span style="flex: none; width: 40px; height: 40px; border-radius: 50%; background: #E3F0FF; color: #0B57C9; display: inline-flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px">{{m.initials}}</span>
+<span style="min-width: 0; display: flex; flex-direction: column">
+<span style="display: flex; align-items: center; gap: 8px"><span style="font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{m.name}}</span><sc-if value="{{m.isYou}}" hint-placeholder-val="{{ false }}"><span style="flex: none; padding: 1px 7px; border-radius: 6px; background: #F1F0ED; color: #3A4A63; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase">You</span></sc-if></span>
+<span style="color: #5A6577; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{m.email}}</span>
+</span>
+</div>
+<div style="min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 4px">
+<span style="padding: 2px 8px; border-radius: 6px; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; background: {{m.roleBg}}; color: {{m.roleFg}}">{{m.roleLabel}}</span>
+<span style="color: #5A6577; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%">{{m.scopeText}}</span>
+</div>
+<div style="min-width: 0; display: flex; flex-direction: column; gap: 4px; align-items: flex-start">
+<span style="color: #3A4A63; font-size: 13px">{{m.active}}</span>
+<span style="display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; color: {{m.tfaFg}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6z"></path></svg>{{m.tfaText}}</span>
+</div>
+<div style="position: relative; display: flex; justify-content: flex-end">
+<sc-if value="{{m.canManage}}" hint-placeholder-val="{{ true }}">
+<button class="iconbtn" type="button" onClick="{{m.toggleMenu}}" aria-label="Actions for {{m.name}}" aria-haspopup="menu" style="width: 44px; height: 44px; border: 0; border-radius: 10px; background: transparent; color: #3A4A63; cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 12h.01M12 12h.01M19 12h.01"></path></svg></button>
+</sc-if>
+<sc-if value="{{m.menuOpen}}" hint-placeholder-val="{{ false }}">
+<button type="button" aria-label="Close menu" onClick="{{closeMenu}}" style="position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 30; border: 0; background: transparent; cursor: default"></button>
+<div role="menu" style="position: absolute; right: 0; top: 46px; z-index: 40; width: 232px; box-sizing: border-box; background: #FFFFFF; border: 1px solid #ECEAE6; border-radius: 14px; box-shadow: 0 12px 32px rgba(11,31,58,0.16); padding: 6px; display: flex; flex-direction: column; gap: 2px">
+<button class="menuitem" role="menuitem" type="button" onClick="{{m.openRole}}" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 10px; border: 0; border-radius: 8px; background: transparent; color: #0B1F3A; font: inherit; text-align: left; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6z"></path></svg>Change role &amp; access</button>
+<div style="height: 1px; background: #ECEAE6; margin: 2px 0"></div>
+<button class="menuitem" role="menuitem" type="button" onClick="{{m.openRemove}}" style="display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 10px; border: 0; border-radius: 8px; background: transparent; color: #B3261E; font: inherit; text-align: left; cursor: pointer"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 11h6M3 21c0-3.5 3-6 7-6s7 2.5 7 6M10 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"></path></svg>Remove from team</button>
+</div>
+</sc-if>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+</section>
+
+<section aria-labelledby="inv-h" style="display: flex; flex-direction: column; gap: 12px">
+<h2 id="inv-h" style="margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -0.02em">Pending invites <span style="color: #5A6577; font-weight: 400">· {{inviteCount}}</span></h2>
+<div style="background: #FFFFFF; border: 1px solid #ECEAE6; border-radius: 20px; overflow: hidden">
+<sc-if value="{{noInvites}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding: 24px 20px">
+<span style="font-weight: 600">No pending invites</span>
+<span style="color: #5A6577">Invite a colleague, freelancer or client to give them access.</span>
+<button class="btn-outline" type="button" onClick="{{openInvite}}" style="min-height: 44px; padding: 0 18px; border: 1.5px solid #CBD0D8; border-radius: 10px; background: transparent; color: #0B1F3A; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; font-weight: 500; letter-spacing: 0.02em; text-transform: uppercase; cursor: pointer">Invite member</button>
+</div>
+</sc-if>
+<sc-for list="{{invites}}" as="i" hint-placeholder-count="2">
+<div style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; padding: 14px 20px; border-top: {{i.border}}">
+<span style="flex: none; width: 40px; height: 40px; border-radius: 50%; background: #F1F0ED; color: #5A6577; display: inline-flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 7l9 6 9-6"></path></svg></span>
+<div style="flex: 1 1 220px; min-width: 0; display: flex; flex-direction: column; gap: 2px">
+<span style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px"><span style="font-weight: 600">{{i.email}}</span><span style="padding: 2px 8px; border-radius: 6px; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; background: {{i.roleBg}}; color: {{i.roleFg}}">{{i.roleLabel}}</span></span>
+<span style="color: #5A6577; font-size: 13px">{{i.scopeText}} · Invited {{i.sent}}</span>
+</div>
+<span style="flex: none; display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 6px; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; background: {{i.stBg}}; color: {{i.stFg}}"><span style="width: 6px; height: 6px; border-radius: 50%; background: {{i.stDot}}"></span>{{i.status}}</span>
+<div style="flex: none; display: flex; align-items: center; gap: 6px">
+<button class="btn-outline" type="button" onClick="{{i.copy}}" style="min-height: 44px; padding: 0 14px; border: 1.5px solid #CBD0D8; border-radius: 10px; background: transparent; color: #0B1F3A; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; font-weight: 500; letter-spacing: 0.02em; text-transform: uppercase; cursor: pointer">Copy link</button>
+<button class="btn-outline" type="button" onClick="{{i.resend}}" style="min-height: 44px; padding: 0 14px; border: 1.5px solid #CBD0D8; border-radius: 10px; background: transparent; color: #0B1F3A; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; font-weight: 500; letter-spacing: 0.02em; text-transform: uppercase; cursor: pointer">Resend</button>
+<button class="iconbtn" type="button" onClick="{{i.revoke}}" aria-label="Revoke invite for {{i.email}}" style="width: 44px; height: 44px; border: 0; border-radius: 10px; background: transparent; color: #B3261E; cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+</div>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section aria-labelledby="act-h" style="display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: center; justify-content: space-between; gap: 12px">
+<h2 id="act-h" style="margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -0.02em">Team activity</h2>
+<a class="link" href="#" style="color: #0B57C9; font-weight: 500">Full audit log →</a>
+</div>
+<div style="background: #FFFFFF; border: 1px solid #ECEAE6; border-radius: 20px; overflow: hidden">
+<sc-for list="{{activity}}" as="a" hint-placeholder-count="6">
+<div style="display: flex; align-items: center; gap: 14px; padding: 14px 20px; border-top: {{a.border}}">
+<span style="flex: none; width: 36px; height: 36px; border-radius: 10px; background: #F1F0ED; color: #3A4A63; display: inline-flex; align-items: center; justify-content: center">
+<sc-if value="{{a.isUser}}" hint-placeholder-val="{{ true }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21c0-3.5 3-6 7-6s7 2.5 7 6M10 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM19 8v6M16 11h6"></path></svg></sc-if>
+<sc-if value="{{a.isShield}}" hint-placeholder-val="{{ false }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6z"></path></svg></sc-if>
+<sc-if value="{{a.isRefresh}}" hint-placeholder-val="{{ false }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.3-5.7M20 4v5h-5"></path></svg></sc-if>
+<sc-if value="{{a.isTrash}}" hint-placeholder-val="{{ false }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"></path></svg></sc-if>
+</span>
+<span style="min-width: 0; flex: 1; display: flex; flex-direction: column"><span><span style="font-weight: 600">{{a.who}}</span> {{a.text}}</span><span style="color: #5A6577; font-size: 13px; font-family: 'Geist Mono', ui-monospace, monospace">{{a.ref}}</span></span>
+<span style="flex: none; color: #5A6577; font-size: 13px">{{a.time}}</span>
+</div>
+</sc-for>
+</div>
+</section>
+
+</div>
+
+<aside aria-label="About roles" style="flex: 1 1 300px; max-width: 360px; min-width: 280px; display: flex; flex-direction: column; gap: 16px">
+<section aria-labelledby="roles-h" style="padding: 20px; background: #FFFFFF; border: 1px solid #ECEAE6; border-radius: 20px; display: flex; flex-direction: column; gap: 16px">
+<h2 id="roles-h" style="margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -0.02em">Roles</h2>
+<sc-for list="{{roleCards}}" as="r" hint-placeholder-count="4">
+<div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-start">
+<span style="padding: 2px 8px; border-radius: 6px; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; background: {{r.bg}}; color: {{r.fg}}">{{r.label}}</span>
+<span style="color: #3A4A63">{{r.desc}}</span>
+</div>
+</sc-for>
+</section>
+<section style="padding: 18px 20px; background: #E3F0FF; border-radius: 20px; display: flex; flex-direction: column; gap: 8px">
+<span style="display: inline-flex; align-items: center; gap: 8px; font-weight: 600"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l8 3v6c0 4.5-3.2 8-8 9-4.8-1-8-4.5-8-9V6z"></path></svg>Working with clients?</span>
+<span style="color: #3A4A63">Give clients the Viewer role on just their project. They can see logs and metrics but cannot deploy or change anything.</span>
+</section>
+</aside>
+
+</div>
+</main>
+</div>
+</div>
+
+<sc-if value="{{showToast}}" hint-placeholder-val="{{ false }}">
+<div role="status" style="position: absolute; left: 50%; bottom: 32px; transform: translateX(-50%); z-index: 90; display: inline-flex; align-items: center; gap: 10px; padding: 12px 18px; border-radius: 12px; background: #0B1F3A; color: #FFFFFF; font-weight: 500; box-shadow: 0 12px 32px rgba(11,31,58,0.28)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8EBEFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M8 12.5l3 3 5-6"></path></svg>{{toast}}</div>
+</sc-if>
+
+<sc-if value="{{showModal}}" hint-placeholder-val="{{ false }}">
+<div style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; z-index: 60">
+<button type="button" aria-label="Close dialog" tabindex="-1" onClick="{{closeModal}}" style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; width: 100%; border: 0; background: rgba(11,31,58,0.45); cursor: default"></button>
+<div style="position: relative; display: flex; justify-content: center; padding: 72px 16px 32px; pointer-events: none">
+
+<sc-if value="{{showInvite}}" hint-placeholder-val="{{ true }}">
+<div role="dialog" aria-modal="true" aria-labelledby="inv-title" style="pointer-events: auto; width: 580px; max-width: 100%; box-sizing: border-box; background: #FFFFFF; border-radius: 24px; box-shadow: 0 24px 64px rgba(11,31,58,0.32); display: flex; flex-direction: column; overflow: hidden">
+<div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 24px 24px 0">
+<div style="display: flex; flex-direction: column; gap: 4px"><h2 id="inv-title" style="margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.03em">Invite team member</h2><span style="color: #5A6577">They get access as soon as they accept.</span></div>
+<button class="iconbtn" type="button" onClick="{{closeModal}}" aria-label="Close" style="flex: none; width: 44px; height: 44px; margin: -8px -8px 0 0; border: 0; border-radius: 10px; background: transparent; color: #5A6577; cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+</div>
+<div style="padding: 20px 24px 24px; display: flex; flex-direction: column; gap: 20px">
+
+<div role="group" aria-label="Invite method" style="display: flex; gap: 4px; padding: 4px; border-radius: 12px; background: #F1F0ED">
+<button type="button" onClick="{{pickEmail}}" aria-pressed="{{emailPressed}}" style="flex: 1; min-height: 40px; border: 0; border-radius: 9px; font: inherit; font-weight: 500; cursor: pointer; background: {{emailTabBg}}; color: #0B1F3A; box-shadow: {{emailTabShadow}}">By email</button>
+<button type="button" onClick="{{pickLink}}" aria-pressed="{{linkPressed}}" style="flex: 1; min-height: 40px; border: 0; border-radius: 9px; font: inherit; font-weight: 500; cursor: pointer; background: {{linkTabBg}}; color: #0B1F3A; box-shadow: {{linkTabShadow}}">Invite link</button>
+</div>
+
+<sc-if value="{{isEmail}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-weight: 600">Email addresses</span>
+<div class="wrap" style="display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-height: 48px; box-sizing: border-box; padding: 6px; border: 1.5px solid #E1DFDA; border-radius: 10px; background: #FFFFFF">
+<sc-for list="{{emailChips}}" as="c" hint-placeholder-count="2">
+<span style="display: inline-flex; align-items: center; gap: 2px; padding: 0 2px 0 10px; min-height: 32px; border-radius: 8px; background: {{c.bg}}; color: {{c.fg}}; font-weight: 500">{{c.value}}<button type="button" onClick="{{c.remove}}" aria-label="Remove {{c.value}}" style="width: 32px; height: 32px; border: 0; border-radius: 8px; background: transparent; color: inherit; cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button></span>
+</sc-for>
+<input class="field" type="email" aria-label="Add an email address" placeholder="Add an email, press Enter" onKeyDown="{{onEmailKey}}" onBlur="{{onEmailBlur}}" style="flex: 1; min-width: 180px; min-height: 36px; box-sizing: border-box; padding: 0 8px; border: 0; border-radius: 8px; background: transparent; font: inherit; color: #0B1F3A">
+</div>
+<sc-if value="{{hasInvalid}}" hint-placeholder-val="{{ false }}"><span style="display: inline-flex; align-items: center; gap: 6px; color: #B3261E; font-size: 13px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v5M12 16.5v.01"></path></svg>{{invalidText}}</span></sc-if>
+<span style="color: #5A6577; font-size: 13px">Paste several addresses at once, separated by commas.</span>
+</div>
+</sc-if>
+
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-weight: 600">Role</span>
+<div role="radiogroup" aria-label="Role" style="display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{roleOptions}}" as="o" hint-placeholder-count="3">
+<button class="opt" type="button" role="radio" aria-checked="{{o.checked}}" onClick="{{o.pick}}" style="display: flex; align-items: flex-start; gap: 12px; width: 100%; box-sizing: border-box; padding: 12px 14px; border-radius: 12px; font: inherit; text-align: left; cursor: pointer; color: #0B1F3A; border: 1.5px solid {{o.border}}; background: {{o.bg}}">
+<span style="flex: none; margin-top: 2px; width: 18px; height: 18px; box-sizing: border-box; border-radius: 50%; border: 2px solid {{o.ring}}; display: inline-flex; align-items: center; justify-content: center"><span style="width: 8px; height: 8px; border-radius: 50%; background: {{o.dot}}"></span></span>
+<span style="display: flex; flex-direction: column"><span style="font-weight: 600">{{o.label}}</span><span style="color: #5A6577; font-size: 13px">{{o.desc}}</span></span>
+</button>
+</sc-for>
+</div>
+</div>
+
+<sc-if value="{{needsScope}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-weight: 600">Project access</span>
+<div role="group" aria-label="Project access" style="display: flex; gap: 8px">
+<button class="opt" type="button" onClick="{{scopeAll}}" aria-pressed="{{scopeAllPressed}}" style="flex: 1; min-height: 44px; border-radius: 10px; font: inherit; font-weight: 500; cursor: pointer; color: #0B1F3A; border: 1.5px solid {{scopeAllBorder}}; background: {{scopeAllBg}}">All projects</button>
+<button class="opt" type="button" onClick="{{scopeSel}}" aria-pressed="{{scopeSelPressed}}" style="flex: 1; min-height: 44px; border-radius: 10px; font: inherit; font-weight: 500; cursor: pointer; color: #0B1F3A; border: 1.5px solid {{scopeSelBorder}}; background: {{scopeSelBg}}">Selected projects</button>
+</div>
+<sc-if value="{{showProjects}}" hint-placeholder-val="{{ true }}">
+<div style="border: 1px solid #ECEAE6; border-radius: 12px; overflow: hidden">
+<sc-for list="{{projectRows}}" as="p" hint-placeholder-count="6">
+<button class="row" type="button" role="checkbox" aria-checked="{{p.checked}}" onClick="{{p.toggle}}" style="display: flex; align-items: center; gap: 12px; width: 100%; box-sizing: border-box; min-height: 44px; padding: 0 14px; border: 0; border-top: {{p.border}}; background: #FFFFFF; font: inherit; text-align: left; color: #0B1F3A; cursor: pointer">
+<span style="flex: none; width: 20px; height: 20px; box-sizing: border-box; border-radius: 6px; border: 1.5px solid {{p.boxBorder}}; background: {{p.boxBg}}; display: inline-flex; align-items: center; justify-content: center"><sc-if value="{{p.checked}}" hint-placeholder-val="{{ false }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"></path></svg></sc-if></span>
+<span style="flex: 1; font-weight: 500">{{p.name}}</span>
+<span style="color: #5A6577; font-size: 13px">{{p.res}}</span>
+</button>
+</sc-for>
+</div>
+</sc-if>
+</div>
+</sc-if>
+<sc-if value="{{isAdminRole}}" hint-placeholder-val="{{ false }}"><div style="padding: 12px 14px; border-radius: 12px; background: #F1F0ED; color: #3A4A63">Admins always have access to every project and all server settings.</div></sc-if>
+
+<sc-if value="{{isLink}}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-weight: 600">Valid for</span>
+<div role="group" aria-label="Link validity" style="display: flex; gap: 8px">
+<sc-for list="{{validityOptions}}" as="v" hint-placeholder-count="3">
+<button class="opt" type="button" onClick="{{v.pick}}" aria-pressed="{{v.pressed}}" style="flex: 1; min-height: 44px; border-radius: 10px; font: inherit; font-weight: 500; cursor: pointer; color: #0B1F3A; border: 1.5px solid {{v.border}}; background: {{v.bg}}">{{v.label}}</button>
+</sc-for>
+</div>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-weight: 600">Invite link</span>
+<div style="display: flex; gap: 8px">
+<input class="field" type="text" readonly="" aria-label="Invite link" value="https://deploy.derisory.nl/invite/9fK2xQ-7mTb4" style="flex: 1; min-width: 0; min-height: 48px; box-sizing: border-box; padding: 0 12px; border: 1.5px solid #E1DFDA; border-radius: 10px; background: #FAF9F8; color: #0B1F3A; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 13px">
+<button class="btn-primary" type="button" onClick="{{copyLink}}" style="flex: none; display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 18px; border: 0; border-radius: 10px; background: #0B1F3A; color: #FFFFFF; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; font-weight: 500; letter-spacing: 0.02em; text-transform: uppercase; cursor: pointer">{{copyLabel}}</button>
+</div>
+<span style="color: #5A6577; font-size: 13px">Works once. Anyone with this link can join with the role above, so share it only with the person you mean.</span>
+</div>
+</sc-if>
+
+</div>
+<div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 24px; border-top: 1px solid #ECEAE6; background: #FAF9F8">
+<span style="color: #5A6577; font-size: 13px; max-width: 240px">{{footNote}}</span>
+<div style="display: flex; gap: 8px">
+<button class="btn-outline" type="button" onClick="{{closeModal}}" style="min-height: 44px; padding: 0 18px; border: 1.5px solid #CBD0D8; border-radius: 10px; background: transparent; color: #0B1F3A; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; font-weight: 500; letter-spacing: 0.02em; text-transform: uppercase; cursor: pointer">{{cancelLabel}}</button>
+<sc-if value="{{isEmail}}" hint-placeholder-val="{{ true }}"><button class="btn-primary" type="button" onClick="{{sendInvites}}" disabled="{{sendDisabled}}" style="min-height: 44px; padding: 0 18px; border: 0; border-radius: 10px; background: #0B1F3A; color: #FFFFFF; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; font-weight: 500; letter-spacing: 0.02em; text-transform: uppercase; cursor: pointer">{{sendLabel}}</button></sc-if>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{showSent}}" hint-placeholder-val="{{ false }}">
+<div role="dialog" aria-modal="true" aria-labelledby="sent-title" style="pointer-events: auto; width: 520px; max-width: 100%; box-sizing: border-box; background: #FFFFFF; border-radius: 24px; box-shadow: 0 24px 64px rgba(11,31,58,0.32); overflow: hidden">
+<div style="padding: 32px 24px 8px; display: flex; flex-direction: column; align-items: flex-start; gap: 14px">
+<span style="width: 48px; height: 48px; border-radius: 50%; background: #E6F4EC; color: #176B3D; display: inline-flex; align-items: center; justify-content: center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M8 12.5l3 3 5-6"></path></svg></span>
+<div style="display: flex; flex-direction: column; gap: 4px"><h2 id="sent-title" style="margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.03em">{{sentTitle}}</h2><span style="color: #5A6577">Each link is valid for 7 days. You can resend or revoke it from this page.</span></div>
+</div>
+<div style="margin: 12px 24px 0; border: 1px solid #ECEAE6; border-radius: 14px; overflow: hidden">
+<sc-for list="{{sentRows}}" as="s" hint-placeholder-count="2">
+<div style="display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-top: {{s.border}}">
+<span style="min-width: 0; flex: 1; display: flex; flex-direction: column"><span style="font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{s.email}}</span><span style="color: #5A6577; font-size: 13px">{{roleSummary}}</span></span>
+<span style="flex: none; display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; color: #176B3D"><span style="width: 6px; height: 6px; border-radius: 50%; background: #1A7F4B"></span>Email sent</span>
+<button class="btn-outline" type="button" onClick="{{s.copy}}" style="flex: none; min-height: 40px; padding: 0 12px; border: 1.5px solid #CBD0D8; border-radius: 10px; background: transparent; color: #0B1F3A; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 11px; font-weight: 500; letter-spacing: 0.02em; text-transform: uppercase; cursor: pointer">Copy link</button>
+</div>
+</sc-for>
+</div>
+<p style="margin: 12px 24px 0; color: #5A6577; font-size: 13px">Not in their inbox? Copy the link and send it yourself.</p>
+<div style="display: flex; justify-content: flex-end; gap: 8px; padding: 20px 24px 24px">
+<button class="btn-outline" type="button" onClick="{{inviteMore}}" style="min-height: 44px; padding: 0 18px; border: 1.5px solid #CBD0D8; border-radius: 10px; background: transparent; color: #0B1F3A; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; font-weight: 500; letter-spacing: 0.02em; text-transform: uppercase; cursor: pointer">Invite more</button>
+<button class="btn-primary" type="button" onClick="{{closeModal}}" style="min-height: 44px; padding: 0 18px; border: 0; border-radius: 10px; background: #0B1F3A; color: #FFFFFF; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; font-weight: 500; letter-spacing: 0.02em; text-transform: uppercase; cursor: pointer">Done</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{showRole}}" hint-placeholder-val="{{ false }}">
+<div role="dialog" aria-modal="true" aria-labelledby="role-title" style="pointer-events: auto; width: 540px; max-width: 100%; box-sizing: border-box; background: #FFFFFF; border-radius: 24px; box-shadow: 0 24px 64px rgba(11,31,58,0.32); overflow: hidden">
+<div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 24px 24px 0">
+<div style="display: flex; align-items: center; gap: 12px">
+<span style="flex: none; width: 44px; height: 44px; border-radius: 50%; background: #E3F0FF; color: #0B57C9; display: inline-flex; align-items: center; justify-content: center; font-weight: 600">{{target.initials}}</span>
+<div style="display: flex; flex-direction: column"><h2 id="role-title" style="margin: 0; font-size: 20px; font-weight: 600; letter-spacing: -0.03em">Change role for {{target.name}}</h2><span style="color: #5A6577">{{target.email}}</span></div>
+</div>
+<button class="iconbtn" type="button" onClick="{{closeModal}}" aria-label="Close" style="flex: none; width: 44px; height: 44px; margin: -8px -8px 0 0; border: 0; border-radius: 10px; background: transparent; color: #5A6577; cursor: pointer; display: inline-flex; align-items: center; justify-content: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+</div>
+<div style="padding: 20px 24px 24px; display: flex; flex-direction: column; gap: 20px">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-weight: 600">Role</span>
+<div role="radiogroup" aria-label="Role" style="display: flex; flex-direction: column; gap: 8px">
+<sc-for list="{{roleOptions}}" as="o" hint-placeholder-count="3">
+<button class="opt" type="button" role="radio" aria-checked="{{o.checked}}" onClick="{{o.pick}}" style="display: flex; align-items: flex-start; gap: 12px; width: 100%; box-sizing: border-box; padding: 12px 14px; border-radius: 12px; font: inherit; text-align: left; cursor: pointer; color: #0B1F3A; border: 1.5px solid {{o.border}}; background: {{o.bg}}">
+<span style="flex: none; margin-top: 2px; width: 18px; height: 18px; box-sizing: border-box; border-radius: 50%; border: 2px solid {{o.ring}}; display: inline-flex; align-items: center; justify-content: center"><span style="width: 8px; height: 8px; border-radius: 50%; background: {{o.dot}}"></span></span>
+<span style="display: flex; flex-direction: column"><span style="font-weight: 600">{{o.label}}</span><span style="color: #5A6577; font-size: 13px">{{o.desc}}</span></span>
+</button>
+</sc-for>
+</div>
+</div>
+<sc-if value="{{needsScope}}" hint-placeholder-val="{{ true }}">
+<div style="display: flex; flex-direction: column; gap: 8px">
+<span style="font-weight: 600">Project access</span>
+<div role="group" aria-label="Project access" style="display: flex; gap: 8px">
+<button class="opt" type="button" onClick="{{scopeAll}}" aria-pressed="{{scopeAllPressed}}" style="flex: 1; min-height: 44px; border-radius: 10px; font: inherit; font-weight: 500; cursor: pointer; color: #0B1F3A; border: 1.5px solid {{scopeAllBorder}}; background: {{scopeAllBg}}">All projects</button>
+<button class="opt" type="button" onClick="{{scopeSel}}" aria-pressed="{{scopeSelPressed}}" style="flex: 1; min-height: 44px; border-radius: 10px; font: inherit; font-weight: 500; cursor: pointer; color: #0B1F3A; border: 1.5px solid {{scopeSelBorder}}; background: {{scopeSelBg}}">Selected projects</button>
+</div>
+<sc-if value="{{showProjects}}" hint-placeholder-val="{{ true }}">
+<div style="border: 1px solid #ECEAE6; border-radius: 12px; overflow: hidden">
+<sc-for list="{{projectRows}}" as="p" hint-placeholder-count="6">
+<button class="row" type="button" role="checkbox" aria-checked="{{p.checked}}" onClick="{{p.toggle}}" style="display: flex; align-items: center; gap: 12px; width: 100%; box-sizing: border-box; min-height: 44px; padding: 0 14px; border: 0; border-top: {{p.border}}; background: #FFFFFF; font: inherit; text-align: left; color: #0B1F3A; cursor: pointer">
+<span style="flex: none; width: 20px; height: 20px; box-sizing: border-box; border-radius: 6px; border: 1.5px solid {{p.boxBorder}}; background: {{p.boxBg}}; display: inline-flex; align-items: center; justify-content: center"><sc-if value="{{p.checked}}" hint-placeholder-val="{{ false }}"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7"></path></svg></sc-if></span>
+<span style="flex: 1; font-weight: 500">{{p.name}}</span>
+<span style="color: #5A6577; font-size: 13px">{{p.res}}</span>
+</button>
+</sc-for>
+</div>
+</sc-if>
+</div>
+</sc-if>
+<sc-if value="{{isAdminRole}}" hint-placeholder-val="{{ false }}"><div style="padding: 12px 14px; border-radius: 12px; background: #F1F0ED; color: #3A4A63">Admins always have access to every project and all server settings.</div></sc-if>
+</div>
+<div style="display: flex; justify-content: flex-end; gap: 8px; padding: 16px 24px; border-top: 1px solid #ECEAE6; background: #FAF9F8">
+<button class="btn-outline" type="button" onClick="{{closeModal}}" style="min-height: 44px; padding: 0 18px; border: 1.5px solid #CBD0D8; border-radius: 10px; background: transparent; color: #0B1F3A; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; font-weight: 500; letter-spacing: 0.02em; text-transform: uppercase; cursor: pointer">Cancel</button>
+<button class="btn-primary" type="button" onClick="{{saveRole}}" disabled="{{saveDisabled}}" style="min-height: 44px; padding: 0 18px; border: 0; border-radius: 10px; background: #0B1F3A; color: #FFFFFF; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; font-weight: 500; letter-spacing: 0.02em; text-transform: uppercase; cursor: pointer">Save changes</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{showRemove}}" hint-placeholder-val="{{ false }}">
+<div role="alertdialog" aria-modal="true" aria-labelledby="rm-title" style="pointer-events: auto; width: 500px; max-width: 100%; box-sizing: border-box; background: #FFFFFF; border-radius: 24px; box-shadow: 0 24px 64px rgba(11,31,58,0.32); overflow: hidden">
+<div style="padding: 28px 24px 8px; display: flex; flex-direction: column; align-items: flex-start; gap: 14px">
+<span style="width: 48px; height: 48px; border-radius: 50%; background: #FBE8E6; color: #B3261E; display: inline-flex; align-items: center; justify-content: center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 11h6M3 21c0-3.5 3-6 7-6s7 2.5 7 6M10 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"></path></svg></span>
+<div style="display: flex; flex-direction: column; gap: 4px"><h2 id="rm-title" style="margin: 0; font-size: 22px; font-weight: 600; letter-spacing: -0.03em">Remove {{target.name}}?</h2><span style="color: #5A6577">{{target.email}} · {{targetRoleLabel}}</span></div>
+</div>
+<ul style="margin: 8px 24px 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; color: #3A4A63">
+<li style="display: flex; gap: 10px"><span style="flex: none; margin-top: 7px; width: 6px; height: 6px; border-radius: 50%; background: #B3261E"></span><span>They lose access straight away and all their sessions and API tokens are revoked.</span></li>
+<li style="display: flex; gap: 10px"><span style="flex: none; margin-top: 7px; width: 6px; height: 6px; border-radius: 50%; background: #6B7686"></span><span>Their deployments, apps and databases stay as they are.</span></li>
+<li style="display: flex; gap: 10px"><span style="flex: none; margin-top: 7px; width: 6px; height: 6px; border-radius: 50%; background: #6B7686"></span><span>You can invite them again at any time.</span></li>
+</ul>
+<div style="display: flex; justify-content: flex-end; gap: 8px; padding: 24px">
+<button class="btn-outline" type="button" onClick="{{closeModal}}" style="min-height: 44px; padding: 0 18px; border: 1.5px solid #CBD0D8; border-radius: 10px; background: transparent; color: #0B1F3A; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; font-weight: 500; letter-spacing: 0.02em; text-transform: uppercase; cursor: pointer">Cancel</button>
+<button class="btn-danger" type="button" onClick="{{confirmRemove}}" style="min-height: 44px; padding: 0 18px; border: 0; border-radius: 10px; background: #B3261E; color: #FFFFFF; font-family: 'Geist Mono', ui-monospace, monospace; font-size: 12px; font-weight: 500; letter-spacing: 0.02em; text-transform: uppercase; cursor: pointer">Remove member</button>
+</div>
+</div>
+</sc-if>
+
+</div>
+</div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"startModal":{"editor":"enum","options":["none","invite","link","sent","role","remove"],"default":"none","section":"Preview"},"$preview":{"width":1360,"height":1200}}'>
+class Component extends DCLogic {
+constructor(props) {
+super(props);
+const start = props.startModal || 'none';
+const PROJECTS = [
+{ id: 'clientx', name: 'Client X', res: '5 resources' },
+{ id: 'webshop', name: 'Webshop', res: '4 resources' },
+{ id: 'docs', name: 'Docs site', res: '1 resource' },
+{ id: 'internal', name: 'Internal tools', res: '3 resources' },
+{ id: 'analytics', name: 'Analytics', res: '2 resources' },
+{ id: 'sandbox', name: 'Sandbox', res: '1 resource' }
+];
+this.PROJECTS = PROJECTS;
+this.state = {
+modal: start === 'link' ? 'invite' : start,
+method: start === 'link' ? 'link' : 'email',
+members: [
+{ id: 'joey', name: 'Joey de Kruis', email: 'joey@derisory.nl', initials: 'JK', role: 'owner', scope: null, active: 'Active now', tfa: true, isYou: true },
+{ id: 'sanne', name: 'Sanne Bakker', email: 'sanne@derisory.nl', initials: 'SB', role: 'admin', scope: null, active: 'Active 2 h ago', tfa: true, isYou: false },
+{ id: 'tom', name: 'Tom Jansen', email: 'tom@derisory.nl', initials: 'TJ', role: 'developer', scope: ['clientx', 'webshop', 'internal'], active: 'Active yesterday', tfa: false, isYou: false },
+{ id: 'lisa', name: 'Lisa Meijer', email: 'lisa@clientx.nl', initials: 'LM', role: 'viewer', scope: ['clientx'], active: 'Active 5 days ago', tfa: true, isYou: false }
+],
+invites: [
+{ id: 'i1', email: 'mark@webshop.nl', role: 'developer', scope: ['webshop'], sent: '2 days ago', expired: false, left: 'Expires in 5 days' },
+{ id: 'i2', email: 'nina@derisory.nl', role: 'admin', scope: null, sent: '9 days ago', expired: true, left: 'Expired 2 days ago' }
+],
+emails: start === 'invite' || start === 'link' || start === 'sent' ? ['eva@derisory.nl', 'daan@clientx.nl'] : [],
+role: 'developer',
+scopeMode: 'selected',
+sel: { clientx: true, webshop: true },
+validity: '7 days',
+copied: false,
+menu: null,
+target: start === 'remove' ? 'tom' : (start === 'role' ? 'lisa' : null),
+sent: start === 'sent' ? ['eva@derisory.nl', 'daan@clientx.nl'] : [],
+toast: ''
+};
+if (start === 'role') { this.state.role = 'viewer'; this.state.scopeMode = 'selected'; this.state.sel = { clientx: true }; }
+if (start === 'remove') { this.state.role = 'developer'; }
+}
+
+flash(text) {
+this.setState({ toast: text });
+setTimeout(() => this.setState({ toast: '' }), 2500);
+}
+
+renderVals() {
+const s = this.state;
+const ROLES = {
+owner: { label: 'Owner', desc: 'Full control of this instance. There is one owner.', bg: '#0B1F3A', fg: '#FFFFFF' },
+admin: { label: 'Admin', desc: 'Manages team, server settings, security and every project.', bg: '#E3F0FF', fg: '#0B3D91' },
+developer: { label: 'Developer', desc: 'Creates and deploys apps, databases and static sites. No server or team settings.', bg: '#F1F0ED', fg: '#3A4A63' },
+viewer: { label: 'Viewer', desc: 'Read-only access to projects, logs and metrics. Cannot deploy or change anything.', bg: '#ECEEF1', fg: '#4A5361' }
+};
+const names = (ids) => (ids ? (ids.length === 1 ? this.PROJECTS.find((p) => p.id === ids[0]).name + ' only' : ids.length + ' projects') : 'All projects');
+const isEmailOk = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+
+const members = s.members.map((m, i) => ({
+...m,
+border: i === 0 ? '0' : '1px solid #ECEAE6',
+roleLabel: ROLES[m.role].label, roleBg: ROLES[m.role].bg, roleFg: ROLES[m.role].fg,
+scopeText: names(m.scope),
+tfaText: m.tfa ? '2FA on' : '2FA off', tfaFg: m.tfa ? '#176B3D' : '#8A5200',
+canManage: m.role !== 'owner',
+menuOpen: s.menu === m.id,
+toggleMenu: () => this.setState({ menu: s.menu === m.id ? null : m.id }),
+openRole: () => this.setState({ menu: null, modal: 'role', target: m.id, role: m.role, scopeMode: m.scope ? 'selected' : 'all', sel: (m.scope || []).reduce((a, k) => ({ ...a, [k]: true }), {}) }),
+openRemove: () => this.setState({ menu: null, modal: 'remove', target: m.id })
+}));
+
+const invites = s.invites.map((inv, i) => ({
+...inv,
+border: i === 0 ? '0' : '1px solid #ECEAE6',
+roleLabel: ROLES[inv.role].label, roleBg: ROLES[inv.role].bg, roleFg: ROLES[inv.role].fg,
+scopeText: names(inv.scope),
+status: inv.expired ? 'Expired' : inv.left,
+stBg: inv.expired ? '#FBE8E6' : '#FBF0DC', stFg: inv.expired ? '#B3261E' : '#8A5200', stDot: inv.expired ? '#B3261E' : '#D98A00',
+copy: () => this.flash('Invite link copied'),
+resend: () => { this.setState({ invites: s.invites.map((x) => (x.id === inv.id ? { ...x, expired: false, left: 'Expires in 7 days', sent: 'just now' } : x)) }); this.flash('Invite sent again to ' + inv.email); },
+revoke: () => { this.setState({ invites: s.invites.filter((x) => x.id !== inv.id) }); this.flash('Invite for ' + inv.email + ' revoked'); }
+}));
+
+const activity = [
+{ who: 'Joey de Kruis', text: 'deleted the service api-old', ref: 'service 01M74TKM…FBH6', time: '2 h ago', k: 'trash' },
+{ who: 'Dockyrd', text: 'was updated to v0.1.0', ref: 'server', time: '3 h ago', k: 'refresh' },
+{ who: 'Sanne Bakker', text: 'applied a security fix', ref: 'security.check.fix', time: 'Yesterday', k: 'shield' },
+{ who: 'Joey de Kruis', text: 'invited mark@webshop.nl as Developer', ref: 'invite · Webshop only', time: '2 days ago', k: 'user' },
+{ who: 'Lisa Meijer', text: 'accepted her invite as Viewer', ref: 'member · Client X only', time: '5 days ago', k: 'user' }
+].map((a, i) => ({ ...a, border: i === 0 ? '0' : '1px solid #ECEAE6', isUser: a.k === 'user', isShield: a.k === 'shield', isRefresh: a.k === 'refresh', isTrash: a.k === 'trash' }));
+
+const isInviteOpen = s.modal === 'invite';
+const isRoleOpen = s.modal === 'role';
+const role = s.role;
+const needsScope = role === 'developer' || role === 'viewer';
+const selIds = Object.keys(s.sel).filter((k) => s.sel[k]);
+const roleOptions = ['admin', 'developer', 'viewer'].map((k) => {
+const on = role === k;
+return { k, label: ROLES[k].label, desc: ROLES[k].desc, checked: on ? 'true' : 'false', border: on ? '#3B93F5' : '#E1DFDA', bg: on ? '#F4F9FF' : '#FFFFFF', ring: on ? '#3B93F5' : '#9AA3B2', dot: on ? '#3B93F5' : 'transparent', pick: () => this.setState({ role: k }) };
+});
+const projectRows = this.PROJECTS.map((p, i) => {
+const on = !!s.sel[p.id];
+return { ...p, checked: on, border: i === 0 ? '0' : '1px solid #ECEAE6', boxBg: on ? '#0B1F3A' : '#FFFFFF', boxBorder: on ? '#0B1F3A' : '#9AA3B2', toggle: () => this.setState({ sel: { ...s.sel, [p.id]: !on } }) };
+});
+const allMode = s.scopeMode === 'all';
+const emailChips = s.emails.map((v, i) => {
+const ok = isEmailOk(v);
+return { value: v, bg: ok ? '#F1F0ED' : '#FBE8E6', fg: ok ? '#0B1F3A' : '#B3261E', remove: () => this.setState({ emails: s.emails.filter((_, j) => j !== i) }) };
+});
+const invalid = s.emails.filter((v) => !isEmailOk(v));
+const validEmails = s.emails.filter(isEmailOk);
+const addFromInput = (el) => {
+const parts = el.value.split(/[\s,;]+/).map((x) => x.trim()).filter(Boolean);
+if (parts.length) { this.setState({ emails: [...s.emails, ...parts.filter((p) => s.emails.indexOf(p) === -1)] }); el.value = ''; }
+};
+const scopeSummary = () => (needsScope ? (allMode ? 'All projects' : (selIds.length === 1 ? names(selIds) : selIds.length + ' projects')) : 'All projects');
+const roleSummary = ROLES[role].label + ' · ' + scopeSummary();
+const target = s.members.find((m) => m.id === s.target) || s.members[2];
+const method = s.method;
+const mkTab = (on) => ({ bg: on ? '#FFFFFF' : 'transparent', shadow: on ? '0 1px 3px rgba(11,31,58,0.16)' : 'none' });
+const te = mkTab(method === 'email');
+const tl = mkTab(method === 'link');
+const seg = (on) => ({ border: on ? '#3B93F5' : '#E1DFDA', bg: on ? '#F4F9FF' : '#FFFFFF' });
+const sa = seg(allMode);
+const ss = seg(!allMode);
+const n = validEmails.length;
+
+return {
+memberCount: s.members.length,
+inviteCount: s.invites.length,
+noInvites: s.invites.length === 0,
+members, invites, activity,
+roleCards: ['owner', 'admin', 'developer', 'viewer'].map((k) => ROLES[k]),
+openInvite: () => this.setState({ modal: 'invite', method: 'email', emails: [], role: 'developer', scopeMode: 'all', sel: {}, copied: false }),
+closeMenu: () => this.setState({ menu: null }),
+closeModal: () => this.setState({ modal: 'none', copied: false }),
+showModal: s.modal !== 'none',
+showInvite: isInviteOpen, showSent: s.modal === 'sent', showRole: isRoleOpen, showRemove: s.modal === 'remove',
+showToast: !!s.toast, toast: s.toast,
+isEmail: method === 'email', isLink: method === 'link',
+pickEmail: () => this.setState({ method: 'email' }),
+pickLink: () => this.setState({ method: 'link' }),
+emailPressed: method === 'email' ? 'true' : 'false', linkPressed: method === 'link' ? 'true' : 'false',
+emailTabBg: te.bg, emailTabShadow: te.shadow, linkTabBg: tl.bg, linkTabShadow: tl.shadow,
+emailChips,
+hasInvalid: invalid.length > 0,
+invalidText: invalid.length === 1 ? invalid[0] + ' is not a valid email address.' : invalid.length + ' addresses are not valid.',
+onEmailKey: (e) => { if (e.key === 'Enter' || e.key === ',' || e.key === ' ') { e.preventDefault(); addFromInput(e.target); } else if (e.key === 'Backspace' && !e.target.value && s.emails.length) { this.setState({ emails: s.emails.slice(0, -1) }); } },
+onEmailBlur: (e) => addFromInput(e.target),
+roleOptions, needsScope, isAdminRole: role === 'admin',
+scopeAll: () => this.setState({ scopeMode: 'all' }),
+scopeSel: () => this.setState({ scopeMode: 'selected' }),
+scopeAllPressed: allMode ? 'true' : 'false', scopeSelPressed: allMode ? 'false' : 'true',
+scopeAllBorder: sa.border, scopeAllBg: sa.bg, scopeSelBorder: ss.border, scopeSelBg: ss.bg,
+showProjects: !allMode, projectRows,
+validityOptions: ['24 hours', '7 days', '30 days'].map((label) => ({ label, pressed: s.validity === label ? 'true' : 'false', border: s.validity === label ? '#3B93F5' : '#E1DFDA', bg: s.validity === label ? '#F4F9FF' : '#FFFFFF', pick: () => this.setState({ validity: label }) })),
+copyLabel: s.copied ? 'Copied' : 'Copy',
+copyLink: () => { this.setState({ copied: true }); setTimeout(() => this.setState({ copied: false }), 2000); },
+footNote: method === 'email' ? 'Invites are emailed from this server and valid for 7 days.' : 'Generating a link does not send any email.',
+cancelLabel: method === 'link' ? 'Close' : 'Cancel',
+sendDisabled: n === 0 || invalid.length > 0 || (needsScope && !allMode && selIds.length === 0),
+sendLabel: n === 0 ? 'Send invite' : (n === 1 ? 'Send 1 invite' : 'Send ' + n + ' invites'),
+sendInvites: () => this.setState({
+modal: 'sent', sent: validEmails,
+invites: [...validEmails.map((em, i) => ({ id: 'n' + Date.now() + i, email: em, role, scope: needsScope && !allMode ? selIds : null, sent: 'just now', expired: false, left: 'Expires in 7 days' })), ...s.invites]
+}),
+sentTitle: s.sent.length === 1 ? 'Invite sent' : s.sent.length + ' invites sent',
+roleSummary,
+sentRows: s.sent.map((email, i) => ({ email, border: i === 0 ? '0' : '1px solid #ECEAE6', copy: () => this.flash('Invite link copied') })),
+inviteMore: () => this.setState({ modal: 'invite', method: 'email', emails: [], copied: false }),
+target,
+targetRoleLabel: ROLES[target.role].label,
+saveDisabled: needsScope && !allMode && selIds.length === 0,
+saveRole: () => { this.setState({ modal: 'none', members: s.members.map((m) => (m.id === target.id ? { ...m, role, scope: needsScope && !allMode ? selIds : null } : m)) }); this.flash(target.name + ' is now ' + ROLES[role].label); },
+confirmRemove: () => { this.setState({ modal: 'none', members: s.members.filter((m) => m.id !== target.id) }); this.flash(target.name + ' was removed from the team'); }
+};
+}
+}
+</script>
+</body>
+</html>

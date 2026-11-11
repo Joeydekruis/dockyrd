@@ -124,12 +124,37 @@
   });
 
   var menuBtn = document.getElementById("menuBtn");
+  var navBackdrop = document.getElementById("navBackdrop");
+  var mobileNav = document.getElementById("mobileNav");
+  var sidebar = document.getElementById("sidebar");
+
+  function navDrawer() {
+    return sidebar || mobileNav;
+  }
+
+  function closeNav() {
+    document.body.classList.remove("nav-open");
+    if (menuBtn) menuBtn.setAttribute("aria-expanded", "false");
+  }
+
   if (menuBtn) {
+    var drawer = navDrawer();
+    if (drawer) menuBtn.setAttribute("aria-controls", drawer.id);
     menuBtn.addEventListener("click", function () {
-      var open = document.body.classList.toggle("nav-open");
+      var open = !document.body.classList.contains("nav-open");
+      document.body.classList.toggle("nav-open", open);
       menuBtn.setAttribute("aria-expanded", open ? "true" : "false");
     });
   }
+  if (navBackdrop) navBackdrop.addEventListener("click", closeNav);
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && document.body.classList.contains("nav-open")) {
+      closeNav();
+    }
+  });
+  document.querySelectorAll("#sidebar a, #mobileNav a").forEach(function (a) {
+    a.addEventListener("click", closeNav);
+  });
 
   var dlg = document.getElementById("searchDlg");
   var input = document.getElementById("searchInput");

@@ -1,4 +1,4 @@
-const settingsCardClass =
+export const settingsCardClass =
   "mb-8 space-y-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-6";
 
 export function SettingsSection({
@@ -44,7 +44,7 @@ export function Owner2FARequiredBanner({ show }: { show: boolean }) {
       role="status"
     >
       Owners must enable two-factor authentication before using the rest of the
-      dashboard. Set it up under Password &amp; 2FA.
+      dashboard. Set it up below under two-factor authentication.
     </p>
   );
 }

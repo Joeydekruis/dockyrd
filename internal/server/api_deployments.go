@@ -16,6 +16,15 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/jobs"
 )
 
+func deploymentCancellable(status string) bool {
+	switch status {
+	case "queued", "waiting", "starting", "building", "healthchecking", "running":
+		return true
+	default:
+		return false
+	}
+}
+
 type deploymentResponse struct {
 	ID         string  `json:"id"`
 	ServiceID  string  `json:"service_id"`
@@ -44,6 +53,7 @@ type deploymentResponse struct {
 }
 
 func registerDeploymentRoutes(mux *http.ServeMux, deps apiDeps) {
+	mux.HandleFunc("GET /api/v1/deployments/active", deps.handleGetActiveDeployment)
 	mux.HandleFunc("GET /api/v1/services/{id}/deployments", deps.handleListDeployments)
 	mux.HandleFunc("POST /api/v1/services/{id}/deployments", deps.handleCreateDeployment)
 	mux.HandleFunc("GET /api/v1/deployments/{id}", deps.handleGetDeployment)
@@ -51,6 +61,7 @@ func registerDeploymentRoutes(mux *http.ServeMux, deps apiDeps) {
 	mux.HandleFunc("POST /api/v1/deployments/{id}/promote", deps.handlePromoteDeployment)
 	mux.HandleFunc("POST /api/v1/deployments/{id}/redeploy", deps.handleRedeployDeployment)
 	mux.HandleFunc("GET /api/v1/deployments/{id}/log", deps.handleDeploymentLog)
+	registerDeployBreakRoutes(mux, deps)
 }
 
 func (d apiDeps) handleListDeployments(w http.ResponseWriter, r *http.Request) {
@@ -116,6 +127,10 @@ func (d apiDeps) handleCreateDeployment(w http.ResponseWriter, r *http.Request) 
 	meta := d.gitMetaForServiceDeploy(ctx, serviceID)
 	deploymentID, err := jobs.EnqueueServiceDeploy(ctx, d.q, serviceID, "manual", user.ID, meta)
 	if err != nil {
+		if errors.Is(err, jobs.ErrDeploymentSlotBusy) {
+			writeJSONError(w, http.StatusConflict, "another deployment is in progress")
+			return
+		}
 		writeJSONError(w, http.StatusInternalServerError, "create deployment error")
 		return
 	}
@@ -157,6 +172,43 @@ func (d apiDeps) handleGetDeployment(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, resp)
 }
 
+func (d apiDeps) handleGetActiveDeployment(w http.ResponseWriter, r *http.Request) {
+	if _, ok := d.requireUser(w, r); !ok {
+		return
+	}
+	ctx := r.Context()
+	row, err := d.q.GetActiveDeployment(ctx)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			writeJSON(w, http.StatusOK, map[string]any{"deployment": nil})
+			return
+		}
+		writeJSONError(w, http.StatusInternalServerError, "database error")
+		return
+	}
+	projectID, err := d.q.GetServiceProjectID(ctx, row.ServiceID)
+	if err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "database error")
+		return
+	}
+	if _, ok := d.requireProjectScope(w, r, apitoken.ScopeRead, projectID); !ok {
+		return
+	}
+	writeJSON(w, http.StatusOK, map[string]any{
+		"deployment": map[string]any{
+			"id":             row.ID,
+			"service_id":     row.ServiceID,
+			"status":         row.Status,
+			"queued_at":      nullInt64(row.QueuedAt),
+			"started_at":     nullInt64Ptr(row.StartedAt),
+			"service_name":   row.ServiceName,
+			"service_slug":   row.ServiceSlug,
+			"service_kind":   row.ServiceKind,
+			"project_slug":   row.ProjectSlug,
+		},
+	})
+}
+
 func (d apiDeps) handleCancelDeployment(w http.ResponseWriter, r *http.Request) {
 	if _, ok := d.requireUser(w, r); !ok {
 		return
@@ -172,20 +224,31 @@ func (d apiDeps) handleCancelDeployment(w http.ResponseWriter, r *http.Request) 
 		writeJSONError(w, http.StatusInternalServerError, "database error")
 		return
 	}
-	if row.Status != "queued" {
+	projectID, err := d.q.GetServiceProjectID(ctx, row.ServiceID)
+	if err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "database error")
+		return
+	}
+	if _, ok := d.requireProjectScope(w, r, apitoken.ScopeDeploy, projectID); !ok {
+		return
+	}
+	if !deploymentCancellable(row.Status) {
 		writeJSONError(w, http.StatusConflict, "deployment not cancellable")
 		return
 	}
 	finished := time.Now().Unix()
 	if err := d.q.UpdateDeploymentStatus(ctx, sqlc.UpdateDeploymentStatusParams{
-		Status:    "cancelled",
-		Error:     sql.NullString{},
-		StartedAt: sql.NullInt64{},
+		Status:     "cancelled",
+		Error:      sql.NullString{String: "cancelled by user", Valid: true},
+		StartedAt:  sql.NullInt64{},
 		FinishedAt: sql.NullInt64{Int64: finished, Valid: true},
-		ID:        id,
+		ID:         id,
 	}); err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "update error")
 		return
+	}
+	if d.events != nil {
+		d.events.Publish("deployments:"+id, map[string]string{"status": "cancelled"})
 	}
 	w.WriteHeader(http.StatusNoContent)
 }
@@ -209,6 +272,10 @@ func (d apiDeps) handleRedeployDeployment(w http.ResponseWriter, r *http.Request
 	meta := mergeGitMeta(d.gitMetaForServiceDeploy(ctx, row.ServiceID), gitMetaFromDeploymentRow(row))
 	newID, err := jobs.EnqueueServiceDeploy(ctx, d.q, row.ServiceID, "redeploy", user.ID, meta)
 	if err != nil {
+		if errors.Is(err, jobs.ErrDeploymentSlotBusy) {
+			writeJSONError(w, http.StatusConflict, "another deployment is in progress")
+			return
+		}
 		writeJSONError(w, http.StatusInternalServerError, "enqueue error")
 		return
 	}

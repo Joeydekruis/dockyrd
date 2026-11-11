@@ -160,7 +160,11 @@ export function Sidebar() {
       className="fixed bottom-0 left-0 z-40 flex w-[232px] shrink-0 flex-col overflow-y-auto border-r px-4 py-6 top-[var(--dockyrd-announcement-height,44px)]"
       style={{ background: "var(--page-bg)", borderColor: "var(--border)" }}
     >
-      <Link href="/" className="mb-8 inline-block" aria-label="Dockyrd home">
+      <Link
+        href="/"
+        className="dockyrd-focus-ring mb-8 inline-block rounded-[10px]"
+        aria-label="Dockyrd home"
+      >
         <DockyrdLogo />
       </Link>
       {inSettings && settingsSidebar ? settingsSidebar : <MainSidebar />}

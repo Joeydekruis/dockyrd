@@ -6,6 +6,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.7.19] - 2026-11-11
+
+_Finished: 2026-11-11_
+
+### Added
+
+- **Deploy Break** — full-width breakout game on application and static-site deployment detail; scores per deployment + all-time leaderboard (`deployment_break_scores`, `/api/v1/deployments/{id}/break-score`); global deploy snackbar (bottom-right, loading, **View deployment**); cancel in-progress deploys from detail; single active deploy instance-wide (`EnsureDeploymentSlot`)
+- **Team settings** — role change and remove-member modals, audit labels, expanded team table UX
+- **MCP** — dedicated server MCP settings page (`/settings/server/mcp`)
+
+### Changed
+
+- **Deploy flow** — **Deploy now** routes to deployment detail (game); API `GET /api/v1/deployments/active`
+- **UI links** — shared `InlineLink` / `btn-inline-link` tokens across dashboard primitives
+- **Integrations** — MCP instance controls moved to server MCP settings
+- **Accept invite** — password rules aligned with account security page
+
 ## [0.7.18] - 2026-11-11
 
 _Finished: 2026-11-11_

@@ -140,3 +140,27 @@ SET
   finished_at = ?
 WHERE status IN ('building', 'starting', 'healthchecking')
 RETURNING id, service_id;
+
+-- name: CountInProgressDeployments :one
+SELECT COUNT(*) AS count
+FROM deployments
+WHERE status IN ('queued', 'waiting', 'starting', 'building', 'healthchecking', 'running');
+
+-- name: GetActiveDeployment :one
+SELECT
+  d.id,
+  d.service_id,
+  d.status,
+  d.queued_at,
+  d.started_at,
+  s.name AS service_name,
+  s.slug AS service_slug,
+  s.kind AS service_kind,
+  p.slug AS project_slug
+FROM deployments d
+JOIN services s ON s.id = d.service_id
+JOIN environments e ON e.id = s.environment_id
+JOIN projects p ON p.id = e.project_id
+WHERE d.status IN ('queued', 'waiting', 'starting', 'building', 'healthchecking', 'running')
+ORDER BY COALESCE(d.started_at, d.queued_at) ASC
+LIMIT 1;

@@ -17,7 +17,6 @@ SELECT
   expires_at
 FROM invites
 WHERE accepted_at IS NULL
-  AND expires_at > ?
 ORDER BY expires_at DESC;
 
 -- name: GetPendingInviteByTokenHash :one
@@ -36,3 +35,7 @@ LIMIT 1;
 UPDATE invites
 SET accepted_at = ?
 WHERE id = ?;
+
+-- name: DeleteInvite :exec
+DELETE FROM invites
+WHERE id = ? AND accepted_at IS NULL;

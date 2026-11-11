@@ -37,7 +37,7 @@ export function DashboardProjectTiles({
           <Link
             key={row.project.id}
             href={`/projects/${row.project.slug}`}
-            className="flex min-w-0 flex-col gap-1.5 rounded-2xl border px-4 py-3.5 transition-colors hover:bg-[var(--hover-row)]"
+            className="dockyrd-surface-interactive flex min-w-0 flex-col gap-1.5 rounded-2xl border px-4 py-3.5"
             style={{
               background: "var(--surface)",
               borderColor: "var(--border)",

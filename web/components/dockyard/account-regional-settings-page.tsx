@@ -32,7 +32,7 @@ const timeFormatOptions: { value: TimeFormat; label: string; hint: string }[] =
     },
   ];
 
-export function AccountRegionalSettingsPage() {
+export function AccountRegionalSettingsSection() {
   const { prefs: saved, loading, save } = useUserLocale();
   const [draft, setDraft] = useState<UserLocalePrefs | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -75,18 +75,17 @@ export function AccountRegionalSettingsPage() {
   }
 
   return (
-    <DashboardShell title="Date & time" breadcrumb="Account settings">
-      <SettingsPageBody>
-        <SettingsErrorBanner message={error} />
-        {savedMsg ? (
-          <p className="mb-4 text-sm text-green-700" role="status">
-            Date and time preferences saved. Charts update immediately.
-          </p>
-        ) : null}
-        <SettingsSection
-          title="Date & time"
-          description="Timezone and clock format for analytics charts and timestamps in the dashboard."
-        >
+    <>
+      <SettingsErrorBanner message={error} />
+      {savedMsg ? (
+        <p className="mb-4 text-sm text-green-700" role="status">
+          Date and time preferences saved. Charts update immediately.
+        </p>
+      ) : null}
+      <SettingsSection
+        title="Date & time"
+        description="Timezone and clock format for analytics charts and timestamps in the dashboard."
+      >
           {loading || !draft ? (
             <DockyrdPageLoading className="py-2" cubeSize={28} />
           ) : (
@@ -155,7 +154,16 @@ export function AccountRegionalSettingsPage() {
               </Button>
             </form>
           )}
-        </SettingsSection>
+      </SettingsSection>
+    </>
+  );
+}
+
+export function AccountRegionalSettingsPage() {
+  return (
+    <DashboardShell title="Profile & security" breadcrumb="Account settings">
+      <SettingsPageBody>
+        <AccountRegionalSettingsSection />
       </SettingsPageBody>
     </DashboardShell>
   );

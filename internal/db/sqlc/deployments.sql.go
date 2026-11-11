@@ -10,6 +10,19 @@ import (
 	"database/sql"
 )
 
+const countInProgressDeployments = `-- name: CountInProgressDeployments :one
+SELECT COUNT(*) AS count
+FROM deployments
+WHERE status IN ('queued', 'waiting', 'starting', 'building', 'healthchecking', 'running')
+`
+
+func (q *Queries) CountInProgressDeployments(ctx context.Context) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countInProgressDeployments)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createDeployment = `-- name: CreateDeployment :exec
 INSERT INTO deployments (
   id,
@@ -43,6 +56,55 @@ func (q *Queries) CreateDeployment(ctx context.Context, arg CreateDeploymentPara
 		arg.QueuedAt,
 	)
 	return err
+}
+
+const getActiveDeployment = `-- name: GetActiveDeployment :one
+SELECT
+  d.id,
+  d.service_id,
+  d.status,
+  d.queued_at,
+  d.started_at,
+  s.name AS service_name,
+  s.slug AS service_slug,
+  s.kind AS service_kind,
+  p.slug AS project_slug
+FROM deployments d
+JOIN services s ON s.id = d.service_id
+JOIN environments e ON e.id = s.environment_id
+JOIN projects p ON p.id = e.project_id
+WHERE d.status IN ('queued', 'waiting', 'starting', 'building', 'healthchecking', 'running')
+ORDER BY COALESCE(d.started_at, d.queued_at) ASC
+LIMIT 1
+`
+
+type GetActiveDeploymentRow struct {
+	ID          string
+	ServiceID   string
+	Status      string
+	QueuedAt    sql.NullInt64
+	StartedAt   sql.NullInt64
+	ServiceName string
+	ServiceSlug string
+	ServiceKind string
+	ProjectSlug string
+}
+
+func (q *Queries) GetActiveDeployment(ctx context.Context) (GetActiveDeploymentRow, error) {
+	row := q.db.QueryRowContext(ctx, getActiveDeployment)
+	var i GetActiveDeploymentRow
+	err := row.Scan(
+		&i.ID,
+		&i.ServiceID,
+		&i.Status,
+		&i.QueuedAt,
+		&i.StartedAt,
+		&i.ServiceName,
+		&i.ServiceSlug,
+		&i.ServiceKind,
+		&i.ProjectSlug,
+	)
+	return i, err
 }
 
 const getDeploymentByID = `-- name: GetDeploymentByID :one

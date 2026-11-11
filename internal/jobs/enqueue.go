@@ -20,6 +20,9 @@ type GitMeta struct {
 
 // EnqueueServiceDeploy creates a queued deployment and schedules the worker job.
 func EnqueueServiceDeploy(ctx context.Context, q *sqlc.Queries, serviceID, trigger, userID string, meta GitMeta) (string, error) {
+	if err := EnsureDeploymentSlot(ctx, q); err != nil {
+		return "", err
+	}
 	now := time.Now().Unix()
 	deploymentID := ulid.Make().String()
 	triggeredBy := sql.NullString{}

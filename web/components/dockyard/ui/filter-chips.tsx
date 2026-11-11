@@ -18,7 +18,7 @@ export function FilterChips({ options, active, onChange }: FilterChipsProps) {
             role="tab"
             aria-selected={isActive}
             onClick={() => onChange(opt.value)}
-            className="rounded-md border-0 p-0 transition-opacity"
+            className="dockyrd-pill-tab rounded-md border-0 p-0 transition-opacity"
             style={{ opacity: isActive ? 1 : 0.65 }}
           >
             <Chip>{opt.label}</Chip>

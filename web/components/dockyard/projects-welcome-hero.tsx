@@ -101,7 +101,7 @@ export function ProjectsWelcomeHero({
                     aria-pressed={selected}
                     aria-label={item.title}
                     onClick={() => setKind(item.id)}
-                    className="flex size-11 items-center justify-center rounded-full border-2 transition-colors"
+                    className="dockyrd-icon-choice flex size-11 items-center justify-center rounded-full border-2"
                     style={{
                       borderColor: selected
                         ? "var(--accent-blue)"

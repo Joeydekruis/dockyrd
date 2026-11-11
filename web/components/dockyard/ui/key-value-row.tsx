@@ -8,7 +8,7 @@ type KeyValueRowProps = {
 export function KeyValueRow({ label, value }: KeyValueRowProps) {
   return (
     <div
-      className="flex items-start gap-3 border-t py-3 first:border-t-0"
+      className="flex items-center gap-3 border-t py-3 first:border-t-0"
       style={{ borderColor: "var(--border)" }}
     >
       <dt

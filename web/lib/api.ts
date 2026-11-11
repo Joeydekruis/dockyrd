@@ -825,6 +825,62 @@ export function createDeployment(serviceId: string) {
   });
 }
 
+export type ActiveDeployment = {
+  id: string;
+  service_id: string;
+  status: string;
+  queued_at: number;
+  started_at?: number;
+  service_name: string;
+  service_slug: string;
+  service_kind: string;
+  project_slug: string;
+};
+
+export function getActiveDeployment() {
+  return apiFetch<{ deployment: ActiveDeployment | null }>(
+    "/api/v1/deployments/active",
+  );
+}
+
+export function cancelDeployment(deploymentId: string) {
+  return apiFetch<void>(`/api/v1/deployments/${deploymentId}/cancel`, {
+    method: "POST",
+    json: {},
+  });
+}
+
+export type DeploymentBreakBest = {
+  score: number;
+  user_id: string;
+  user_name: string;
+  updated_at: number;
+  deployment_id?: string;
+  service_name?: string;
+  service_slug?: string;
+  service_kind?: string;
+  project_slug?: string;
+};
+
+export type DeploymentBreakScoreSummary = {
+  your_score?: number | null;
+  deployment_best?: DeploymentBreakBest | null;
+  all_time_best?: DeploymentBreakBest | null;
+};
+
+export function fetchDeploymentBreakScore(deploymentId: string) {
+  return apiFetch<DeploymentBreakScoreSummary>(
+    `/api/v1/deployments/${deploymentId}/break-score`,
+  );
+}
+
+export function putDeploymentBreakScore(deploymentId: string, score: number) {
+  return apiFetch<void>(`/api/v1/deployments/${deploymentId}/break-score`, {
+    method: "PUT",
+    json: { score },
+  });
+}
+
 export async function fetchDeploymentLog(
   deploymentId: string,
 ): Promise<string> {
@@ -1191,6 +1247,8 @@ export type TeamUser = {
   name: string;
   role: string;
   created_at: number;
+  updated_at?: number;
+  totp_enabled?: boolean;
 };
 
 export type TeamInvite = {
@@ -1210,11 +1268,25 @@ export function listInvites() {
   return apiFetch<{ invites: TeamInvite[] }>("/api/v1/invites");
 }
 
-export function createInvite(input: { email: string; role: string }) {
+export function createInvite(input: { email?: string; role: string }) {
   return apiFetch<TeamInvite>("/api/v1/invites", {
     method: "POST",
     json: input,
   });
+}
+
+export function patchTeamUser(
+  id: string,
+  input: { role?: string; disabled?: boolean },
+) {
+  return apiFetch<void>(`/api/v1/users/${id}`, {
+    method: "PATCH",
+    json: input,
+  });
+}
+
+export function revokeInvite(id: string) {
+  return apiFetch<void>(`/api/v1/invites/${id}`, { method: "DELETE" });
 }
 
 export function previewInvite(token: string) {
@@ -1228,6 +1300,7 @@ export function acceptInvite(input: {
   token: string;
   name: string;
   password: string;
+  email?: string;
 }) {
   return apiFetch<{ ok: boolean }>("/api/v1/invites/accept", {
     method: "POST",

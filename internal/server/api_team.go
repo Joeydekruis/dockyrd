@@ -19,16 +19,19 @@ func registerTeamRoutes(mux *http.ServeMux, deps apiDeps) {
 	mux.HandleFunc("PATCH /api/v1/users/{id}", deps.handlePatchUser)
 	mux.HandleFunc("GET /api/v1/invites", deps.handleListInvites)
 	mux.HandleFunc("POST /api/v1/invites", deps.handleCreateInvite)
+	mux.HandleFunc("DELETE /api/v1/invites/{id}", deps.handleDeleteInvite)
 	mux.HandleFunc("GET /api/v1/audit", deps.handleListAudit)
 }
 
 type teamUserResponse struct {
-	ID         string `json:"id"`
-	Email      string `json:"email"`
-	Name       string `json:"name"`
-	Role       string `json:"role"`
-	CreatedAt  int64  `json:"created_at"`
-	DisabledAt int64  `json:"disabled_at,omitempty"`
+	ID           string `json:"id"`
+	Email        string `json:"email"`
+	Name         string `json:"name"`
+	Role         string `json:"role"`
+	CreatedAt    int64  `json:"created_at"`
+	UpdatedAt    int64  `json:"updated_at"`
+	TotpEnabled  bool   `json:"totp_enabled"`
+	DisabledAt   int64  `json:"disabled_at,omitempty"`
 }
 
 type inviteResponse struct {
@@ -68,6 +71,8 @@ func (d apiDeps) handleListUsers(w http.ResponseWriter, r *http.Request) {
 			Name:      row.Name,
 			Role:      row.Role,
 			CreatedAt: row.CreatedAt,
+			UpdatedAt: row.UpdatedAt,
+			TotpEnabled: row.TotpEnabledAt.Valid,
 		}
 		if row.DisabledAt.Valid {
 			u.DisabledAt = row.DisabledAt.Int64
@@ -83,26 +88,65 @@ func (d apiDeps) handlePatchUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	id := r.PathValue("id")
+	if id == actor.ID {
+		writeJSONError(w, http.StatusBadRequest, "cannot change your own role or remove yourself here")
+		return
+	}
+	target, err := d.q.GetUserByID(r.Context(), id)
+	if err != nil {
+		writeJSONError(w, http.StatusNotFound, "user not found")
+		return
+	}
+	if target.Role == "owner" {
+		writeJSONError(w, http.StatusForbidden, "cannot modify the owner account")
+		return
+	}
 	var body struct {
-		Role string `json:"role"`
+		Role     *string `json:"role"`
+		Disabled *bool   `json:"disabled"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		writeJSONError(w, http.StatusBadRequest, "invalid json")
 		return
 	}
-	body.Role = strings.TrimSpace(body.Role)
-	if !validAssignRole(body.Role) {
+	ctx := r.Context()
+	now := time.Now().Unix()
+	if body.Disabled != nil && *body.Disabled {
+		if err := d.q.DisableUser(ctx, sqlc.DisableUserParams{
+			DisabledAt: sql.NullInt64{Int64: now, Valid: true},
+			UpdatedAt:  now,
+			ID:         id,
+		}); err != nil {
+			writeJSONError(w, http.StatusInternalServerError, "database error")
+			return
+		}
+		_ = d.q.DeleteAllSessionsForUser(ctx, id)
+		_ = d.audit.Record(ctx, audit.Entry{
+			UserID:     actor.ID,
+			Action:     "user.remove",
+			TargetKind: "user",
+			TargetID:   id,
+			Meta:       map[string]any{"email": target.Email},
+			IP:         clientIP(r),
+		})
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+	if body.Role == nil {
+		writeJSONError(w, http.StatusBadRequest, "role or disabled required")
+		return
+	}
+	role := strings.TrimSpace(*body.Role)
+	if !validAssignRole(role) {
 		writeJSONError(w, http.StatusBadRequest, "invalid role")
 		return
 	}
-	if body.Role == "owner" && actor.Role != "owner" {
+	if role == "owner" && actor.Role != "owner" {
 		writeJSONError(w, http.StatusForbidden, "only owner can assign owner role")
 		return
 	}
-	ctx := r.Context()
-	now := time.Now().Unix()
 	if err := d.q.UpdateUserRole(ctx, sqlc.UpdateUserRoleParams{
-		Role:      body.Role,
+		Role:      role,
 		UpdatedAt: now,
 		ID:        id,
 	}); err != nil {
@@ -114,7 +158,7 @@ func (d apiDeps) handlePatchUser(w http.ResponseWriter, r *http.Request) {
 		Action:     "user.role_change",
 		TargetKind: "user",
 		TargetID:   id,
-		Meta:       map[string]any{"role": body.Role},
+		Meta:       map[string]any{"role": role},
 		IP:         clientIP(r),
 	})
 	w.WriteHeader(http.StatusNoContent)
@@ -124,8 +168,7 @@ func (d apiDeps) handleListInvites(w http.ResponseWriter, r *http.Request) {
 	if _, ok := d.requireAdmin(w, r); !ok {
 		return
 	}
-	now := time.Now().Unix()
-	rows, err := d.q.ListPendingInvites(r.Context(), sql.NullInt64{Int64: now, Valid: true})
+	rows, err := d.q.ListPendingInvites(r.Context())
 	if err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "database error")
 		return
@@ -162,8 +205,8 @@ func (d apiDeps) handleCreateInvite(w http.ResponseWriter, r *http.Request) {
 	}
 	body.Email = strings.TrimSpace(strings.ToLower(body.Email))
 	body.Role = strings.TrimSpace(body.Role)
-	if body.Email == "" || !validAssignRole(body.Role) {
-		writeJSONError(w, http.StatusBadRequest, "email and role required")
+	if !validAssignRole(body.Role) {
+		writeJSONError(w, http.StatusBadRequest, "role required")
 		return
 	}
 	if body.Role == "owner" && actor.Role != "owner" {
@@ -178,9 +221,13 @@ func (d apiDeps) handleCreateInvite(w http.ResponseWriter, r *http.Request) {
 	id := ulid.Make().String()
 	expires := time.Now().Add(7 * 24 * time.Hour).Unix()
 	ctx := r.Context()
+	emailParam := sql.NullString{}
+	if body.Email != "" {
+		emailParam = sql.NullString{String: body.Email, Valid: true}
+	}
 	if err := d.q.CreateInvite(ctx, sqlc.CreateInviteParams{
 		ID:        id,
-		Email:     sql.NullString{String: body.Email, Valid: true},
+		Email:     emailParam,
 		Role:      sql.NullString{String: body.Role, Valid: true},
 		TokenHash: hash,
 		InvitedBy: sql.NullString{String: actor.ID, Valid: true},
@@ -199,7 +246,7 @@ func (d apiDeps) handleCreateInvite(w http.ResponseWriter, r *http.Request) {
 	})
 	emailSent := false
 	smtpCfg, _, base, smtpOK := d.smtpReady(ctx)
-	if smtpOK {
+	if smtpOK && body.Email != "" {
 		link := "/accept-invite?token=" + plain
 		if base != "" {
 			link = base + link
@@ -218,6 +265,27 @@ func (d apiDeps) handleCreateInvite(w http.ResponseWriter, r *http.Request) {
 		Token:     plain,
 		EmailSent: emailSent,
 	})
+}
+
+func (d apiDeps) handleDeleteInvite(w http.ResponseWriter, r *http.Request) {
+	actor, ok := d.requireAdmin(w, r)
+	if !ok {
+		return
+	}
+	id := r.PathValue("id")
+	ctx := r.Context()
+	if err := d.q.DeleteInvite(ctx, id); err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "database error")
+		return
+	}
+	_ = d.audit.Record(ctx, audit.Entry{
+		UserID:     actor.ID,
+		Action:     "invite.revoke",
+		TargetKind: "invite",
+		TargetID:   id,
+		IP:         clientIP(r),
+	})
+	w.WriteHeader(http.StatusNoContent)
 }
 
 func (d apiDeps) handleListAudit(w http.ResponseWriter, r *http.Request) {

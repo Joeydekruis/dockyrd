@@ -9,7 +9,7 @@ export function AnnouncementBanner() {
   return (
     <section
       aria-label="Announcement"
-      className="relative flex h-full min-h-11 w-full flex-wrap items-center justify-between gap-2 border-b px-6 py-2 text-sm sm:gap-4"
+      className="relative flex h-full w-full flex-wrap items-center justify-between gap-2 border-b px-6 text-sm sm:gap-4"
       style={{
         background: "var(--banner-blue)",
         borderColor: "var(--border)",
@@ -32,7 +32,7 @@ export function AnnouncementBanner() {
           href={PUBLIC_DOCS_INTRO_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex min-h-9 items-center gap-2 rounded-[10px] px-3 py-1.5 text-[13px] font-medium no-underline transition-colors hover:bg-white/50"
+          className="inline-flex items-center gap-2 rounded-[10px] px-3 py-1 text-[13px] font-medium no-underline transition-colors hover:bg-white/50"
         >
           <BookOpen strokeWidth={1.8} className="size-4" aria-hidden />
           Documentation
@@ -42,7 +42,7 @@ export function AnnouncementBanner() {
           href={PUBLIC_GITHUB_REPO_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex min-h-9 items-center gap-2 rounded-[10px] px-3 py-1.5 text-[13px] font-medium no-underline transition-colors hover:bg-white/50"
+          className="inline-flex items-center gap-2 rounded-[10px] px-3 py-1 text-[13px] font-medium no-underline transition-colors hover:bg-white/50"
         >
           <svg
             width="16"

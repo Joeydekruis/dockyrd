@@ -42,6 +42,16 @@ func (q *Queries) CreateInvite(ctx context.Context, arg CreateInviteParams) erro
 	return err
 }
 
+const deleteInvite = `-- name: DeleteInvite :exec
+DELETE FROM invites
+WHERE id = ? AND accepted_at IS NULL
+`
+
+func (q *Queries) DeleteInvite(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, deleteInvite, id)
+	return err
+}
+
 const getPendingInviteByTokenHash = `-- name: GetPendingInviteByTokenHash :one
 SELECT
   id,
@@ -88,7 +98,6 @@ SELECT
   expires_at
 FROM invites
 WHERE accepted_at IS NULL
-  AND expires_at > ?
 ORDER BY expires_at DESC
 `
 
@@ -100,8 +109,8 @@ type ListPendingInvitesRow struct {
 	ExpiresAt sql.NullInt64
 }
 
-func (q *Queries) ListPendingInvites(ctx context.Context, expiresAt sql.NullInt64) ([]ListPendingInvitesRow, error) {
-	rows, err := q.db.QueryContext(ctx, listPendingInvites, expiresAt)
+func (q *Queries) ListPendingInvites(ctx context.Context) ([]ListPendingInvitesRow, error) {
+	rows, err := q.db.QueryContext(ctx, listPendingInvites)
 	if err != nil {
 		return nil, err
 	}

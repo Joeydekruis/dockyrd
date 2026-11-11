@@ -48,6 +48,7 @@ func (d apiDeps) handleInviteAccept(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Token    string `json:"token"`
 		Name     string `json:"name"`
+		Email    string `json:"email"`
 		Password string `json:"password"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -74,7 +75,10 @@ func (d apiDeps) handleInviteAccept(w http.ResponseWriter, r *http.Request) {
 	}
 	email := strings.ToLower(strings.TrimSpace(inv.Email.String))
 	if email == "" {
-		writeJSONError(w, http.StatusBadRequest, "invite has no email")
+		email = strings.ToLower(strings.TrimSpace(body.Email))
+	}
+	if email == "" {
+		writeJSONError(w, http.StatusBadRequest, "email required for this invite")
 		return
 	}
 	if _, err := d.q.GetUserByEmail(ctx, email); err == nil {

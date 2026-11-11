@@ -69,7 +69,7 @@ export function TemplateCard({
     return (
       <a
         href={href}
-        className={`${className} transition-colors hover:bg-[var(--hover-row)]`}
+        className={`dockyrd-surface-interactive ${className}`}
         style={style}
       >
         {body}
