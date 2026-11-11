@@ -13,12 +13,11 @@ func sshPrecheck(ctx context.Context, exec Commander, skip bool) error {
 	if skip {
 		return nil
 	}
-	out, err := exec.Run(ctx, "sshd", "-T")
+	enabled, err := SSHPasswordAuthEnabled(ctx, exec)
 	if err != nil {
 		return fmt.Errorf("%w: cannot read sshd config: %v", ErrPrecondition, err)
 	}
-	cfg := strings.ToLower(string(out))
-	if !strings.Contains(cfg, "passwordauthentication yes") {
+	if !enabled {
 		return nil
 	}
 	if !hasPrivilegedAuthorizedKeys() {

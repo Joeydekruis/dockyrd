@@ -448,12 +448,11 @@ export function mountDeployBreak(canvas, root, options) {
     const r = cv.getBoundingClientRect();
     paddle.target = ((e.clientX - r.left) / r.width) * W;
   }
-  canvas.addEventListener("pointermove", setTargetFromEvent);
-  canvas.addEventListener("pointerdown", (e) => {
+  function onPointerDown(e) {
     setTargetFromEvent(e);
     launch();
-  });
-  window.addEventListener("keydown", (e) => {
+  }
+  function onKeyDown(e) {
     const k = e.key;
     if (k === "ArrowLeft" || k === "a" || k === "A") {
       keys.left = true;
@@ -471,21 +470,26 @@ export function mountDeployBreak(canvas, root, options) {
     } else if (k === "m" || k === "M") {
       muteBtn.click();
     }
-  });
-  window.addEventListener("keyup", (e) => {
+  }
+  function onKeyUp(e) {
     const k = e.key;
     if (k === "ArrowLeft" || k === "a" || k === "A") keys.left = false;
     if (k === "ArrowRight" || k === "d" || k === "D") keys.right = false;
-  });
+  }
+  function onVisibilityChange() {
+    if (document.hidden && state === "play") togglePause();
+  }
+  canvas.addEventListener("pointermove", setTargetFromEvent);
+  canvas.addEventListener("pointerdown", onPointerDown);
+  window.addEventListener("keydown", onKeyDown);
+  window.addEventListener("keyup", onKeyUp);
   muteBtn.onclick = () => {
     muted = !muted;
     muteBtn.textContent = "Sound: " + (muted ? "off" : "on");
     muteBtn.setAttribute("aria-pressed", String(muted));
   };
   pauseBtn.onclick = togglePause;
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden && state === "play") togglePause();
-  });
+  document.addEventListener("visibilitychange", onVisibilityChange);
 
   // ---------- Update ----------
   function stepBall(b) {
@@ -822,9 +826,12 @@ export function mountDeployBreak(canvas, root, options) {
   }
 
   // ---------- Loop (fixed 60Hz) ----------
+  let destroyed = false;
+  let rafId = 0;
   let last = performance.now(),
     acc = 0;
   function frame(now) {
+    if (destroyed) return;
     acc += Math.min(100, now - last);
     last = now;
     while (acc >= 1000 / 60) {
@@ -839,19 +846,7 @@ export function mountDeployBreak(canvas, root, options) {
       acc -= 1000 / 60;
     }
     draw();
-
-    function applyExternalDeploy() {
-      if (typeof options.deployProgress === "number") {
-        const ext = Math.max(deploy, options.deployProgress);
-        deploy = ext;
-        deployDone = !!options.deployDone || deploy >= 100;
-        updateDeploy();
-      }
-      if (options.releaseLabel) elLevel.textContent = options.releaseLabel;
-    }
-    setInterval(applyExternalDeploy, 500);
-
-    requestAnimationFrame(frame);
+    rafId = requestAnimationFrame(frame);
   }
 
   // ---------- Init ----------
@@ -871,9 +866,8 @@ export function mountDeployBreak(canvas, root, options) {
     }
     if (options.releaseLabel) elLevel.textContent = options.releaseLabel;
   }
-  setInterval(applyExternalDeploy, 500);
-
-  requestAnimationFrame(frame);
+  const deploySyncId = setInterval(applyExternalDeploy, 500);
+  rafId = requestAnimationFrame(frame);
   // demo hooks for testing
   window.__dy = {
     get state() {
@@ -903,5 +897,18 @@ export function mountDeployBreak(canvas, root, options) {
       bricks.length = 0;
     },
   };
-  return { getScore: () => score, getBest: () => best };
+  return {
+    getScore: () => score,
+    getBest: () => best,
+    destroy() {
+      destroyed = true;
+      cancelAnimationFrame(rafId);
+      clearInterval(deploySyncId);
+      canvas.removeEventListener("pointermove", setTargetFromEvent);
+      canvas.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    },
+  };
 }

@@ -661,6 +661,48 @@ func (q *Queries) ListServicesByProject(ctx context.Context, projectID string) (
 	return items, nil
 }
 
+const listServicesDiskMeta = `-- name: ListServicesDiskMeta :many
+SELECT id, name, slug, kind
+FROM services
+WHERE parent_service_id IS NULL
+ORDER BY name
+`
+
+type ListServicesDiskMetaRow struct {
+	ID   string
+	Name string
+	Slug string
+	Kind string
+}
+
+func (q *Queries) ListServicesDiskMeta(ctx context.Context) ([]ListServicesDiskMetaRow, error) {
+	rows, err := q.db.QueryContext(ctx, listServicesDiskMeta)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListServicesDiskMetaRow
+	for rows.Next() {
+		var i ListServicesDiskMetaRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Slug,
+			&i.Kind,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const serviceSlugExistsInEnvironment = `-- name: ServiceSlugExistsInEnvironment :one
 SELECT id
 FROM services

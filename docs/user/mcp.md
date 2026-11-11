@@ -76,6 +76,20 @@ Create the token with the right **project** and **scope** (`read`, `deploy`, or 
 
 Point Cursor or Claude at this command only when the editor runs **on the server** (or via SSH). For laptops connecting to a remote VPS, prefer **HTTPS + OAuth** instead.
 
+## Troubleshooting Claude connect
+
+If Claude shows **“Couldn’t register”** with your panel name, it usually means the panel’s OAuth metadata did not advertise **Client ID Metadata Documents (CIMD)**. Claude then tries **dynamic client registration**, which Dockyrd does not expose.
+
+**Check on the panel (as an admin, logged in):**
+
+```bash
+curl -sS "https://YOUR_PANEL/.well-known/oauth-authorization-server" | jq '.client_id_metadata_document_supported'
+```
+
+This must be `true` on builds that support Claude/Cursor OAuth.
+
+Also confirm **MCP is enabled** under Server settings → MCP, the panel **public URL** is correct HTTPS (used in OAuth metadata), and the instance allows outbound HTTPS from the server when fetching Claude’s client metadata document.
+
 ## Security practices
 
 - Prefer **OAuth** for Claude and Cursor on your workstation.

@@ -12,4 +12,8 @@ export function mountDeployBreak(
   canvas: HTMLCanvasElement,
   root: HTMLElement,
   options: DeployBreakMountOptions,
-): { getScore: () => number; getBest: () => number };
+): {
+  getScore: () => number;
+  getBest: () => number;
+  destroy: () => void;
+};

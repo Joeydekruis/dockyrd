@@ -1350,6 +1350,51 @@ export function getServerCleanup() {
   return apiFetch<CleanupSummary>("/api/v1/server/cleanup");
 }
 
+export type DiskUsageCategory = {
+  id: string;
+  label: string;
+  bytes: number;
+};
+
+export type DiskUsageService = {
+  service_id: string;
+  name: string;
+  slug: string;
+  kind: string;
+  bytes: number;
+  sources?: string[];
+};
+
+export type DiskUsageVolume = {
+  name: string;
+  bytes: number;
+  service_id?: string;
+  slug?: string;
+};
+
+export type DiskUsageReport = {
+  data_dir: string;
+  scanned_at: number;
+  categories: DiskUsageCategory[];
+  services: DiskUsageService[];
+  docker: {
+    docker_available: boolean;
+    images_bytes: number;
+    containers_bytes: number;
+    volumes_bytes: number;
+    build_cache_bytes: number;
+    dangling_images_bytes: number;
+    volumes?: DiskUsageVolume[];
+  };
+  log_files: { path: string; bytes: number }[];
+  other_bytes: number;
+};
+
+export function getServerDiskUsage(refresh?: boolean) {
+  const q = refresh ? "?refresh=1" : "";
+  return apiFetch<DiskUsageReport>(`/api/v1/server/disk-usage${q}`);
+}
+
 export type ServerInfo = {
   version: string;
   uptime_sec: number;

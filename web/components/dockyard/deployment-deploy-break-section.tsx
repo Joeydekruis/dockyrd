@@ -36,6 +36,7 @@ export function DeploymentDeployBreakSection({
   const [sessionBest, setSessionBest] = useState(0);
   const [liveScore, setLiveScore] = useState(0);
   const lastSaved = useRef(0);
+  const sessionBestRef = useRef(0);
 
   const release = useMemo(
     () => deploymentReleaseTag(deployment) ?? "v0.1.1",
@@ -78,12 +79,13 @@ export function DeploymentDeployBreakSection({
   const onScoreChange = useCallback(
     (score: number) => {
       setLiveScore(score);
-      if (score > sessionBest) {
+      if (score > sessionBestRef.current) {
+        sessionBestRef.current = score;
         setSessionBest(score);
         void persistScore(score);
       }
     },
-    [persistScore, sessionBest],
+    [persistScore],
   );
 
   const onBestChange = useCallback((best: number) => {

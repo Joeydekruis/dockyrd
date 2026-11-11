@@ -245,11 +245,6 @@ export function ApplicationDeploymentDetailPage() {
 
           <DeploymentResourceStrip deployment={row.deployment} />
 
-          <DeploymentDeployBreakSection
-            deployment={row.deployment}
-            service={row.service}
-          />
-
           <section
             className="rounded-[20px] border px-6 py-5"
             style={{
@@ -316,6 +311,11 @@ export function ApplicationDeploymentDetailPage() {
               </div>
             ) : null}
           </section>
+
+          <DeploymentDeployBreakSection
+            deployment={row.deployment}
+            service={row.service}
+          />
 
           {row.deployment.error ? (
             <div

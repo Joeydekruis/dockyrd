@@ -74,6 +74,7 @@ func (s *Server) handleAuthorizationServerMetadata(w http.ResponseWriter, r *htt
 		"grant_types_supported":                 []string{"authorization_code"},
 		"token_endpoint_auth_methods_supported": []string{"none"},
 		"code_challenge_methods_supported":      []string{"S256"},
+		"client_id_metadata_document_supported": true,
 	}
 	writeJSON(w, http.StatusOK, meta)
 }
@@ -90,16 +91,21 @@ func (s *Server) handleAuthorize(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	origin := s.origin(r)
-	if !allowedRedirectURI(redirectURI, origin) {
-		http.Error(w, "invalid_request", http.StatusBadRequest)
-		return
-	}
 	if q.Get("code_challenge_method") != "S256" || strings.TrimSpace(q.Get("code_challenge")) == "" {
 		http.Error(w, "invalid_request", http.StatusBadRequest)
 		return
 	}
 	clientID := strings.TrimSpace(q.Get("client_id"))
 	if clientID == "" {
+		http.Error(w, "invalid_request", http.StatusBadRequest)
+		return
+	}
+	oauthClient, err := ResolveOAuthClient(r.Context(), clientID, http.DefaultClient)
+	if err != nil {
+		http.Error(w, "invalid_client", http.StatusBadRequest)
+		return
+	}
+	if !oauthClient.AllowsRedirectURI(redirectURI, origin) {
 		http.Error(w, "invalid_request", http.StatusBadRequest)
 		return
 	}
@@ -119,7 +125,7 @@ func (s *Server) handleAuthorize(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if q.Get("consent") != "1" {
-		renderOAuthConsent(w, r, clientID, scopes)
+		renderOAuthConsent(w, r, oauthClient.DisplayID(), scopes)
 		return
 	}
 

@@ -84,12 +84,11 @@ func (s *SSHPasswordAuthDisable) Verify(ctx context.Context) error {
 	if s.Env.HostRoot() != "" {
 		return nil
 	}
-	out, err := s.Env.Exec.Run(ctx, "sshd", "-T")
+	enabled, err := SSHPasswordAuthEnabled(ctx, s.Env.Exec)
 	if err != nil {
 		return err
 	}
-	cfg := strings.ToLower(string(out))
-	if strings.Contains(cfg, "passwordauthentication yes") {
+	if enabled {
 		return fmt.Errorf("password authentication still enabled")
 	}
 	return nil

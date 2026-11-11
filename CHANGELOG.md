@@ -6,6 +6,22 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.7.20] - 2026-11-11
+
+_Finished: 2026-11-11_
+
+### Added
+
+- **MCP OAuth (Claude)** — Client ID Metadata Documents (`client_id_metadata_document_supported`), CIMD fetch/validation, pinned Anthropic metadata when Cloudflare blocks fetch; loopback port-insensitive redirect matching; `docs/user/mcp.md` troubleshooting
+- **Server disk usage** — `GET /api/v1/server/disk-usage` with category/service/volume breakdown (`internal/diskusage`, Docker sizing); analytics dashboard disk panels
+
+### Changed
+
+- **Analytics** — server traffic tab charts and data hooks; per-service analytics wiring
+- **Security checks** — `sshd -T` via `SSHPasswordAuthEnabled`; nftables read via `ReadNFTRules`; proxy defaults check includes panel host/upstream
+- **Host ops** — `sshd_effective` helpers; unattended-upgrades ensure uses `EffectiveConfig` paths
+- **Deploy Break** — engine timing/score tweaks; deployment detail integration
+
 ## [0.7.19] - 2026-11-11
 
 _Finished: 2026-11-11_

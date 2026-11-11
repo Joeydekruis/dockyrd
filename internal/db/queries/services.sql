@@ -195,6 +195,12 @@ JOIN projects p ON p.id = e.project_id
 WHERE s.id = ?
 LIMIT 1;
 
+-- name: ListServicesDiskMeta :many
+SELECT id, name, slug, kind
+FROM services
+WHERE parent_service_id IS NULL
+ORDER BY name;
+
 -- name: UpdateServiceConfig :exec
 UPDATE services
 SET config = ?, updated_at = ?

@@ -6,11 +6,13 @@ import {
   ackEvent,
   type CleanupSummary,
   type ContainerMetricSnapshot,
+  type DiskUsageReport,
   type dockyrdEvent,
   getMe,
   getServerCleanup,
   getServerContainerMetrics,
   getServerContainers,
+  getServerDiskUsage,
   getServerInfo,
   getServerMetrics,
   listEvents,
@@ -32,6 +34,7 @@ export type AnalyticsData = {
   containers: ServerContainer[];
   containerMetrics: ContainerMetricSnapshot[];
   cleanup: CleanupSummary | null;
+  diskUsage: DiskUsageReport | null;
   isAdmin: boolean;
   loading: boolean;
   error: string | null;
@@ -62,6 +65,7 @@ export function useAnalyticsData(): AnalyticsData {
     ContainerMetricSnapshot[]
   >([]);
   const [cleanup, setCleanup] = useState<CleanupSummary | null>(null);
+  const [diskUsage, setDiskUsage] = useState<DiskUsageReport | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [cleanupBusy, setCleanupBusy] = useState(false);
   const [lastRefreshedAt, setLastRefreshedAt] = useState<number | null>(null);
@@ -88,15 +92,18 @@ export function useAnalyticsData(): AnalyticsData {
         setContainerMetrics(cm.metrics);
         setEvents(ev.events);
         try {
-          const [{ containers: cs }, sum] = await Promise.all([
+          const [{ containers: cs }, sum, disk] = await Promise.all([
             getServerContainers(),
             getServerCleanup(),
+            getServerDiskUsage().catch(() => null),
           ]);
           setContainers(cs.filter((c) => c.state === "running"));
           setCleanup(sum);
+          setDiskUsage(disk);
         } catch {
           setContainers([]);
           setCleanup(null);
+          setDiskUsage(null);
         }
         try {
           const me = await getMe();
@@ -175,6 +182,7 @@ export function useAnalyticsData(): AnalyticsData {
     containers,
     containerMetrics,
     cleanup,
+    diskUsage,
     isAdmin,
     loading,
     error,

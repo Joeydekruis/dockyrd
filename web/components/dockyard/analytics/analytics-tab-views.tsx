@@ -41,6 +41,7 @@ import {
 import type {
   CleanupSummary,
   ContainerMetricSnapshot,
+  DiskUsageReport,
   dockyrdEvent,
   HostMetricPoint,
   ServerContainer,
@@ -448,12 +449,204 @@ export function MemoryTab({
   );
 }
 
+function DiskUsageTables({ diskUsage }: { diskUsage: DiskUsageReport | null }) {
+  if (!diskUsage) {
+    return (
+      <UnavailablePanel title="Usage breakdown">
+        Scanning disk usage — refresh in a moment if this stays empty.
+      </UnavailablePanel>
+    );
+  }
+
+  const docker = diskUsage.docker;
+  const hasDocker = docker.docker_available;
+
+  return (
+    <div className="space-y-6">
+      <AnalyticsChartCard
+        title="Data directory"
+        subtitle={`Under ${diskUsage.data_dir}`}
+      >
+        {diskUsage.categories.length === 0 ? (
+          <p className="text-sm" style={{ color: "var(--muted-text)" }}>
+            No measured categories yet.
+          </p>
+        ) : (
+          <table className="w-full text-left text-sm">
+            <thead>
+              <tr className="font-mono text-[11px] uppercase tracking-widest text-[var(--muted-text)]">
+                <th className="pb-2 pr-3">Category</th>
+                <th className="pb-2">Size</th>
+              </tr>
+            </thead>
+            <tbody>
+              {diskUsage.categories.map((row) => (
+                <tr key={row.id} className="border-t border-[var(--border)]">
+                  <td className="py-2 pr-3">{row.label}</td>
+                  <td className="py-2 font-mono tabular-nums">
+                    {formatBytes(row.bytes)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </AnalyticsChartCard>
+
+      <AnalyticsChartCard
+        title="By application"
+        subtitle="Compose data, static releases, and database volumes"
+      >
+        {diskUsage.services.length === 0 ? (
+          <p className="text-sm" style={{ color: "var(--muted-text)" }}>
+            No per-application usage detected under the data directory yet.
+          </p>
+        ) : (
+          <table className="w-full text-left text-sm">
+            <thead>
+              <tr className="font-mono text-[11px] uppercase tracking-widest text-[var(--muted-text)]">
+                <th className="pb-2 pr-3">Service</th>
+                <th className="pb-2 pr-3">Kind</th>
+                <th className="pb-2">Size</th>
+              </tr>
+            </thead>
+            <tbody>
+              {diskUsage.services.map((row) => (
+                <tr
+                  key={row.service_id}
+                  className="border-t border-[var(--border)]"
+                >
+                  <td className="py-2 pr-3">
+                    <div className="font-medium">{row.name}</div>
+                    {row.sources?.length ? (
+                      <div
+                        className="text-xs"
+                        style={{ color: "var(--muted-text)" }}
+                      >
+                        {row.sources.join(" · ")}
+                      </div>
+                    ) : null}
+                  </td>
+                  <td className="py-2 pr-3 font-mono text-xs">{row.kind}</td>
+                  <td className="py-2 font-mono tabular-nums">
+                    {formatBytes(row.bytes)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </AnalyticsChartCard>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <AnalyticsChartCard
+          title="Docker engine"
+          subtitle={
+            hasDocker
+              ? "Often on a separate disk from dockyrd data"
+              : "Docker unavailable"
+          }
+        >
+          {hasDocker ? (
+            <ul className="space-y-2 text-sm">
+              <li className="flex justify-between">
+                <span>Images</span>
+                <span className="font-mono">
+                  {formatBytes(docker.images_bytes)}
+                </span>
+              </li>
+              <li className="flex justify-between">
+                <span>Containers (writable layers)</span>
+                <span className="font-mono">
+                  {formatBytes(docker.containers_bytes)}
+                </span>
+              </li>
+              <li className="flex justify-between">
+                <span>Named volumes</span>
+                <span className="font-mono">
+                  {formatBytes(docker.volumes_bytes)}
+                </span>
+              </li>
+              <li className="flex justify-between">
+                <span>Build cache</span>
+                <span className="font-mono">
+                  {formatBytes(docker.build_cache_bytes)}
+                </span>
+              </li>
+            </ul>
+          ) : (
+            <p className="text-sm" style={{ color: "var(--muted-text)" }}>
+              Connect Docker to see image, container, and volume sizes.
+            </p>
+          )}
+        </AnalyticsChartCard>
+
+        <AnalyticsChartCard
+          title="Log files"
+          subtitle="Under the data directory"
+        >
+          {diskUsage.log_files.length === 0 ? (
+            <p className="text-sm" style={{ color: "var(--muted-text)" }}>
+              No large log files found in the proxy log directory.
+            </p>
+          ) : (
+            <ul className="space-y-2 text-sm">
+              {diskUsage.log_files.map((f) => (
+                <li key={f.path} className="flex justify-between gap-3">
+                  <span className="truncate font-mono text-xs" title={f.path}>
+                    {f.path}
+                  </span>
+                  <span className="shrink-0 font-mono tabular-nums">
+                    {formatBytes(f.bytes)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </AnalyticsChartCard>
+      </div>
+
+      {hasDocker && docker.volumes && docker.volumes.length > 0 ? (
+        <AnalyticsChartCard
+          title="Largest Docker volumes"
+          subtitle="Database and persistent app data"
+        >
+          <table className="w-full text-left text-sm">
+            <thead>
+              <tr className="font-mono text-[11px] uppercase tracking-widest text-[var(--muted-text)]">
+                <th className="pb-2 pr-3">Volume</th>
+                <th className="pb-2 pr-3">Linked service</th>
+                <th className="pb-2">Size</th>
+              </tr>
+            </thead>
+            <tbody>
+              {docker.volumes.map((v) => (
+                <tr key={v.name} className="border-t border-[var(--border)]">
+                  <td className="py-2 pr-3 font-mono text-xs">{v.name}</td>
+                  <td className="py-2 pr-3">{v.slug || "—"}</td>
+                  <td className="py-2 font-mono tabular-nums">
+                    {formatBytes(v.bytes)}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </AnalyticsChartCard>
+      ) : null}
+    </div>
+  );
+}
+
 export function DiskTab({
   points,
   latest,
   rangeLabel,
   cleanup,
-}: TabProps & { cleanup: CleanupSummary | null }) {
+  diskUsage,
+}: TabProps & {
+  cleanup: CleanupSummary | null;
+  diskUsage: DiskUsageReport | null;
+}) {
   const { metricTimeLabels } = useUserLocale();
   const labels = metricTimeLabels(points);
   const usedGb = points.map((p) => p.disk_used / (1024 * 1024 * 1024));
@@ -539,34 +732,29 @@ export function DiskTab({
       >
         <EChart option={chartOpt} height={280} ariaLabel="Disk usage chart" />
       </AnalyticsChartCard>
-      <div className="grid gap-6 lg:grid-cols-2">
-        <AnalyticsChartCard
-          title="What is using the disk"
-          subtitle="Best-effort breakdown"
-        >
-          <EChart option={stackOpt} height={24} ariaLabel="Disk breakdown" />
-          <ul className="mt-4 space-y-2 text-sm">
-            <li className="flex justify-between">
-              <span>Data directory (measured)</span>
-              <span className="font-mono">{formatBytes(used)}</span>
-            </li>
-            <li className="flex justify-between">
-              <span>Build cache</span>
-              <span className="font-mono">
-                {formatBytes(cleanup?.build_cache_bytes ?? 0)}
-              </span>
-            </li>
-            <li className="flex justify-between">
-              <span>Free</span>
-              <span className="font-mono">{formatBytes(free)}</span>
-            </li>
-          </ul>
-        </AnalyticsChartCard>
-        <UnavailablePanel title="Largest volumes">
-          Per-volume sizes for managed databases are not exposed in the API yet.
-          Use Docker cleanup below for reclaimable Docker layers.
-        </UnavailablePanel>
-      </div>
+      <AnalyticsChartCard
+        title="What is using the disk"
+        subtitle="Best-effort summary on the data volume"
+      >
+        <EChart option={stackOpt} height={24} ariaLabel="Disk breakdown" />
+        <ul className="mt-4 space-y-2 text-sm">
+          <li className="flex justify-between">
+            <span>Data directory (measured)</span>
+            <span className="font-mono">{formatBytes(used)}</span>
+          </li>
+          <li className="flex justify-between">
+            <span>Build cache</span>
+            <span className="font-mono">
+              {formatBytes(cleanup?.build_cache_bytes ?? 0)}
+            </span>
+          </li>
+          <li className="flex justify-between">
+            <span>Free</span>
+            <span className="font-mono">{formatBytes(free)}</span>
+          </li>
+        </ul>
+      </AnalyticsChartCard>
+      <DiskUsageTables diskUsage={diskUsage} />
     </div>
   );
 }

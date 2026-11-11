@@ -51,8 +51,7 @@ func checkFirewallActive(ctx context.Context, deps Deps, ts int64) Result {
 		ID: "firewall.active", Title: "Host firewall", Severity: "high",
 		Fix: FixHostAction, FixKind: hostops.KindFirewallEnsure, LastRunAt: ts,
 	}
-	path := deps.Env.NFTRulesPath()
-	data, err := deps.Env.ReadFile(path)
+	data, err := deps.Env.ReadNFTRules()
 	if err != nil {
 		if runtime.GOOS != "linux" {
 			r.Status, r.Detail = StatusWarn, "Firewall state not inspectable on this dev host"
@@ -127,14 +126,13 @@ func checkSSHPasswordAuth(ctx context.Context, deps Deps, ts int64) Result {
 		r.Status, r.Detail = StatusWarn, "sshd not inspected on dev host"
 		return r
 	}
-	out, err := deps.Env.Exec.Run(ctx, "sshd", "-T")
+	enabled, err := hostops.SSHPasswordAuthEnabled(ctx, deps.Env.Exec)
 	if err != nil {
 		r.Status, r.Detail = StatusWarn, "Cannot query sshd"
 		r.Fix = FixNone
 		return r
 	}
-	cfg := strings.ToLower(string(out))
-	if strings.Contains(cfg, "passwordauthentication yes") {
+	if enabled {
 		r.Status, r.Detail = StatusFail, "Password authentication is enabled"
 		return r
 	}
@@ -232,7 +230,11 @@ func checkProxyDefaults(deps Deps, ts int64) Result {
 		ID: "proxy.defaults", Title: "Proxy baseline defaults", Severity: "medium",
 		Fix: FixLink, FixHref: "/settings/server/updates", LastRunAt: ts,
 	}
-	raw, err := proxy.Render(proxy.RenderInput{ACMEEmail: "checks@dockyrd.local"})
+	raw, err := proxy.Render(proxy.RenderInput{
+		ACMEEmail:     "checks@dockyrd.local",
+		PanelHost:     "checks.dockyrd.local",
+		PanelUpstream: "127.0.0.1:1",
+	})
 	if err != nil {
 		r.Status, r.Detail = StatusFail, err.Error()
 		return r

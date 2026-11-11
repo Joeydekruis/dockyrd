@@ -43,14 +43,15 @@ export function DeployBreakGame({
   optsRef.current.onScoreChange = onScoreChange;
   optsRef.current.onBestChange = onBestChange;
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: remount canvas game when deployment id changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies: mount once per deployment
   useEffect(() => {
     const root = rootRef.current;
     const canvas = canvasRef.current;
     if (!root || !canvas) return;
     optsRef.current.initialBest = initialBest;
-    mountDeployBreak(canvas, root, optsRef.current);
-  }, [deploymentId, initialBest]);
+    const engine = mountDeployBreak(canvas, root, optsRef.current);
+    return () => engine.destroy();
+  }, [deploymentId]);
 
   return (
     <div

@@ -62,7 +62,7 @@ func (f *FirewallEnsure) Apply(ctx context.Context) (RevertPayload, error) {
 
 func (f *FirewallEnsure) Verify(ctx context.Context) error {
 	path := f.Env.NFTRulesPath()
-	data, err := f.Env.ReadFile(path)
+	data, err := f.Env.ReadNFTRules()
 	if err != nil {
 		return err
 	}

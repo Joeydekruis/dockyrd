@@ -60,7 +60,30 @@ func (h HostEnv) NFTRulesPath() string {
 	if root := h.HostRoot(); root != "" {
 		return filepath.Join(root, "nftables", "dockyrd.nft")
 	}
+	return filepath.Join(h.Cfg.ConfigDir, "nftables", "dockyrd.nft")
+}
+
+// LegacyNFTRulesPath is the pre-0.1.x rules location (some hosts could not create /etc/nftables.d).
+func (h HostEnv) LegacyNFTRulesPath() string {
+	if h.HostRoot() != "" {
+		return ""
+	}
 	return "/etc/nftables.d/dockyrd.nft"
+}
+
+func (h HostEnv) AptConfDDir() string {
+	if root := h.HostRoot(); root != "" {
+		return filepath.Join(root, "apt", "apt.conf.d")
+	}
+	return "/etc/apt/apt.conf.d"
+}
+
+func (h HostEnv) UnattendedAptConfPath() string {
+	return filepath.Join(h.AptConfDDir(), "50dockyrd-unattended-upgrades")
+}
+
+func (h HostEnv) UnattendedAutoUpgradesPath() string {
+	return filepath.Join(h.AptConfDDir(), "20dockyrd-auto-upgrades")
 }
 
 func (h HostEnv) UnattendedStampPath() string {
@@ -83,6 +106,20 @@ func (h HostEnv) RebootRequiredPath() string {
 
 func (h HostEnv) ReadFile(path string) ([]byte, error) {
 	return os.ReadFile(path)
+}
+
+// ReadNFTRules returns dockyrd nftables rules from the managed path or the legacy system path.
+func (h HostEnv) ReadNFTRules() ([]byte, error) {
+	data, err := h.ReadFile(h.NFTRulesPath())
+	if err == nil {
+		return data, nil
+	}
+	if legacy := h.LegacyNFTRulesPath(); legacy != "" {
+		if data, err2 := h.ReadFile(legacy); err2 == nil {
+			return data, nil
+		}
+	}
+	return nil, err
 }
 
 func (h HostEnv) WriteFile(path string, data []byte, mode os.FileMode) error {

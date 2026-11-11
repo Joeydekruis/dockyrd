@@ -153,7 +153,11 @@ export function AnalyticsPage() {
         {tab === "cpu" ? <CpuTab {...tabProps} /> : null}
         {tab === "memory" ? <MemoryTab {...tabProps} /> : null}
         {tab === "disk" ? (
-          <DiskTab {...tabProps} cleanup={data.cleanup} />
+          <DiskTab
+            {...tabProps}
+            cleanup={data.cleanup}
+            diskUsage={data.diskUsage}
+          />
         ) : null}
         {tab === "network" ? <NetworkTab {...tabProps} /> : null}
 
