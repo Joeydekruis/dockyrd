@@ -26,6 +26,21 @@ func (d apiDeps) handleServerDiskUsage(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, report)
 }
 
+func (d apiDeps) handleServerDiskUsageDetail(w http.ResponseWriter, r *http.Request) {
+	if _, ok := d.requireUser(w, r); !ok {
+		return
+	}
+	scope := strings.TrimSpace(r.URL.Query().Get("scope"))
+	path := strings.TrimSpace(r.URL.Query().Get("path"))
+	serviceID := strings.TrimSpace(r.URL.Query().Get("service_id"))
+	detail, err := diskusage.Detail(r.Context(), d.cfg, d.q, d.docker, scope, path, serviceID)
+	if err != nil {
+		writeJSONError(w, http.StatusBadRequest, "disk detail failed")
+		return
+	}
+	writeJSON(w, http.StatusOK, detail)
+}
+
 func (d apiDeps) diskUsageReport(r *http.Request, force bool) diskusage.Report {
 	if !force {
 		diskUsageMu.Lock()

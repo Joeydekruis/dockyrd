@@ -147,6 +147,29 @@ func TestMCPOAuthPKCERoundtrip(t *testing.T) {
 	}
 }
 
+func TestMCPGetUnauthorized(t *testing.T) {
+	dir := t.TempDir()
+	cfg := config.Config{DataDir: filepath.Join(dir, "data"), ConfigDir: filepath.Join(dir, "etc")}
+	conn, q, err := db.Open(cfg.DatabasePath())
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = conn.Close() })
+
+	mux := http.NewServeMux()
+	registerAPIRoutes(mux, apiDeps{cfg: cfg, q: q})
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/mcp", nil)
+	req.Header.Set("Origin", "https://claude.ai")
+	mux.ServeHTTP(rec, req)
+	if rec.Code != http.StatusUnauthorized {
+		t.Fatalf("GET /mcp status %d want 401", rec.Code)
+	}
+	if !strings.Contains(rec.Header().Get("WWW-Authenticate"), "resource_metadata=") {
+		t.Fatalf("missing WWW-Authenticate: %q", rec.Header().Get("WWW-Authenticate"))
+	}
+}
+
 func TestMCPPostUnauthorized(t *testing.T) {
 	dir := t.TempDir()
 	cfg := config.Config{DataDir: filepath.Join(dir, "data"), ConfigDir: filepath.Join(dir, "etc")}
@@ -161,6 +184,7 @@ func TestMCPPostUnauthorized(t *testing.T) {
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodPost, "/mcp", strings.NewReader(`{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}`))
 	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Origin", "https://claude.ai")
 	mux.ServeHTTP(rec, req)
 	if rec.Code != http.StatusUnauthorized {
 		t.Fatalf("status %d want 401", rec.Code)

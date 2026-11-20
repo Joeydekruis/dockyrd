@@ -15,9 +15,12 @@ import (
 
 // Category is one row in the data-directory breakdown.
 type Category struct {
-	ID    string `json:"id"`
-	Label string `json:"label"`
-	Bytes int64  `json:"bytes"`
+	ID        string `json:"id"`
+	Label     string `json:"label"`
+	Bytes     int64  `json:"bytes"`
+	RelPath   string `json:"rel_path,omitempty"`
+	IsDir     bool   `json:"is_dir"`
+	Drillable bool   `json:"drillable"`
 }
 
 // ServiceRow attributes on-disk usage to one deployable service.
@@ -57,13 +60,14 @@ type DockerUsage struct {
 
 // Report is the full disk inventory for the analytics Disk tab.
 type Report struct {
-	DataDir    string     `json:"data_dir"`
-	ScannedAt  int64      `json:"scanned_at"`
-	Categories []Category `json:"categories"`
-	Services   []ServiceRow `json:"services"`
-	Docker     DockerUsage `json:"docker"`
-	LogFiles   []LogFile  `json:"log_files"`
-	OtherBytes int64      `json:"other_bytes"`
+	DataDir    string        `json:"data_dir"`
+	ScannedAt  int64         `json:"scanned_at"`
+	Summary    VolumeSummary `json:"summary"`
+	Categories []Category    `json:"categories"`
+	Services   []ServiceRow  `json:"services"`
+	Docker     DockerUsage   `json:"docker"`
+	LogFiles   []LogFile     `json:"log_files"`
+	OtherBytes int64         `json:"other_bytes"`
 }
 
 var categoryLabels = map[string]string{
@@ -85,9 +89,10 @@ func BuildReport(ctx context.Context, cfg config.Config, q *sqlc.Queries, cli *d
 		DataDir:   root,
 		ScannedAt: 0,
 	}
+	report.Docker = dockerBreakdown(ctx, cli, q)
+	report.Summary = volumeSummary(ctx, cfg, cli, report.Docker)
 	report.Categories = dataDirCategories(root)
 	report.LogFiles = findLargeLogs(cfg)
-	report.Docker = dockerBreakdown(ctx, cli, q)
 
 	if q != nil {
 		report.Services = serviceUsage(ctx, cfg, q, report.Docker.Volumes)
@@ -120,7 +125,14 @@ func dataDirCategories(root string) []Category {
 			label = "Other: " + name
 			id = "other:" + name
 		}
-		out = append(out, Category{ID: id, Label: label, Bytes: bytes})
+		out = append(out, Category{
+			ID:        id,
+			Label:     label,
+			Bytes:     bytes,
+			RelPath:   name,
+			IsDir:     e.IsDir(),
+			Drillable: e.IsDir() && bytes > 0,
+		})
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].Bytes > out[j].Bytes })
 	return out
@@ -212,6 +224,9 @@ func dockerBreakdown(ctx context.Context, cli *docker.Client, q *sqlc.Queries) D
 				row.Slug = slug
 				break
 			}
+		}
+		if row.Slug == "" && strings.Contains(vol.Name, "buildkit") {
+			row.Slug = "BuildKit"
 		}
 		out.Volumes = append(out.Volumes, row)
 	}

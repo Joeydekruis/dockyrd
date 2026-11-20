@@ -40,3 +40,20 @@ func TestDynamicClientRegistration(t *testing.T) {
 		t.Fatal("DCR client should allow Claude redirect")
 	}
 }
+
+func TestDynamicClientRegistrationCORS(t *testing.T) {
+	srv := &Server{}
+	mux := http.NewServeMux()
+	srv.Register(mux)
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodOptions, "/oauth/register", nil)
+	req.Header.Set("Origin", "https://claude.ai")
+	mux.ServeHTTP(rec, req)
+	if rec.Code != http.StatusNoContent {
+		t.Fatalf("OPTIONS status %d", rec.Code)
+	}
+	if rec.Header().Get("Access-Control-Allow-Origin") != "*" {
+		t.Fatalf("missing CORS headers: %#v", rec.Header())
+	}
+}

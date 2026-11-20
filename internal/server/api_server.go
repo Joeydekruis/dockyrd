@@ -19,6 +19,7 @@ func registerServerRoutes(mux *http.ServeMux, deps apiDeps) {
 	mux.HandleFunc("GET /api/v1/server/cleanup", deps.handleServerCleanupGet)
 	mux.HandleFunc("POST /api/v1/server/cleanup", deps.handleServerCleanupPost)
 	mux.HandleFunc("GET /api/v1/server/disk-usage", deps.handleServerDiskUsage)
+	mux.HandleFunc("GET /api/v1/server/disk-usage/detail", deps.handleServerDiskUsageDetail)
 	mux.HandleFunc("POST /api/v1/server/edge/reload", deps.handleServerEdgeReload)
 }
 

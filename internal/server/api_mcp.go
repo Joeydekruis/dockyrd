@@ -3,8 +3,6 @@ package server
 import (
 	"context"
 	"net/http"
-	"net/url"
-	"strings"
 
 	mcpsdkauth "github.com/modelcontextprotocol/go-sdk/auth"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
@@ -73,37 +71,22 @@ func (d apiDeps) registerMCPRoutes(mux *http.ServeMux) {
 		return ti, nil
 	}
 
-	mux.Handle("POST /mcp", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if panelDisabled(r.Context()) {
-			http.Error(w, "mcp disabled", http.StatusNotFound)
-			return
-		}
-		if !mcpOriginOK(r) {
-			http.Error(w, "forbidden", http.StatusForbidden)
-			return
-		}
+	// Match all methods on /mcp (GET probe, POST JSON-RPC, DELETE session). Do not require
+	// Origin == Host: remote clients (Claude) send a cross-origin Origin during setup.
+	mux.Handle("/mcp", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		panel, _ := instance.LoadPanel(r.Context(), d.q)
 		origin := mcpsoaut.PanelOrigin(r, d.cfg, panel)
 		prm := origin + "/.well-known/oauth-protected-resource/mcp"
+		inner := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			if panelDisabled(r.Context()) {
+				http.Error(w, "mcp disabled", http.StatusServiceUnavailable)
+				return
+			}
+			stream.ServeHTTP(w, r)
+		})
 		handler := mcpsdkauth.RequireBearerToken(verifier, &mcpsdkauth.RequireBearerTokenOptions{
 			ResourceMetadataURL: prm,
-		})(stream)
+		})(inner)
 		handler.ServeHTTP(w, r)
 	}))
-}
-
-func mcpOriginOK(r *http.Request) bool {
-	origin := strings.TrimSpace(r.Header.Get("Origin"))
-	if origin == "" {
-		return true
-	}
-	u, err := url.Parse(origin)
-	if err != nil {
-		return false
-	}
-	host := r.Host
-	if h := strings.TrimSpace(r.Header.Get("X-Forwarded-Host")); h != "" {
-		host = h
-	}
-	return strings.EqualFold(u.Host, host)
 }
