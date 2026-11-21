@@ -1,18 +1,15 @@
 # Generator state
 
-**Updated:** 2026-11-11
+**Updated:** 2026-11-21
 
 ## In progress
 
-**#83 MCP (Claude/Cursor)** — generator i1 on `development`.
+**#79 P2a proxybuild & proxy.swap** — implementation on agent worktree.
 
-- OAuth PRM + authorization server metadata, `/oauth/authorize` + `/oauth/token` (PKCE)
-- `POST /mcp` Streamable HTTP (`modelcontextprotocol/go-sdk` v1.8.0)
-- Tools: list projects/services, deployments, logs tail, trigger deploy
-- `dockyrd mcp --stdio`
-- Settings → Server → Integrations: MCP section
-- Tests: `TestMCPProtectedResourceMetadata`, `TestMCPOAuthPKCERoundtrip`
-- **Next:** `mcp-reviewer` + `security-reviewer`; instance toggles in API/UI; login `return` URL support; handoff #83
+- `packaging/proxybuild/Dockerfile`, `.github/workflows/proxybuild.yml`
+- `internal/proxybuild`, `internal/proxy/swap.go`, `hostops` proxy.swap
+- Addon `proxybuild` + `proxybuild_installed` API/UI flag
+- **Next:** commit, changelog 0.7.22, handoff #79
 
 ## Last ship
 

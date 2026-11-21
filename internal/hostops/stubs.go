@@ -34,4 +34,3 @@ func NewFirewallEnsureStub() Action        { return newStub(KindFirewallEnsure) 
 func NewSSHPasswordAuthDisableStub() Action { return newStub(KindSSHPasswordAuthDisable) }
 func NewUnattendedEnableStub() Action      { return newStub(KindUnattendedEnable) }
 func NewCrowdsecBouncerInstallStub() Action { return newStub(KindCrowdsecBouncerInstall) }
-func NewProxySwapStub() Action             { return newStub(KindProxySwap) }

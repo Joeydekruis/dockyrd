@@ -1,0 +1,9 @@
+{
+  "repository": "ghcr.io/joeydekruis/dockyrd-proxy",
+  "caddy_version": "2.8.4",
+  "cosign": {
+    "certificate_identity_regexp": "https://github.com/Joeydekruis/dockyrd/.github/workflows/proxybuild.yml@refs/tags/.*",
+    "certificate_oidc_issuer": "https://token.actions.githubusercontent.com"
+  },
+  "default_image": "caddy:2-alpine"
+}

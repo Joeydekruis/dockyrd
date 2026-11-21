@@ -15,6 +15,7 @@ export type SecurityPolicy = {
   default_mem_mb: number;
   default_cpu: number;
   default_pids: number;
+  proxybuild_installed: boolean;
   proxy_rate_limit_installed: boolean;
   proxy_waf_installed: boolean;
 };
@@ -45,6 +46,7 @@ export type ServiceSecurityPayload = {
     mem_mb: number;
     cpu: number;
     pids: number;
+    proxybuild_installed: boolean;
     proxy_rate_limit_installed: boolean;
     proxy_waf_installed: boolean;
   };

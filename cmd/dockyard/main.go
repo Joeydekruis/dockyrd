@@ -8,6 +8,7 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/admin"
 	"github.com/Joeydekruis/dockyrd/internal/config"
 	"github.com/Joeydekruis/dockyrd/internal/hostops"
+	"github.com/Joeydekruis/dockyrd/internal/proxybuild"
 	"github.com/Joeydekruis/dockyrd/internal/doctor"
 	mcpsdk "github.com/Joeydekruis/dockyrd/internal/mcp"
 	"github.com/Joeydekruis/dockyrd/internal/server"
@@ -28,6 +29,7 @@ func main() {
 	switch os.Args[1] {
 	case "serve":
 		server.SetBuildVersion(version)
+		proxybuild.SetPanelVersion(version)
 		if err := server.Serve(cfg); err != nil {
 			fmt.Fprintf(os.Stderr, "serve: %v\n", err)
 			os.Exit(1)

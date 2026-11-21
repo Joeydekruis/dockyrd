@@ -27,8 +27,16 @@ const (
 
 // EnsureProxy runs the system Caddy container (dy-proxy) with host networking on 80/443.
 func (c *Client) EnsureProxy(ctx context.Context, cfg config.Config) error {
+	return c.ensureProxyImage(ctx, cfg, EffectiveProxyImage(cfg))
+}
+
+func (c *Client) ensureProxyImage(ctx context.Context, cfg config.Config, image string) error {
 	if c == nil || c.moby == nil {
 		return errors.New("docker client required")
+	}
+	image = strings.TrimSpace(image)
+	if image == "" {
+		image = ProxyImage
 	}
 	if err := c.EnsureEdgeNetwork(ctx); err != nil {
 		return err
@@ -52,14 +60,15 @@ func (c *Client) EnsureProxy(ctx context.Context, cfg config.Config) error {
 		return err
 	}
 
-	if err := c.PullImage(ctx, ProxyImage); err != nil {
-		return fmt.Errorf("pull %s: %w", ProxyImage, err)
+	if err := c.PullImage(ctx, image); err != nil {
+		return fmt.Errorf("pull %s: %w", image, err)
 	}
 
 	inspect, err := c.moby.ContainerInspect(ctx, ProxyContainerName)
 	if err == nil {
 		spec := inspect.Config.Labels[proxySpecLabel]
-		if spec != proxySpecHostV2 {
+		runningImage := inspect.Config.Image
+		if spec != proxySpecHostV2 || !strings.Contains(runningImage, imageNameKey(image)) {
 			if err := c.removeProxyContainer(ctx); err != nil {
 				return err
 			}
@@ -85,7 +94,7 @@ func (c *Client) EnsureProxy(ctx context.Context, cfg config.Config) error {
 		}
 		applySystemCgroup(hostCfg)
 		_, err = c.moby.ContainerCreate(ctx, &container.Config{
-			Image: ProxyImage,
+			Image: image,
 			Cmd: []string{
 				"caddy", "run",
 				"--config", caddyDirInContainer + "/bootstrap.json",
@@ -96,7 +105,6 @@ func (c *Client) EnsureProxy(ctx context.Context, cfg config.Config) error {
 				proxySpecLabel: proxySpecHostV2,
 			},
 		}, hostCfg, nil, nil, ProxyContainerName)
-		// cgroup applied on create only; existing dy-proxy keeps prior placement until recreated
 		if err != nil {
 			return fmt.Errorf("create dy-proxy: %w", err)
 		}
@@ -118,6 +126,17 @@ func (c *Client) EnsureProxy(ctx context.Context, cfg config.Config) error {
 		return err
 	}
 	return nil
+}
+
+func imageNameKey(ref string) string {
+	ref = strings.TrimSpace(ref)
+	if i := strings.LastIndex(ref, "/"); i >= 0 {
+		ref = ref[i+1:]
+	}
+	if i := strings.Index(ref, "@"); i >= 0 {
+		ref = ref[:i]
+	}
+	return ref
 }
 
 func (c *Client) removeProxyContainer(ctx context.Context) error {
