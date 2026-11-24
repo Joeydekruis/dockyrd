@@ -51,6 +51,7 @@ type serviceSecurityEffective struct {
 	MemMB         int               `json:"mem_mb"`
 	CPU           float64           `json:"cpu"`
 	PIDs          int               `json:"pids"`
+	ProxyBuild     bool             `json:"proxybuild_installed"`
 	ProxyRateLimit bool             `json:"proxy_rate_limit_installed"`
 	ProxyWAF       bool             `json:"proxy_waf_installed"`
 }
@@ -417,6 +418,7 @@ func (d apiDeps) serviceSecurityPayload(ctx context.Context, row sqlc.ServiceSec
 			MemMB:           securitypolicy.EffectiveMemMB(inst, site),
 			CPU:             securitypolicy.EffectiveCPU(inst, site),
 			PIDs:            securitypolicy.EffectivePIDs(inst, site),
+			ProxyBuild:      d.proxyBuildInstalled(ctx),
 			ProxyRateLimit:  rl,
 			ProxyWAF:        waf,
 		},

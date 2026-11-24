@@ -100,6 +100,7 @@ export function ServiceSecurityTab({ serviceId, kind }: Props) {
   }
 
   const proxyReady =
+    data.effective.proxybuild_installed ||
     data.effective.proxy_rate_limit_installed ||
     data.effective.proxy_waf_installed;
 

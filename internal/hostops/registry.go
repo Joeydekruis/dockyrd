@@ -35,7 +35,7 @@ func DefaultRegistry(cfg config.Config) *Registry {
 	r.Register(KindSSHPasswordAuthDisable, func() Action { return NewSSHPasswordAuthDisable(env) })
 	r.Register(KindUnattendedEnable, func() Action { return NewUnattendedEnable(env) })
 	r.Register(KindCrowdsecBouncerInstall, NewCrowdsecBouncerInstallStub)
-	r.Register(KindProxySwap, NewProxySwapStub)
+	r.Register(KindProxySwap, func() Action { return NewProxySwap(cfg) })
 	r.Register(KindTestEcho, func() Action { return NewTestEcho(cfg) })
 	return r
 }

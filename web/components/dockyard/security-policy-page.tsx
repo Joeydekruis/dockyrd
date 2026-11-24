@@ -69,7 +69,9 @@ export function SecurityPolicyPage() {
   }
 
   const proxyReady =
-    policy.proxy_rate_limit_installed || policy.proxy_waf_installed;
+    policy.proxybuild_installed ||
+    policy.proxy_rate_limit_installed ||
+    policy.proxy_waf_installed;
 
   return (
     <DashboardShell title="Security">

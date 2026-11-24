@@ -31,6 +31,7 @@ type policyResponse struct {
 	DefaultMemMB   int                            `json:"default_mem_mb"`
 	DefaultCPU     float64                        `json:"default_cpu"`
 	DefaultPIDs    int                            `json:"default_pids"`
+	ProxyBuild     bool                           `json:"proxybuild_installed"`
 	ProxyRateLimit bool                           `json:"proxy_rate_limit_installed"`
 	ProxyWAF       bool                           `json:"proxy_waf_installed"`
 }
@@ -79,6 +80,7 @@ func (d apiDeps) handleGetSecurityPolicy(w http.ResponseWriter, r *http.Request)
 		DefaultMemMB:   int(row.DefaultMemMb),
 		DefaultCPU:     row.DefaultCpu,
 		DefaultPIDs:    int(row.DefaultPids),
+		ProxyBuild:     d.proxyBuildInstalled(r.Context()),
 		ProxyRateLimit: rlInstalled,
 		ProxyWAF:       wafInstalled,
 	})
@@ -155,6 +157,11 @@ func (d apiDeps) handlePutSecurityPolicy(w http.ResponseWriter, r *http.Request)
 	})
 	d.syncEdgeProxy(r.Context())
 	d.handleGetSecurityPolicy(w, r)
+}
+
+func (d apiDeps) proxyBuildInstalled(ctx context.Context) bool {
+	row, err := d.q.GetAddon(ctx, "proxybuild")
+	return err == nil && row.State == "installed"
 }
 
 func (d apiDeps) proxyBuildFlags(ctx context.Context) (rateLimit, waf bool) {

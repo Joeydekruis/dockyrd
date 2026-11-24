@@ -40,6 +40,10 @@ var catalog = []CatalogEntry{
 		Kind: KindRecommended, Installable: false,
 	},
 	{
+		ID: "proxybuild", Title: "Dockyrd proxy build", Description: "Signed Caddy image with WAF and rate-limit modules",
+		Kind: KindRecommended, Installable: true, HostAction: hostops.KindProxySwap, Version: "1",
+	},
+	{
 		ID: "proxy-waf", Title: "Proxy WAF", Description: "Coraza WAF via proxybuild (P2)",
 		Kind: KindOptional, Installable: false,
 	},
