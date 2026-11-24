@@ -2,5 +2,13 @@
   "name": "dockyrd",
   "version": "0.7.21",
   "private": true,
-  "description": "dockyrd monorepo — app version source of truth for CHANGELOG"
+  "description": "dockyrd monorepo — app version source of truth for CHANGELOG",
+  "scripts": {
+    "init": "go run ./cmd/dockyard init",
+    "build": "make build",
+    "serve": "./bin/dockyrd serve",
+    "dev": "bash scripts/dev-local.sh",
+    "dev:api": "dockyrd_DEV_UI=http://localhost:3000 go run ./cmd/dockyard serve",
+    "dev:web": "pnpm --dir web dev"
+  }
 }

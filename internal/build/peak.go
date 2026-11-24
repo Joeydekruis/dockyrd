@@ -68,7 +68,7 @@ func (s *PeakSampler) Stop() (memPeak, swapPeak int64) {
 
 // FailureMessage returns user-facing copy with build-elsewhere hints.
 func FailureMessage(kind, detail string) string {
-	hints := " You can add swap, add a remote builder under Server settings → Builders, or build on GitHub Actions."
+	hints := " You can add swap or add a remote builder under Server settings → Builders."
 	switch kind {
 	case "oom":
 		return "This build ran out of memory under the server budget." + hints

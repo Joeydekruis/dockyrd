@@ -82,11 +82,6 @@ func (rt *Runtime) runAppDeployment(ctx context.Context, deploymentID string, de
 		imageRef = strings.TrimSpace(dep.ImageRef.String)
 		needsBuild = false
 	}
-	if appCfg.UsesGitHubActionsBuild() && needsBuild {
-		if dep.Status == "waiting" {
-			return nil
-		}
-	}
 
 	now := time.Now().Unix()
 	if err := rt.Q.UpdateDeploymentStatus(ctx, sqlc.UpdateDeploymentStatusParams{

@@ -14,7 +14,7 @@ Product plan for cgroup isolation, build budgets, admission control, pressure fr
 | [#52](https://github.com/Joeydekruis/dockyrd/issues/52) | Layer 2 static sites on BuildKit + buildkitd.toml sizing | M2 |
 | [#53](https://github.com/Joeydekruis/dockyrd/issues/53) | Layer 4 PSI watchdog (freeze/thaw) | M4 |
 | [#54](https://github.com/Joeydekruis/dockyrd/issues/54) | Layer 5 env injection + hints | M2 |
-| [#55](https://github.com/Joeydekruis/dockyrd/issues/55) | Layer 6a GitHub Actions workflow + deploy hook | M2 |
+| [#55](https://github.com/Joeydekruis/dockyrd/issues/55) | Layer 6a deploy hook (CI posts image) | M2 |
 | [#56](https://github.com/Joeydekruis/dockyrd/issues/56) | API/UI: build budget, resource strip, builders settings | M4 |
 | [#57](https://github.com/Joeydekruis/dockyrd/issues/57) | Layer 6b remote BuildKit + doctor + e2e fixtures | M4 / v0.2 |
 
@@ -27,7 +27,7 @@ Local specs: `docs/project/issues/<n>/spec.md` per issue.
 3. **Budget & admission** — Formula from meminfo + slice working sets; set `MemoryHigh`/`MemoryMax`/`MemorySwapMax` on `dy-build.slice`; `waiting` deployment state when peak > budget.
 4. **Watchdog** — PSI-driven `cgroup.freeze` on build slice only; thaw on startup in reconciler.
 5. **Tuning** — `NODE_OPTIONS`, cache mounts, non-blocking hints.
-6. **Build elsewhere** — GitHub Actions generator + deploy hook; optional remote BuildKit (mTLS).
+6. **Build elsewhere** — deploy hook for external CI; optional remote BuildKit (mTLS).
 
 ## Deployment state machine change
 
@@ -42,7 +42,7 @@ internal/build/
   watchdog.go
   env.go
   staticsite.go       # BuildKit path
-  ghactions.go
+  deployhook.go
   remote.go
 ```
 

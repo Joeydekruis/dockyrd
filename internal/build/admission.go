@@ -100,7 +100,7 @@ func DecideAdmission(b Budget, expectedPeak int64) AdmissionDecision {
 	if b.RAMBytes < minRAMToBuild {
 		dec.Fail = true
 		dec.Message = fmt.Sprintf(
-			"Not enough memory to build safely (%d MB available). Add swap, use a remote builder, or build on GitHub Actions.",
+			"Not enough memory to build safely (%d MB available). Add swap or use a remote builder.",
 			b.RAMBytes/(1024*1024),
 		)
 		return dec

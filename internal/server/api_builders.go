@@ -218,6 +218,10 @@ func (d apiDeps) handlePatchBuildLocation(w http.ResponseWriter, r *http.Request
 		writeJSONError(w, http.StatusBadRequest, "build_location required")
 		return
 	}
+	if strings.EqualFold(loc, "github_actions") {
+		writeJSONError(w, http.StatusBadRequest, "github_actions build location is no longer supported")
+		return
+	}
 	raw, err := github.LoadServiceConfig(r.Context(), d.q, serviceID)
 	if err != nil {
 		writeJSONError(w, http.StatusNotFound, "service not found")

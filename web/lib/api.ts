@@ -409,14 +409,6 @@ export function createServiceDeployToken(serviceId: string) {
   );
 }
 
-export function getServiceGitHubWorkflow(serviceId: string) {
-  return apiFetch<{
-    workflow: string;
-    yaml: string;
-    secrets: { name: string; value?: string; description?: string }[];
-  }>(`/api/v1/services/${serviceId}/github-workflow`);
-}
-
 export function restartDatabaseService(serviceId: string) {
   return apiFetch<void>(`/api/v1/services/${serviceId}/restart`, {
     method: "POST",

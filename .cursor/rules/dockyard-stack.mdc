@@ -31,7 +31,7 @@ Generate after schema/API changes: `make generate` (sqlc, OpenAPI, TS client typ
 ## Build
 
 - `make build`: `pnpm --dir web build` → `web/out` → `go build` with embed.
-- Do not commit `web/out`; CI builds it as an artefact.
+- Do not commit `web/out`; `make build` produces it before the Go embed step.
 
 ## Forbidden shortcuts
 

@@ -4,7 +4,7 @@ Tracked after milestone **M5** / release **v0.0.22+**. Create GitHub issues as y
 
 | Item | Notes |
 |------|--------|
-| Ubuntu/Debian install CI matrix | `.github/workflows/install-matrix.yml` (verify-install on runners) |
+| Ubuntu/Debian install matrix | Periodic local `./scripts/verify-install.sh` on amd64 + arm64 hosts |
 | `e2e/fixtures/` deploy smoke | Sample app + Postgres + bucket on Docker host |
 | Load during redeploy | `e2e/scripts/load-health.sh` skeleton |
 | UI update modal | Instance banner + release notes (server `GET /api/v1/server`) |

@@ -23,7 +23,7 @@ You write production code and tests. You **must not** author reviewer-owned file
 2. **UI contract:** `docs/design-index.json` + `docs/dockyrd-design.html`; issue wireframes when §17 gaps
 3. **If designer ran:** `design-direction.md` + `assets/*-wireframe.html` - treat as contract for that feature
 4. When design was skipped (typical S-M): implement from spec + `docs/project/patterns/` + `web/components/dockyrd/*`
-5. Enforce [dockyrd-design-contract](../../.cursor/rules/dockyrd-design-contract.mdc) + [dockyrd-stack](../../.cursor/rules/dockyrd-stack.mdc) on touched surfaces
+5. Enforce [dockyrd-design-contract](../rules/dockyrd-design-contract.mdc) + [dockyrd-stack](../rules/dockyrd-stack.mdc) on touched surfaces
 6. `docs/project/generator-state.md` (context only)
 7. `docs/project/setup.md` - verify commands; skill **dockyrd-dev** for embed/generate loop
 8. For iteration `i>1`: all `docs/project/feedback/<n>/*-i<i-1>.md` and `generator-response-i<i-1>.md`

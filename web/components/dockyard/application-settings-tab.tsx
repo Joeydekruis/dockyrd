@@ -22,7 +22,6 @@ import {
   createServiceDeployToken,
   deletePanelService,
   getServiceDeployTokenStatus,
-  getServiceGitHubWorkflow,
   type Project,
   patchService,
   type Service,
@@ -146,29 +145,6 @@ export function ApplicationSettingsTab({
     };
   }, [gitSourced, service.id]);
 
-  async function downloadWorkflowYaml() {
-    setBusy(true);
-    onError(null);
-    try {
-      const res = await getServiceGitHubWorkflow(service.id);
-      const blob = new Blob([res.yaml], { type: "text/yaml;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const tail = res.workflow.includes("/")
-        ? res.workflow.split("/").pop()
-        : null;
-      const name = tail && tail.length > 0 ? tail : "dockyrd.yml";
-      const anchor = document.createElement("a");
-      anchor.href = url;
-      anchor.download = name;
-      anchor.click();
-      URL.revokeObjectURL(url);
-    } catch (e) {
-      onError(e instanceof Error ? e.message : "Could not load workflow");
-    } finally {
-      setBusy(false);
-    }
-  }
-
   async function regenerateDeployToken() {
     setBusy(true);
     onError(null);
@@ -273,7 +249,7 @@ export function ApplicationSettingsTab({
           </div>
           <SettingsDetailBlock
             title="Deploy hook"
-            description="POST a built image reference with a deploy token (GitHub Actions or custom CI)."
+            description="POST a built image reference with a deploy token from your own CI pipeline."
             actionLabel={gitSourced ? "Regenerate token" : undefined}
             onAction={
               gitSourced ? () => void regenerateDeployToken() : undefined
@@ -296,21 +272,6 @@ export function ApplicationSettingsTab({
               },
             ]}
           />
-          {gitSourced ? (
-            <SettingsDetailBlock
-              title="GitHub Actions"
-              description="Workflow that builds on GitHub and deploys via the hook above."
-              actionLabel="Download workflow"
-              onAction={() => void downloadWorkflowYaml()}
-              rows={[
-                {
-                  label: "File",
-                  value: ".github/workflows/dockyrd.yml",
-                  span: 2,
-                },
-              ]}
-            />
-          ) : null}
           {!gitSourced ? (
             <p
               className="-mx-6 border-t px-6 py-4 text-[13px]"

@@ -12,6 +12,9 @@ import (
 // resolveBuildx picks a docker buildx builder from buildLocation (local | auto | remote:<id>).
 func (rt *Runtime) resolveBuildx(ctx context.Context, buildLocation string) (buildxName, metricsLabel string, remote bool, err error) {
 	loc := strings.TrimSpace(strings.ToLower(buildLocation))
+	if loc == "github_actions" {
+		loc = "local"
+	}
 	if loc == "" || loc == "local" {
 		if rt.Docker != nil {
 			if err := rt.Docker.EnsureBuildkit(ctx, rt.Cfg.DataDir); err != nil {
@@ -19,9 +22,6 @@ func (rt *Runtime) resolveBuildx(ctx context.Context, buildLocation string) (bui
 			}
 		}
 		return build.LocalBuildxBuilder(), "local", false, nil
-	}
-	if loc == "github_actions" {
-		return "", "", false, fmt.Errorf("build runs on GitHub Actions")
 	}
 	if loc == "auto" {
 		if name, label, ok := rt.firstOnlineRemoteBuildx(ctx); ok {

@@ -41,11 +41,9 @@ User **Postgres/Redis** services are provisioned by dockyrd in Docker — not mi
 
 ---
 
-## CI
+## Verification (local)
 
-Briefing §14.3 expects **`.github/workflows/`** (`ci.yml`, `e2e.yml`, `release.yml`). Maintain workflows when adding gates (Go lint, `pnpm` web build, Radix check, integration on main/nightly).
-
-Local runs should mirror CI subsets for touched surfaces — full matrix before release / `push-to-main`.
+No GitHub Actions workflows in this repo — run gates from **`docs/project/setup.md`** locally for touched surfaces. Full matrix before release / `push-to-main`.
 
 ---
 

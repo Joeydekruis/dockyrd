@@ -20,11 +20,10 @@ Optional with Docker: `go test -tags=integration ./...`, `make e2e-ui` (`E2E_FRE
 |------|----------|
 | Doctor | `dockyrd doctor`, `internal/doctor/` |
 | Admin CLI | `dockyrd admin reset-password`, `disable-2fa` |
-| CI | `.github/workflows/ci.yml` |
 | Self-update | `dockyrd update`, `internal/updater/` |
-| E2E | `e2e/smoke.sh`, `.github/workflows/e2e.yml`, `make e2e` |
-| Release | `.goreleaser.yaml`, `.github/workflows/release.yml` |
-| Playwright | `e2e/tests/`, CI job |
+| E2E | `e2e/smoke.sh`, `make e2e` |
+| Release | `.goreleaser.yaml` (GoReleaser run locally) |
+| Playwright | `e2e/tests/` |
 | Server info | `GET /api/v1/server`, instance settings UI |
 | Install | `scripts/install.sh`, `scripts/verify-install.sh` |
 | User docs | `docs/user/` (install, first-app, nextjs, domains-dns, troubleshooting, email-smtp) |

@@ -10,9 +10,9 @@ Overlaps `.cursor/rules/testing.mdc`; pair with **`.cursor/rules/typescript/test
 
 ## CI vs manual / harness
 
-**GitHub Actions (default):** `go test`, `tsc --noEmit`, web build, no-Radix, lean **`e2e/`** smoke (health, setup+login API, one sign-in heading). No layout screenshots, axe, or Lighthouse in CI unless a Feature rubric explicitly requires it.
+**Local default:** `go test`, `tsc --noEmit`, web build, no-Radix, lean **`e2e/`** smoke (health, setup+login API, one sign-in heading). No layout screenshots, axe, or Lighthouse unless a Feature rubric explicitly requires it.
 
-**Manual / Feature harness:** visual, a11y, perf, and breakpoint checks below — when product risk warrants it, not on every push.
+**Manual / Feature harness:** visual, a11y, perf, and breakpoint checks below — when product risk warrants it.
 
 ## Priority ladder (manual / harness — not default CI)
 
