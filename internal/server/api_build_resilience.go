@@ -12,7 +12,6 @@ import (
 	"github.com/oklog/ulid/v2"
 
 	"github.com/Joeydekruis/dockyrd/internal/apitoken"
-	"github.com/Joeydekruis/dockyrd/internal/appconfig"
 	"github.com/Joeydekruis/dockyrd/internal/build"
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
 	"github.com/Joeydekruis/dockyrd/internal/github"
@@ -22,7 +21,6 @@ import (
 
 func registerBuildResilienceRoutes(mux *http.ServeMux, deps apiDeps) {
 	mux.HandleFunc("GET /api/v1/server/build-budget", deps.handleBuildBudget)
-	mux.HandleFunc("GET /api/v1/services/{id}/github-workflow", deps.handleGitHubWorkflow)
 	mux.HandleFunc("GET /api/v1/services/{id}/deploy-token", deps.handleGetDeployTokenStatus)
 	mux.HandleFunc("POST /api/v1/services/{id}/deploy-token", deps.handleCreateDeployToken)
 	mux.HandleFunc("POST /api/v1/hooks/deploy/{service_id}", deps.handleDeployHook)
@@ -53,50 +51,6 @@ func (d apiDeps) handleBuildBudget(w http.ResponseWriter, r *http.Request) {
 		"kernel_reserve":  snap.KernelReserve,
 		"mem_total":       snap.MemTotal,
 		"isolation_active": res.Available(),
-	})
-}
-
-func (d apiDeps) handleGitHubWorkflow(w http.ResponseWriter, r *http.Request) {
-	user, ok := d.requireUser(w, r)
-	if !ok {
-		return
-	}
-	_ = user
-	serviceID := r.PathValue("id")
-	raw, err := github.LoadServiceConfig(r.Context(), d.q, serviceID)
-	if err != nil {
-		writeJSONError(w, http.StatusNotFound, "service not found")
-		return
-	}
-	cfg, err := appconfig.Parse(raw)
-	if err != nil {
-		writeJSONError(w, http.StatusBadRequest, "invalid app config")
-		return
-	}
-	repo := cfg.Source.Repo
-	if repo == "" {
-		writeJSONError(w, http.StatusBadRequest, "service has no GitHub repo")
-		return
-	}
-	base := d.githubPublicBaseURL(r)
-	yaml, err := build.RenderGitHubWorkflow(build.GitHubWorkflowInput{
-		Branch:      cfg.Source.BranchOrDefault(),
-		Context:     cfg.BuildContextDir("."),
-		Image:       build.ExpectedGHCRImage(repo),
-		DockyrdURL: base,
-		ServiceID:   serviceID,
-	})
-	if err != nil {
-		writeJSONError(w, http.StatusInternalServerError, "workflow render failed")
-		return
-	}
-	writeJSON(w, http.StatusOK, map[string]any{
-		"workflow": ".github/workflows/dockyrd.yml",
-		"yaml":     yaml,
-		"secrets": []map[string]string{
-			{"name": "dockyrd_URL", "value": base},
-			{"name": "dockyrd_DEPLOY_TOKEN", "description": "Create via POST /api/v1/services/{id}/deploy-token"},
-		},
 	})
 }
 

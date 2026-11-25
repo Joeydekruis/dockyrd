@@ -47,13 +47,21 @@ func (s *Server) resourceURL(r *http.Request) string {
 }
 
 func (s *Server) Register(mux *http.ServeMux) {
-	mux.HandleFunc("GET /.well-known/oauth-protected-resource", s.handleProtectedResourceMetadata)
-	mux.HandleFunc("GET /.well-known/oauth-protected-resource/mcp", s.handleProtectedResourceMetadata)
-	mux.HandleFunc("GET /.well-known/oauth-authorization-server", s.handleAuthorizationServerMetadata)
-	mux.HandleFunc("GET /.well-known/openid-configuration", s.handleAuthorizationServerMetadata)
+	prm := withDiscoveryCORS(s.handleProtectedResourceMetadata)
+	asMeta := withDiscoveryCORS(s.handleAuthorizationServerMetadata)
+	mux.HandleFunc("GET /.well-known/oauth-protected-resource", prm)
+	mux.HandleFunc("OPTIONS /.well-known/oauth-protected-resource", prm)
+	mux.HandleFunc("GET /.well-known/oauth-protected-resource/mcp", prm)
+	mux.HandleFunc("OPTIONS /.well-known/oauth-protected-resource/mcp", prm)
+	mux.HandleFunc("GET /.well-known/oauth-authorization-server", asMeta)
+	mux.HandleFunc("OPTIONS /.well-known/oauth-authorization-server", asMeta)
+	mux.HandleFunc("GET /.well-known/openid-configuration", asMeta)
+	mux.HandleFunc("OPTIONS /.well-known/openid-configuration", asMeta)
 	mux.HandleFunc("GET /oauth/authorize", s.handleAuthorize)
 	mux.HandleFunc("POST /oauth/token", s.handleToken)
-	mux.HandleFunc("POST /oauth/register", s.handleRegisterClient)
+	reg := withRegisterCORS(s.handleRegisterClient)
+	mux.HandleFunc("POST /oauth/register", reg)
+	mux.HandleFunc("OPTIONS /oauth/register", reg)
 }
 
 func (s *Server) handleProtectedResourceMetadata(w http.ResponseWriter, r *http.Request) {
@@ -75,7 +83,7 @@ func (s *Server) handleAuthorizationServerMetadata(w http.ResponseWriter, r *htt
 		"registration_endpoint":                 origin + "/oauth/register",
 		"scopes_supported":                      mcpscope.AllScopes,
 		"response_types_supported":              []string{"code"},
-		"grant_types_supported":                 []string{"authorization_code"},
+		"grant_types_supported":                 []string{"authorization_code", "refresh_token"},
 		"token_endpoint_auth_methods_supported": []string{"none"},
 		"code_challenge_methods_supported":      []string{"S256"},
 		"client_id_metadata_document_supported": true,

@@ -37,6 +37,7 @@
     "playwright": "latest",
     "storybook": "^10.6.5",
     "tailwindcss": "^4.1.0",
+    "tencil": "^0.14.2",
     "typescript": "^5.8.0",
     "vite": "latest",
     "vitest": "latest"

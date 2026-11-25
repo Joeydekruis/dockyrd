@@ -79,6 +79,45 @@ func (q *Queries) DeleteDomain(ctx context.Context, id string) error {
 	return err
 }
 
+const getDomainByHostname = `-- name: GetDomainByHostname :one
+SELECT
+  id,
+  service_id,
+  hostname,
+  is_platform,
+  is_primary,
+  redirect_to,
+  dns_status,
+  dns_checked_at,
+  cert_status,
+  cert_expires_at,
+  target_service,
+  target_port
+FROM domains
+WHERE hostname = ?
+LIMIT 1
+`
+
+func (q *Queries) GetDomainByHostname(ctx context.Context, hostname string) (Domain, error) {
+	row := q.db.QueryRowContext(ctx, getDomainByHostname, hostname)
+	var i Domain
+	err := row.Scan(
+		&i.ID,
+		&i.ServiceID,
+		&i.Hostname,
+		&i.IsPlatform,
+		&i.IsPrimary,
+		&i.RedirectTo,
+		&i.DnsStatus,
+		&i.DnsCheckedAt,
+		&i.CertStatus,
+		&i.CertExpiresAt,
+		&i.TargetService,
+		&i.TargetPort,
+	)
+	return i, err
+}
+
 const getDomainByID = `-- name: GetDomainByID :one
 SELECT
   id,

@@ -33,15 +33,9 @@ Confirm HEAD is `development` and up to date.
 
 Run the **full** matrix from `docs/project/setup.md` — not a subset. Abort merge on any failure.
 
-**CI parity:** Anything that runs on push to `main` must pass locally first (see `.github/workflows/`). A common miss is `./scripts/verify-install.sh` — invoked with its shebang (`bash`), not the Actions shell; scripts using `set -o pipefail` must use `#!/usr/bin/env bash`, not `#!/bin/sh` (Ubuntu `/bin/sh` is dash).
+**Pre-merge gates:** Run locally before merging to `main`. A common miss is `./scripts/verify-install.sh` — invoked with its shebang (`bash`), not a minimal `/bin/sh`; scripts using `set -o pipefail` must use `#!/usr/bin/env bash`.
 
-| Workflow | Local mirror (before merge) |
-|----------|-----------------------------|
-| `ci.yml` | `make lint`, `make test`, `chmod +x scripts/ensure-ui-stub.sh && ./scripts/ensure-ui-stub.sh`, `pnpm --dir web build`, `./scripts/check-no-radix.sh` |
-| `e2e.yml` | `make build`, `./e2e/smoke.sh`, **`./scripts/verify-install.sh`**, `pnpm --dir e2e test` (Playwright + Docker as in CI) |
-| `install-matrix.yml` | `make build`, **`./scripts/verify-install.sh`** |
-
-When Makefile exists (briefing §14.3):
+When Makefile exists:
 
 ```bash
 make lint
@@ -80,8 +74,8 @@ Never `--force` to `main`.
 
 After section 5, follow [release-ship](../../../.cursor/rules/release-ship.mdc) (skill [release-ship](../../../.cursor/skills/release-ship/SKILL.md)):
 
-1. Push tag **`v$(node -p "require('./package.json').version")`** to `origin` (triggers GoReleaser).
-2. **Wait** for `.github/workflows/release.yml` **success**.
+1. Push tag **`v$(node -p "require('./package.json').version")`** to `origin` (optional marker; release assets come from GoReleaser).
+2. Run **`goreleaser release --clean`** on `main` at that tag (see [release-ship](../../../.cursor/skills/release-ship/SKILL.md)).
 3. **Verify** both `dockyrd_{version}_linux_amd64.tar.gz` and `dockyrd_{version}_linux_arm64.tar.gz` (+ `checksums.txt`) on the GitHub Release.
 
 Do **not** tell Joey the release is ready for self-update until step 3 passes.

@@ -4,7 +4,7 @@ import type { Deployment } from "@/lib/api";
 export function formatBuildLocation(value: string | undefined): string {
   const v = (value ?? "local").trim().toLowerCase();
   if (v === "" || v === "local") return "On this server";
-  if (v === "github_actions") return "GitHub Actions";
+  if (v === "github_actions") return "On this server";
   if (v === "auto") return "Auto (remote when available)";
   if (v.startsWith("remote:")) {
     const id = v.slice("remote:".length);

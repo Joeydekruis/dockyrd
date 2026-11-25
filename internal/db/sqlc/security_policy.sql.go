@@ -54,7 +54,8 @@ const getServiceSecurity = `-- name: GetServiceSecurity :one
 SELECT
   service_id, profile, lock_exempt, csp, csp_report_only,
   basic_user, basic_hash, ip_allowlist_json, maintenance,
-  rl_mode, rl_rpm, rl_login_rpm, waf_mode, mem_mb, cpu, pids
+  rl_mode, rl_rpm, rl_login_rpm, waf_mode, mem_mb, cpu, pids,
+  waf_path_exceptions_json
 FROM service_security
 WHERE service_id = ?
 `
@@ -79,6 +80,7 @@ func (q *Queries) GetServiceSecurity(ctx context.Context, serviceID string) (Ser
 		&i.MemMb,
 		&i.Cpu,
 		&i.Pids,
+		&i.WafPathExceptionsJson,
 	)
 	return i, err
 }
@@ -87,31 +89,34 @@ const insertServiceSecurity = `-- name: InsertServiceSecurity :exec
 INSERT INTO service_security (
   service_id, profile, lock_exempt, csp, csp_report_only,
   basic_user, basic_hash, ip_allowlist_json, maintenance,
-  rl_mode, rl_rpm, rl_login_rpm, waf_mode, mem_mb, cpu, pids
+  rl_mode, rl_rpm, rl_login_rpm, waf_mode, waf_path_exceptions_json,
+  mem_mb, cpu, pids
 ) VALUES (
   ?, ?, ?, ?, ?,
   ?, ?, ?, ?,
-  ?, ?, ?, ?, ?, ?, ?
+  ?, ?, ?, ?, ?,
+  ?, ?, ?
 )
 `
 
 type InsertServiceSecurityParams struct {
-	ServiceID       string
-	Profile         string
-	LockExempt      int64
-	Csp             sql.NullString
-	CspReportOnly   int64
-	BasicUser       sql.NullString
-	BasicHash       sql.NullString
-	IpAllowlistJson string
-	Maintenance     int64
-	RlMode          string
-	RlRpm           sql.NullInt64
-	RlLoginRpm      sql.NullInt64
-	WafMode         string
-	MemMb           sql.NullInt64
-	Cpu             sql.NullFloat64
-	Pids            sql.NullInt64
+	ServiceID             string
+	Profile               string
+	LockExempt            int64
+	Csp                   sql.NullString
+	CspReportOnly         int64
+	BasicUser             sql.NullString
+	BasicHash             sql.NullString
+	IpAllowlistJson       string
+	Maintenance           int64
+	RlMode                string
+	RlRpm                 sql.NullInt64
+	RlLoginRpm            sql.NullInt64
+	WafMode               string
+	WafPathExceptionsJson string
+	MemMb                 sql.NullInt64
+	Cpu                   sql.NullFloat64
+	Pids                  sql.NullInt64
 }
 
 func (q *Queries) InsertServiceSecurity(ctx context.Context, arg InsertServiceSecurityParams) error {
@@ -129,6 +134,7 @@ func (q *Queries) InsertServiceSecurity(ctx context.Context, arg InsertServiceSe
 		arg.RlRpm,
 		arg.RlLoginRpm,
 		arg.WafMode,
+		arg.WafPathExceptionsJson,
 		arg.MemMb,
 		arg.Cpu,
 		arg.Pids,
@@ -197,6 +203,7 @@ UPDATE service_security SET
   rl_rpm = ?,
   rl_login_rpm = ?,
   waf_mode = ?,
+  waf_path_exceptions_json = ?,
   mem_mb = ?,
   cpu = ?,
   pids = ?
@@ -204,22 +211,23 @@ WHERE service_id = ?
 `
 
 type UpdateServiceSecurityParams struct {
-	Profile         string
-	LockExempt      int64
-	Csp             sql.NullString
-	CspReportOnly   int64
-	BasicUser       sql.NullString
-	BasicHash       sql.NullString
-	IpAllowlistJson string
-	Maintenance     int64
-	RlMode          string
-	RlRpm           sql.NullInt64
-	RlLoginRpm      sql.NullInt64
-	WafMode         string
-	MemMb           sql.NullInt64
-	Cpu             sql.NullFloat64
-	Pids            sql.NullInt64
-	ServiceID       string
+	Profile               string
+	LockExempt            int64
+	Csp                   sql.NullString
+	CspReportOnly         int64
+	BasicUser             sql.NullString
+	BasicHash             sql.NullString
+	IpAllowlistJson       string
+	Maintenance           int64
+	RlMode                string
+	RlRpm                 sql.NullInt64
+	RlLoginRpm            sql.NullInt64
+	WafMode               string
+	WafPathExceptionsJson string
+	MemMb                 sql.NullInt64
+	Cpu                   sql.NullFloat64
+	Pids                  sql.NullInt64
+	ServiceID             string
 }
 
 func (q *Queries) UpdateServiceSecurity(ctx context.Context, arg UpdateServiceSecurityParams) error {
@@ -236,6 +244,7 @@ func (q *Queries) UpdateServiceSecurity(ctx context.Context, arg UpdateServiceSe
 		arg.RlRpm,
 		arg.RlLoginRpm,
 		arg.WafMode,
+		arg.WafPathExceptionsJson,
 		arg.MemMb,
 		arg.Cpu,
 		arg.Pids,

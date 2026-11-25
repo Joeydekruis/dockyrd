@@ -15,10 +15,16 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/staticsite"
 )
 
+func proxyWAFInstalled(ctx context.Context, q *sqlc.Queries) bool {
+	row, err := q.GetAddon(ctx, "proxy-waf")
+	return err == nil && row.State == "installed"
+}
+
 // SyncFromDB renders and loads Caddy config for live app and static routes.
 // When docker is non-nil, app upstream hostnames (dy-*) resolve to container IPs for host-networked dy-proxy.
 func SyncFromDB(ctx context.Context, q *sqlc.Queries, cfg config.Config, dock *docker.Client) error {
 	inst, instErr := securitypolicy.LoadInstance(ctx, q)
+	wafInstalled := proxyWAFInstalled(ctx, q)
 	appRows, err := q.ListLiveAppProxyRoutes(ctx)
 	if err != nil {
 		return err
@@ -38,6 +44,8 @@ func SyncFromDB(ctx context.Context, q *sqlc.Queries, cfg config.Config, dock *d
 			site, siteErr := securitypolicy.LoadSite(ctx, q, row.ServiceID)
 			if siteErr == nil {
 				snap := securitypolicy.SnapshotForRoute(inst, site)
+				snap.ProxyWAFInstalled = wafInstalled
+				snap.AllowWAF = true
 				route.Security = &snap
 			}
 		}
@@ -75,6 +83,8 @@ func SyncFromDB(ctx context.Context, q *sqlc.Queries, cfg config.Config, dock *d
 			site, siteErr := securitypolicy.LoadSite(ctx, q, row.ServiceID)
 			if siteErr == nil {
 				snap := securitypolicy.SnapshotForRoute(inst, site)
+				snap.ProxyWAFInstalled = wafInstalled
+				snap.AllowWAF = false // static sites never get coraza_waf (§4.6)
 				sroute.Security = &snap
 			}
 		}
@@ -102,6 +112,8 @@ func SyncFromDB(ctx context.Context, q *sqlc.Queries, cfg config.Config, dock *d
 			site, siteErr := securitypolicy.LoadSite(ctx, q, row.ServiceID)
 			if siteErr == nil {
 				snap := securitypolicy.SnapshotForRoute(inst, site)
+				snap.ProxyWAFInstalled = wafInstalled
+				snap.AllowWAF = true
 				croute.Security = &snap
 			}
 		}

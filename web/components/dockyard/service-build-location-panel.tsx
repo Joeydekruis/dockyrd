@@ -54,7 +54,6 @@ export function ServiceBuildLocationPanel({
 
   const options = [
     { value: "local", label: "On this server" },
-    { value: "github_actions", label: "GitHub Actions (CI build)" },
     { value: "auto", label: "Auto — remote when configured" },
     ...builders.map((b) => ({
       value: `remote:${b.id}`,
@@ -85,7 +84,7 @@ export function ServiceBuildLocationPanel({
       >
         <SettingsDetailBlock
           title="Where builds run"
-          description="Use GitHub Actions or a remote BuildKit node when this server is too small for heavy builds."
+          description="Use a remote BuildKit node when this server is too small for heavy builds."
           rows={[
             {
               label: "Current",

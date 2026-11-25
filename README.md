@@ -25,13 +25,46 @@ When `https://get.dockyrd.dev` is live, the install one-liner will be:
 curl -fsSL https://get.dockyrd.dev | sudo sh
 ```
 
-## Local build
+## Local development
+
+**Prerequisites:** Go, pnpm, and (for deploy features) Docker. Details: [`docs/project/setup.md`](docs/project/setup.md).
+
+First-time setup:
 
 ```bash
-make build
-./bin/dockyrd serve
+pnpm --dir web install
+pnpm run init                    # one-time: prints setup URL
+```
+
+### Hot reload (dashboard + API)
+
+One command starts the Go API on **:8000** and Next.js (Turbopack) on **:3000**. Non-API traffic on `:8000` is proxied to the dev server so cookies and `/api/v1/*` stay on one origin.
+
+```bash
+pnpm run dev
+# Open http://127.0.0.1:8000  (not :3000 alone)
+```
+
+Split across two terminals:
+
+```bash
+pnpm run dev:api    # dockyrd_DEV_UI=http://localhost:3000
+pnpm run dev:web
+```
+
+Environment override: `dockyrd_DEV_UI` (default `http://localhost:3000`).
+
+### Embedded UI (no HMR)
+
+Production-like build with the static export embedded in the binary:
+
+```bash
+pnpm run build
+pnpm run serve
 # → http://127.0.0.1:8000  (UI + GET /api/v1/health)
 ```
+
+UI-only iteration (components, no live API on the same origin): `pnpm run dev:web` or `pnpm --dir web storybook` (:6006).
 
 - **Branch:** day-to-day work on `development`; `main` is release-ready after merge.
 - **Verify:** [`docs/project/setup.md`](docs/project/setup.md) · [`docs/user/production-validation.md`](docs/user/production-validation.md)

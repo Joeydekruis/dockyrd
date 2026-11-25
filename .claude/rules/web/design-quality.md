@@ -9,7 +9,7 @@ paths:
 
 # Web design quality (Dockyrd dashboard)
 
-Fits **`frontend-evaluator`** + [dockyrd-design-contract](../../../.cursor/rules/dockyrd-design-contract.mdc).
+Fits **`frontend-evaluator`** + [dockyrd-design-contract](../dockyrd-design-contract.mdc).
 
 ## Before implementing UI
 

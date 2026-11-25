@@ -425,6 +425,18 @@ type SecurityCheckCache struct {
 	ResultsJson string
 }
 
+type SecurityEvent struct {
+	ID        int64
+	Ts        string
+	ServiceID string
+	Source    string
+	Rule      sql.NullString
+	Path      sql.NullString
+	Action    sql.NullString
+	Ip        sql.NullString
+	Detail    sql.NullString
+}
+
 type SecurityPolicy struct {
 	ID             int64
 	DefaultProfile string
@@ -475,22 +487,23 @@ type ServiceLink struct {
 }
 
 type ServiceSecurity struct {
-	ServiceID       string
-	Profile         string
-	LockExempt      int64
-	Csp             sql.NullString
-	CspReportOnly   int64
-	BasicUser       sql.NullString
-	BasicHash       sql.NullString
-	IpAllowlistJson string
-	Maintenance     int64
-	RlMode          string
-	RlRpm           sql.NullInt64
-	RlLoginRpm      sql.NullInt64
-	WafMode         string
-	MemMb           sql.NullInt64
-	Cpu             sql.NullFloat64
-	Pids            sql.NullInt64
+	ServiceID             string
+	Profile               string
+	LockExempt            int64
+	Csp                   sql.NullString
+	CspReportOnly         int64
+	BasicUser             sql.NullString
+	BasicHash             sql.NullString
+	IpAllowlistJson       string
+	Maintenance           int64
+	RlMode                string
+	RlRpm                 sql.NullInt64
+	RlLoginRpm            sql.NullInt64
+	WafMode               string
+	MemMb                 sql.NullInt64
+	Cpu                   sql.NullFloat64
+	Pids                  sql.NullInt64
+	WafPathExceptionsJson string
 }
 
 type Session struct {

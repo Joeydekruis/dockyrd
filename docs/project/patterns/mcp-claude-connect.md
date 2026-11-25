@@ -43,7 +43,8 @@ Pinned Anthropic metadata used when Cloudflare blocks server-side fetch.
 
 - **Public URL** in Server settings must match Claude MCP URL host/scheme (or rely on HTTPS upgrade when request is TLS).
 - Panel egress HTTPS to `claude.ai` for CIMD fetch (or pins).
-- Allow **Anthropic egress** `160.79.104.0/21` if WAF blocks OAuth discovery.
+- Allow **Anthropic egress** `160.79.104.0/21` on the **same host** as MCP (panel is both resource and authorization server) — WAF blocking this range causes **“Couldn’t register”** even when your browser curl works.
+- Claude may **fall back to DCR** if CIMD preconditions fail; `POST /oauth/register` must return **201** (browser cross-origin needs `Access-Control-Allow-Origin: *`).
 
 ## Verify on an instance
 

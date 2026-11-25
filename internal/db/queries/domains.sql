@@ -78,6 +78,24 @@ FROM domains
 WHERE id = ?
 LIMIT 1;
 
+-- name: GetDomainByHostname :one
+SELECT
+  id,
+  service_id,
+  hostname,
+  is_platform,
+  is_primary,
+  redirect_to,
+  dns_status,
+  dns_checked_at,
+  cert_status,
+  cert_expires_at,
+  target_service,
+  target_port
+FROM domains
+WHERE hostname = ?
+LIMIT 1;
+
 -- name: CreateDomain :exec
 INSERT INTO domains (
   id,

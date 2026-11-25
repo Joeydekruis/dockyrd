@@ -8,15 +8,6 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/db/sqlc"
 )
 
-// ServiceUsesGitHubActions reports buildLocation=github_actions on an app service.
-func ServiceUsesGitHubActions(raw json.RawMessage) bool {
-	cfg, err := appconfig.Parse(raw)
-	if err != nil {
-		return false
-	}
-	return cfg.UsesGitHubActionsBuild()
-}
-
 // RepoFromServiceConfig returns owner/repo from git source.
 func RepoFromServiceConfig(raw json.RawMessage) string {
 	cfg, err := appconfig.Parse(raw)

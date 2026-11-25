@@ -78,7 +78,20 @@ Point Cursor or Claude at this command only when the editor runs **on the server
 
 ## Troubleshooting Claude connect
 
-If Claude shows **“Couldn’t register”** with your panel name, it usually means the panel’s OAuth metadata did not advertise **Client ID Metadata Documents (CIMD)**. Claude then tries **dynamic client registration**, which Dockyrd does not expose.
+If Claude reports **“Connecting to the server: Not found”** or **502** during setup:
+
+- Use the full MCP URL from **Settings → Server → MCP** (must end with **`/mcp`**, HTTPS).
+- Ensure **MCP is enabled** on that page (disabled instances returned 404 before 0.7.22; discovery needs **`401`** on `GET`/`POST /mcp`).
+- From your laptop, run the `curl` checks below — they must succeed from the public internet (Anthropic’s servers call the same URLs). A **502** at the edge usually means a proxy/WAF/Cloudflare issue, not the panel binary.
+- Builds before **0.7.22** only handled **`POST /mcp`** and rejected Claude’s **`Origin`** header with **403** — update the panel if you are on an older release.
+
+If Claude shows **“Couldn’t register”** (`ofid_…` reference), discovery often succeeded but **client registration** failed:
+
+- **CIMD path:** metadata must include `client_id_metadata_document_supported: true` and `"none"` in `token_endpoint_auth_methods_supported` (Dockyrd advertises both). `issuer` must match the HTTPS host you pasted in Claude.
+- **DCR fallback:** Claude’s UI may `POST` `/oauth/register` from the browser — needs **201** and CORS (build **≥ 0.7.22**).
+- **WAF / firewall:** allow inbound **HTTPS from `160.79.104.0/21`** to your panel host (Anthropic connector checks).
+
+If Claude shows **“Couldn’t register”** on an **old build** without CIMD, it tried DCR when `registration_endpoint` was missing — update the panel first.
 
 **Check on the panel (as an admin, logged in):**
 

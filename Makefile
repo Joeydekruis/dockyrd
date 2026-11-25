@@ -23,7 +23,7 @@ lint: ensure-ui-stub
 	@./scripts/check-no-radix.sh
 
 dev:
-	@echo "Run: dockyrd_DEV_UI=http://localhost:3000 go run ./cmd/dockyrd serve & pnpm --dir web dev"
+	bash scripts/dev-local.sh
 
 ensure-ui-stub:
 	@./scripts/ensure-ui-stub.sh

@@ -6,6 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+## [0.7.22] - 2026-11-25
+
+_Finished: 2026-11-25_
+
+### Added
+
+- **#81 / P2c Coraza WAF** — `security_events` + `waf_path_exceptions_json`; effective WAF resolve (Strict→detect, never auto-block); `coraza_waf` Caddy render gated on `proxy-waf` installed; fixture audit-log ingest + 7-day purge; Application Security WAF Segmented, path exceptions, events table (`https://github.com/Joeydekruis/dockyrd/issues/81`)
+- **Privacy docs** — security-event IPs retained 7 days, separate from analytics (`docs/user/privacy.md`)
+
+### Changed
+
+- **Service security API** — GET/PUT include `waf_path_exceptions` and effective `waf_mode`; `GET …/security/events` returns persisted rows (Member+ read; PUT uses project write scope)
+- **Roadmap** — M7 marks P2c (#81) done; P2a/P2b + P3 (#79–#80, #82) remain open
+
 ## [0.7.21] - 2026-11-11
 
 _Finished: 2026-11-11_

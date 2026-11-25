@@ -32,18 +32,20 @@ type Instance struct {
 
 // Site is per-service security settings used for resolution.
 type Site struct {
-	ServiceID    string
-	Profile      Profile
-	LockExempt   bool
-	CSP          string
-	CSPReportOnly bool
-	BasicUser    string
-	BasicHash    string
-	Allowlist    []string
-	Maintenance  bool
-	MemMB        *int
-	CPU          *float64
-	PIDs         *int
+	ServiceID       string
+	Profile         Profile
+	LockExempt      bool
+	CSP             string
+	CSPReportOnly   bool
+	BasicUser       string
+	BasicHash       string
+	Allowlist       []string
+	Maintenance     bool
+	WAFMode         WAFMode
+	WAFPathExceptions []string
+	MemMB           *int
+	CPU             *float64
+	PIDs            *int
 }
 
 // FloorInput captures a PUT body fragment for floor validation.

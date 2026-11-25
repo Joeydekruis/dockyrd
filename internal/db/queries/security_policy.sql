@@ -26,7 +26,8 @@ WHERE id = 1;
 SELECT
   service_id, profile, lock_exempt, csp, csp_report_only,
   basic_user, basic_hash, ip_allowlist_json, maintenance,
-  rl_mode, rl_rpm, rl_login_rpm, waf_mode, mem_mb, cpu, pids
+  rl_mode, rl_rpm, rl_login_rpm, waf_mode, mem_mb, cpu, pids,
+  waf_path_exceptions_json
 FROM service_security
 WHERE service_id = ?;
 
@@ -34,11 +35,13 @@ WHERE service_id = ?;
 INSERT INTO service_security (
   service_id, profile, lock_exempt, csp, csp_report_only,
   basic_user, basic_hash, ip_allowlist_json, maintenance,
-  rl_mode, rl_rpm, rl_login_rpm, waf_mode, mem_mb, cpu, pids
+  rl_mode, rl_rpm, rl_login_rpm, waf_mode, waf_path_exceptions_json,
+  mem_mb, cpu, pids
 ) VALUES (
   ?, ?, ?, ?, ?,
   ?, ?, ?, ?,
-  ?, ?, ?, ?, ?, ?, ?
+  ?, ?, ?, ?, ?,
+  ?, ?, ?
 );
 
 -- name: UpdateServiceSecurity :exec
@@ -55,6 +58,7 @@ UPDATE service_security SET
   rl_rpm = ?,
   rl_login_rpm = ?,
   waf_mode = ?,
+  waf_path_exceptions_json = ?,
   mem_mb = ?,
   cpu = ?,
   pids = ?

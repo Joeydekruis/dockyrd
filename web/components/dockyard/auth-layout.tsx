@@ -33,7 +33,7 @@ export function AuthLayout({
             <br />
             hardware. Without the
             <br />
-            mess.
+            mess
           </h2>
         </div>
         <p className="max-w-md text-sm leading-relaxed text-white/90">

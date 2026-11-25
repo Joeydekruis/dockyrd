@@ -30,4 +30,5 @@ Until `https://get.dockyrd.dev` is live, this GitHub raw URL is the official one
 | Email / SMTP | [email-smtp.md](./email-smtp.md) | (panel settings; link from troubleshooting) |
 | Troubleshooting | [troubleshooting.md](./troubleshooting.md) | [/docs/troubleshooting.html](https://dockyrd.io/docs/troubleshooting.html) |
 | AI assistants (MCP) | [mcp.md](./mcp.md) | [/docs/mcp.html](https://dockyrd.io/docs/mcp.html) |
+| Privacy (security-event IPs) | [privacy.md](./privacy.md) | — |
 | Production checks | [production-validation.md](./production-validation.md) | — |

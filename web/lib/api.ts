@@ -409,14 +409,6 @@ export function createServiceDeployToken(serviceId: string) {
   );
 }
 
-export function getServiceGitHubWorkflow(serviceId: string) {
-  return apiFetch<{
-    workflow: string;
-    yaml: string;
-    secrets: { name: string; value?: string; description?: string }[];
-  }>(`/api/v1/services/${serviceId}/github-workflow`);
-}
-
 export function restartDatabaseService(serviceId: string) {
   return apiFetch<void>(`/api/v1/services/${serviceId}/restart`, {
     method: "POST",
@@ -1357,6 +1349,37 @@ export type DiskUsageCategory = {
   id: string;
   label: string;
   bytes: number;
+  rel_path?: string;
+  is_dir?: boolean;
+  drillable?: boolean;
+};
+
+export type DiskUsageVolumeSummary = {
+  filesystem_used: number;
+  filesystem_total: number;
+  data_dir_bytes: number;
+  docker_root?: string;
+  docker_on_data_volume: boolean;
+  docker_bytes: number;
+  outside_data_dir_bytes: number;
+};
+
+export type DiskUsageDetailEntry = {
+  name: string;
+  path?: string;
+  bytes: number;
+  is_dir?: boolean;
+  drillable?: boolean;
+  hint?: string;
+};
+
+export type DiskUsageDetail = {
+  title: string;
+  scope: string;
+  path?: string;
+  bytes: number;
+  children?: DiskUsageDetailEntry[];
+  note?: string;
 };
 
 export type DiskUsageService = {
@@ -1378,6 +1401,7 @@ export type DiskUsageVolume = {
 export type DiskUsageReport = {
   data_dir: string;
   scanned_at: number;
+  summary: DiskUsageVolumeSummary;
   categories: DiskUsageCategory[];
   services: DiskUsageService[];
   docker: {
@@ -1396,6 +1420,19 @@ export type DiskUsageReport = {
 export function getServerDiskUsage(refresh?: boolean) {
   const q = refresh ? "?refresh=1" : "";
   return apiFetch<DiskUsageReport>(`/api/v1/server/disk-usage${q}`);
+}
+
+export function getServerDiskUsageDetail(params: {
+  scope: "data" | "docker" | "service";
+  path?: string;
+  serviceId?: string;
+}) {
+  const search = new URLSearchParams({ scope: params.scope });
+  if (params.path) search.set("path", params.path);
+  if (params.serviceId) search.set("service_id", params.serviceId);
+  return apiFetch<DiskUsageDetail>(
+    `/api/v1/server/disk-usage/detail?${search.toString()}`,
+  );
 }
 
 export type ServerInfo = {

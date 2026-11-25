@@ -1,6 +1,12 @@
 "use client";
 
 import type { EChartsOption } from "echarts";
+import { ChevronRight } from "lucide-react";
+import { useState } from "react";
+import {
+  DiskUsageDetailModal,
+  type DiskDrillTarget,
+} from "@/components/dockyard/analytics/disk-usage-detail-modal";
 import {
   areaLineOption,
   dualAreaOption,
@@ -449,7 +455,28 @@ export function MemoryTab({
   );
 }
 
+function DrillHint({ onClick, label }: { onClick: () => void; label: string }) {
+  return (
+    <button
+      type="button"
+      className="inline-flex items-center gap-1 text-left underline-offset-2 hover:underline"
+      onClick={onClick}
+    >
+      {label}
+      <ChevronRight className="size-3.5 opacity-60" aria-hidden />
+    </button>
+  );
+}
+
 function DiskUsageTables({ diskUsage }: { diskUsage: DiskUsageReport | null }) {
+  const [drill, setDrill] = useState<DiskDrillTarget | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const openDrill = (target: DiskDrillTarget) => {
+    setDrill(target);
+    setModalOpen(true);
+  };
+
   if (!diskUsage) {
     return (
       <UnavailablePanel title="Usage breakdown">
@@ -460,9 +487,70 @@ function DiskUsageTables({ diskUsage }: { diskUsage: DiskUsageReport | null }) {
 
   const docker = diskUsage.docker;
   const hasDocker = docker.docker_available;
+  const summary = diskUsage.summary;
+  const dockerDominates =
+    summary?.docker_on_data_volume &&
+    summary.outside_data_dir_bytes > 0 &&
+    summary.docker_bytes > summary.data_dir_bytes;
 
   return (
     <div className="space-y-6">
+      {summary?.filesystem_used ? (
+        <div
+          className="rounded-[20px] border p-5 text-sm"
+          style={{ borderColor: "var(--border)", background: "var(--surface)" }}
+        >
+          <h3 className="font-semibold">Where the &ldquo;Used&rdquo; number comes from</h3>
+          <p className="mt-2" style={{ color: "var(--muted-text)" }}>
+            The headline disk chart measures the whole filesystem backing{" "}
+            <span className="font-mono text-xs">{diskUsage.data_dir}</span>, not
+            only Dockyrd&rsquo;s folder.
+          </p>
+          <ul className="mt-3 space-y-2">
+            <li className="flex justify-between gap-4">
+              <span>Entire volume (chart)</span>
+              <span className="font-mono tabular-nums">
+                {formatBytes(summary.filesystem_used)}
+              </span>
+            </li>
+            <li className="flex justify-between gap-4">
+              <span>Measured under Dockyrd data</span>
+              <span className="font-mono tabular-nums">
+                {formatBytes(summary.data_dir_bytes)}
+              </span>
+            </li>
+            {summary.docker_on_data_volume ? (
+              <li className="flex justify-between gap-4">
+                <span>
+                  Docker engine
+                  {summary.docker_root ? (
+                    <>
+                      {" "}
+                      <span className="font-mono text-xs">
+                        ({summary.docker_root})
+                      </span>
+                    </>
+                  ) : null}
+                </span>
+                <span className="font-mono tabular-nums">
+                  {formatBytes(summary.docker_bytes)}
+                </span>
+              </li>
+            ) : null}
+          </ul>
+          {dockerDominates ? (
+            <p className="mt-3 text-xs" style={{ color: "var(--muted-text)" }}>
+              Most of your used space is Docker (images, container layers,
+              volumes such as BuildKit), not static sites or logs. Expand{" "}
+              <strong className="font-medium text-[var(--text)]">
+                Docker engine
+              </strong>{" "}
+              below for a line-by-line list.
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+
       <AnalyticsChartCard
         title="Data directory"
         subtitle={`Under ${diskUsage.data_dir}`}
@@ -482,7 +570,22 @@ function DiskUsageTables({ diskUsage }: { diskUsage: DiskUsageReport | null }) {
             <tbody>
               {diskUsage.categories.map((row) => (
                 <tr key={row.id} className="border-t border-[var(--border)]">
-                  <td className="py-2 pr-3">{row.label}</td>
+                  <td className="py-2 pr-3">
+                    {row.drillable && row.rel_path ? (
+                      <DrillHint
+                        label={row.label}
+                        onClick={() =>
+                          openDrill({
+                            scope: "data",
+                            path: row.rel_path ?? row.id,
+                            title: row.label,
+                          })
+                        }
+                      />
+                    ) : (
+                      row.label
+                    )}
+                  </td>
                   <td className="py-2 font-mono tabular-nums">
                     {formatBytes(row.bytes)}
                   </td>
@@ -517,7 +620,16 @@ function DiskUsageTables({ diskUsage }: { diskUsage: DiskUsageReport | null }) {
                   className="border-t border-[var(--border)]"
                 >
                   <td className="py-2 pr-3">
-                    <div className="font-medium">{row.name}</div>
+                    <DrillHint
+                      label={row.name}
+                      onClick={() =>
+                        openDrill({
+                          scope: "service",
+                          serviceId: row.service_id,
+                          title: row.name,
+                        })
+                      }
+                    />
                     {row.sources?.length ? (
                       <div
                         className="text-xs"
@@ -549,30 +661,34 @@ function DiskUsageTables({ diskUsage }: { diskUsage: DiskUsageReport | null }) {
         >
           {hasDocker ? (
             <ul className="space-y-2 text-sm">
-              <li className="flex justify-between">
-                <span>Images</span>
-                <span className="font-mono">
-                  {formatBytes(docker.images_bytes)}
-                </span>
-              </li>
-              <li className="flex justify-between">
-                <span>Containers (writable layers)</span>
-                <span className="font-mono">
-                  {formatBytes(docker.containers_bytes)}
-                </span>
-              </li>
-              <li className="flex justify-between">
-                <span>Named volumes</span>
-                <span className="font-mono">
-                  {formatBytes(docker.volumes_bytes)}
-                </span>
-              </li>
-              <li className="flex justify-between">
-                <span>Build cache</span>
-                <span className="font-mono">
-                  {formatBytes(docker.build_cache_bytes)}
-                </span>
-              </li>
+              {(
+                [
+                  ["images", "Images", docker.images_bytes],
+                  [
+                    "containers",
+                    "Containers (writable layers)",
+                    docker.containers_bytes,
+                  ],
+                  ["volumes", "Named volumes", docker.volumes_bytes],
+                  ["build_cache", "Build cache", docker.build_cache_bytes],
+                ] as const
+              ).map(([kind, label, bytes]) => (
+                <li key={kind} className="flex justify-between gap-3">
+                  <DrillHint
+                    label={label}
+                    onClick={() =>
+                      openDrill({
+                        scope: "docker",
+                        path: kind,
+                        title: label,
+                      })
+                    }
+                  />
+                  <span className="font-mono tabular-nums">
+                    {formatBytes(bytes)}
+                  </span>
+                </li>
+              ))}
             </ul>
           ) : (
             <p className="text-sm" style={{ color: "var(--muted-text)" }}>
@@ -633,6 +749,12 @@ function DiskUsageTables({ diskUsage }: { diskUsage: DiskUsageReport | null }) {
           </table>
         </AnalyticsChartCard>
       ) : null}
+
+      <DiskUsageDetailModal
+        open={modalOpen}
+        target={drill}
+        onClose={() => setModalOpen(false)}
+      />
     </div>
   );
 }

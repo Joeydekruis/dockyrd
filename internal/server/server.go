@@ -80,8 +80,14 @@ func Serve(cfg config.Config) error {
 		startBackground(ctx, cfg, sqlConn, q, hub, notifier, dispatcher)
 	}
 
-	ui, err := web.Assets()
-	if err == nil {
+	if devUI := devUITarget(); devUI != "" {
+		if err := mountDevUIProxy(mux, devUI); err != nil {
+			slog.Warn("dev UI proxy disabled, falling back to embedded UI", "target", devUI, "err", err)
+			if ui, err := web.Assets(); err == nil {
+				mountUI(mux, ui)
+			}
+		}
+	} else if ui, err := web.Assets(); err == nil {
 		mountUI(mux, ui)
 	}
 
