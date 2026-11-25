@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -26,33 +27,35 @@ func registerServiceSecurityRoutes(mux *http.ServeMux, deps apiDeps) {
 }
 
 type serviceSecurityStored struct {
-	Profile       string   `json:"profile"`
-	LockExempt    bool     `json:"lock_exempt"`
-	CSP           string   `json:"csp,omitempty"`
-	CSPReportOnly bool     `json:"csp_report_only"`
-	BasicUser     string   `json:"basic_user,omitempty"`
-	BasicAuthSet  bool     `json:"basic_auth_configured"`
-	IPAllowlist   []string `json:"ip_allowlist"`
-	Maintenance   bool     `json:"maintenance"`
-	RLMode        string   `json:"rl_mode"`
-	RlRpm         *int64   `json:"rl_rpm,omitempty"`
-	RlLoginRpm    *int64   `json:"rl_login_rpm,omitempty"`
-	WAFMode       string   `json:"waf_mode"`
-	MemMB         *int     `json:"mem_mb,omitempty"`
-	CPU           *float64 `json:"cpu,omitempty"`
-	PIDs          *int     `json:"pids,omitempty"`
+	Profile           string   `json:"profile"`
+	LockExempt        bool     `json:"lock_exempt"`
+	CSP               string   `json:"csp,omitempty"`
+	CSPReportOnly     bool     `json:"csp_report_only"`
+	BasicUser         string   `json:"basic_user,omitempty"`
+	BasicAuthSet      bool     `json:"basic_auth_configured"`
+	IPAllowlist       []string `json:"ip_allowlist"`
+	Maintenance       bool     `json:"maintenance"`
+	RLMode            string   `json:"rl_mode"`
+	RlRpm             *int64   `json:"rl_rpm,omitempty"`
+	RlLoginRpm        *int64   `json:"rl_login_rpm,omitempty"`
+	WAFMode           string   `json:"waf_mode"`
+	WAFPathExceptions []string `json:"waf_path_exceptions"`
+	MemMB             *int     `json:"mem_mb,omitempty"`
+	CPU               *float64 `json:"cpu,omitempty"`
+	PIDs              *int     `json:"pids,omitempty"`
 }
 
 type serviceSecurityEffective struct {
-	Profile       string            `json:"profile"`
-	Headers       map[string]string `json:"headers"`
-	LockFloor     bool              `json:"lock_floor"`
-	InstanceProfile string          `json:"instance_default_profile"`
-	MemMB         int               `json:"mem_mb"`
-	CPU           float64           `json:"cpu"`
-	PIDs          int               `json:"pids"`
-	ProxyRateLimit bool             `json:"proxy_rate_limit_installed"`
-	ProxyWAF       bool             `json:"proxy_waf_installed"`
+	Profile           string            `json:"profile"`
+	Headers           map[string]string `json:"headers"`
+	LockFloor         bool              `json:"lock_floor"`
+	InstanceProfile   string            `json:"instance_default_profile"`
+	MemMB             int               `json:"mem_mb"`
+	CPU               float64           `json:"cpu"`
+	PIDs              int               `json:"pids"`
+	WAFMode           string            `json:"waf_mode"`
+	ProxyRateLimit    bool              `json:"proxy_rate_limit_installed"`
+	ProxyWAF          bool              `json:"proxy_waf_installed"`
 }
 
 type serviceSecurityResponse struct {
@@ -61,19 +64,32 @@ type serviceSecurityResponse struct {
 }
 
 type putServiceSecurityRequest struct {
-	Profile       string   `json:"profile"`
-	LockExempt    *bool    `json:"lock_exempt"`
-	CSP           *string  `json:"csp"`
-	CSPReportOnly *bool    `json:"csp_report_only"`
-	IPAllowlist   []string `json:"ip_allowlist"`
-	Maintenance   *bool    `json:"maintenance"`
-	RLMode        *string  `json:"rl_mode"`
-	RlRpm         *int64   `json:"rl_rpm"`
-	RlLoginRpm    *int64   `json:"rl_login_rpm"`
-	WAFMode       *string  `json:"waf_mode"`
-	MemMB         *int     `json:"mem_mb"`
-	CPU           *float64 `json:"cpu"`
-	PIDs          *int     `json:"pids"`
+	Profile           string   `json:"profile"`
+	LockExempt        *bool    `json:"lock_exempt"`
+	CSP               *string  `json:"csp"`
+	CSPReportOnly     *bool    `json:"csp_report_only"`
+	IPAllowlist       []string `json:"ip_allowlist"`
+	Maintenance       *bool    `json:"maintenance"`
+	RLMode            *string  `json:"rl_mode"`
+	RlRpm             *int64   `json:"rl_rpm"`
+	RlLoginRpm        *int64   `json:"rl_login_rpm"`
+	WAFMode           *string  `json:"waf_mode"`
+	WAFPathExceptions []string `json:"waf_path_exceptions"`
+	MemMB             *int     `json:"mem_mb"`
+	CPU               *float64 `json:"cpu"`
+	PIDs              *int     `json:"pids"`
+}
+
+type securityEventDTO struct {
+	ID        string `json:"id"`
+	TS        string `json:"ts"`
+	ServiceID string `json:"service_id"`
+	Source    string `json:"source"`
+	Rule      string `json:"rule,omitempty"`
+	Path      string `json:"path,omitempty"`
+	Action    string `json:"action,omitempty"`
+	IP        string `json:"ip,omitempty"`
+	Detail    string `json:"detail,omitempty"`
 }
 
 func (d apiDeps) handleGetServiceSecurity(w http.ResponseWriter, r *http.Request) {
@@ -101,10 +117,6 @@ func (d apiDeps) handleGetServiceSecurity(w http.ResponseWriter, r *http.Request
 }
 
 func (d apiDeps) handlePutServiceSecurity(w http.ResponseWriter, r *http.Request) {
-	user, ok := d.requireAdmin(w, r)
-	if !ok {
-		return
-	}
 	serviceID := r.PathValue("id")
 	ctx := r.Context()
 	svc, err := d.q.GetServiceByID(ctx, serviceID)
@@ -116,6 +128,16 @@ func (d apiDeps) handlePutServiceSecurity(w http.ResponseWriter, r *http.Request
 		writeJSONError(w, http.StatusInternalServerError, "database error")
 		return
 	}
+	projectID, err := d.q.GetServiceProjectID(ctx, serviceID)
+	if err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "database error")
+		return
+	}
+	p, ok := d.requireProjectScope(w, r, apitoken.ScopeWrite, projectID)
+	if !ok {
+		return
+	}
+	user := p.User
 	prev, _, err := d.ensureServiceSecurity(ctx, serviceID)
 	if err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "database error")
@@ -170,6 +192,21 @@ func (d apiDeps) handlePutServiceSecurity(w http.ResponseWriter, r *http.Request
 	if body.Maintenance != nil {
 		next.Maintenance = *body.Maintenance
 	}
+	if body.WAFMode != nil {
+		if err := securitypolicy.ValidateWAFMode(*body.WAFMode); err != nil {
+			writeJSON(w, http.StatusUnprocessableEntity, map[string]any{"error": err.Error(), "field": "waf_mode"})
+			return
+		}
+		next.WAFMode = securitypolicy.WAFMode(strings.TrimSpace(*body.WAFMode))
+	}
+	if body.WAFPathExceptions != nil {
+		list, err := securitypolicy.ValidatePathExceptions(body.WAFPathExceptions)
+		if err != nil {
+			writeJSON(w, http.StatusUnprocessableEntity, map[string]any{"error": err.Error(), "field": "waf_path_exceptions"})
+			return
+		}
+		next.WAFPathExceptions = list
+	}
 	if err := securitypolicy.ValidateResources(body.MemMB, body.CPU, body.PIDs); err != nil {
 		writeJSONError(w, http.StatusBadRequest, err.Error())
 		return
@@ -189,23 +226,28 @@ func (d apiDeps) handlePutServiceSecurity(w http.ResponseWriter, r *http.Request
 		return
 	}
 	allowJSON, _ := json.Marshal(next.Allowlist)
+	excJSON, _ := json.Marshal(next.WAFPathExceptions)
+	if next.WAFPathExceptions == nil {
+		excJSON = []byte("[]")
+	}
 	params := sqlc.UpdateServiceSecurityParams{
-		Profile:         string(next.Profile),
-		LockExempt:      boolToInt64(next.LockExempt),
-		Csp:             nullString(strings.TrimSpace(next.CSP)),
-		CspReportOnly:   boolToInt64(next.CSPReportOnly),
-		BasicUser:       prev.BasicUser,
-		BasicHash:       prev.BasicHash,
-		IpAllowlistJson: string(allowJSON),
-		Maintenance:     boolToInt64(next.Maintenance),
-		RlMode:          prev.RlMode,
-		RlRpm:           prev.RlRpm,
-		RlLoginRpm:      prev.RlLoginRpm,
-		WafMode:         prev.WafMode,
-		MemMb:           securitypolicy.NullInt(next.MemMB),
-		Cpu:             securitypolicy.NullFloat(next.CPU),
-		Pids:            securitypolicy.NullInt(next.PIDs),
-		ServiceID:       serviceID,
+		Profile:               string(next.Profile),
+		LockExempt:            boolToInt64(next.LockExempt),
+		Csp:                   nullString(strings.TrimSpace(next.CSP)),
+		CspReportOnly:         boolToInt64(next.CSPReportOnly),
+		BasicUser:             prev.BasicUser,
+		BasicHash:             prev.BasicHash,
+		IpAllowlistJson:       string(allowJSON),
+		Maintenance:           boolToInt64(next.Maintenance),
+		RlMode:                prev.RlMode,
+		RlRpm:                 prev.RlRpm,
+		RlLoginRpm:            prev.RlLoginRpm,
+		WafMode:               string(next.WAFMode),
+		WafPathExceptionsJson: string(excJSON),
+		MemMb:                 securitypolicy.NullInt(next.MemMB),
+		Cpu:                   securitypolicy.NullFloat(next.CPU),
+		Pids:                  securitypolicy.NullInt(next.PIDs),
+		ServiceID:             serviceID,
 	}
 	if body.RLMode != nil {
 		params.RlMode = strings.TrimSpace(*body.RLMode)
@@ -215,9 +257,6 @@ func (d apiDeps) handlePutServiceSecurity(w http.ResponseWriter, r *http.Request
 	}
 	if body.RlLoginRpm != nil {
 		params.RlLoginRpm = ptrInt64ToNull(body.RlLoginRpm)
-	}
-	if body.WAFMode != nil {
-		params.WafMode = strings.TrimSpace(*body.WAFMode)
 	}
 	if err := d.q.UpdateServiceSecurity(ctx, params); err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "update error")
@@ -266,22 +305,23 @@ func (d apiDeps) handleSetServiceBasicAuth(w http.ResponseWriter, r *http.Reques
 		return
 	}
 	params := sqlc.UpdateServiceSecurityParams{
-		Profile:         row.Profile,
-		LockExempt:      row.LockExempt,
-		Csp:             row.Csp,
-		CspReportOnly:   row.CspReportOnly,
-		BasicUser:       nullString(body.Username),
-		BasicHash:       nullString(hash),
-		IpAllowlistJson: row.IpAllowlistJson,
-		Maintenance:     row.Maintenance,
-		RlMode:          row.RlMode,
-		RlRpm:           row.RlRpm,
-		RlLoginRpm:      row.RlLoginRpm,
-		WafMode:         row.WafMode,
-		MemMb:           row.MemMb,
-		Cpu:             row.Cpu,
-		Pids:            row.Pids,
-		ServiceID:       serviceID,
+		Profile:               row.Profile,
+		LockExempt:            row.LockExempt,
+		Csp:                   row.Csp,
+		CspReportOnly:         row.CspReportOnly,
+		BasicUser:             nullString(body.Username),
+		BasicHash:             nullString(hash),
+		IpAllowlistJson:       row.IpAllowlistJson,
+		Maintenance:           row.Maintenance,
+		RlMode:                row.RlMode,
+		RlRpm:                 row.RlRpm,
+		RlLoginRpm:            row.RlLoginRpm,
+		WafMode:               row.WafMode,
+		WafPathExceptionsJson: row.WafPathExceptionsJson,
+		MemMb:                 row.MemMb,
+		Cpu:                   row.Cpu,
+		Pids:                  row.Pids,
+		ServiceID:             serviceID,
 	}
 	if err := d.q.UpdateServiceSecurity(ctx, params); err != nil {
 		writeJSONError(w, http.StatusInternalServerError, "update error")
@@ -327,7 +367,61 @@ func (d apiDeps) handleListServiceSecurityEvents(w http.ResponseWriter, r *http.
 	if _, ok := d.requireProjectScope(w, r, apitoken.ScopeRead, projectID); !ok {
 		return
 	}
-	writeJSON(w, http.StatusOK, map[string]any{"events": []any{}})
+	limit := 50
+	if raw := strings.TrimSpace(r.URL.Query().Get("limit")); raw != "" {
+		n, err := strconv.Atoi(raw)
+		if err != nil || n < 1 {
+			writeJSONError(w, http.StatusBadRequest, "invalid limit")
+			return
+		}
+		if n > 200 {
+			n = 200
+		}
+		limit = n
+	}
+	source := strings.TrimSpace(r.URL.Query().Get("source"))
+	var rows []sqlc.SecurityEvent
+	if source != "" {
+		switch source {
+		case "ratelimit", "waf", "crowdsec":
+		default:
+			writeJSONError(w, http.StatusBadRequest, "invalid source")
+			return
+		}
+		rows, err = d.q.ListSecurityEventsByServiceSource(ctx, sqlc.ListSecurityEventsByServiceSourceParams{
+			ServiceID: serviceID, Source: source, Limit: int64(limit),
+		})
+	} else {
+		rows, err = d.q.ListSecurityEventsByService(ctx, sqlc.ListSecurityEventsByServiceParams{
+			ServiceID: serviceID, Limit: int64(limit),
+		})
+	}
+	if err != nil {
+		writeJSONError(w, http.StatusInternalServerError, "database error")
+		return
+	}
+	out := make([]securityEventDTO, 0, len(rows))
+	for _, row := range rows {
+		out = append(out, securityEventDTO{
+			ID:        strconv.FormatInt(row.ID, 10),
+			TS:        row.Ts,
+			ServiceID: row.ServiceID,
+			Source:    row.Source,
+			Rule:      nullStrVal(row.Rule),
+			Path:      nullStrVal(row.Path),
+			Action:    nullStrVal(row.Action),
+			IP:        nullStrVal(row.Ip),
+			Detail:    nullStrVal(row.Detail),
+		})
+	}
+	writeJSON(w, http.StatusOK, map[string]any{"events": out})
+}
+
+func nullStrVal(v sql.NullString) string {
+	if v.Valid {
+		return v.String
+	}
+	return ""
 }
 
 func (d apiDeps) ensureServiceSecurity(ctx context.Context, serviceID string) (sqlc.ServiceSecurity, bool, error) {
@@ -341,22 +435,23 @@ func (d apiDeps) ensureServiceSecurity(ctx context.Context, serviceID string) (s
 	def := securitypolicy.DefaultSite(serviceID)
 	allowJSON, _ := json.Marshal(def.Allowlist)
 	params := sqlc.InsertServiceSecurityParams{
-		ServiceID:       serviceID,
-		Profile:         string(def.Profile),
-		LockExempt:      0,
-		Csp:             sql.NullString{},
-		CspReportOnly:   0,
-		BasicUser:       sql.NullString{},
-		BasicHash:       sql.NullString{},
-		IpAllowlistJson: string(allowJSON),
-		Maintenance:     0,
-		RlMode:          "inherit",
-		RlRpm:           sql.NullInt64{},
-		RlLoginRpm:      sql.NullInt64{},
-		WafMode:         "inherit",
-		MemMb:           sql.NullInt64{},
-		Cpu:             sql.NullFloat64{},
-		Pids:            sql.NullInt64{},
+		ServiceID:             serviceID,
+		Profile:               string(def.Profile),
+		LockExempt:            0,
+		Csp:                   sql.NullString{},
+		CspReportOnly:         0,
+		BasicUser:             sql.NullString{},
+		BasicHash:             sql.NullString{},
+		IpAllowlistJson:       string(allowJSON),
+		Maintenance:           0,
+		RlMode:                "inherit",
+		RlRpm:                 sql.NullInt64{},
+		RlLoginRpm:            sql.NullInt64{},
+		WafMode:               "inherit",
+		WafPathExceptionsJson: "[]",
+		MemMb:                 sql.NullInt64{},
+		Cpu:                   sql.NullFloat64{},
+		Pids:                  sql.NullInt64{},
 	}
 	if err := d.q.InsertServiceSecurity(ctx, params); err != nil {
 		return sqlc.ServiceSecurity{}, false, err
@@ -370,16 +465,24 @@ func (d apiDeps) serviceSecurityPayload(ctx context.Context, row sqlc.ServiceSec
 	site, _ := securitypolicy.SiteFromRow(row)
 	var allow []string
 	_ = json.Unmarshal([]byte(row.IpAllowlistJson), &allow)
+	var exceptions []string
+	if row.WafPathExceptionsJson != "" {
+		_ = json.Unmarshal([]byte(row.WafPathExceptionsJson), &exceptions)
+	}
+	if exceptions == nil {
+		exceptions = []string{}
+	}
 	rl, waf := d.proxyBuildFlags(ctx)
 	stored := serviceSecurityStored{
-		Profile:       row.Profile,
-		LockExempt:    row.LockExempt != 0,
-		CSPReportOnly: row.CspReportOnly != 0,
-		BasicAuthSet:  row.BasicUser.Valid && row.BasicHash.Valid,
-		IPAllowlist:   allow,
-		Maintenance:   row.Maintenance != 0,
-		RLMode:        row.RlMode,
-		WAFMode:       row.WafMode,
+		Profile:           row.Profile,
+		LockExempt:        row.LockExempt != 0,
+		CSPReportOnly:     row.CspReportOnly != 0,
+		BasicAuthSet:      row.BasicUser.Valid && row.BasicHash.Valid,
+		IPAllowlist:       allow,
+		Maintenance:       row.Maintenance != 0,
+		RLMode:            row.RlMode,
+		WAFMode:           row.WafMode,
+		WAFPathExceptions: exceptions,
 	}
 	if row.Csp.Valid {
 		stored.CSP = row.Csp.String
@@ -417,6 +520,7 @@ func (d apiDeps) serviceSecurityPayload(ctx context.Context, row sqlc.ServiceSec
 			MemMB:           securitypolicy.EffectiveMemMB(inst, site),
 			CPU:             securitypolicy.EffectiveCPU(inst, site),
 			PIDs:            securitypolicy.EffectivePIDs(inst, site),
+			WAFMode:         string(securitypolicy.EffectiveWAFMode(inst, site)),
 			ProxyRateLimit:  rl,
 			ProxyWAF:        waf,
 		},

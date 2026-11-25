@@ -49,6 +49,7 @@ export { SearchPalette, type SearchResultRow } from "./search-palette";
 export { SearchSelect, type SearchSelectOption } from "./search-select";
 export { SearchSelectField } from "./search-select-field";
 export { SearchTrigger } from "./search-trigger";
+export { Segmented } from "./segmented";
 export { Select, type SelectOption } from "./select";
 export { SelectButton } from "./select-button";
 export { SelectField } from "./select-field";

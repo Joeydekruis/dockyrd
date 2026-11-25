@@ -5,11 +5,14 @@ import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/dockyard/ui/button";
 import { EmptyState } from "@/components/dockyard/ui/empty-state";
 import { RadioGroup } from "@/components/dockyard/ui/radio-group";
+import { Segmented } from "@/components/dockyard/ui/segmented";
 import { Switch } from "@/components/dockyard/ui/switch";
 import {
   clearServiceBasicAuth,
   getServiceSecurity,
+  listServiceSecurityEvents,
   putServiceSecurity,
+  type SecurityEvent,
   type ServiceSecurityPayload,
   setServiceBasicAuth,
 } from "@/lib/security-policy-api";
@@ -23,11 +26,22 @@ export function ServiceSecurityTab({ serviceId, kind }: Props) {
   const [data, setData] = useState<ServiceSecurityPayload | null>(null);
   const [allowlistText, setAllowlistText] = useState("");
   const [csp, setCsp] = useState("");
+  const [exceptionsText, setExceptionsText] = useState("");
   const [busy, setBusy] = useState(false);
   const [redeployNote, setRedeployNote] = useState(false);
   const [basicUser, setBasicUser] = useState("");
   const [revealedPassword, setRevealedPassword] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [events, setEvents] = useState<SecurityEvent[]>([]);
+
+  const refreshEvents = useCallback(async () => {
+    try {
+      const res = await listServiceSecurityEvents(serviceId);
+      setEvents(res.events ?? []);
+    } catch {
+      setEvents([]);
+    }
+  }, [serviceId]);
 
   const refresh = useCallback(async () => {
     try {
@@ -35,16 +49,26 @@ export function ServiceSecurityTab({ serviceId, kind }: Props) {
       setData(payload);
       setCsp(payload.stored.csp ?? "");
       setAllowlistText((payload.stored.ip_allowlist ?? []).join("\n"));
+      setExceptionsText((payload.stored.waf_path_exceptions ?? []).join("\n"));
       setBasicUser(payload.stored.basic_user ?? "");
       setError(null);
+      await refreshEvents();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to load security");
     }
-  }, [serviceId]);
+  }, [serviceId, refreshEvents]);
 
   useEffect(() => {
     void refresh();
   }, [refresh]);
+
+  useEffect(() => {
+    function onFocus() {
+      void refreshEvents();
+    }
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [refreshEvents]);
 
   async function onSave() {
     if (!data) return;
@@ -64,6 +88,10 @@ export function ServiceSecurityTab({ serviceId, kind }: Props) {
         maintenance: data.stored.maintenance,
         rl_mode: data.stored.rl_mode,
         waf_mode: data.stored.waf_mode,
+        waf_path_exceptions: exceptionsText
+          .split("\n")
+          .map((l) => l.trim())
+          .filter(Boolean),
       };
       if (kind === "app") {
         body.mem_mb = mem;
@@ -72,7 +100,9 @@ export function ServiceSecurityTab({ serviceId, kind }: Props) {
       }
       const next = await putServiceSecurity(serviceId, body);
       setData(next);
+      setExceptionsText((next.stored.waf_path_exceptions ?? []).join("\n"));
       setRedeployNote(kind === "app");
+      await refreshEvents();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Save failed");
     } finally {
@@ -99,9 +129,9 @@ export function ServiceSecurityTab({ serviceId, kind }: Props) {
     );
   }
 
-  const proxyReady =
-    data.effective.proxy_rate_limit_installed ||
-    data.effective.proxy_waf_installed;
+  const wafInstalled = data.effective.proxy_waf_installed;
+  const showWafControls = kind === "app";
+  const wafMode = data.stored.waf_mode || "inherit";
 
   return (
     <div className="space-y-6">
@@ -214,21 +244,77 @@ export function ServiceSecurityTab({ serviceId, kind }: Props) {
         />
       </section>
 
-      <section className="space-y-3 rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-6 opacity-90">
+      <section className="space-y-3 rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-6">
         <h2 className="text-lg font-medium">Traffic protection</h2>
-        <p className="text-sm text-[var(--muted-text)]">
-          {proxyReady
-            ? "Rate limit and WAF handlers ship with the proxy build (P2)."
-            : "Install the proxy build from Add-ons to enable rate limiting and WAF."}
-        </p>
-        {!proxyReady ? (
-          <Link
-            href="/server/security/addons"
-            className="text-sm text-[var(--accent-blue)] underline"
-          >
-            View add-ons
-          </Link>
-        ) : null}
+        {showWafControls ? (
+          wafInstalled ? (
+            <div className="space-y-4">
+              <Segmented
+                legend="WAF"
+                aria-label="WAF mode"
+                value={
+                  wafMode === "inherit"
+                    ? data.effective.waf_mode || "off"
+                    : wafMode
+                }
+                onChange={(waf_mode) =>
+                  setData({ ...data, stored: { ...data.stored, waf_mode } })
+                }
+                options={[
+                  { value: "off", label: "Off" },
+                  { value: "detect", label: "Detect" },
+                  { value: "block", label: "Block" },
+                ]}
+              />
+              <p className="text-sm text-[var(--muted-text)]">
+                Effective mode: {data.effective.waf_mode}. Strict profiles
+                default to detect — Block is an explicit opt-in.
+              </p>
+              {wafMode === "block" ||
+              (wafMode === "inherit" &&
+                data.effective.waf_mode === "block") ? (
+                <p
+                  className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm"
+                  role="status"
+                >
+                  Block can cause false positives and downtime. Prefer Detect
+                  while reviewing path exceptions and security events.
+                </p>
+              ) : null}
+              <label className="block text-sm">
+                Path exceptions (prefix per line)
+                <textarea
+                  className="mt-1 min-h-[88px] w-full rounded-lg border border-[var(--border)] px-3 py-2 font-mono text-sm"
+                  value={exceptionsText}
+                  onChange={(e) => setExceptionsText(e.target.value)}
+                  placeholder={"/api/\n/_next/"}
+                />
+              </label>
+              <p className="text-sm text-[var(--muted-text)]">
+                Rate limiting ships in a later proxy build — controls stay
+                disabled until that add-on is installed.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-sm text-[var(--muted-text)]">
+                Install the proxy WAF add-on to enable Coraza detect/block and
+                path exceptions.
+              </p>
+              <Link
+                href="/server/security/addons"
+                className="text-sm text-[var(--accent-blue)] underline"
+              >
+                View add-ons
+              </Link>
+            </div>
+          )
+        ) : (
+          <p className="text-sm text-[var(--muted-text)]">
+            WAF mode is not available for static sites. Security events still
+            appear below when present.
+          </p>
+        )}
       </section>
 
       {kind === "app" ? (
@@ -284,10 +370,56 @@ export function ServiceSecurityTab({ serviceId, kind }: Props) {
 
       <section className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-6">
         <h2 className="mb-2 text-lg font-medium">Security events</h2>
-        <EmptyState
-          title="No events yet"
-          description="Events appear when rate limiting or WAF is enabled."
-        />
+        {events.length === 0 ? (
+          <EmptyState
+            title="No events yet"
+            description="Events appear when WAF (or rate limiting) records a hit. Client IPs are kept for 7 days for security only."
+          />
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[640px] text-left text-sm">
+              <thead>
+                <tr
+                  className="border-b font-mono text-[11px] uppercase tracking-widest"
+                  style={{
+                    borderColor: "var(--border)",
+                    color: "var(--muted-text)",
+                  }}
+                >
+                  <th className="px-2 py-2 font-normal">Time</th>
+                  <th className="px-2 py-2 font-normal">Source</th>
+                  <th className="px-2 py-2 font-normal">Rule</th>
+                  <th className="px-2 py-2 font-normal">Path</th>
+                  <th className="px-2 py-2 font-normal">Action</th>
+                  <th className="px-2 py-2 font-normal">IP</th>
+                </tr>
+              </thead>
+              <tbody>
+                {events.map((ev) => (
+                  <tr
+                    key={ev.id}
+                    className="border-b"
+                    style={{ borderColor: "var(--border)" }}
+                    title={ev.detail}
+                  >
+                    <td className="px-2 py-2 font-mono text-[12px]">{ev.ts}</td>
+                    <td className="px-2 py-2">{ev.source}</td>
+                    <td className="px-2 py-2 font-mono text-[12px]">
+                      {ev.rule || "—"}
+                    </td>
+                    <td className="max-w-[180px] truncate px-2 py-2 font-mono text-[12px]">
+                      {ev.path || "—"}
+                    </td>
+                    <td className="px-2 py-2">{ev.action || "—"}</td>
+                    <td className="px-2 py-2 font-mono text-[12px]">
+                      {ev.ip || "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
 
       <Button onClick={onSave} disabled={busy}>

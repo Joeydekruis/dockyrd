@@ -111,14 +111,19 @@ func ipDenyHandler(ranges []string) map[string]any {
 	}
 }
 
-// prependSecurity builds headers → encode → access → upstream handles.
+// prependSecurity builds headers → encode → (rate_limit out of scope #80) →
+// coraza_waf → access → upstream handles.
 func prependSecurity(snap securitypolicy.RouteSnapshot, upstream []any) []any {
-	out := make([]any, 0, len(upstream)+6)
+	out := make([]any, 0, len(upstream)+8)
 	out = append(out, policyHeadersHandler(snap.Headers))
 	if h := cspHeadersHandler(snap); h != nil {
 		out = append(out, h)
 	}
 	out = append(out, encodeHandler())
+	// rate_limit: deferred to #80 — do not emit here.
+	if h := corazaWAFHandler(snap); h != nil {
+		out = append(out, h)
+	}
 	if snap.Maintenance {
 		out = append(out, maintenanceHandler())
 		return out

@@ -24,6 +24,7 @@ import (
 	"github.com/Joeydekruis/dockyrd/internal/proxy"
 	"github.com/Joeydekruis/dockyrd/internal/reconcile"
 	"github.com/Joeydekruis/dockyrd/internal/resources"
+	securityevents "github.com/Joeydekruis/dockyrd/internal/security/events"
 	"github.com/Joeydekruis/dockyrd/internal/updater"
 	"github.com/Joeydekruis/dockyrd/internal/watch"
 )
@@ -94,6 +95,7 @@ func startBackground(ctx context.Context, cfg config.Config, db *sql.DB, q *sqlc
 	}
 
 	go worker.RunLoop(ctx, 2*time.Second)
+	go (&securityevents.Worker{Cfg: cfg, Q: q, Log: log}).Run(ctx, 30*time.Second)
 	go rec.Run(ctx, 30*time.Second)
 	if dispatcher != nil {
 		go dispatcher.Run(ctx, 2*time.Second)

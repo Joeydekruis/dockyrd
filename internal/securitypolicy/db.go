@@ -33,13 +33,22 @@ func SiteFromRow(row sqlc.ServiceSecurity) (Site, error) {
 	if strings := row.IpAllowlistJson; strings != "" {
 		_ = json.Unmarshal([]byte(strings), &allow)
 	}
+	var exceptions []string
+	if raw := stringsTrimJSON(row.WafPathExceptionsJson); raw != "" && raw != "[]" {
+		_ = json.Unmarshal([]byte(raw), &exceptions)
+	}
 	site := Site{
-		ServiceID:     row.ServiceID,
-		Profile:       Profile(row.Profile),
-		LockExempt:    row.LockExempt != 0,
-		CSPReportOnly: row.CspReportOnly != 0,
-		Maintenance:   row.Maintenance != 0,
-		Allowlist:     allow,
+		ServiceID:         row.ServiceID,
+		Profile:           Profile(row.Profile),
+		LockExempt:        row.LockExempt != 0,
+		CSPReportOnly:     row.CspReportOnly != 0,
+		Maintenance:       row.Maintenance != 0,
+		Allowlist:         allow,
+		WAFMode:           WAFMode(row.WafMode),
+		WAFPathExceptions: exceptions,
+	}
+	if site.WAFMode == "" {
+		site.WAFMode = WAFInherit
 	}
 	if row.Csp.Valid {
 		site.CSP = row.Csp.String
@@ -67,7 +76,7 @@ func SiteFromRow(row sqlc.ServiceSecurity) (Site, error) {
 
 // DefaultSite returns inherit defaults for lazy service_security rows.
 func DefaultSite(serviceID string) Site {
-	return Site{ServiceID: serviceID, Profile: ProfileInherit}
+	return Site{ServiceID: serviceID, Profile: ProfileInherit, WAFMode: WAFInherit}
 }
 
 // ParseAllowlistJSON decodes stored JSON array.

@@ -30,6 +30,7 @@ export type ServiceSecurityStored = {
   maintenance: boolean;
   rl_mode: string;
   waf_mode: string;
+  waf_path_exceptions: string[];
   mem_mb?: number;
   cpu?: number;
   pids?: number;
@@ -45,9 +46,22 @@ export type ServiceSecurityPayload = {
     mem_mb: number;
     cpu: number;
     pids: number;
+    waf_mode: string;
     proxy_rate_limit_installed: boolean;
     proxy_waf_installed: boolean;
   };
+};
+
+export type SecurityEvent = {
+  id: string;
+  ts: string;
+  service_id: string;
+  source: string;
+  rule?: string;
+  path?: string;
+  action?: string;
+  ip?: string;
+  detail?: string;
 };
 
 export function getSecurityPolicy() {
@@ -99,7 +113,7 @@ export function clearServiceBasicAuth(serviceId: string) {
 }
 
 export function listServiceSecurityEvents(serviceId: string) {
-  return apiFetch<{ events: unknown[] }>(
+  return apiFetch<{ events: SecurityEvent[] }>(
     `/api/v1/services/${serviceId}/security/events`,
   );
 }
